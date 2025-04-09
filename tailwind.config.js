@@ -3,6 +3,9 @@ export default {
   content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
   theme: {
     extend: {
+      fontFamily:{
+        'unique': ['"Space Mono"', 'monospace'],
+      },
       colors:{
         'guacamole-a': '#3E6102',
         'guacamole-b': '#568203',

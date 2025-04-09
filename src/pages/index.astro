@@ -1,6 +1,6 @@
 ---
 
-import Navbar from '../components/Navbar.astro';
+
 import Layout from '../layouts/Layout.astro';
 
 // Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
@@ -8,5 +8,25 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout>
-	<Navbar />
+	<div class="grid grid-cols-2 gap-4 h-screen bg-guacamole-c">
+
+		<div class="px-28  flex flex-col justify-center items-start  font-unique border-r-2 border-black bg-guacamole-f">
+			<h1 class="text-5xl">Work For money and design for love</h1>
+			<p class="text-2xl "> Lorem ipsum dolor sit amet consectetur adipisicing elit. Optio eos doloribus cumque dolorum non aliquam laboriosam nihil dolorem enim veritatis beatae, fugit officia voluptates labore voluptate esse vel atque aspernatur.</p>
+			<button class="text-xl border-2 border-black  px-4 py-1 shadow-button transition-all duration-100 active:translate-y-1 active:shadow-sm  bg-guacamole-h"> Ir a la tienda</button>
+			<div>
+				<ul class="flex gap-6">
+					<li class=""><a href="/">Inicio</a></li>
+					<li><a href="/about">Acerca de mí</a></li>
+					<li><a href="/services">Producto</a></li>
+					<li><a href="/contact">Contacto</a></li>
+				</ul>
+			</div>
+		</div>
+		
+	
+		<div class="grid place-items-center bg-guacamole-c w-full">
+			<img class=" shadow-image border-4 border-black" src="https://www.daisybrand.com/wp-content/uploads/2019/12/GUACAMOLE-770x628.jpg" alt="guacamole"/>
+		</div>
+	</div>
 </Layout>
