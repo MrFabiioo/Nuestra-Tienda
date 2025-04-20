@@ -15,6 +15,9 @@ export default {
         'guacamole-f': '#CDB902',
         'guacamole-g': '#A98403',
         'guacamole-h': '#956303',
+        'guacamole-fondo':'#74ac22',
+        'guacamole-icons':'#492e06',
+        'guacamole-pulpa':'#dcd329',
       }
     },
   },
