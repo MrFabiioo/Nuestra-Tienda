@@ -11,6 +11,6 @@
         box-shadow: 10px 10px 0 theme('colors.black');
     }
     .shadow-icons{
-        box-shadow: 4px 3px 0 theme('colors.green.900');
+        box-shadow: 4px 3px 0 theme('colors.guacamole-a');
     }
 }
