@@ -1,21 +1,49 @@
 ---
 import "../styles/global.css";
 ---
+
 <nav class="w-full">
-    <div class="border-b-2 border-black font-unique text-7xl text-center py-3 bg-guacamole-pulpa text-amber-950 font-extrabold">GUACAMOLE SHOP 🥑</div>
-    <div class="bg-wite border-b-2 border-gray-950 flex justify-between items-center px-8 py-4 font-unique text-2xl bg-guacamole-icons">
-        <div class="items-start">
-            <ul class="flex gap-6 text-guacamole-pulpa font-bold">
+    <!-- Título del navbar -->
+    <div class="border-b-2 border-black font-unique text-4xl md:text-7xl text-center py-2 md:py-3 bg-guacamole-pulpa text-amber-950 font-extrabold">
+        GUACAMOLE SHOP 🥑
+    </div>
+
+    <!-- Contenedor principal del navbar -->
+    <div class="border-b-2 border-gray-950 flex justify-between items-center px-4 md:px-8 py-3 md:py-4 font-unique text-xl md:text-2xl bg-guacamole-icons relative">
+        <!-- Menú hamburguesa para pantallas pequeñas -->
+        <div class="md:hidden">
+            <button id="menu-toggle" class="text-guacamole-pulpa font-bold focus:outline-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Lista de enlaces (oculta en móviles, visible en pantallas grandes) -->
+        <div id="menu" class="hidden absolute top-full left-0 w-full bg-guacamole-icons md:static md:flex md:items-center md:w-auto md:bg-transparent ">
+            <ul class="flex flex-col md:flex-row gap-4 md:gap-6 text-guacamole-pulpa font-bold p-4 md:p-0 border-b-2 border-black md:border-none">
                 <li><a href="/">Inicio</a></li>
                 <li><a href="/about">Acerca de mí</a></li>
                 <li><a href="/services">Producto</a></li>
                 <li><a href="/contact">Contacto</a></li>
             </ul>
         </div>
+
+        <!-- Botón de compra -->
         <div>
-            <button class="bg-guacamole-f text-amber-950 font-bold border-4 border-black rounded-lg px-6 py-3 shadow-[4px_4px_0_0_#3E6102] hover:shadow-[2px_2px_0_0_#3E6102] active:translate-y-1 active:shadow-[0px_0px_0_0_#3E6102] transition-all">
+            <button class="bg-guacamole-f text-amber-950 font-bold border-4 ml-6 border-black rounded-lg px-3 md:px-6 py-1 md:py-3 shadow-[4px_4px_0_0_#3E6102] hover:shadow-[2px_2px_0_0_#3E6102] active:translate-y-1 active:shadow-[0px_0px_0_0_#3E6102] transition-all text-sm md:text-xl">
                 Comprar Guacamole 🥑
-              </button>
+            </button>
         </div>
     </div>
+
+    <!-- Script para el menú hamburguesa -->
+    <script>
+        const menuToggle = document.getElementById('menu-toggle');
+        const menu = document.getElementById('menu');
+
+        menuToggle.addEventListener('click', () => {
+        menu.classList.toggle('hidden');
+        });
+    </script>
 </nav>
