@@ -1,0 +1,63 @@
+---
+// filepath: c:\Users\fabio\Proyectos\Proyectos personales\guacamoleSHOP\guacamole-shop\src\pages\guacamole.astro
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout>
+    <div class=" mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-8 items-center font-unique">
+        <!-- Imagen del producto -->
+        <div class="relative">
+            <img 
+                src="/guacamoleIA.png" 
+                alt="Tazón de Guacamole" 
+                class="w-full rounded-lg shadow-lg shadow-image border-2 border-black transition-transform transform hover:scale-105 duration-300"
+            />
+            <button class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-2xl font-bold rounded-lg opacity-0 hover:opacity-100 transition-opacity">
+                ▶
+            </button>
+        </div>
+
+        <!-- Detalles del producto -->
+        <div class="flex flex-col gap-4">
+            <div class="flex gap-2">
+                <h1 class="text-4xl text-amber-950">Tazón de </h1>
+                <h1 class="text-4xl text-guacamole-a font-extrabold">  Guacamole</h1>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-lg text-guacamole-pulpa font-semibold">★★★★★</span>
+                <span class="text-sm text-amber-950">2,500+ reseñas verificadas</span>
+            </div>
+            <p class="text-lg text-amber-950">
+                Disfruta de un delicioso tazón de guacamole fresco, preparado con los mejores ingredientes. Perfecto para compartir en reuniones o disfrutar solo.
+            </p>
+            <div class="flex items-center gap-4">
+                <span class="text-xl font-bold text-amber-950">$15.00</span>
+                <span class="text-sm text-gray-500 line-through">$20.00</span>
+            </div>
+
+            <!-- Opciones de tamaño -->
+            <div>
+                <h3 class="text-lg font-semibold text-amber-950">Tamaño:</h3>
+                <div class="flex gap-2 mt-2">
+                    <button class="bg-guacamole-f text-amber-950 font-bold border-4  border-black rounded-lg px-3 md:px-6 py-1 md:py-3 shadow-[4px_4px_0_0_#3E6102] hover:shadow-[2px_2px_0_0_#3E6102] active:translate-y-1 active:shadow-[0px_0px_0_0_#3E6102] transition-all text-sm md:text-xl">Pequeño</button>
+                    <button class="bg-guacamole-f text-amber-950 font-bold border-4  border-black rounded-lg px-3 md:px-6 py-1 md:py-3 shadow-[4px_4px_0_0_#3E6102] hover:shadow-[2px_2px_0_0_#3E6102] active:translate-y-1 active:shadow-[0px_0px_0_0_#3E6102] transition-all text-sm md:text-xl">Mediano</button>
+                    <button class="bg-guacamole-f text-amber-950 font-bold border-4  border-black rounded-lg px-3 md:px-6 py-1 md:py-3 shadow-[4px_4px_0_0_#3E6102] hover:shadow-[2px_2px_0_0_#3E6102] active:translate-y-1 active:shadow-[0px_0px_0_0_#3E6102] transition-all text-sm md:text-xl">Grande</button>
+                </div>
+            </div>
+
+            <!-- Botón de compra -->
+            <button class="bg-guacamole-f text-amber-950 font-bold border-4  border-black rounded-lg px-3 md:px-6 py-1 md:py-3 shadow-[4px_4px_0_0_#3E6102] hover:shadow-[2px_2px_0_0_#3E6102] active:translate-y-1 active:shadow-[0px_0px_0_0_#3E6102] transition-all text-sm md:text-xl">
+                Añadir al carrito 🥑
+            </button>
+
+            <!-- Garantías -->
+            <div class="text-sm text-amber-950 mt-4">
+                <p>✔ Envío gratis en pedidos mayores a $50.</p>
+                <p>✔ Garantía de devolución de 30 días.</p>
+            </div>
+
+            <!-- Enlace a más detalles -->
+            
+        </div>
+    </div>
+</Layout>

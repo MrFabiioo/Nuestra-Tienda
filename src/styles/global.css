@@ -8,7 +8,7 @@
         box-shadow: 5px 5px 0 theme('colors.black');
     }
     .shadow-image{
-        box-shadow: 10px 10px 0 theme('colors.black');
+        box-shadow: 5px 5px 0 theme('colors.black');
     }
     .shadow-icons{
         box-shadow: 4px 3px 0 theme('colors.guacamole-a');
