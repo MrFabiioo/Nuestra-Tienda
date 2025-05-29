@@ -1,6 +1,7 @@
 ---
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
+
 ---
 <!doctype html>
 <html lang="en">
@@ -12,11 +13,11 @@ import Footer from '../components/Footer.astro';
 		<title>Guacamole Shop</title>
 	</head>
 	<body class="flex flex-col min-h-screen">
-	 	<Navbar/>
-			<main class="flex flex-grow bg-guacamole-fondo">
-				<slot />
-			</main>
-		<Footer/>
+				<Navbar/>	
+					<main class="flex flex-grow bg-guacamole-fondo">
+						<slot />
+					</main>
+				<Footer/>	
 	</body>
 </html>
 

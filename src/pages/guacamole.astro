@@ -1,6 +1,6 @@
 ---
-// filepath: c:\Users\fabio\Proyectos\Proyectos personales\guacamoleSHOP\guacamole-shop\src\pages\guacamole.astro
 import Layout from '../layouts/Layout.astro';
+import ButtonAddToCart from '../components/ButtonAddToCart.jsx';
 ---
 
 <Layout>
@@ -46,9 +46,7 @@ import Layout from '../layouts/Layout.astro';
             </div>
 
             <!-- Botón de compra -->
-            <button class="bg-guacamole-f text-amber-950 font-bold border-4  border-black rounded-lg px-3 md:px-6 py-1 md:py-3 shadow-[4px_4px_0_0_#3E6102] hover:shadow-[2px_2px_0_0_#3E6102] active:translate-y-1 active:shadow-[0px_0px_0_0_#3E6102] transition-all text-sm md:text-xl">
-                Añadir al carrito 🥑
-            </button>
+            <ButtonAddToCart client:only="preact"/>
 
             <!-- Garantías -->
             <div class="text-sm text-amber-950 mt-4">

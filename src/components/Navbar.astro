@@ -1,5 +1,7 @@
 ---
 import "../styles/global.css";
+import ShoppingCart from "./CartButton.jsx";
+
 ---
 
 <nav class="w-full">
@@ -19,6 +21,8 @@ import "../styles/global.css";
             </button>
         </div>
 
+        
+
         <!-- Lista de enlaces (oculta en móviles, visible en pantallas grandes) -->
         <div id="menu" class="hidden absolute top-full left-0 w-full bg-guacamole-icons md:static md:flex md:items-center md:w-auto md:bg-transparent z-10 ">
             <ul class="flex flex-col md:flex-row gap-4 md:gap-6 text-guacamole-pulpa font-bold p-4 md:p-0 border-b-2 border-black md:border-none">
@@ -30,11 +34,15 @@ import "../styles/global.css";
         </div>
 
         <!-- Botón de compra -->
-        <div>
+        <div class="flex gap-4 md:gap-6 items-center">
             <button  class="bg-guacamole-f text-amber-950 font-bold border-4 ml-6 border-black rounded-lg px-3 md:px-6 py-1 md:py-3 shadow-[4px_4px_0_0_#3E6102] hover:shadow-[2px_2px_0_0_#3E6102] active:translate-y-1 active:shadow-[0px_0px_0_0_#3E6102] transition-all text-sm md:text-xl">
                 <a href="/guacamole/">Comprar Guacamole 🥑</a>
             </button>
+            <div class="text-guacamole-pulpa ">
+                <ShoppingCart client:only="preact"/>
+            </div>
         </div>
+        
     </div>
 
     <!-- Script para el menú hamburguesa -->
