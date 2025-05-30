@@ -1,0 +1,166 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout>
+  <main
+    class="w-full flex items-center justify-center bg-guacamole-fondo text-guacamole-icons font-mono p-4 md:p-10 gap-8 mb-10"
+  >
+    <style>
+      /* Oculta todos los contenidos por defecto */
+      .tab-content {
+        display: none;
+      }
+      /* Muestra el contenido cuando el radio está checked */
+      #tab-bancolombia:checked ~ .tab-bancolombia,
+      #tab-tarjetas:checked ~ .tab-tarjetas,
+      #tab-especie:checked ~ .tab-especie {
+        display: block;
+      }
+      /* Opcional: resalta la pestaña activa */
+      #tab-bancolombia:checked + label,
+      #tab-tarjetas:checked + label,
+      #tab-especie:checked + label {
+        background: var(--guacamole-f);
+        color: var(--guacamole-pulpa);
+        opacity: 1;
+        z-index: 10;
+      }
+    </style>
+
+    <div class="w-full h-full relative">
+      <!-- Radios ocultos para controlar las pestañas -->
+      <input type="radio" id="tab-bancolombia" name="tab" class="hidden" checked>
+      <label for="tab-bancolombia"
+        class="flex justify-center bg-guacamole-f w-fit text-center mx-auto text-guacamole-icons px-4 py-2 rounded-t-md border-t-4 border-r-4 border-l-4 border-black font-semibold cursor-pointer"
+      >
+        Bancolombia
+      </label>
+      <div
+        class="tab-content tab-bancolombia w-full h-full bg-guacamole-f text-amber-950 font-bold border-b-4 border-r-4 border-l-4 border-black rounded-lg px-3 md:px-6 py-1 md:py-3 shadow-[4px_4px_0_0_#3E6102] text-sm md:text-xl"
+      >
+        <div class="space-y-4">
+          <details
+            class="group relative overflow-hidden rounded border border-gray-300 shadow-sm dark:border-gray-600"
+          >
+            <summary
+              class="flex items-center justify-between gap-2 p-3 text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-200 dark:hover:text-white [&::-webkit-details-marker]:hidden"
+            >
+              <span class="text-sm font-medium"> Codigo QR </span>
+              <span class="transition-transform group-open:-rotate-180">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="size-4"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
+                </svg>
+              </span>
+            </summary>
+            <div
+              class="divide-y divide-gray-300 border-t border-gray-300 bg-white dark:divide-gray-600 dark:border-gray-600 dark:bg-gray-900"
+            >
+              <picture>
+                <img src="/guacamoleIA.png" alt="Guacamole Image">
+              </picture>
+            </div>
+          </details>
+          <details
+            class="group relative overflow-hidden rounded border border-gray-300 shadow-sm dark:border-gray-600"
+          >
+            <summary
+              class="flex items-center justify-between gap-2 p-3 text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-200 dark:hover:text-white [&::-webkit-details-marker]:hidden"
+            >
+              <span class="text-sm font-medium"> Transferencia Bancaria </span>
+              <span class="transition-transform group-open:-rotate-180">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="size-4"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
+                </svg>
+              </span>
+            </summary>
+            <div
+              class="divide-y divide-gray-300 border-t border-gray-300 bg-white dark:divide-gray-600 dark:border-gray-600 dark:bg-gray-900"
+            >
+              <h1 class="text-lg bg-guacamole-icons text-center font-semibold text-gray-700 dark:text-gray-200">
+                 Bancolombia 331-85984-045 Ahorros
+              </h1>
+            </div>
+          </details>
+          <details
+            class="group relative overflow-hidden rounded border border-gray-300 shadow-sm dark:border-gray-600"
+          >
+            <summary
+              class="flex items-center justify-between gap-2 p-3 text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-200 dark:hover:text-white [&::-webkit-details-marker]:hidden"
+            >
+              <span class="text-sm font-medium"> Nequi </span>
+              <span class="transition-transform group-open:-rotate-180">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="size-4"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
+                </svg>
+              </span>
+            </summary>
+            <div
+              class="divide-y divide-gray-300 border-t border-gray-300 bg-white dark:divide-gray-600 dark:border-gray-600 dark:bg-gray-900"
+            >
+              <h1 class="text-lg bg-guacamole-icons text-center font-semibold text-gray-700 dark:text-gray-200">
+                 3502018487
+              </h1>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+    <div class="w-full h-full relative">
+      <input type="radio" id="tab-tarjetas" name="tab" class="hidden">
+      <label for="tab-tarjetas"
+        class="flex justify-center bg-guacamole-f w-fit text-center mx-auto text-guacamole-icons px-4 py-2 rounded-t-md border-t-4 border-r-4 border-l-4 border-black font-semibold cursor-pointer"
+      >
+        Tarjetas
+      </label>
+      <div
+        class="tab-content tab-tarjetas w-full h-full bg-guacamole-f text-amber-950 font-bold border-b-4 border-r-4 border-l-4 border-black rounded-lg px-3 md:px-6 py-1 md:py-3 shadow-[4px_4px_0_0_#3E6102] text-sm md:text-xl"
+      >
+        2
+      </div>
+    </div>
+    <div class="w-full h-full relative">
+      <input type="radio" id="tab-especie" name="tab" class="hidden">
+      <label for="tab-especie"
+        class="flex justify-center bg-guacamole-f w-fit text-center mx-auto text-guacamole-icons px-4 py-2 rounded-t-md border-t-4 border-r-4 border-l-4 border-black font-semibold cursor-pointer"
+      >
+        En especie
+      </label>
+      <div
+        class="tab-content tab-especie w-full h-full bg-guacamole-f text-amber-950 font-bold border-b-4 border-r-4 border-l-4 border-black rounded-lg px-3 md:px-6 py-1 md:py-3 shadow-[4px_4px_0_0_#3E6102] text-sm md:text-xl"
+      >
+        3
+      </div>
+    </div>
+  </main>
+</Layout>
