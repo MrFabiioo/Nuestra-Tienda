@@ -6,7 +6,7 @@ import ShoppingCart from "./CartButton.jsx";
 
 <nav class="w-full">
     <!-- Título del navbar -->
-    <div class="border-b-2 border-black font-unique text-4xl md:text-7xl text-center py-2 md:py-3 bg-guacamole-pulpa text-amber-950 font-extrabold">
+    <div class="border-b-2 border-black font-unique text-4xl md:text-7xl text-center py-2 md:py-3 bg-guacamole-f text-amber-950 font-extrabold">
         GUACAMOLE SHOP 🥑
     </div>
 
@@ -35,9 +35,10 @@ import ShoppingCart from "./CartButton.jsx";
 
         <!-- Botón de compra -->
         <div class="flex gap-4 md:gap-6 items-center">
-            <button  class="bg-guacamole-f text-amber-950 font-bold border-4 ml-6 border-black rounded-lg px-3 md:px-6 py-1 md:py-3 shadow-[4px_4px_0_0_#3E6102] hover:bg-guacamole-b active:translate-y-1 active:shadow-[0px_0px_0_0_#3E6102] transition-all text-sm md:text-xl">
-                <a href="/guacamole/">Comprar Guacamole 🥑</a>
-            </button>
+            <a href="/guacamole" class="group relative inline-block focus:ring-3 focus:outline-hidden active:translate-y-1 active:shadow-[0px_0px_0_0_#3E6102] transition-all">
+                <span class="absolute inset-0 translate-x-1.5 translate-y-1.5 bg-guacamole-f transition-transform group-hover:translate-x-0 group-hover:translate-y-0"></span>
+                <span class="relative inline-block border-2 border-current px-8 py-3 text-sm font-bold tracking-widest text-black uppercase"> Comprar guacamole 🥑</span>
+            </a>
             <div class="text-guacamole-pulpa ">
                 <ShoppingCart client:only="preact"/>
             </div>

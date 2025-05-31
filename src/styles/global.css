@@ -3,14 +3,34 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer utilities{
-    .shadow-button{
+@layer utilities {
+    .shadow-button {
         box-shadow: 5px 5px 0 theme('colors.black');
     }
-    .shadow-image{
-        box-shadow: 5px 5px 0 theme('colors.black');
+
+    .shadow-image {
+        box-shadow: 4px 4px 0 theme('colors.guacamole-icons');
     }
-    .shadow-icons{
+
+    .shadow-icons {
         box-shadow: 4px 3px 0 theme('colors.guacamole-a');
+    }
+
+    .neo-brutal-shadow {
+        box-shadow:
+            0 0 0 2px theme('colors.black'),
+            /* Borde negro delgado */
+            8px 8px 0 0 theme('colors.guacamole-icons');
+        /* Sombra sólida desplazada */
+        border: 1px solid theme('colors.black');
+        background: theme('colors.guacamole-f');
+        transition: box-shadow 0.15s, transform 0.15s;
+    }
+
+    .neo-brutal-shadow:active {
+        box-shadow:
+            0 0 0 2px theme('colors.black'),
+            2px 2px 0 0 theme('colors.guacamole-a');
+        transform: translate(2px, 2px);
     }
 }

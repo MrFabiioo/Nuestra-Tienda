@@ -4,7 +4,7 @@ import Layout from "../layouts/Layout.astro";
 
 <Layout>
   <main
-    class="w-full flex items-center justify-center bg-guacamole-fondo text-guacamole-icons font-mono p-4 md:p-10 gap-8 mb-10"
+    class="w-full flex flex-col sm:flex-row items-center justify-center bg-guacamole-fondo text-guacamole-icons font-mono p-4 md:p-10 gap-24 sm:gap-8 mt-12 mb-24"
   >
     <style>
       /* Oculta todos los contenidos por defecto */
@@ -18,26 +18,33 @@ import Layout from "../layouts/Layout.astro";
         display: block;
       }
       /* Opcional: resalta la pestaña activa */
-      #tab-bancolombia:checked + label,
-      #tab-tarjetas:checked + label,
-      #tab-especie:checked + label {
-        background: var(--guacamole-f);
-        color: var(--guacamole-pulpa);
-        opacity: 1;
-        z-index: 10;
+      input[type="radio"]:checked + label {
+        background-color: #cdb902; /* Cambia el color de fondo de la pestaña activa */
+        border-color: #000; /* Cambia el color del borde de la pestaña activa */
+        border-bottom: transparent;
       }
     </style>
 
-    <div class="w-full h-full relative">
+    <div class="w-full h-full relative text-center">
       <!-- Radios ocultos para controlar las pestañas -->
-      <input type="radio" id="tab-bancolombia" name="tab" class="hidden" checked>
-      <label for="tab-bancolombia"
-        class="flex justify-center bg-guacamole-f w-fit text-center mx-auto text-guacamole-icons px-4 py-2 rounded-t-md border-t-4 border-r-4 border-l-4 border-black font-semibold cursor-pointer"
-      >
-        Bancolombia
-      </label>
+      <input type="radio" id="tab-bancolombia" name="tab" class="hidden" />
       <div
-        class="tab-content tab-bancolombia w-full h-full bg-guacamole-f text-amber-950 font-bold border-b-4 border-r-4 border-l-4 border-black rounded-lg px-3 md:px-6 py-1 md:py-3 shadow-[4px_4px_0_0_#3E6102] text-sm md:text-xl"
+        class="group relative inline-block focus:ring-3 focus:outline-hidden"
+      >
+        <span
+          class="absolute inset-0 translate-x-1.5 translate-y-1.5 bg-guacamole-f transition-transform group-hover:translate-x-0 group-hover:translate-y-0"
+        ></span>
+        <label
+          id="label-tab-bancolombia"
+          for="tab-bancolombia"
+          class="flex justify-center w-72 text-center mx-auto text-guacamole-icons border-black cursor-pointer relative border-2 px-8 py-3 text-sm font-bold tracking-widest uppercase"
+        >
+          Bancolombia
+        </label>
+      </div>
+      
+      <div
+        class="tab-content tab-bancolombia w-full h-full bg-guacamole-f text-amber-950 font-bold border-2 border-black  px-3 md:px-6 py-1 md:py-3  text-sm md:text-xl mt-10"
       >
         <div class="space-y-4">
           <details
@@ -67,7 +74,7 @@ import Layout from "../layouts/Layout.astro";
               class="divide-y divide-gray-300 border-t border-gray-300 bg-white dark:divide-gray-600 dark:border-gray-600 dark:bg-gray-900"
             >
               <picture>
-                <img src="/guacamoleIA.png" alt="Guacamole Image">
+                <img src="/guacamoleIA.png" alt="Guacamole Image" />
               </picture>
             </div>
           </details>
@@ -97,8 +104,10 @@ import Layout from "../layouts/Layout.astro";
             <div
               class="divide-y divide-gray-300 border-t border-gray-300 bg-white dark:divide-gray-600 dark:border-gray-600 dark:bg-gray-900"
             >
-              <h1 class="text-lg bg-guacamole-icons text-center font-semibold text-gray-700 dark:text-gray-200">
-                 Bancolombia 331-85984-045 Ahorros
+              <h1
+                class="text-lg bg-guacamole-icons text-center font-semibold text-gray-700 dark:text-gray-200"
+              >
+                Bancolombia 331-85984-045 Ahorros
               </h1>
             </div>
           </details>
@@ -128,38 +137,257 @@ import Layout from "../layouts/Layout.astro";
             <div
               class="divide-y divide-gray-300 border-t border-gray-300 bg-white dark:divide-gray-600 dark:border-gray-600 dark:bg-gray-900"
             >
-              <h1 class="text-lg bg-guacamole-icons text-center font-semibold text-gray-700 dark:text-gray-200">
-                 3502018487
+              <h1
+                class="text-lg bg-guacamole-icons text-center font-semibold text-gray-700 dark:text-gray-200"
+              >
+                3502018487
               </h1>
             </div>
+            
           </details>
+          <button class="bg-guacamole-icons text-white font-bold py-2 px-4 rounded">
+            <div class="flex items-center justify-center gap-2 active:translate-y-1 active:shadow-[0px_0px_0_0_#3E6102] transition-all">
+              finalizar compra
+            </div>
+          </button>
+          
         </div>
       </div>
     </div>
-    <div class="w-full h-full relative">
-      <input type="radio" id="tab-tarjetas" name="tab" class="hidden">
-      <label for="tab-tarjetas"
-        class="flex justify-center bg-guacamole-f w-fit text-center mx-auto text-guacamole-icons px-4 py-2 rounded-t-md border-t-4 border-r-4 border-l-4 border-black font-semibold cursor-pointer"
-      >
-        Tarjetas
-      </label>
+    <div class="w-full h-full relative text-center">
+      <input type="radio" id="tab-tarjetas" name="tab" class="hidden" />
       <div
-        class="tab-content tab-tarjetas w-full h-full bg-guacamole-f text-amber-950 font-bold border-b-4 border-r-4 border-l-4 border-black rounded-lg px-3 md:px-6 py-1 md:py-3 shadow-[4px_4px_0_0_#3E6102] text-sm md:text-xl"
+        class="group relative inline-block focus:ring-3 focus:outline-hidden"
       >
-        2
+        <span
+          class="absolute inset-0 translate-x-1.5 translate-y-1.5 bg-guacamole-f transition-transform group-hover:translate-x-0 group-hover:translate-y-0"
+        ></span>
+        <label
+          id="label-tab-tarjetas"
+          for="tab-tarjetas"
+          class="flex justify-center w-72 text-center mx-auto text-guacamole-icons border-black cursor-pointer relative border-2 px-8 py-3 text-sm font-bold tracking-widest uppercase"
+        >
+          Tarjetas
+        </label>
+      </div>
+      <div
+        class="tab-content tab-tarjetas w-full h-full bg-guacamole-f text-amber-950 font-bold border-4 border-black rounded-lg px-3 md:px-6 py-1 md:py-3 shadow-[4px_4px_0_0_#3E6102] text-sm md:text-xl mt-10"
+      >
+        <details
+          class="group relative overflow-hidden rounded border border-gray-300 shadow-sm dark:border-gray-600"
+        >
+          <summary
+            class="flex items-center justify-between gap-2 p-3 text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-200 dark:hover:text-white [&::-webkit-details-marker]:hidden"
+          >
+            <span class="text-sm font-medium"> Codigo QR </span>
+            <span class="transition-transform group-open:-rotate-180">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="size-4"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
+              </svg>
+            </span>
+          </summary>
+          <div
+            class="divide-y divide-gray-300 border-t border-gray-300 bg-white dark:divide-gray-600 dark:border-gray-600 dark:bg-gray-900"
+          >
+            <picture>
+              <img src="/guacamoleIA.png" alt="Guacamole Image" />
+            </picture>
+          </div>
+        </details>
+        <details
+          class="group relative overflow-hidden rounded border border-gray-300 shadow-sm dark:border-gray-600"
+        >
+          <summary
+            class="flex items-center justify-between gap-2 p-3 text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-200 dark:hover:text-white [&::-webkit-details-marker]:hidden"
+          >
+            <span class="text-sm font-medium"> Transferencia Bancaria </span>
+            <span class="transition-transform group-open:-rotate-180">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="size-4"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
+              </svg>
+            </span>
+          </summary>
+          <div
+            class="divide-y divide-gray-300 border-t border-gray-300 bg-white dark:divide-gray-600 dark:border-gray-600 dark:bg-gray-900"
+          >
+            <h1
+              class="text-lg bg-guacamole-icons text-center font-semibold text-gray-700 dark:text-gray-200"
+            >
+              Bancolombia 331-85984-045 Ahorros
+            </h1>
+          </div>
+        </details>
+        <details
+          class="group relative overflow-hidden rounded border border-gray-300 shadow-sm dark:border-gray-600"
+        >
+          <summary
+            class="flex items-center justify-between gap-2 p-3 text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-200 dark:hover:text-white [&::-webkit-details-marker]:hidden"
+          >
+            <span class="text-sm font-medium"> Nequi </span>
+            <span class="transition-transform group-open:-rotate-180">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="size-4"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
+              </svg>
+            </span>
+          </summary>
+          <div
+            class="divide-y divide-gray-300 border-t border-gray-300 bg-white dark:divide-gray-600 dark:border-gray-600 dark:bg-gray-900"
+          >
+            <h1
+              class="text-lg bg-guacamole-icons text-center font-semibold text-gray-700 dark:text-gray-200"
+            >
+              3502018487
+            </h1>
+          </div>
+        </details>
       </div>
     </div>
-    <div class="w-full h-full relative">
-      <input type="radio" id="tab-especie" name="tab" class="hidden">
-      <label for="tab-especie"
-        class="flex justify-center bg-guacamole-f w-fit text-center mx-auto text-guacamole-icons px-4 py-2 rounded-t-md border-t-4 border-r-4 border-l-4 border-black font-semibold cursor-pointer"
-      >
-        En especie
-      </label>
+    <div class="w-full h-full relative text-center">
+      <input type="radio" id="tab-especie" name="tab" class="hidden" />
       <div
-        class="tab-content tab-especie w-full h-full bg-guacamole-f text-amber-950 font-bold border-b-4 border-r-4 border-l-4 border-black rounded-lg px-3 md:px-6 py-1 md:py-3 shadow-[4px_4px_0_0_#3E6102] text-sm md:text-xl"
+        class="group relative inline-block focus:ring-3 focus:outline-hidden"
       >
-        3
+        <span
+          class="absolute inset-0 translate-x-1.5 translate-y-1.5 bg-guacamole-f transition-transform group-hover:translate-x-0 group-hover:translate-y-0"
+        ></span>
+        <label
+          id="label-tab-especie"
+          for="tab-especie"
+          class="flex justify-center w-72 text-center mx-auto text-guacamole-icons border-black cursor-pointer relative border-2 px-8 py-3 text-sm font-bold tracking-widest uppercase"
+        >
+          En especie
+        </label>
+      </div>
+      <div
+        class="tab-content tab-especie w-full h-full bg-guacamole-f text-amber-950 font-bold border-4 border-black rounded-lg px-3 md:px-6 py-1 md:py-3 shadow-[4px_4px_0_0_#3E6102] text-sm md:text-xl mt-10"
+      >
+        <details
+          class="group relative overflow-hidden rounded border border-gray-300 shadow-sm dark:border-gray-600"
+        >
+          <summary
+            class="flex items-center justify-between gap-2 p-3 text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-200 dark:hover:text-white [&::-webkit-details-marker]:hidden"
+          >
+            <span class="text-sm font-medium"> Codigo QR </span>
+            <span class="transition-transform group-open:-rotate-180">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="size-4"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
+              </svg>
+            </span>
+          </summary>
+          <div
+            class="divide-y divide-gray-300 border-t border-gray-300 bg-white dark:divide-gray-600 dark:border-gray-600 dark:bg-gray-900"
+          >
+            <picture>
+              <img src="/guacamoleIA.png" alt="Guacamole Image" />
+            </picture>
+          </div>
+        </details>
+        <details
+          class="group relative overflow-hidden rounded border border-gray-300 shadow-sm dark:border-gray-600"
+        >
+          <summary
+            class="flex items-center justify-between gap-2 p-3 text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-200 dark:hover:text-white [&::-webkit-details-marker]:hidden"
+          >
+            <span class="text-sm font-medium"> Transferencia Bancaria </span>
+            <span class="transition-transform group-open:-rotate-180">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="size-4"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
+              </svg>
+            </span>
+          </summary>
+          <div
+            class="divide-y divide-gray-300 border-t border-gray-300 bg-white dark:divide-gray-600 dark:border-gray-600 dark:bg-gray-900"
+          >
+            <h1
+              class="text-lg bg-guacamole-icons text-center font-semibold text-gray-700 dark:text-gray-200"
+            >
+              Bancolombia 331-85984-045 Ahorros
+            </h1>
+          </div>
+        </details>
+        <details
+          class="group relative overflow-hidden rounded border border-gray-300 shadow-sm dark:border-gray-600"
+        >
+          <summary
+            class="flex items-center justify-between gap-2 p-3 text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-200 dark:hover:text-white [&::-webkit-details-marker]:hidden"
+          >
+            <span class="text-sm font-medium"> Nequi </span>
+            <span class="transition-transform group-open:-rotate-180">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="size-4"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
+              </svg>
+            </span>
+          </summary>
+          <div
+            class="divide-y divide-gray-300 border-t border-gray-300 bg-white dark:divide-gray-600 dark:border-gray-600 dark:bg-gray-900"
+          >
+            <h1
+              class="text-lg bg-guacamole-icons text-center font-semibold text-gray-700 dark:text-gray-200"
+            >
+              3502018487
+            </h1>
+          </div>
+        </details>
       </div>
     </div>
   </main>
