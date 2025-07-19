@@ -1,62 +1,145 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import ButtonAddToCart from '../components/ButtonAddToCart.jsx';
+import Layout from "../layouts/Layout.astro";
+import ButtonAddToCart from "../components/ButtonAddToCart.jsx";
+
+const tamaños = ["Pequeño", "Mediano", "Grande", "Extra-grande"];
 ---
 
 <Layout>
-    <div class=" mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-8 items-center font-unique">
+    <div
+        class="mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-8 items-center font-unique"
+    >
         <!-- Imagen del producto -->
         <div class="relative">
-            <img 
-                src="/guacamoleIA.png" 
-                alt="Tazón de Guacamole" 
-                class="w-full  border-2 border-black transition-transform transform hover:scale-105 duration-300"
+            <img
+                src="/images/guacamoleIA.png"
+                alt="Tazón de Guacamole"
+                class="w-full border-2 border-black transition-transform transform hover:scale-105 duration-300"
             />
-            <button class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-2xl font-bold rounded-lg opacity-0 hover:opacity-100 transition-opacity">
-                ▶
-            </button>
+            
         </div>
 
         <!-- Detalles del producto -->
-        <div class="flex flex-col gap-4 ">
+        <div class="flex flex-col gap-4">
             <div class="flex gap-2">
-                <h1 class="text-4xl text-amber-950">Tazón de </h1>
-                <h1 class="text-4xl text-guacamole-a font-extrabold">  Guacamole</h1>
+                <h1 class="text-4xl text-guacamole-a font-extrabold uppercase">
+                    Guacamole
+                </h1>
             </div>
             <div class="flex items-center gap-2">
-                <span class="text-lg text-guacamole-pulpa font-semibold">★★★★★</span>
-                <span class="text-sm text-amber-950">2,500+ reseñas verificadas</span>
+                <span class="text-lg text-guacamole-pulpa font-semibold"
+                    >★★★★★</span
+                >
+                <span class="text-sm text-black uppercase"
+                    >2,500+ reseñas verificadas</span
+                >
             </div>
-            <p class="text-lg text-amber-950">
-                Disfruta de un delicioso tazón de guacamole fresco, preparado con los mejores ingredientes. Perfecto para compartir en reuniones o disfrutar solo.
+            <p class="text-lg text-black uppercase">
+                Disfruta de un delicioso tazón de guacamole fresco, preparado
+                con los mejores ingredientes. Perfecto para compartir en
+                reuniones o disfrutar solo.
             </p>
             <div class="flex items-center gap-4">
-                <span class="text-xl font-bold text-amber-950">$9.000</span>
-                <span class="text-sm text-gray-500 line-through">$10.000</span>
+                <span class="text-xl font-bold text-black">$9.000</span>
+                <span class="text-sm text-guacamole-icons line-through"
+                    >$10.000</span
+                >
+            </div>
+
+            <h3>Cantidad</h3>
+            <div>
+                <button id="decrement" class="btn-quantity">-</button>
+                <input class="w-[45px] text-center" type="number" value="1" />
+                <button id="increment" class="btn-quantity">+</button>
             </div>
 
             <!-- Opciones de tamaño -->
-            <!-- <div>
-                <h3 class="text-lg font-semibold text-amber-950">Tamaño:</h3>
-                <div class="flex gap-2 mt-2">
-                    <button class="bg-guacamole-f text-amber-950 font-bold border-4  border-black rounded-lg px-3 md:px-6 py-1 md:py-3 shadow-[4px_4px_0_0_#3E6102] hover:shadow-[2px_2px_0_0_#3E6102] active:translate-y-1 active:shadow-[0px_0px_0_0_#3E6102] transition-all text-sm md:text-xl">Pequeño</button>
-                    <button class="bg-guacamole-f text-amber-950 font-bold border-4  border-black rounded-lg px-3 md:px-6 py-1 md:py-3 shadow-[4px_4px_0_0_#3E6102] hover:shadow-[2px_2px_0_0_#3E6102] active:translate-y-1 active:shadow-[0px_0px_0_0_#3E6102] transition-all text-sm md:text-xl">Mediano</button>
-                    <button class="bg-guacamole-f text-amber-950 font-bold border-4  border-black rounded-lg px-3 md:px-6 py-1 md:py-3 shadow-[4px_4px_0_0_#3E6102] hover:shadow-[2px_2px_0_0_#3E6102] active:translate-y-1 active:shadow-[0px_0px_0_0_#3E6102] transition-all text-sm md:text-xl">Grande</button>
-                </div>
-            </div> -->
+            <div>
+                <h3 id="h3-g" class="text-lg font-semibold text-amber-950">
+                    Tamaño:
+                </h3>
+                <ul class="flex gap-3">
+                    {
+                        tamaños.map((t) => (
+                            <li class="cursor-pointer" data-size="">
+                                {t}
+                            </li>
+                        ))
+                    }
+                </ul>
+            </div>
 
             <!-- Botón de compra -->
-            <ButtonAddToCart client:only="preact"/>
-            
+            <button id="add-card" class="bg-guacamole-pulpa">agregar al carrito</button>
 
             <!-- Garantías -->
-            <div class="text-sm text-amber-950 mt-4">
+            <div class="text-sm text-black mt-4 uppercase">
                 <p>✔ Envío gratis en pedidos mayores a $50.</p>
                 <p>✔ Garantía de devolución de 30 días.</p>
             </div>
 
             <!-- Enlace a más detalles -->
-            
         </div>
     </div>
 </Layout>
+
+<style>
+    .selected-size {
+        @apply text-amber-950 underline font-bold transition-all;
+    }
+
+    input{
+        @apply bg-guacamole-f
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+        
+    }
+</style>
+
+<script>
+    const sizeElments = document.querySelectorAll("li");
+    sizeElments.forEach((liElement) => {
+        liElement.addEventListener("click", () => {
+            sizeElments.forEach((s) => s.classList.remove("selected-size"));
+            liElement.classList.add("selected-size");
+        });
+    });
+
+    const quantityInput = document.querySelector('input') as HTMLInputElement;
+    const producIdInput = document.querySelector('#product-id') as HTMLInputElement;
+    let quantity = 1;
+
+    const incrementButton = document.querySelector('#increment') as HTMLButtonElement;
+    const decrementButton = document.querySelector('#decrement') as HTMLButtonElement;
+    const addToCardButton = document.querySelector('#add-card') as HTMLButtonElement;
+    
+    incrementButton.addEventListener('click',()=>{
+        quantity = Math.min(quantity+1,5);
+        quantityInput.value= quantity.toString();
+    });
+    decrementButton.addEventListener('click',()=>{
+        quantity = Math.max(quantity-1,1);
+        quantityInput.value= quantity.toString();
+    });
+
+    addToCardButton.addEventListener('click',()=>{
+        const size = document.querySelector('.selected-size')?.textContent;
+        if (!size) {
+            alert('seleccione un tamaño')
+        }
+
+        //addToCardButton.disabled = true;
+
+        console.log({
+            id: 1,
+            size:size,
+            quantity:quantity
+        })
+    })
+    
+
+</script>

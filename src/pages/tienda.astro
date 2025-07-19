@@ -1,0 +1,87 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Card from "../components/Card.astro";
+import { actions } from "astro:actions";
+
+// const products = [
+//     {
+//         img: "https://www.shoothecook.es/wp-content/uploads/guacamole-F-500x500.jpg",
+//         name: "Guacamole",
+//         description: "Rico y delicioso guacamole para compartir",
+//         value: 9000,
+//     },
+//     {
+//         img: "https://cdn-ilddihb.nitrocdn.com/MgqZCGPEMHvMRLsisMUCAIMWvgGMxqaj/assets/images/optimized/rev-16c8237/www.goya.com/wp-content/uploads/2023/10/mexican-guacamole.jpg",
+//         name: "Guacamole",
+//         description: "Rico y delicioso guacamole para compartir",
+//         value: 9000,
+//     },
+//     {
+//         img: "https://masienda.com/es/cdn/shop/articles/221004MAS_Shot_11_1111.jpg?v=1681316566",
+//         name: "Guacamole",
+//         description: "Rico y delicioso guacamole para compartir",
+//         value: 9000,
+//     },
+//     {
+//         img: "https://masienda.com/es/cdn/shop/articles/221004MAS_Shot_11_1111.jpg?v=1681316566",
+//         name: "Guacamole",
+//         description: "Rico y delicioso guacamole para compartir",
+//         value: 9000,
+//     },
+//     {
+//         img: "https://masienda.com/es/cdn/shop/articles/221004MAS_Shot_11_1111.jpg?v=1681316566",
+//         name: "Guacamole",
+//         description: "Rico y delicioso guacamole para compartir",
+//         value: 9000,
+//     },
+//     {
+//         img: "https://masienda.com/es/cdn/shop/articles/221004MAS_Shot_11_1111.jpg?v=1681316566",
+//         name: "Guacamole",
+//         description: "Rico y delicioso guacamole para compartir",
+//         value: 9000,
+//     },
+//     {
+//         img: "https://masienda.com/es/cdn/shop/articles/221004MAS_Shot_11_1111.jpg?v=1681316566",
+//         name: "Guacamole",
+//         description: "Rico y delicioso guacamole para compartir",
+//         value: 9000,
+//     },
+//     {
+//         img: "https://masienda.com/es/cdn/shop/articles/221004MAS_Shot_11_1111.jpg?v=1681316566",
+//         name: "Guacamole",
+//         description: "Rico y delicioso guacamole para compartir",
+//         value: 9000,
+//     },
+// ];
+
+const {data,error} = await Astro.callAction(actions.getProductsByPage,{})
+
+if (error) {
+    return Astro.redirect('/');
+}
+
+//console.log(data)
+
+const  {products,totalPages} = data;
+
+---
+
+<Layout>
+    <div
+        class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 place-items-center"
+    >
+        {
+            products.map((product)=>(
+                <Card product={product}/>
+            ))
+        }
+
+
+    </div>
+</Layout>
+
+<style>
+    div {
+        place-items: center;
+    }
+</style>

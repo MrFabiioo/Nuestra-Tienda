@@ -14,7 +14,7 @@ export default function ButtonAddToCart() {
             <span
                 class="relative inline-block border-2 border-current px-8 py-3 text-sm font-bold tracking-widest text-black uppercase "
             >
-                Añadir al carrito 🥑
+                Añadir al carrito 
             </span>
         </button>
     )

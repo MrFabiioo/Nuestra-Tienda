@@ -1,0 +1,31 @@
+---
+import type { ProductWithImages } from '../interfaces/products-with-images.interface';
+
+interface Props {
+    product:ProductWithImages;
+}
+
+const product= Astro.props;
+
+const images = product.product.images.split(',')
+---
+
+<section
+    class="p-4 m-4 border-2 border-black shadow-lg bg-guacamole-a font-unique"
+>
+    <div class="w-full h-full">
+        <img
+            src={images[0]}
+            alt="Guacamole"
+            class=" border-2 border-black h-[350px] object-contain"
+        />
+    </div>
+    <p class="text-guacamole-f font-bold text-xl flex justify-center">{product.product.title}</p>
+    <p class="text-lg text-guacamole-f my-4">{product.product.description}</p>
+    <div class="flex justify-between items-center">
+        <p class="text-2xl font-bold text-guacamole-d">$ {product.product.price}</p>
+        <a href="/guacamole" class="text-2xl text-guacamole-f cursor-pointer"
+            >Comprar</a
+        >
+    </div>
+</section>
