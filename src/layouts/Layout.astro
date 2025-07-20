@@ -1,7 +1,13 @@
 ---
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
+import type { StringSchema } from 'node_modules/astro/dist/env/schema';
 
+interface Props {
+	title?:String;
+	description?:string;
+	image?:string;
+}
 ---
 <!doctype html>
 <html lang="en">
@@ -14,7 +20,7 @@ import Footer from '../components/Footer.astro';
 	</head>
 	<body class="flex flex-col min-h-screen">
 				<Navbar/>	
-					<main class="flex flex-grow bg-guacamole-fondo">
+					<main class="flex flex-col  bg-guacamole-fondo ">
 						<slot />
 					</main>
 				<Footer/>	

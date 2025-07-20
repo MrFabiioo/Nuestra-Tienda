@@ -7,19 +7,21 @@ interface Props {
 
 const product= Astro.props;
 
-const images = product.product.images.split(',')
+const currentImage = product.product.images.split(',')
 ---
 
 <section
     class="p-4 m-4 border-2 border-black shadow-lg bg-guacamole-a font-unique"
->
-    <div class="w-full h-full">
+>   <a href={`products/${product.product.slug}`}>
+    <div  class="w-full h-full">
         <img
-            src={images[0]}
+            id="card-img"
+            src={currentImage[0]}
             alt="Guacamole"
             class=" border-2 border-black h-[350px] object-contain"
         />
     </div>
+    </a>
     <p class="text-guacamole-f font-bold text-xl flex justify-center">{product.product.title}</p>
     <p class="text-lg text-guacamole-f my-4">{product.product.description}</p>
     <div class="flex justify-between items-center">
@@ -29,3 +31,18 @@ const images = product.product.images.split(',')
         >
     </div>
 </section>
+
+
+<script>
+const images = document.querySelectorAll('#card-img');
+images.forEach((img) => {
+  const imageElement = img as HTMLImageElement;
+  const originalSrc = imageElement.src;
+  imageElement.addEventListener('mouseenter', () => {
+    imageElement.src = '/guacamole-caricatura-partida.png'; // o la imagen que quieras mostrar
+  });
+  imageElement.addEventListener('mouseleave', () => {
+    imageElement.src = originalSrc;
+  });
+});
+</script>
