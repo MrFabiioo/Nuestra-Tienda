@@ -88,7 +88,9 @@ const {product, images} = data;
 
             <!-- Enlace a más detalles -->
         </div>
+        
     </div>
+    <input id="product-id" type="hidden" value={product.id}/>
 </Layout>
 
 <style>
@@ -109,6 +111,8 @@ const {product, images} = data;
 </style>
 
 <script>
+import { CartCookiesClient } from "src/utils/cart-cookies";
+
     const sizeElments = document.querySelectorAll("li");
     sizeElments.forEach((liElement) => {
         liElement.addEventListener("click", () => {
@@ -137,16 +141,18 @@ const {product, images} = data;
     addToCardButton.addEventListener('click',()=>{
         const size = document.querySelector('.selected-size')?.textContent;
         if (!size) {
-            alert('seleccione un tamaño')
+            return alert('seleccione un tamaño')
         }
 
         //addToCardButton.disabled = true;
 
-        console.log({
-            id: 1,
+        CartCookiesClient.addItem({
+            productId:producIdInput.value,
             size:size,
-            quantity:quantity
+            quantity:quantity,
         })
+
+        window.location.href='/cart';
     })
     
 

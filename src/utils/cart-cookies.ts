@@ -1,42 +1,39 @@
-import Cookies from "js-cookie";
-import type { CartItem } from "src/interfaces/cart-item";
+import type { CartItem } from '@interfaces/cart-item';
+import Cookies from 'js-cookie';
 
 export class CartCookiesClient {
-    static getCart() {
-        return JSON.parse(Cookies.get('cart') ?? '[]');
+  static getCart(): CartItem[] {
+    return JSON.parse(Cookies.get('cart') ?? '[]');
+  }
+
+  static addItem(cartItem: CartItem): CartItem[] {
+    const cart = CartCookiesClient.getCart();
+
+    const itemInCart = cart.find(
+      (item) =>
+        item.productId === cartItem.productId && item.size === cartItem.size
+    );
+
+    if (itemInCart) {
+      itemInCart.quantity += cartItem.quantity;
+    } else {
+      cart.push(cartItem);
     }
 
-    static addItem(cartItem: CartItem): CartItem[] {
-        //const cart = CartCookiesClient.getCart();
-        interface CartItemInCart extends CartItem {
-            quantity: number;
-        }
-        const cart: CartItemInCart[] = CartCookiesClient.getCart();
-        const itemInCart: CartItemInCart | undefined = cart.find(
-            (item: CartItemInCart) => item.productId === cartItem.productId && item.size === cartItem.size
-        );
-        if (itemInCart) {
-            itemInCart.quantity += cartItem.quantity;
-        } else {
-            cart.push(cartItem);
-        }
+    Cookies.set('cart', JSON.stringify(cart));
 
-        Cookies.set('cart', JSON.stringify(cart));
+    return cart;
+  }
 
-        return cart;
-    }
+  static removeItem(productId: string, size: string): CartItem[] {
+    const cart = CartCookiesClient.getCart();
 
-    static removeItem(productId: string, size: string): CartItem[] {
-        const cart = CartCookiesClient.getCart();
-        interface CartItemInCart extends CartItem {
-            quantity: number;
-        }
-        const updateCart: CartItemInCart[] = cart.filter(
-            (item: CartItemInCart) => !(item.productId === productId && item.size === size)
-        );
-        Cookies.set('cart', JSON.stringify(cart));
+    const updatedCart = cart.filter(
+      (item) => !(item.productId === productId && item.size === size)
+    );
 
-        return updateCart;
+    Cookies.set('cart', JSON.stringify(updatedCart));
 
-    }
+    return updatedCart;
+  }
 }

@@ -4,6 +4,6 @@ export interface CartItem {
     size:string;
 }
 
-export interface CartItemInCart {
-            quantity: number;
-        }
+// export interface CartItemInCart {
+//             quantity: number;
+//         }

@@ -12,7 +12,9 @@
     "jsxImportSource": "preact",
     "baseUrl": ".",
     "paths": {
-      "@layouts/*":["src/layouts/*"]
+      "@layouts/*":["src/layouts/*"],
+      "@interfaces/*":["src/interfaces/*"],
+      "@utils/*":["src/utils/*"],
     }
   },
   

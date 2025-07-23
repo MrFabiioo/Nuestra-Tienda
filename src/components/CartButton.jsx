@@ -43,7 +43,7 @@ export default function ShoppingCart() {
           </div>
 
 
-          <a class="group relative focus:ring-3 focus:outline-hidden" href="/checkout">
+          <a class="group relative focus:ring-3 focus:outline-hidden" href="/cart">
             <span
               class=" absolute inset-0 translate-x-1.5 translate-y-1.5 bg-guacamole-f transition-transform group-hover:translate-x-0 group-hover:translate-y-0"
             ></span>
