@@ -1,12 +1,19 @@
 // Adjust the import path as necessary
-import { useCartStore } from '../store/useCartStore';
-import { useState } from 'preact/hooks'
+//import { useCartStore } from '../store/useCartStore';
+import { useState,useEffect } from 'preact/hooks'
+import {useStore} from '@nanostores/preact'
 import Cart from './svgs/Cart';
+import { itemsIncart } from 'src/store/cart.store';
+import { CartCookiesClient } from '@utils/cart-cookies';
 
 
 export default function ShoppingCart() {
-  //
+  const $itemsInCart = useStore(itemsIncart)
   const [isOpen, setIsOpen] = useState(false);
+  useEffect(()=>{
+    const cart = CartCookiesClient.getCart();
+    itemsIncart.set(cart.length)
+  })
   const toggleCart = () => {
     setIsOpen(!isOpen);
   };
@@ -14,7 +21,7 @@ export default function ShoppingCart() {
     <>
       <button onClick={toggleCart} class="active:translate-y-1 active:shadow-[0px_0px_0_0_#3E6102] transition-all text-sm md:text-xl relative">
         <Cart />
-        <p class="bg-guacamole-a rounded-full absolute -top-2 -right-2 w-6 h-6 flex items-center justify-center">3</p>
+        <p class="bg-guacamole-a rounded-full absolute -top-2 -right-2 w-6 h-6 flex items-center justify-center">{$itemsInCart}</p>
       </button>
       {isOpen && (
         <div class="absolute top-full right-2 mt-2 w-80 bg-guacamole-a border-2 border-black   p-6 z-50 flex flex-col gap-4">
@@ -33,7 +40,7 @@ export default function ShoppingCart() {
             <img src="/images/guacamoleIA.png" alt="Guacamole" class="w-12 h-12 border-2 border-black shadow-[2px_2px_0_0_#3E6102]" />
             <div>
               <p class="text-guacamole-pulpa font-bold uppercase">Tazón de Guacamole</p>
-              <p class="text-guacamole-e font-bold">x 3</p>
+              <p class="text-guacamole-e font-bold">x {$itemsInCart}</p>
             </div>
             <span class="ml-auto text-lg font-bold text-guacamole-pulpa">${(9000 * 3).toFixed(0)}</span>
           </div>

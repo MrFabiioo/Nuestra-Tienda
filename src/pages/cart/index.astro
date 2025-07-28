@@ -90,6 +90,29 @@ const total = products.reduce(
       </button>
     </div>
   </section>
+
  
 
 </Layout>
+
+<script>
+import { CartCookiesClient } from "@utils/cart-cookies";
+import { navigate } from "astro:transitions/client";
+import { itemsIncart } from "src/store/cart.store";
+ document.addEventListener('astro:page-load',()=>{
+
+   const deleteButtons = document.querySelectorAll('.btn-delete');
+   deleteButtons.forEach(button => {
+     button.addEventListener('click',(event)=>{
+       const target = event.target as HTMLButtonElement;
+       const productId = target.dataset.id ?? "";
+       const size= target.dataset.size ?? "";
+       const cart =CartCookiesClient.removeItem(productId,size)
+       itemsIncart.set(cart.length);
+      // window.location.reload()
+       navigate('/cart')
+     })
+ })
+    
+  });
+</script>

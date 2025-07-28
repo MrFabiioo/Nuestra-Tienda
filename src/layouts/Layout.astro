@@ -1,7 +1,8 @@
 ---
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
-import type { StringSchema } from 'node_modules/astro/dist/env/schema';
+import { ClientRouter } from 'astro:transitions';
+
 
 interface Props {
 	title?:String;
@@ -17,10 +18,11 @@ interface Props {
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<title>Guacamole Shop</title>
+		<ClientRouter/>
 	</head>
 	<body class="flex flex-col min-h-screen">
 				<Navbar/>	
-					<main class="flex flex-col  bg-guacamole-fondo ">
+					<main class="flex flex-col  bg-guacamole-fondo flex-1">
 						<slot />
 					</main>
 				<Footer/>	

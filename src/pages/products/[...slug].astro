@@ -111,7 +111,11 @@ const {product, images} = data;
 </style>
 
 <script>
+import { navigate } from "astro:transitions/client";
+import { itemsIncart } from "src/store/cart.store";
 import { CartCookiesClient } from "src/utils/cart-cookies";
+
+document.addEventListener('astro:page-load',()=>{
 
     const sizeElments = document.querySelectorAll("li");
     sizeElments.forEach((liElement) => {
@@ -138,7 +142,8 @@ import { CartCookiesClient } from "src/utils/cart-cookies";
         quantityInput.value= quantity.toString();
     });
 
-    addToCardButton.addEventListener('click',()=>{
+     if(!incrementButton || !quantityInput) return;
+    addToCardButton.addEventListener('click',async()=>{
         const size = document.querySelector('.selected-size')?.textContent;
         if (!size) {
             return alert('seleccione un tamaño')
@@ -146,14 +151,18 @@ import { CartCookiesClient } from "src/utils/cart-cookies";
 
         //addToCardButton.disabled = true;
 
-        CartCookiesClient.addItem({
+       const cart = CartCookiesClient.addItem({
             productId:producIdInput.value,
             size:size,
             quantity:quantity,
         })
 
-        window.location.href='/cart';
+        itemsIncart.set(cart.length)
+
+       // window.location.href='/cart';
+      await navigate('/cart')
     })
+})
     
 
 </script>

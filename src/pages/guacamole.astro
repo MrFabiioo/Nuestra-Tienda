@@ -101,45 +101,48 @@ const tamaños = ["Pequeño", "Mediano", "Grande", "Extra-grande"];
 </style>
 
 <script>
-    const sizeElments = document.querySelectorAll("li");
-    sizeElments.forEach((liElement) => {
-        liElement.addEventListener("click", () => {
-            sizeElments.forEach((s) => s.classList.remove("selected-size"));
-            liElement.classList.add("selected-size");
+    document.addEventListener('astro:page-load',()=>{
+
+        const sizeElments = document.querySelectorAll("li");
+        sizeElments.forEach((liElement) => {
+            liElement.addEventListener("click", () => {
+                sizeElments.forEach((s) => s.classList.remove("selected-size"));
+                liElement.classList.add("selected-size");
+            });
         });
-    });
-
-    const quantityInput = document.querySelector('input') as HTMLInputElement;
-    const producIdInput = document.querySelector('#product-id') as HTMLInputElement;
-    let quantity = 1;
-
-    const incrementButton = document.querySelector('#increment') as HTMLButtonElement;
-    const decrementButton = document.querySelector('#decrement') as HTMLButtonElement;
-    const addToCardButton = document.querySelector('#add-card') as HTMLButtonElement;
     
-    incrementButton.addEventListener('click',()=>{
-        quantity = Math.min(quantity+1,5);
-        quantityInput.value= quantity.toString();
-    });
-    decrementButton.addEventListener('click',()=>{
-        quantity = Math.max(quantity-1,1);
-        quantityInput.value= quantity.toString();
-    });
-
-    addToCardButton.addEventListener('click',()=>{
-        const size = document.querySelector('.selected-size')?.textContent;
-        if (!size) {
-            alert('seleccione un tamaño')
-        }
-
-        //addToCardButton.disabled = true;
-
-        console.log({
-            id: 1,
-            size:size,
-            quantity:quantity
+        const quantityInput = document.querySelector('input') as HTMLInputElement;
+        const producIdInput = document.querySelector('#product-id') as HTMLInputElement;
+        let quantity = 1;
+    
+        const incrementButton = document.querySelector('#increment') as HTMLButtonElement;
+        const decrementButton = document.querySelector('#decrement') as HTMLButtonElement;
+        const addToCardButton = document.querySelector('#add-card') as HTMLButtonElement;
+        
+        incrementButton.addEventListener('click',()=>{
+            quantity = Math.min(quantity+1,5);
+            quantityInput.value= quantity.toString();
+        });
+        decrementButton.addEventListener('click',()=>{
+            quantity = Math.max(quantity-1,1);
+            quantityInput.value= quantity.toString();
+        });
+    
+        addToCardButton.addEventListener('click',()=>{
+            const size = document.querySelector('.selected-size')?.textContent;
+            if (!size) {
+                alert('seleccione un tamaño')
+            }
+    
+            //addToCardButton.disabled = true;
+    
+            console.log({
+                id: 1,
+                size:size,
+                quantity:quantity
+            })
         })
+        
     })
-    
 
 </script>
