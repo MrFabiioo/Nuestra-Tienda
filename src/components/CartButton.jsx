@@ -10,18 +10,23 @@ import { CartCookiesClient } from '@utils/cart-cookies';
 export default function ShoppingCart() {
   const $itemsInCart = useStore(itemsIncart)
   const [isOpen, setIsOpen] = useState(false);
+  const cart = CartCookiesClient.getCart();
   useEffect(()=>{
-    const cart = CartCookiesClient.getCart();
+    
     itemsIncart.set(cart.length)
   })
   const toggleCart = () => {
     setIsOpen(!isOpen);
   };
+
+  //console.log(cart.length)
   return (
     <>
       <button onClick={toggleCart} class="active:translate-y-1 active:shadow-[0px_0px_0_0_#3E6102] transition-all text-sm md:text-xl relative">
         <Cart />
-        <p class="bg-guacamole-a rounded-full absolute -top-2 -right-2 w-6 h-6 flex items-center justify-center">{$itemsInCart}</p>
+        {
+          cart.length >0 && <p class="bg-guacamole-a rounded-full absolute -top-2 -right-2 w-6 h-6 flex items-center justify-center">{$itemsInCart}</p>
+        }
       </button>
       {isOpen && (
         <div class="absolute top-full right-2 mt-2 w-80 bg-guacamole-a border-2 border-black   p-6 z-50 flex flex-col gap-4">

@@ -1,0 +1,51 @@
+---
+import Layout from "@layouts/Layout.astro";
+
+import { actions } from "astro:actions";
+import Pagination from "@components/shared/Pagination.astro";
+import { Formatter } from "@utils/formatter";
+import ProductImage from "@components/products/ProductImage.astro";
+
+export const prerender = false
+const url = Astro.url;
+const pageParam = Number(url.searchParams.get('page') ?? 1);
+
+
+const {data,error} = await Astro.callAction(actions.getProductsByPage,{
+    page:pageParam
+})
+
+if (error) {
+    return Astro.redirect('/');
+}
+
+const  {products,totalPages} = data;
+
+
+---
+
+<Layout>
+
+    <table class="w-full mx-5 mt-5 text-center ">
+        <thead>
+            <tr>
+                <th class="text-left">Imagen</th>
+                <th class="text-center">Titulo</th>
+                <th class="text-center">Precio</th>
+                <th class="text-center">Tamaños </th>
+            </tr>
+        </thead>
+        <tbody>
+            {products.map((p)=>(
+                <tr>
+                    <td><ProductImage src={p.images.split(',')[0]} alt={p.title} className={`w-20 h-20`}/></td>
+                    <td><a class="hover:underline cursor-pointer" href={`/admin/products/${p.slug}`}>{p.title}</a></td>
+                    <td>{Formatter.currency(p.price)}</td>
+                    <td>{p.sizes}</td>
+                </tr>
+                
+            ))}
+        </tbody>
+    </table>
+    <Pagination pageParam={pageParam} totalPages={totalPages}/>
+</Layout>

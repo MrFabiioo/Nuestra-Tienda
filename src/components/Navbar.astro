@@ -35,14 +35,15 @@ import Aguacate from "./svgs/aguacate.astro";
         <div id="menu" class="hidden absolute top-full left-0 w-full bg-guacamole-icons md:static md:flex md:items-center md:w-auto md:bg-transparent z-10 ">
             <ul class="flex flex-col md:flex-row gap-4 md:gap-6 text-guacamole-pulpa font-bold p-4 md:p-0 border-b-2 border-black md:border-none">
                 <li><a href="/">INICIO</a></li>
-                <li><a href="/about">ACERCA DE MÍ</a></li>
-                <li><a href="/services">PRODUCTO</a></li>
+                <li><a href="/admin/dashboard">ADMIN</a></li>
+                <li><a href="/a">PRODUCTO</a></li>
                 <li><a href="/contact">CONTACTO</a></li>
             </ul>
         </div>
 
         <!-- Botón de compra -->
         <div class="flex gap-4 md:gap-6 items-center ml-6">
+            <a href="/admin/dashboard">ADMIN</a>
             <a href="/guacamole" class="group relative inline-block focus:ring-3 focus:outline-hidden active:translate-y-1 active:shadow-[0px_0px_0_0_#3E6102] transition-all">
                 <span class="absolute inset-0 translate-x-1.5 translate-y-1.5 bg-guacamole-f transition-transform group-hover:translate-x-0 group-hover:translate-y-0"></span>
                 <span class="relative inline-block border-2 border-current px-8 py-3 text-sm font-bold tracking-widest text-black uppercase"> Comprar guacamole </span>

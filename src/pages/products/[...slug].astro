@@ -1,11 +1,9 @@
 ---
 import Layout from "@layouts/Layout.astro";
 import { actions } from "astro:actions";
-import { Product } from "astro:db";
-import { getProductsByPage } from "src/actions/products/getProducts";
 import ProductSliceShow from "src/components/products/ProductSliceShow.astro";
 export const prerender = false;
-const tamaños = ["Pequeño", "Mediano", "Grande", "Extra-grande"];
+
 
 const {slug}= Astro.params;
 
