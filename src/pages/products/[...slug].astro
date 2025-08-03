@@ -23,7 +23,7 @@ const {product, images} = data;
     >
         <!-- Imagen del producto -->
         <div class="relative">
-            <ProductSliceShow images={images}/>
+            <ProductSliceShow images={images.map(i=>i.image)}/>
             
         </div>
 
