@@ -12,10 +12,11 @@ export const getProductsByPage= defineAction({
             limit:z.number().optional().default(6),
         }),
         handler:async({page,limit})=>{
-            page = page >= 0 ? 1 : page;
+            page = page <= 0 ? 1 : page;
             const [totalRecords] = await db.select({count: count()}).from(Product);
+            //console.log(`totalRecords : ${totalRecords[0]}`)
             const totalPages  = Math.ceil(totalRecords.count/limit);
-
+            //console.log(`total pages: ${totalPages}`)
             if (page > totalPages) {
                 return{
                     products: [] as ProductWithImages[],
@@ -37,8 +38,15 @@ export const getProductsByPage= defineAction({
             `
             const {rows} = await db.run(productQuery);
 
+            const products = rows.map(product =>{
+                return{
+                    ...product,
+                    images: product.images ? product.images : 'no-image.png'
+                }
+            }) as unknown as ProductWithImages[]
+
             return {
-                products: rows as unknown as ProductWithImages[],
+                products: products, //rows as unknown as ProductWithImages[],
                 totalPages: totalPages,
 
             } ;

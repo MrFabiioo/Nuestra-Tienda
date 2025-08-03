@@ -2,6 +2,7 @@
 import ProductImage from '@components/products/ProductImage.astro';
 import Layout from '@layouts/Layout.astro';
 import { actions } from 'astro:actions';
+import { promise } from 'astro:schema';
 import ProductSliceShow from "src/components/products/ProductSliceShow.astro";
 export const prerender = false
 const {slug} = Astro.params;
@@ -22,6 +23,7 @@ const {product,images} = data;
 
   <form class="grid grid-cols-1 sm:grid-cols-2 gap-4">
     <!-- Datos generales -->
+     <input type="hidden" name="id" value={product.id}>
     <div class="mt-2">
       <h2 class="text-lg font-semibold">Datos generales</h2>
 
@@ -208,6 +210,9 @@ const {product,images} = data;
 </Layout>
 
 <script>
+import { actions } from "astro:actions";
+import { navigate } from "astro:transitions/client";
+
 
 
   document.addEventListener('astro:page-load',()=>{
@@ -216,13 +221,18 @@ const {product,images} = data;
     if (!form) {
       return;
     }
-    form.addEventListener('submit',(e)=>{
+    form.addEventListener('submit',async(e)=>{
       e.preventDefault();
       const selectedSizes = Array.from(sizeButtons).filter(btn=> btn.classList.contains('active')).map(btn=>btn.textContent?.trim()).join(',');
       const formData = new FormData(form);
       formData.set('sizes',selectedSizes)
       const formValues= Object.fromEntries(formData.entries());
       console.log(formValues)
+      const {data,error} = await actions.createUpdateProduct(formData);
+      if (error) {
+        return alert(error.message)
+      }
+      navigate(`/admin/products/${data.slug}`);
     })
   })
 </script>
