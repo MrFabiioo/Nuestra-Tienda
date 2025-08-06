@@ -8,6 +8,7 @@ interface Props {
 const product= Astro.props;
 
 const currentImage = product.product.images.split(',')
+//console.log('currentImage:',currentImage)
 ---
 
 <section
@@ -17,6 +18,8 @@ const currentImage = product.product.images.split(',')
         <img
             id="card-img"
             src={currentImage[0]}
+            data-first={currentImage[0]}
+            data-second={currentImage[1]}
             alt="Guacamole"
             class=" border-2 border-black h-[350px] object-contain"
         />
@@ -34,15 +37,22 @@ const currentImage = product.product.images.split(',')
 
 
 <script>
-const images = document.querySelectorAll('#card-img');
-images.forEach((img) => {
-  const imageElement = img as HTMLImageElement;
-  const originalSrc = imageElement.src;
-  imageElement.addEventListener('mouseenter', () => {
-    imageElement.src = '/guacamole-caricatura-partida.png'; // o la imagen que quieras mostrar
+  const images = document.querySelectorAll('#card-img');
+  images.forEach((img) => {
+    const imageElement = img as HTMLImageElement;
+    const firstSrc = imageElement.dataset.first;
+    const secondSrc = imageElement.dataset.second;
+
+    imageElement.addEventListener('mouseenter', () => {
+      if (secondSrc) {
+        imageElement.src = secondSrc;
+      }
+    });
+
+    imageElement.addEventListener('mouseleave', () => {
+      if (firstSrc) {
+        imageElement.src = firstSrc;
+      }
+    });
   });
-  imageElement.addEventListener('mouseleave', () => {
-    imageElement.src = originalSrc;
-  });
-});
 </script>

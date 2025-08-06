@@ -130,7 +130,8 @@ document.addEventListener('astro:page-load',()=>{
     const incrementButton = document.querySelector('#increment') as HTMLButtonElement;
     const decrementButton = document.querySelector('#decrement') as HTMLButtonElement;
     const addToCardButton = document.querySelector('#add-card') as HTMLButtonElement;
-    
+    //console.log({ incrementButton, decrementButton, addToCardButton });
+    if(!incrementButton || !quantityInput) return;
     incrementButton.addEventListener('click',()=>{
         quantity = Math.min(quantity+1,5);
         quantityInput.value= quantity.toString();
@@ -140,7 +141,6 @@ document.addEventListener('astro:page-load',()=>{
         quantityInput.value= quantity.toString();
     });
 
-     if(!incrementButton || !quantityInput) return;
     addToCardButton.addEventListener('click',async()=>{
         const size = document.querySelector('.selected-size')?.textContent;
         if (!size) {

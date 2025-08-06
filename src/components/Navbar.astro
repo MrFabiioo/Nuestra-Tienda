@@ -58,11 +58,14 @@ import Aguacate from "./svgs/aguacate.astro";
 
     <!-- Script para el menú hamburguesa -->
     <script>
-        const menuToggle = document.getElementById('menu-toggle');
-        const menu = document.getElementById('menu');
+        document.addEventListener('astro:page-load',()=>{
 
-        menuToggle.addEventListener('click', () => {
-        menu.classList.toggle('hidden');
-        });
+            const menuToggle = document.getElementById('menu-toggle');
+            const menu = document.getElementById('menu');
+    
+            menuToggle.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+            });
+        })
     </script>
 </nav>
