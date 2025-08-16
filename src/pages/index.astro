@@ -1,24 +1,25 @@
 ---
-import Instagram from "../components/svgs/instagram.astro";
-import Facebook from "../components/svgs/facebook.astro";
-import Git from "../components/svgs/git.astro";
+import Instagram from "@svg/Instagram.astro";
+import Facebook from "@svg/Facebook.astro";
+import Git from "@svg/Git.astro";
 import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-guacamole-fondo h-full mb-24">
         <div
-            class="px-4 sm:px-8 max-w-full md:max-w-screen-xl mx-auto flex flex-col justify-center items-start font-unique"
+            class="px-4 sm:px-8 max-w-full md:max-w-screen-xl mx-auto flex flex-col justify-center sm:items-start items-center font-unique"
         >
-            <h1 class="text-2xl sm:text-4xl md:text-5xl text-black">
+            <h1 class="text-xl sm:text-4xl md:text-3xl text-black mt-10 border-black border-2 bg-guacamole-f rounded-xl shadow-button px-4 py-2  ">
                 TIENDA GUACAMOLE SHOP
             </h1>
             <p class="text-base sm:text-2xl mt-6 sm:mt-12 text-black">
-                LOREN IPSUM DOLOR SIT AMET, CONSECTETUR ADIPISICING ELIGENDI
-                VOLUPTATES, VOLUPTAS DUCIMUS, CULPA EXPLICABO. LABORE
-                VOLUPTATES, VOLUPTAS DUCIMUS, CULPA EXPLICABO. LABORE
-                VOLUPTATES, VOLUPTAS DUCIMUS, CULPA EXPLICABO. LABORE
-                VOLUPTATES, VOLUPTAS DUCIMUS, CULPA EXPLICABO. LABORE
+                🥑 ¡El sabor que estabas esperando!
+                    En Guacamole Shop preparamos guacamole fresco cada día, con ingredientes 100% naturales y sin conservantes.
+            </p>
+            <p class="text-base sm:text-2xl mt-6 sm:mt-12 text-black">
+                Cremoso, saludable y listo para disfrutar en tacos, tostadas o como más te guste.
+                Pruébalo hoy y siente México en cada bocado.
             </p>
             <div class="block md:hidden w-full mt-6">
                 <img
@@ -28,66 +29,42 @@ import Layout from "../layouts/Layout.astro";
                 />
             </div>
             <a href="/tienda"
-                class="group relative inline-block focus:ring-3 focus:outline-hidden w-full sm:w-fit active:translate-y-1 active:shadow-[0px_0px_0_0_#3E6102] transition-all mt-8 sm:mt-12"
+                class="text-black mt-10 border-black border-2 bg-guacamole-f rounded-xl shadow-button px-4 py-2"
             >
-                <span
-                    class="absolute inset-0 translate-x-1.5 translate-y-1.5 bg-guacamole-f transition-transform group-hover:translate-x-0 group-hover:translate-y-0"
-                ></span>
-
-                <span
-                    class="block w-full sm:w-[324px] h-[48px] sm:h-[58px] relative border-2 border-current px-4 sm:px-8 py-2 sm:py-3 text-sm font-bold tracking-widest text-black uppercase"
-                >
-                   Ir a la tienda 
-                </span>
+                
+                   IR A LA TIENDA
+                
             </a>
-            <div class="w-full flex justify-center items-center sm:justify-start ">
-                <ul class="flex gap-4 sm:gap-6 mt-6 ">
-                    <li>
+            <div class="w-full flex sm:justify-start items-center justify-center ">
+                <ul class="flex gap-4 sm:gap-6 mt-6  ">
+                    <li class="flex justify-center items-center">
                         <a
-                            class="group relative inline-block focus:ring-3 focus:outline-hidden w-full sm:w-auto"
-                            href="#"
+                            class="text-black  border-black border-2 bg-guacamole-f rounded-xl shadow-button px-4 py-2 "
+                            href="/"
                         >
-                            <span
-                                class="h-[44px] sm:h-[52px] absolute inset-0 translate-x-1.5 translate-y-1.5 bg-guacamole-f transition-transform group-hover:translate-x-0 group-hover:translate-y-0"
-                            ></span>
-
-                            <span
-                                class="relative inline-block border-2 border-current px-6 sm:px-8 py-2 sm:py-3 text-sm font-bold tracking-widest text-black uppercase"
-                            >
-                                <Instagram />
-                            </span>
+                            
+                                <Instagram >
+                            
                         </a>
                     </li>
-                    <li>
+                    <li class="flex justify-center items-center">
                         <a
-                            class="group relative inline-block focus:ring-3 focus:outline-hidden w-full sm:w-auto"
+                            class="text-black  border-black border-2 bg-guacamole-f rounded-xl shadow-button px-4 py-2"
                             href="#"
                         >
-                            <span
-                                class="h-[44px] sm:h-[52px] absolute inset-0 translate-x-1.5 translate-y-1.5 bg-guacamole-f transition-transform group-hover:translate-x-0 group-hover:translate-y-0"
-                            ></span>
-
-                            <span
-                                class="relative inline-block border-2 border-current px-6 sm:px-8 py-2 sm:py-3 text-sm font-bold tracking-widest text-black uppercase"
-                            >
+                            
                                 <Facebook />
-                            </span>
+                            
                         </a>
                     </li>
-                    <li>
+                    <li class="flex justify-center items-center">
                         <a
-                            class="group relative inline-block focus:ring-3 focus:outline-hidden w-full sm:w-auto"
+                            class="text-black  border-black border-2 bg-guacamole-f rounded-xl shadow-button px-4 py-2"
                             href="#"
                         >
-                            <span
-                                class="h-[44px] sm:h-[52px] absolute inset-0 translate-x-1.5 translate-y-1.5 bg-guacamole-f transition-transform group-hover:translate-x-0 group-hover:translate-y-0"
-                            ></span>
-
-                            <span
-                                class="relative inline-block border-2 border-current px-6 sm:px-8 py-2 sm:py-3 text-sm font-bold tracking-widest text-black uppercase"
-                            >
+                           
                                 <Git />
-                            </span>
+                            
                         </a>
                     </li>
                 </ul>

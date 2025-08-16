@@ -1,7 +1,7 @@
 ---
 import "../styles/global.css";
 import ShoppingCart from "./CartButton.jsx";
-import Aguacate from "./svgs/aguacate.astro";
+import Aguacate from "@svg/Aguacate.astro";
 
 ---
 <style>
@@ -44,9 +44,8 @@ import Aguacate from "./svgs/aguacate.astro";
         <!-- Botón de compra -->
         <div class="flex gap-4 md:gap-6 items-center ml-6">
             <a href="/admin/dashboard">ADMIN</a>
-            <a href="/guacamole" class="group relative inline-block focus:ring-3 focus:outline-hidden active:translate-y-1 active:shadow-[0px_0px_0_0_#3E6102] transition-all">
-                <span class="absolute inset-0 translate-x-1.5 translate-y-1.5 bg-guacamole-f transition-transform group-hover:translate-x-0 group-hover:translate-y-0"></span>
-                <span class="relative inline-block border-2 border-current px-8 py-3 text-sm font-bold tracking-widest text-black uppercase"> Comprar guacamole </span>
+            <a href="/guacamole" class="text-black  border-black border-2 bg-guacamole-f rounded-xl shadow-button px-4 py-2">
+                Comprar guacamole 
                 
             </a>
             <div class="text-guacamole-f ">
@@ -60,8 +59,8 @@ import Aguacate from "./svgs/aguacate.astro";
     <script>
         document.addEventListener('astro:page-load',()=>{
 
-            const menuToggle = document.getElementById('menu-toggle');
-            const menu = document.getElementById('menu');
+            const menuToggle = document.getElementById('menu-toggle') as HTMLButtonElement;
+            const menu = document.getElementById('menu')as HTMLButtonElement;
     
             menuToggle.addEventListener('click', () => {
             menu.classList.toggle('hidden');
