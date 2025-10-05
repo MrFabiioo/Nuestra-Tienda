@@ -18,6 +18,9 @@ export default {
         'guacamole-fondo':'#74ac22',
         'guacamole-icons':'#492e06',
         'guacamole-pulpa':'#dcd329',
+        'black-medium':'#2f3237',
+        'black-dark':'#111213',
+        'white-medium':'#f1f3f9',
       }
     },
   },

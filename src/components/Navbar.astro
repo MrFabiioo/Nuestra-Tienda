@@ -2,69 +2,119 @@
 import "../styles/global.css";
 import ShoppingCart from "./CartButton.jsx";
 import Aguacate from "@svg/Aguacate.astro";
-
 ---
+
 <style>
     @media (max-width: 380px) {
         #navbar-title {
-            font-size:200%; /* Asegúrate de que 'Unique Font' esté definido en tu CSS */
+            font-size: 200%; /* Asegúrate de que 'Unique Font' esté definido en tu CSS */
         }
     }
 </style>
 <nav class="w-full">
     <!-- Título del navbar -->
-    <div id="navbar-title" class=" flex justify-center items-center border-b-2 border-black font-unique text-4xl md:text-7xl text-center py-2 md:py-3 bg-guacamole-f text-amber-950 font-extrabold">
-        GUACAMOLE SHOP 
-        <Aguacate />
-    </div>
 
     <!-- Contenedor principal del navbar -->
-    <div class="border-b-2 border-black flex justify-between items-center px-4 md:px-8 py-3 md:py-4 font-unique text-xl md:text-2xl bg-guacamole-icons relative">
+    <div
+        class="border-b-2  flex justify-between items-center px-4 md:px-8 py-3 md:py-4 font-unique text-xl md:text-2xl bg-black-medium relative"
+    >
         <!-- Menú hamburguesa para pantallas pequeñas -->
         <div class="md:hidden">
-            <button id="menu-toggle" class="text-guacamole-pulpa font-bold focus:outline-none">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            <button
+                id="menu-toggle"
+                class="text-guacamole-pulpa font-bold focus:outline-none"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
             </button>
         </div>
 
-        
-
         <!-- Lista de enlaces (oculta en móviles, visible en pantallas grandes) -->
-        <div id="menu" class="hidden absolute top-full left-0 w-full bg-guacamole-icons md:static md:flex md:items-center md:w-auto md:bg-transparent z-10 ">
-            <ul class="flex flex-col md:flex-row gap-4 md:gap-6 text-guacamole-pulpa font-bold p-4 md:p-0 border-b-2 border-black md:border-none">
-                <li><a href="/">INICIO</a></li>
-                <li><a href="/admin/dashboard">ADMIN</a></li>
-                <li><a href="/a">PRODUCTO</a></li>
-                <li><a href="/contact">CONTACTO</a></li>
+        <div
+            id="menu"
+            class="hidden absolute top-full left-0 w-full bg-black-medium md:static md:flex md:items-center md:w-auto md:bg-transparent z-10"
+        >
+            <ul
+                class="flex flex-col md:flex-row gap-4 md:gap-6 text-guacamole-pulpa font-bold p-4 md:p-0 border-b-2 border-black md:border-none"
+            >
+                <li>
+                    <a
+                        href="/"
+                        class="block px-3 py-2  hover:text-white-medium  transition"
+                    >
+                        AllSHOP
+                    </a>
+                </li>
+                <li>
+                    <a
+                        href="/admin/dashboard"
+                        class="block px-3 py-2 hover:bg-black-dark hover:text-white-medium  transition"
+                    >
+                        ADMIN
+                    </a>
+                </li>
+                <li>
+                    <a
+                        href="/a"
+                        class="block px-3 py-2 hover:bg-black-dark hover:text-white-medium  transition"
+                    >
+                        PRODUCTO
+                    </a>
+                </li>
+                <li>
+                    <a
+                        href="/contact"
+                        class="block px-3 py-2 hover:bg-black-dark hover:text-white-medium  transition"
+                    >
+                        CONTACTO
+                    </a>
+                </li>
             </ul>
         </div>
 
         <!-- Botón de compra -->
         <div class="flex gap-4 md:gap-6 items-center ml-6">
-            <a href="/admin/dashboard">ADMIN</a>
-            <a href="/guacamole" class="text-black  border-black border-2 bg-guacamole-f rounded-xl shadow-button px-4 py-2">
-                Comprar guacamole 
-                
+            <a class="text-guacamole-pulpa hover:bg-black-dark block px-3 py-2 hover:text-white-medium  transition" href="/admin/dashboard">ADMIN</a>
+            <a  id="btn-comprar"
+                href="/guacamole"
+                class=" text-black-medium border-black-dark border-2 bg-guacamole-pulpa w-full  px-4 py-2"
+            >
+                COMPRAR GUAGAMOLE
             </a>
-            <div class="text-guacamole-f ">
-                <ShoppingCart client:only="preact" transition:persist/>
+            <div class="text-guacamole-f">
+                <ShoppingCart client:only="preact" transition:persist />
             </div>
         </div>
-        
     </div>
 
     <!-- Script para el menú hamburguesa -->
     <script>
-        document.addEventListener('astro:page-load',()=>{
+        document.addEventListener("astro:page-load", () => {
+            const menuToggle = document.getElementById(
+                "menu-toggle",
+            ) as HTMLButtonElement;
+            const menu = document.getElementById("menu") as HTMLButtonElement;
 
-            const menuToggle = document.getElementById('menu-toggle') as HTMLButtonElement;
-            const menu = document.getElementById('menu')as HTMLButtonElement;
-    
-            menuToggle.addEventListener('click', () => {
-            menu.classList.toggle('hidden');
+            menuToggle.addEventListener("click", () => {
+                menu.classList.toggle("hidden");
             });
-        })
+        });
     </script>
 </nav>
+
+<style>
+    #btn-comprar:hover{
+        transform: scale(1.1);
+    }
+</style>
