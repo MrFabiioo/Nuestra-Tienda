@@ -18,15 +18,15 @@ const path = url.pathname;
 
 
 
-<div class="flex justify-between my-32 mx-32">
-    <a class="button" href={`${path}?page=${Math.max(currentPage-1,1)}`}>Anterior </a>
-    <p>{`Pagina   ${currentPage}  de  ${totalPages}`}</p>
-    <a class="button" href={`${path}?page=${Math.min(currentPage+1,totalPages)}`}>Siguiente</a>
+<div class="flex justify-between lg:mt-auto mx-6 my-6 sm:mt-auto md:mt-12">
+    <a class="button" href={`${path}?page=${Math.max(currentPage-1,1)}`}>ANTERIOR </a>
+    <p class="font-bold">{`Pagina   ${currentPage}  de  ${totalPages}`}</p>
+    <a class="button" href={`${path}?page=${Math.min(currentPage+1,totalPages)}`}>SIGUIENTE</a>
 
 </div>
 
 <style>
     .button{
-        @apply p-2 bg-guacamole-icons text-guacamole-f rounded
+        @apply p-2 bg-black-medium text-guacamole-f rounded font-bold
     }
 </style>

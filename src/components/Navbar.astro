@@ -1,7 +1,7 @@
 ---
 import "../styles/global.css";
 import ShoppingCart from "./CartButton.jsx";
-import Aguacate from "@svg/Aguacate.astro";
+
 ---
 
 <style>
@@ -16,7 +16,7 @@ import Aguacate from "@svg/Aguacate.astro";
 
     <!-- Contenedor principal del navbar -->
     <div
-        class="border-b-2  flex justify-between items-center px-4 md:px-8 py-3 md:py-4 font-unique text-xl md:text-2xl bg-black-medium relative"
+        class="border-b-2 border-black-medium flex justify-between items-center px-4 md:px-8 py-3 md:py-4 font-unique text-xl md:text-2xl bg-black-medium relative"
     >
         <!-- Menú hamburguesa para pantallas pequeñas -->
         <div class="md:hidden">
@@ -88,9 +88,9 @@ import Aguacate from "@svg/Aguacate.astro";
             <a class="text-guacamole-pulpa hover:bg-black-dark block px-3 py-2 hover:text-white-medium  transition" href="/admin/dashboard">ADMIN</a>
             <a  id="btn-comprar"
                 href="/guacamole"
-                class=" text-black-medium border-black-dark border-2 bg-guacamole-pulpa w-full  px-4 py-2"
+                class=" text-black-medium border-black-dark border-2 bg-guacamole-pulpa w-full  px-4 py-2 "
             >
-                COMPRAR GUAGAMOLE
+                COMPRAR 
             </a>
             <div class="text-guacamole-f">
                 <ShoppingCart client:only="preact" transition:persist />

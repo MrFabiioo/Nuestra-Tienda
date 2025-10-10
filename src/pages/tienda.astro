@@ -24,8 +24,17 @@ const  {products,totalPages} = data;
 ---
 
 <Layout>
-    <div
-        class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 place-items-center h-full  "
+    <div class="flex flex-col justify-center items-center">
+        <input
+            type="text"
+            placeholder="Buscar libro"
+            class="font-mono rounded-lg border border-black-medium w-80 p-4 mb-12 mt-6"
+            
+          />
+    </div>
+        
+    <section
+        class="grid sm:gap-6 gap-12 lg:grid-cols-4 md:grid-cols-2  w-full  max-w-screen grid-cols-1 place-items-center "
     >
         {
             products.map((product)=>(
@@ -34,13 +43,8 @@ const  {products,totalPages} = data;
         }
 
 
-    </div>
+    </section>
 
     <Pagination pageParam={pageParam} totalPages={totalPages}/>
 </Layout>
 
-<style>
-    div {
-        place-items: center;
-    }
-</style>

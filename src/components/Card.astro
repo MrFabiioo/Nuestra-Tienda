@@ -6,12 +6,13 @@ interface Props {
 }
 
 const product= Astro.props;
+//cconsole.log("producto: ",product)
 
 const currentImage = product.product.images.split(',')
 //console.log('currentImage:',currentImage)
 ---
 
-<section
+<!-- <section
     class="p-4 m-4 border-2 border-black shadow-lg bg-guacamole-a font-unique"
 >   <a href={`products/${product.product.slug}`}>
     <div  class="w-full h-full">
@@ -26,14 +27,30 @@ const currentImage = product.product.images.split(',')
     </div>
     </a>
     <p class="text-guacamole-f font-bold text-xl flex justify-center">{product.product.title}</p>
-    <p class="text-lg text-guacamole-f my-4">{product.product.description}</p>
+    <p class="text-lg text-guacamole-f my-4"></p>
     <div class="flex justify-between items-center">
         <p class="text-2xl font-bold text-guacamole-d">$ {product.product.price}</p>
         <a href="/guacamole" class="text-2xl text-guacamole-f cursor-pointer"
             >Comprar</a
         >
     </div>
-</section>
+</section> -->
+
+<div  class='bg-white cursor-pointer w-4/5 h-full border-4 border-black-medium p-2 '>
+  <a href={`products/${product.product.slug}`}>
+            <figure class='relative mb-2 w-full h-80'>
+                <span class='font-mono absolute bottom-0 left-0 bg-white/60 rounded-lg text-black text-sm m-2 px-3 py-0.5'>{product.product.price}</span>
+                <img class='w-full h-full object-cover  shadow-2xl' src={currentImage[0]} alt={product.product.title} src={currentImage[0]}
+            data-first={currentImage[0]}
+            data-second={currentImage[1]}
+            id="card-img"/>
+            </figure>
+            </a>
+            <p class='grid place-content-center'>
+                <span class='font-mono text-lg font-bold'>{product.product.title}</span>
+                <span class='font-mono text-xl font-light'>{product.product.description}</span>
+            </p>
+        </div>
 
 
 <script>
