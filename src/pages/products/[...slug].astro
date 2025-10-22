@@ -15,6 +15,7 @@ if (error) {
 }
 
 const {product, images} = data;
+//console.log("images:-------------> ",images?.[0]?.image || '');
 ---
 
 <Layout title={product.title} description={product.description}>
@@ -24,7 +25,7 @@ const {product, images} = data;
         <!-- Imagen del producto -->
         <div class="relative">
             <ProductSliceShow images={images.map(i=>i.image)}/>
-            
+                <input type="hidden" name="" id="product-image" value={images?.[0]?.image || ''}/>
         </div>
 
         <!-- Detalles del producto -->
@@ -32,6 +33,7 @@ const {product, images} = data;
             <div class="flex gap-2">
                 <h1 class="text-4xl text-guacamole-a font-extrabold uppercase">
                     {product.title}
+                    <input type="hidden" name="product-name" id="product-name" value={product.title}/>
                 </h1>
             </div>
             <div class="flex items-center gap-2">
@@ -47,6 +49,7 @@ const {product, images} = data;
             </p>
             <div class="flex items-center gap-4">
                 <span class="text-xl font-bold text-black">{product.price}</span>
+                <input type="hidden" name="product-price" id="product-price" value={product.price}/>
                 <span class="text-sm text-guacamole-icons line-through"
                     >$10.000</span
                 >
@@ -55,7 +58,7 @@ const {product, images} = data;
             <h3>Cantidad</h3>
             <div>
                 <button id="decrement" class="btn-quantity">-</button>
-                <input class="w-[45px] text-center" type="number" value="1" />
+                <input id="quantity-input" class="w-[45px] text-center" type="number" value="1" />
                 <button id="increment" class="btn-quantity">+</button>
             </div>
 
@@ -123,20 +126,26 @@ document.addEventListener('astro:page-load',()=>{
         });
     });
 
-    const quantityInput = document.querySelector('input') as HTMLInputElement;
+    const quantityInput = document.querySelector('#quantity-input') as HTMLInputElement;
     const producIdInput = document.querySelector('#product-id') as HTMLInputElement;
     let quantity = 1;
 
     const incrementButton = document.querySelector('#increment') as HTMLButtonElement;
     const decrementButton = document.querySelector('#decrement') as HTMLButtonElement;
     const addToCardButton = document.querySelector('#add-card') as HTMLButtonElement;
+
+    const productImageInput = document.querySelector('#product-image') as HTMLInputElement;
+
+    //console.log('productImageInput: ',productImageInput)
     //console.log({ incrementButton, decrementButton, addToCardButton });
     if(!incrementButton || !quantityInput) return;
     incrementButton.addEventListener('click',()=>{
+       //console.log("click +");
         quantity = Math.min(quantity+1,5);
         quantityInput.value= quantity.toString();
     });
     decrementButton.addEventListener('click',()=>{
+       // console.log("click -");
         quantity = Math.max(quantity-1,1);
         quantityInput.value= quantity.toString();
     });
@@ -153,6 +162,9 @@ document.addEventListener('astro:page-load',()=>{
             productId:producIdInput.value,
             size:size,
             quantity:quantity,
+            name:(document.querySelector('#product-name') as HTMLInputElement).value,
+            price:parseFloat((document.querySelector('#product-price') as HTMLInputElement).value),
+            image:productImageInput.value,
         })
 
         itemsIncart.set(cart.length)

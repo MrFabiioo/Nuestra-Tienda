@@ -36,21 +36,51 @@ const currentImage = product.product.images.split(',')
     </div>
 </section> -->
 
-<div  class='bg-white cursor-pointer w-4/5 h-full border-4 border-black-medium p-2 '>
-  <a href={`products/${product.product.slug}`}>
-            <figure class='relative mb-2 w-full h-80'>
-                <span class='font-mono absolute bottom-0 left-0 bg-white/60 rounded-lg text-black text-sm m-2 px-3 py-0.5'>{product.product.price}</span>
-                <img class='w-full h-full object-cover  shadow-2xl' src={currentImage[0]} alt={product.product.title} src={currentImage[0]}
-            data-first={currentImage[0]}
-            data-second={currentImage[1]}
-            id="card-img"/>
-            </figure>
-            </a>
-            <p class='grid place-content-center'>
-                <span class='font-mono text-lg font-bold'>{product.product.title}</span>
-                <span class='font-mono text-xl font-light'>{product.product.description}</span>
-            </p>
-        </div>
+<div class="group relative w-[340px] bg-white/60 backdrop-blur-xl border border-neutral-300/70 rounded-3xl overflow-hidden shadow-[0_4px_40px_-8px_rgba(0,0,0,0.15)] transition-all duration-500 hover:shadow-[0_8px_60px_-4px_rgba(0,0,0,0.25)] hover:-translate-y-1 hover:scale-[1.015] cursor-pointer">
+<a href={`products/${product.product.slug}`}>
+  <!-- Imagen -->
+  <div class="relative aspect-[1/0.68] overflow-hidden">
+    <img
+      src={currentImage[0]}
+      alt={product.product.title}
+      class="w-full h-full object-cover transition-transform duration-[1600ms] ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:scale-110"
+    />
+
+    <!-- Degradado suave -->
+    <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent"></div>
+
+    <!-- Precio flotante -->
+    <span class="absolute bottom-4 left-4 text-sm tracking-wide font-semibold text-neutral-900 bg-white/70 backdrop-blur-md border border-white/40 rounded-full px-4 py-1 shadow-sm">
+      ${product.product.price}
+    </span>
+  </div>
+
+  <!-- Contenido -->
+  <div class="px-5 py-6 flex flex-col gap-2.5">
+    <div class="flex items-center justify-between">
+      <h3 class="text-lg font-semibold tracking-tight text-neutral-900">
+        {product.product.title}
+      </h3>
+<span class="text-lg text-guacamole-pulpa font-semibold"
+                    >★★★★★</span>
+
+    </div>
+    <p class="text-sm text-neutral-600 leading-relaxed line-clamp-3">
+      {product.product.description}
+    </p>
+  </div>
+
+  <!-- Tag o sello -->
+ <span class="absolute top-6 right-[-42px] rotate-45 bg-black text-guacamole-pulpa text-[10px] tracking-[0.2em] font-mono px-10 py-1 shadow-[2px_2px_0px_rgba(0,0,0,0.7)] text-center">
+    ARTESANAL
+  </span>
+
+  <!-- Detalle visual sutil -->
+  <div class="absolute inset-0 pointer-events-none rounded-3xl border border-white/20"></div>
+  </a>
+</div>
+
+
 
 
 <script>

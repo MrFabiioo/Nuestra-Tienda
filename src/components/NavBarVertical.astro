@@ -1,0 +1,133 @@
+---
+import ShoppingCart from "./CartButton"
+import SimpleCart from "@svg/SimpleCart.astro";
+import IconHome from "@svg/IconHome.astro";
+import IconShop from "@svg/IconShop.astro";
+import IconAdmin from "@svg/IconAdmin.astro";
+---
+<nav class="nav-bar">
+    <section class="section-one">
+        <ul>
+            <li class="menu">
+                <div class="bar-container">
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                </div>
+            </li>
+            <li class="cart">
+                <div class="cart-container">
+                    <SimpleCart />
+                </div>
+            </li>
+        </ul>
+    </section>
+    <section class="section-two">
+        <ul>
+            <li class="li-container">
+                <span class="icon-container bg-guacamole-fondo">
+                    <IconHome />
+                </span>
+                <a class="menu-text" href="/">Inicio</a>
+            </li>
+            <li class="li-container">
+                <span class="icon-container">
+                    <IconShop />
+                </span>
+                <a class="menu-text" href="/tienda">Tienda</a>
+            </li>
+            <li class="li-container">
+                <span class="icon-container">
+                    <IconAdmin />
+                </span>
+                <a class="menu-text" href="/admin">Admin</a>
+            </li>
+        </ul>
+    </section>
+</nav>
+
+<style>
+    .nav-bar{
+        position: fixed;
+        width: 72px;
+        height: 100vh;
+        background: rgb(251,250,238);
+        display: flex;
+        flex-direction: column;
+        margin-right: 11px;
+        z-index: 50;
+        
+        
+        
+    }
+    .section-one{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 44px;    
+    }
+    .section-two{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 40px; 
+        
+    }
+    .bar-container{
+        width: 56px;
+        height: 56px;
+        background-color: white;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        border-radius: 16px ;
+    }
+    .bar{
+        height: 2px;
+        width: 27px;
+        margin: 3px 0;
+        background-color: rgb(84,101,36);
+    }
+
+    .cart-container{
+        width: 56px;
+        height: 56px;
+        background-color: rgb(215,235,155);
+        margin-top: 4px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 16px ;
+        cursor: pointer;
+    }
+    .icon-container{
+        width: 56px;
+        height: 32px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        border-radius: 16px ;
+    }
+
+    .menu-text{
+        margin-top: 8px;
+        font-size: 14px;
+        color: rgb(41,47,0);
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .li-container{
+        width: 56px;
+        height: 32px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        margin-top: 36px;
+    }
+</style>

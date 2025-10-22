@@ -2,19 +2,20 @@
 import Layout from '@layouts/Layout.astro'
 import { actions } from 'astro:actions';
 import {Formatter} from '@utils/formatter'
+
 const cart = Astro.cookies.get('cart');
-//console.log(cart)
+
 export const prerender = false
 
 const {data:products,error}= await Astro.callAction(actions.loadProductsFromCart,{});
 
-//const {products} = data;
+
 
 if (error || !products) {
    console.error(error)
    return Astro.redirect('/');
 }
-//console.log(data)
+
 
 const total = products.reduce(
   (acc, product) => acc + product.price * product.quantity,
@@ -23,6 +24,7 @@ const total = products.reduce(
 ---
 
 <Layout>
+ 
    <h1>Carrito</h1>
 
   <section class="grid grid-cols-1 sm:grid-cols-2">
@@ -45,7 +47,7 @@ const total = products.reduce(
               <p>${product.price}</p>
               <p>Cantidad: {product.quantity}</p>
               <p>
-                Talla: <span class="font-bold">{product.sizes}</span>
+                Tipo: <span class="font-bold">{product.sizes}</span>
               </p>
               <button
                 data-id={product.productId}
@@ -109,7 +111,7 @@ import { itemsIncart } from "src/store/cart.store";
        const size= target.dataset.size ?? "";
        const cart =CartCookiesClient.removeItem(productId,size)
        itemsIncart.set(cart.length);
-      // window.location.reload()
+      
        navigate('/cart')
      })
  })

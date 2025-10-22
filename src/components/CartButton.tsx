@@ -1,16 +1,18 @@
-// Adjust the import path as necessary
-//import { useCartStore } from '../store/useCartStore';
+
 import { useState,useEffect } from 'preact/hooks'
 import {useStore} from '@nanostores/preact'
 import Cart from './svgs/Cart';
 import { itemsIncart } from 'src/store/cart.store';
 import { CartCookiesClient } from '@utils/cart-cookies';
+import type { ShoppingCartProps } from 'src/interfaces/shoppin-cart';
 
 
 export default function ShoppingCart() {
   const $itemsInCart = useStore(itemsIncart)
   const [isOpen, setIsOpen] = useState(false);
   const cart = CartCookiesClient.getCart();
+  //console.log('cart: ',cart)
+ 
   useEffect(()=>{
     
     itemsIncart.set(cart.length)
@@ -19,7 +21,7 @@ export default function ShoppingCart() {
     setIsOpen(!isOpen);
   };
 
-  //console.log(cart.length)
+
   return (
     <>
       <button onClick={toggleCart} class="active:translate-y-1 active:shadow-[0px_0px_0_0_#3E6102] transition-all text-sm md:text-xl relative">
@@ -41,14 +43,28 @@ export default function ShoppingCart() {
               ×
             </button>
           </div>
-          <div class="flex items-center gap-3">
-            <img src="/images/guacamoleIA.png" alt="Guacamole" class="w-12 h-12 border-2 border-black shadow-[2px_2px_0_0_#3E6102]" />
+
+                {
+        cart?.map((product) => (
+          <div class="flex gap-5 mt-5">
+            <img src={product.image} alt={product.name} class="w-20 h-20" />
+
             <div>
-              <p class="text-guacamole-pulpa font-bold uppercase">Tazón de Guacamole</p>
-              <p class="text-guacamole-e font-bold">x {$itemsInCart}</p>
+              <p class="">
+                {product.name}
+              </p>
+              <p>${product.price}</p>
+              <p>Cantidad: {product.quantity}</p>
+              <p>
+                Tipo: <span class="font-bold">{product.size}</span>
+              </p>
+              
             </div>
-            <span class="ml-auto text-lg font-bold text-guacamole-pulpa">${(9000 * 3).toFixed(0)}</span>
           </div>
+        ))
+      }
+
+          
           <div class="border-t-2 border-black pt-3 flex flex-col gap-2">
             <p class="text-sm text-guacamole-pulpa uppercase">✔ Envío gratis en pedidos mayores a $50</p>
             <p class="text-sm text-guacamole-pulpa uppercase">✔ Garantía de devolución de 30 días</p>
@@ -71,3 +87,9 @@ export default function ShoppingCart() {
     </>
   );
 }
+
+// TODO: arreglar el bug de actualizacion de cantidad sin tener que cerrar y abrir el carrito.
+//TODO: agregar boton para eliminar productos del carrito.
+//TODO: agregar boton para vaciar el carrito.
+//TODO: cerrar carrito al hacer click fuera del carrito.
+//TODO: agregar barra de desplazamiento si hay muchos productos en el carrito.

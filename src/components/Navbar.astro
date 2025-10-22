@@ -1,120 +1,161 @@
 ---
 import "../styles/global.css";
 import ShoppingCart from "./CartButton.jsx";
-
 ---
 
-<style>
-    @media (max-width: 380px) {
-        #navbar-title {
-            font-size: 200%; /* Asegúrate de que 'Unique Font' esté definido en tu CSS */
-        }
-    }
-</style>
-<nav class="w-full">
-    <!-- Título del navbar -->
 
-    <!-- Contenedor principal del navbar -->
-    <div
-        class="border-b-2 border-black-medium flex justify-between items-center px-4 md:px-8 py-3 md:py-4 font-unique text-xl md:text-2xl bg-black-medium relative"
-    >
-        <!-- Menú hamburguesa para pantallas pequeñas -->
-        <div class="md:hidden">
-            <button
-                id="menu-toggle"
-                class="text-guacamole-pulpa font-bold focus:outline-none"
+    <header class="header">
+        <div class="header__content">
+            <a href="/" class="logo text-guacamole-pulpa">AllShop</a>
+            <div class="nav">
+                <ul class="nav__list">
+                    <li class="nav__item"><a href="/tienda" class="nav__link text-guacamole-pulpa">Productos</a></li>
+                    <li class="nav__item"><a href="#" class="nav__link text-guacamole-pulpa">Acerca de mi</a></li>
+                    <li class="nav__item"><a href="#" class="nav__link text-guacamole-pulpa">Contacto</a></li>
+                    
+                </ul>
+            </div>
+                    <div class="flex gap-4 md:gap-6 items-center ml-6">
+            <a
+                class="text-guacamole-pulpa hover:bg-black-dark block px-3 py-2 hover:text-white-medium transition"
+                href="/admin/dashboard">ADMIN</a
             >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-            </button>
-        </div>
-
-        <!-- Lista de enlaces (oculta en móviles, visible en pantallas grandes) -->
-        <div
-            id="menu"
-            class="hidden absolute top-full left-0 w-full bg-black-medium md:static md:flex md:items-center md:w-auto md:bg-transparent z-10"
-        >
-            <ul
-                class="flex flex-col md:flex-row gap-4 md:gap-6 text-guacamole-pulpa font-bold p-4 md:p-0 border-b-2 border-black md:border-none"
-            >
-                <li>
-                    <a
-                        href="/"
-                        class="block px-3 py-2  hover:text-white-medium  transition"
-                    >
-                        AllSHOP
-                    </a>
-                </li>
-                <li>
-                    <a
-                        href="/admin/dashboard"
-                        class="block px-3 py-2 hover:bg-black-dark hover:text-white-medium  transition"
-                    >
-                        ADMIN
-                    </a>
-                </li>
-                <li>
-                    <a
-                        href="/a"
-                        class="block px-3 py-2 hover:bg-black-dark hover:text-white-medium  transition"
-                    >
-                        PRODUCTO
-                    </a>
-                </li>
-                <li>
-                    <a
-                        href="/contact"
-                        class="block px-3 py-2 hover:bg-black-dark hover:text-white-medium  transition"
-                    >
-                        CONTACTO
-                    </a>
-                </li>
-            </ul>
-        </div>
-
-        <!-- Botón de compra -->
-        <div class="flex gap-4 md:gap-6 items-center ml-6">
-            <a class="text-guacamole-pulpa hover:bg-black-dark block px-3 py-2 hover:text-white-medium  transition" href="/admin/dashboard">ADMIN</a>
-            <a  id="btn-comprar"
-                href="/guacamole"
-                class=" text-black-medium border-black-dark border-2 bg-guacamole-pulpa w-full  px-4 py-2 "
-            >
-                COMPRAR 
-            </a>
+            
             <div class="text-guacamole-f">
                 <ShoppingCart client:only="preact" transition:persist />
             </div>
         </div>
-    </div>
+            <div class="hamburger">
+                <div class="bar bg-guacamole-pulpa"></div>
+                <div class="bar bg-guacamole-pulpa"></div>
+                <div class="bar bg-guacamole-pulpa"></div>
+            </div>
+        </div>
+    </header>
 
-    <!-- Script para el menú hamburguesa -->
-    <script>
-        document.addEventListener("astro:page-load", () => {
-            const menuToggle = document.getElementById(
-                "menu-toggle",
-            ) as HTMLButtonElement;
-            const menu = document.getElementById("menu") as HTMLButtonElement;
 
-            menuToggle.addEventListener("click", () => {
-                menu.classList.toggle("hidden");
-            });
-        });
-    </script>
-</nav>
+
+
 
 <style>
-    #btn-comprar:hover{
-        transform: scale(1.1);
+    ul{
+        list-style: none;
     }
+
+    a{
+        text-decoration: none;
+    }
+
+    .header{
+        background: rgba(29, 29, 31, 0.8);
+        position: fixed;
+        width: 100%;
+        top: 0;
+        z-index: 50 ; 
+        backdrop-filter: blur(20px) saturate(180%)     
+    }
+
+    .header__content{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 30px;
+        height: 60px;              
+    }
+
+    .logo{
+        font-size: 23px;
+        letter-spacing: -1.5px;
+        font-weight: 500;
+    }
+
+    .nav{
+        transition: all 0.3s ease-in-out;
+        
+    }
+    
+
+    .nav__list{
+        display: flex;
+        column-gap: 40px;
+    }
+
+    .nav__link{
+        font-size: 15px;
+        transition: color 0.4s;
+        font-weight: 400;
+    }
+    .nav__link:hover,.nav__link:focus{
+        color: rgba(255, 255, 255, 1);     
+    }  
+
+    .hamburger{
+        display: none;
+        cursor: pointer;
+    }
+
+    .bar{
+        height: 2px;
+        width: 27px;
+        margin: 5px 0;
+        opacity: 0.8;
+        transition:  all 0.3s ease-in-out;
+    }
+
+    @media(max-width:600px){  
+        .nav{
+            position:fixed;
+            top: 60px;
+            left: 0;
+            background: rgba(29, 29, 31, 0.8);  
+            width: 100%;
+            padding: 10px 0 25px;
+            transform: translateX(-100%);       
+        }
+
+        .nav__list{
+            flex-direction: column;
+            align-items: center;
+            row-gap: 20px;
+        }
+
+        .nav__link{
+            font-size: 14px;
+        }
+
+        .hamburger{
+            display: block;
+        }
+
+        .nav--open{
+            transform: translate(0);
+        }
+
+        .hamburger--open .bar:nth-child(1){
+            transform: translateY(7px) rotate(45deg);
+        }
+        .hamburger--open .bar:nth-child(2){
+            opacity: 0;
+        }
+        .hamburger--open .bar:nth-child(3){
+            transform: translateY(-7px) rotate(-45deg);
+        }
+    }
+
 </style>
+<script>
+    document.addEventListener("astro:page-load", () => {
+   
+        const navEl = document.querySelector('.nav');
+        const hamburgerEl = document.querySelector('.hamburger');
+
+        hamburgerEl?.addEventListener('click',()=>{
+            navEl?.classList.toggle('nav--open');
+            hamburgerEl.classList.toggle('hamburger--open')
+        })
+        navEl?.addEventListener('click',()=>{
+            navEl?.classList.remove('nav--open');
+            hamburgerEl?.classList.remove('hamburger--open')
+        })
+    });
+</script>
