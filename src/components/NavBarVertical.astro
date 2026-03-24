@@ -40,7 +40,7 @@ import IconAdmin from "@svg/IconAdmin.astro";
                 <span class="icon-container">
                     <IconAdmin />
                 </span>
-                <a class="menu-text" href="/admin">Admin</a>
+                <a class="menu-text" href="/admin/dashboard">Admin</a>
             </li>
         </ul>
     </section>
@@ -48,14 +48,17 @@ import IconAdmin from "@svg/IconAdmin.astro";
 
 <style>
     .nav-bar{
-        position: fixed;
+        /* Sticky para que se mantenga visible al hacer scroll y ocupe todo el alto */
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0;
         width: 72px;
         height: 100vh;
         background: rgb(251,250,238);
         display: flex;
         flex-direction: column;
-        margin-right: 11px;
-        z-index: 50;
+        box-sizing: border-box;
+        z-index: 20;
         
         
         
@@ -129,5 +132,12 @@ import IconAdmin from "@svg/IconAdmin.astro";
         align-items: center;
         cursor: pointer;
         margin-top: 36px;
+    }
+
+    @media (max-width: 768px) {
+        .nav-bar{
+            display: none;
+        }
+        
     }
 </style>
