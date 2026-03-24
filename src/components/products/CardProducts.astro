@@ -25,10 +25,42 @@ const { title, products } = Astro.props;
         <h2 class="products-section__title">{title}</h2>
     </div>
 
-    <div class="products-section__grid">
-        {products.map((product) => (
-            <ProductCard {...product} />
-        ))}
+    <div class="products-slider">
+        <!-- Contenedor del slider -->
+        <div class="slider-viewport" id={`slider-${title.replace(/\s+/g, '-').toLowerCase()}`}>
+            <div class="slider-track" id={`track-${title.replace(/\s+/g, '-').toLowerCase()}`}>
+                {products.map((product) => (
+                    <div class="slide">
+                        <ProductCard {...product} />
+                    </div>
+                ))}
+            </div>
+        </div>
+
+        <!-- Flecha izquierda -->
+        <button class="slider-btn prev" data-target={`slider-${title.replace(/\s+/g, '-').toLowerCase()}`} aria-label="Anterior">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </button>
+
+        <!-- Flecha derecha -->
+        <button class="slider-btn next" data-target={`slider-${title.replace(/\s+/g, '-').toLowerCase()}`} aria-label="Siguiente">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        </button>
+
+        <!-- Puntos de navegacion -->
+        <div class="slider-dots" id={`dots-${title.replace(/\s+/g, '-').toLowerCase()}`}>
+            {products.map((_, index) => (
+                <button 
+                    class={`dot ${index === 0 ? 'active' : ''}`} 
+                    data-index={index}
+                    aria-label={`Ir a producto ${index + 1}`}
+                ></button>
+            ))}
+        </div>
     </div>
 </section>
 
@@ -39,6 +71,7 @@ const { title, products } = Astro.props;
         padding: 2rem;
         box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.1);
         margin: 2rem 0;
+        position: relative;
     }
 
     .products-section__header {
@@ -57,17 +90,214 @@ const { title, products } = Astro.props;
         text-align: center;
     }
 
-    .products-section__grid {
+    /* Slider */
+    .products-slider {
+        position: relative;
+    }
+
+    .slider-viewport {
+        overflow: hidden;
+        margin: 0 50px;
+    }
+
+    .slider-track {
         display: flex;
         gap: 1.5rem;
+        transition: transform 0.4s ease-in-out;
+    }
+
+    .slide {
+        min-width: calc(33.333% - 1rem);
+        flex-shrink: 0;
+    }
+
+    /* Flechas */
+    .slider-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: rgba(86, 130, 4, 0.9);
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
         justify-content: center;
-        flex-wrap: wrap;
+        color: white;
+        transition: all 0.3s ease;
+        z-index: 10;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .slider-btn:hover {
+        background: #568203;
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .slider-btn:active {
+        transform: translateY(-50%) scale(0.95);
+    }
+
+    .slider-btn.prev {
+        left: 0;
+    }
+
+    .slider-btn.next {
+        right: 0;
+    }
+
+    /* Puntos */
+    .slider-dots {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: rgba(86, 130, 4, 0.3);
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        padding: 0;
+    }
+
+    .dot:hover {
+        background: rgba(86, 130, 4, 0.6);
+    }
+
+    .dot.active {
+        background: #568203;
+        transform: scale(1.2);
+    }
+
+    /* Responsive */
+    @media (max-width: 1100px) {
+        .slide {
+            min-width: calc(50% - 0.75rem);
+        }
     }
 
     @media (max-width: 768px) {
-        .products-section__grid {
-            flex-direction: column;
-            align-items: center;
+        .slide {
+            min-width: calc(100% - 2rem);
+        }
+
+        .slider-viewport {
+            margin: 0 40px;
+        }
+
+        .slider-btn {
+            width: 36px;
+            height: 36px;
+        }
+
+        .slider-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .products-section {
+            padding: 1.5rem 1rem;
+        }
+
+        .slider-viewport {
+            margin: 0 30px;
+        }
+
+        .slider-btn {
+            width: 32px;
+            height: 32px;
+        }
+
+        .slider-btn svg {
+            width: 16px;
+            height: 16px;
         }
     }
 </style>
+
+<script>
+    document.addEventListener("astro:page-load", () => {
+        // Inicializar cada slider
+        const sliders = document.querySelectorAll('.slider-viewport');
+        
+        sliders.forEach((viewport) => {
+            const id = viewport.id;
+            const trackId = id.replace('slider-', 'track-');
+            const dotsId = id.replace('slider-', 'dots-');
+            
+            const track = document.getElementById(trackId);
+            const dotsContainer = document.getElementById(dotsId);
+            const slides = viewport.querySelectorAll('.slide');
+            const dots = dotsContainer?.querySelectorAll('.dot');
+            
+            let currentIndex = 0;
+            const totalSlides = slides.length;
+            
+            function getVisibleSlides() {
+                const width = window.innerWidth;
+                if (width <= 768) return 1;
+                if (width <= 1100) return 2;
+                return 3;
+            }
+            
+            function updateSlider() {
+                const visibleSlides = getVisibleSlides();
+                const maxIndex = Math.max(0, totalSlides - visibleSlides);
+                
+                if (currentIndex > maxIndex) currentIndex = maxIndex;
+                
+                const slideWidth = (slides[0] as HTMLElement)?.offsetWidth + 24; // + gap
+                const translateX = currentIndex * slideWidth;
+                
+                if (track) {
+                    track.style.transform = `translateX(-${translateX}px)`;
+                }
+                
+                dots?.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === currentIndex);
+                });
+            }
+            
+            // Botones prev/next
+            const prevBtn = document.querySelector(`.slider-btn.prev[data-target="${id}"]`);
+            const nextBtn = document.querySelector(`.slider-btn.next[data-target="${id}"]`);
+            
+            prevBtn?.addEventListener('click', () => {
+                const visibleSlides = getVisibleSlides();
+                const maxIndex = Math.max(0, totalSlides - visibleSlides);
+                currentIndex = currentIndex > 0 ? currentIndex - 1 : maxIndex;
+                updateSlider();
+            });
+            
+            nextBtn?.addEventListener('click', () => {
+                const visibleSlides = getVisibleSlides();
+                const maxIndex = Math.max(0, totalSlides - visibleSlides);
+                currentIndex = currentIndex < maxIndex ? currentIndex + 1 : 0;
+                updateSlider();
+            });
+            
+            // Dots
+            dots?.forEach((dot, index) => {
+                dot.addEventListener('click', () => {
+                    currentIndex = index;
+                    updateSlider();
+                });
+            });
+            
+            // Resize
+            window.addEventListener('resize', updateSlider);
+            
+            // Inicial
+            updateSlider();
+        });
+    });
+</script>
