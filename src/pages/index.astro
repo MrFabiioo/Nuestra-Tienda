@@ -1,13 +1,91 @@
 ---
 import Layout from "@layouts/Layout.astro";
 import CardProducts from "@components/products/CardProducts.astro";
-import SliderImageIndex from "@components/SliderImageIndex.astro";
 import SliderImageAutomatic from "@components/SliderImageAutomatic.astro";
 
+// Productos de Salsas y Aderezos
+const salsasProducts = [
+    {
+        name: "Guacamole Tradicional",
+        price: 10000,
+        description: "Ricoguacamole fresco y natural",
+        image: "/images/guacamole-caricatura.png",
+        slug: "/guacamole"
+    },
+    {
+        name: "Guacamole Picante",
+        price: 12000,
+        description: "Con toque de chile habanero",
+        image: "/images/guacamole-caricatura-partida.png",
+        slug: "/guacamole"
+    },
+    {
+        name: "Guacamole Especial",
+        price: 15000,
+        description: "Receta secreta de la casa",
+        image: "/images/guacamoleIA.png",
+        slug: "/guacamole"
+    }
+];
+
+// Productos de Charcuteria
+const charcuteriaProducts = [
+    {
+        name: "Chorizo Artesanal",
+        price: 18000,
+        description: "Chorizo de cerdo premium",
+        image: "/images/Chorizo-de-Cerdo.png",
+        slug: "/tienda"
+    },
+    {
+        name: "Chorizo Ahumado",
+        price: 20000,
+        description: "Con sabor ahumado tradicional",
+        image: "/images/Chorizo-de-Cerdo.png",
+        slug: "/tienda"
+    },
+    {
+        name: "Chorizo Picante",
+        price: 19000,
+        description: "Para los amantes del picante",
+        image: "/images/Chorizo-de-Cerdo.png",
+        slug: "/tienda"
+    }
+];
+
+// Productos de Postres
+const postresProducts = [
+    {
+        name: "Galletas de Avena",
+        price: 8000,
+        description: "Crujientes y saludables",
+        image: "/images/galletas de avena.png",
+        slug: "/tienda"
+    },
+    {
+        name: "Galletas con Chispas",
+        price: 9000,
+        description: "Con chocolate belga",
+        image: "/images/galletas de avena.png",
+        slug: "/tienda"
+    },
+    {
+        name: "Galletas Integrales",
+        price: 9500,
+        description: "Sin azucar agregada",
+        image: "/images/galletas de avena.png",
+        slug: "/tienda"
+    }
+];
 ---
+
 <Layout>  
     <h1 class="text-4xl font-bold text-center mt-10">Bienvenido a Guacamole Shop</h1>
     <p class="text-center mt-4 text-lg">Tu tienda online de guacamole y productos relacionados.</p>  
+    
     <SliderImageAutomatic />
-<CardProducts />
+    
+    <CardProducts title="Salsas y Aderezos" products={salsasProducts} />
+    <CardProducts title="Charcuteria" products={charcuteriaProducts} />
+    <CardProducts title="Postres" products={postresProducts} />
 </Layout>

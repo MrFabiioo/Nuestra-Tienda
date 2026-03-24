@@ -1,39 +1,73 @@
 ---
 import ProductCard from "./ProductCard.astro";
 
-const products = [
-  {
-    name: "Guacamole Tradicional",
-    price: 10000,
-    description: "Ricoguacamole",
-    image: "guacamole-caricatura.png",
-    slug: "#"
-  },
-  {
-    name: "Guacamole Tradicional",
-    price: 10000,
-    description: "Ricoguacamole",
-    image: "guacamole-caricatura.png",
-    slug: "#"
-  },
-  {
-    name: "Guacamole Tradicional",
-    price: 10000,
-    description: "Ricoguacamole",
-    image: "guacamole-caricatura.png",
-    slug: "#"
-  }
-];
+interface Product {
+    name: string;
+    price: number;
+    description: string;
+    image: string;
+    slug?: string;
+    rating?: number;
+    borderColor?: string;
+    tag?: string;
+}
+
+interface Props {
+    title: string;
+    products: Product[];
+}
+
+const { title, products } = Astro.props;
 ---
 
-<section class="bg-white  rounded-3xl p-8 shadow-lg my-8">
-    <div class="flex items-center justify-center mb-8">
-        <h1 class="text-2xl text-center font-bold px-6 py-2 rounded-full text-black bg-guacamole-b">Salsas y Aderezos</h1>
+<section class="products-section">
+    <div class="products-section__header">
+        <h2 class="products-section__title">{title}</h2>
     </div>
 
-    <div class="flex gap-6 justify-center">
+    <div class="products-section__grid">
         {products.map((product) => (
             <ProductCard {...product} />
         ))}
     </div>
 </section>
+
+<style>
+    .products-section {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.1);
+        margin: 2rem 0;
+    }
+
+    .products-section__header {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 2rem;
+    }
+
+    .products-section__title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        padding: 0.5rem 1.5rem;
+        border-radius: 9999px;
+        background: #568203;
+        color: white;
+        text-align: center;
+    }
+
+    .products-section__grid {
+        display: flex;
+        gap: 1.5rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    @media (max-width: 768px) {
+        .products-section__grid {
+            flex-direction: column;
+            align-items: center;
+        }
+    }
+</style>
