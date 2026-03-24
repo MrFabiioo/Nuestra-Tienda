@@ -17,6 +17,7 @@
       "@utils/*":["src/utils/*"],
       "@components/*":["src/components/*"],
       "@svg/*":["src/components/svgs/*"],
+      "@data/*":["src/data/*"],
     }
   },
   

@@ -1,5 +1,6 @@
 ---
 import ShoppingCart from "./CartButton.jsx";
+import SearchBar from "./SearchBar.astro";
 ---
 
 <header class="navbar">
@@ -11,19 +12,8 @@ import ShoppingCart from "./CartButton.jsx";
             <span class="hamburger__line"></span>
         </button>
 
-        <!-- Centro: Barra de busqueda -->
-        <div class="search-bar">
-            <svg class="search-bar__icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <input 
-                type="text" 
-                class="search-bar__input" 
-                placeholder="Buscar productos..."
-                aria-label="Buscar productos"
-            />
-        </div>
+        <!-- Centro: Barra de busqueda con sugerencias -->
+        <SearchBar />
 
         <!-- Derecha: Logo + Carrito -->
         <div class="navbar__right">
@@ -97,43 +87,6 @@ import ShoppingCart from "./CartButton.jsx";
         background: #6da204;
     }
 
-    /* Barra de busqueda */
-    .search-bar {
-        flex: 1;
-        max-width: 400px;
-        position: relative;
-        display: flex;
-        align-items: center;
-    }
-
-    .search-bar__icon {
-        position: absolute;
-        left: 12px;
-        color: #568203;
-        pointer-events: none;
-    }
-
-    .search-bar__input {
-        width: 100%;
-        padding: 10px 12px 10px 44px;
-        border: 2px solid transparent;
-        border-radius: 25px;
-        background: rgba(255, 255, 255, 0.1);
-        color: white;
-        font-size: 14px;
-        transition: all 0.3s ease;
-    }
-
-    .search-bar__input::placeholder {
-        color: rgba(255, 255, 255, 0.5);
-    }
-
-    .search-bar__input:focus {
-        outline: none;
-        border-color: #568203;
-        background: rgba(255, 255, 255, 0.15);
-    }
-
     /* Derecha */
     .navbar__right {
         display: flex;
@@ -195,10 +148,6 @@ import ShoppingCart from "./CartButton.jsx";
 
     /* Responsive */
     @media (max-width: 640px) {
-        .search-bar {
-            display: none;
-        }
-
         .navbar__container {
             padding: 0 1rem;
         }
@@ -219,7 +168,6 @@ import ShoppingCart from "./CartButton.jsx";
             menuToggle.classList.toggle('hamburger--open');
         });
 
-        // Cerrar menu al hacer click en un link
         document.querySelectorAll('.mobile-menu__link').forEach(link => {
             link.addEventListener('click', () => {
                 mobileMenu?.classList.remove('mobile-menu--open');

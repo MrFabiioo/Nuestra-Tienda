@@ -1,0 +1,307 @@
+---
+import { allProducts } from "@data/products";
+
+const productsJson = JSON.stringify(allProducts);
+---
+
+<div class="search-container" id="searchContainer">
+    <div class="search-bar">
+        <svg class="search-bar__icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input 
+            type="text" 
+            class="search-bar__input" 
+            id="searchInput"
+            placeholder="Buscar productos..."
+            aria-label="Buscar productos"
+            autocomplete="off"
+        />
+        <button class="search-bar__clear" id="clearSearch" type="button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Sugerencias dropdown -->
+    <div class="search-dropdown" id="searchDropdown">
+        <div class="search-dropdown__results" id="searchResults"></div>
+        <div class="search-dropdown__empty" id="searchEmpty">
+            No se encontraron productos
+        </div>
+        <div class="search-dropdown__hint" id="searchHint">
+            Escribe para buscar productos...
+        </div>
+    </div>
+</div>
+
+<style>
+    .search-container {
+        flex: 1;
+        max-width: 400px;
+        position: relative;
+    }
+
+    .search-bar {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .search-bar__icon {
+        position: absolute;
+        left: 12px;
+        color: #568203;
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    .search-bar__input {
+        width: 100%;
+        padding: 10px 40px 10px 44px;
+        border: 2px solid transparent;
+        border-radius: 25px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    .search-bar__input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .search-bar__input:focus {
+        outline: none;
+        border-color: #568203;
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    .search-bar__clear {
+        position: absolute;
+        right: 10px;
+        background: transparent;
+        border: none;
+        color: rgba(255, 255, 255, 0.5);
+        cursor: pointer;
+        padding: 4px;
+        display: none;
+        transition: color 0.2s ease;
+    }
+
+    .search-bar__clear:hover {
+        color: white;
+    }
+
+    .search-bar__clear--visible {
+        display: flex;
+    }
+
+    /* Dropdown */
+    .search-dropdown {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        right: 0;
+        background: rgba(29, 29, 31, 0.98);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(86, 130, 4, 0.3);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        display: none;
+        z-index: 100;
+    }
+
+    .search-dropdown--visible {
+        display: block;
+    }
+
+    .search-dropdown__results {
+        max-height: 320px;
+        overflow-y: auto;
+    }
+
+    .search-dropdown__empty,
+    .search-dropdown__hint {
+        padding: 1rem;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.9rem;
+        display: none;
+    }
+
+    .search-dropdown__empty--visible,
+    .search-dropdown__hint--visible {
+        display: block;
+    }
+
+    /* Result item */
+    .search-result {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .search-result:hover {
+        background: rgba(86, 130, 4, 0.15);
+    }
+
+    .search-result__image {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        object-fit: cover;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .search-result__info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .search-result__name {
+        color: white;
+        font-size: 0.95rem;
+        font-weight: 500;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .search-result__category {
+        color: #568203;
+        font-size: 0.8rem;
+    }
+
+    .search-result__arrow {
+        color: rgba(255, 255, 255, 0.4);
+        flex-shrink: 0;
+    }
+
+    @media (max-width: 640px) {
+        .search-container {
+            display: none;
+        }
+    }
+</style>
+
+<script define:vars={{ productsJson }}>
+    const products = JSON.parse(productsJson);
+    
+    const searchContainer = document.getElementById('searchContainer');
+    const searchInput = document.getElementById('searchInput');
+    const searchDropdown = document.getElementById('searchDropdown');
+    const searchResults = document.getElementById('searchResults');
+    const searchEmpty = document.getElementById('searchEmpty');
+    const searchHint = document.getElementById('searchHint');
+    const clearSearch = document.getElementById('clearSearch');
+
+    function showDropdown() {
+        searchDropdown.classList.add('search-dropdown--visible');
+    }
+
+    function hideDropdown() {
+        searchDropdown.classList.remove('search-dropdown--visible');
+    }
+
+    function highlightMatch(text, query) {
+        if (!query) return text;
+        const regex = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+        return text.replace(regex, '<strong>$1</strong>');
+    }
+
+    function renderResults(results, query) {
+        if (results.length === 0) {
+            searchResults.innerHTML = '';
+            searchEmpty.classList.add('search-dropdown__empty--visible');
+            searchHint.classList.remove('search-dropdown__hint--visible');
+        } else {
+            searchEmpty.classList.remove('search-dropdown__empty--visible');
+            searchHint.classList.remove('search-dropdown__hint--visible');
+            
+            searchResults.innerHTML = results.map(product => `
+                <a href="${product.slug}" class="search-result">
+                    <img src="${product.image}" alt="${product.name}" class="search-result__image" loading="lazy" />
+                    <div class="search-result__info">
+                        <div class="search-result__name">${highlightMatch(product.name, query)}</div>
+                        <div class="search-result__category">${product.category}</div>
+                    </div>
+                    <svg class="search-result__arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </a>
+            `).join('');
+        }
+    }
+
+    function searchProducts(query) {
+        const normalizedQuery = query.toLowerCase().trim();
+        
+        if (!normalizedQuery) {
+            searchResults.innerHTML = '';
+            searchEmpty.classList.remove('search-dropdown__empty--visible');
+            searchHint.classList.add('search-dropdown__hint--visible');
+            return;
+        }
+
+        const results = products.filter(product => 
+            product.name.toLowerCase().includes(normalizedQuery) ||
+            product.category.toLowerCase().includes(normalizedQuery) ||
+            product.description.toLowerCase().includes(normalizedQuery)
+        ).slice(0, 6);
+
+        renderResults(results, query);
+    }
+
+    // Event listeners
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value;
+        
+        if (query.length > 0) {
+            clearSearch.classList.add('search-bar__clear--visible');
+        } else {
+            clearSearch.classList.remove('search-bar__clear--visible');
+        }
+        
+        searchProducts(query);
+        showDropdown();
+    });
+
+    searchInput.addEventListener('focus', () => {
+        if (searchInput.value.length > 0) {
+            showDropdown();
+        }
+    });
+
+    clearSearch.addEventListener('click', () => {
+        searchInput.value = '';
+        clearSearch.classList.remove('search-bar__clear--visible');
+        searchResults.innerHTML = '';
+        searchHint.classList.add('search-dropdown__hint--visible');
+        searchEmpty.classList.remove('search-dropdown__empty--visible');
+        searchInput.focus();
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!searchContainer.contains(e.target)) {
+            hideDropdown();
+        }
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            hideDropdown();
+            searchInput.blur();
+        }
+    });
+</script>
