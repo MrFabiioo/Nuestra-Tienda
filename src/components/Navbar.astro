@@ -1,161 +1,230 @@
 ---
-import "../styles/global.css";
 import ShoppingCart from "./CartButton.jsx";
 ---
 
+<header class="navbar">
+    <div class="navbar__container">
+        <!-- Izquierda: Menu hamburguesa -->
+        <button class="hamburger" id="menuToggle" aria-label="Menu">
+            <span class="hamburger__line"></span>
+            <span class="hamburger__line"></span>
+            <span class="hamburger__line"></span>
+        </button>
 
-    <header class="header">
-        <div class="header__content">
-            <a href="/" class="logo text-guacamole-pulpa">AllShop</a>
-            <div class="nav">
-                <ul class="nav__list">
-                    <li class="nav__item"><a href="/tienda" class="nav__link text-guacamole-pulpa">Productos</a></li>
-                    <li class="nav__item"><a href="#" class="nav__link text-guacamole-pulpa">Acerca de mi</a></li>
-                    <li class="nav__item"><a href="#" class="nav__link text-guacamole-pulpa">Contacto</a></li>
-                    
-                </ul>
-            </div>
-                    <div class="flex gap-4 md:gap-6 items-center ml-6">
-            <a
-                class="text-guacamole-pulpa hover:bg-black-dark block px-3 py-2 hover:text-white-medium transition"
-                href="/admin/dashboard">ADMIN</a
-            >
-            
-            <div class="text-guacamole-f">
+        <!-- Centro: Barra de busqueda -->
+        <div class="search-bar">
+            <svg class="search-bar__icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input 
+                type="text" 
+                class="search-bar__input" 
+                placeholder="Buscar productos..."
+                aria-label="Buscar productos"
+            />
+        </div>
+
+        <!-- Derecha: Logo + Carrito -->
+        <div class="navbar__right">
+            <a href="/" class="logo">
+                <span class="logo__text">Guaca</span>
+                <span class="logo__highlight">Shop</span>
+            </a>
+            <div class="cart-icon">
                 <ShoppingCart client:only="preact" transition:persist />
             </div>
         </div>
-            <div class="hamburger">
-                <div class="bar bg-guacamole-pulpa"></div>
-                <div class="bar bg-guacamole-pulpa"></div>
-                <div class="bar bg-guacamole-pulpa"></div>
-            </div>
-        </div>
-    </header>
+    </div>
 
-
-
-
+    <!-- Menu desplegable (mobile) -->
+    <nav class="mobile-menu" id="mobileMenu">
+        <ul class="mobile-menu__list">
+            <li><a href="/" class="mobile-menu__link">Inicio</a></li>
+            <li><a href="/tienda" class="mobile-menu__link">Productos</a></li>
+            <li><a href="/admin/dashboard" class="mobile-menu__link">Admin</a></li>
+            <li><a href="/guacamole" class="mobile-menu__link">Comprar</a></li>
+        </ul>
+    </nav>
+</header>
 
 <style>
-    ul{
-        list-style: none;
-    }
-
-    a{
-        text-decoration: none;
-    }
-
-    .header{
-        background: rgba(29, 29, 31, 0.8);
+    .navbar {
+        background: rgba(29, 29, 31, 0.95);
+        backdrop-filter: blur(20px) saturate(180%);
         position: fixed;
-        width: 100%;
         top: 0;
-        z-index: 50 ; 
-        backdrop-filter: blur(20px) saturate(180%)     
+        left: 0;
+        right: 0;
+        z-index: 50;
+        border-bottom: 2px solid rgba(86, 130, 4, 0.3);
     }
 
-    .header__content{
+    .navbar__container {
+        max-width: 1200px;
+        margin: 0 auto;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0 30px;
-        height: 60px;              
+        padding: 0 1.5rem;
+        height: 64px;
+        gap: 1rem;
     }
 
-    .logo{
-        font-size: 23px;
-        letter-spacing: -1.5px;
-        font-weight: 500;
-    }
-
-    .nav{
-        transition: all 0.3s ease-in-out;
-        
-    }
-    
-
-    .nav__list{
+    /* Hamburguesa */
+    .hamburger {
         display: flex;
-        column-gap: 40px;
-    }
-
-    .nav__link{
-        font-size: 15px;
-        transition: color 0.4s;
-        font-weight: 400;
-    }
-    .nav__link:hover,.nav__link:focus{
-        color: rgba(255, 255, 255, 1);     
-    }  
-
-    .hamburger{
-        display: none;
+        flex-direction: column;
+        justify-content: center;
+        gap: 5px;
+        width: 36px;
+        height: 36px;
+        background: transparent;
+        border: none;
         cursor: pointer;
+        padding: 4px;
     }
 
-    .bar{
+    .hamburger__line {
+        width: 100%;
         height: 2px;
-        width: 27px;
-        margin: 5px 0;
-        opacity: 0.8;
-        transition:  all 0.3s ease-in-out;
+        background: #568203;
+        border-radius: 2px;
+        transition: all 0.3s ease;
     }
 
-    @media(max-width:600px){  
-        .nav{
-            position:fixed;
-            top: 60px;
-            left: 0;
-            background: rgba(29, 29, 31, 0.8);  
-            width: 100%;
-            padding: 10px 0 25px;
-            transform: translateX(-100%);       
-        }
-
-        .nav__list{
-            flex-direction: column;
-            align-items: center;
-            row-gap: 20px;
-        }
-
-        .nav__link{
-            font-size: 14px;
-        }
-
-        .hamburger{
-            display: block;
-        }
-
-        .nav--open{
-            transform: translate(0);
-        }
-
-        .hamburger--open .bar:nth-child(1){
-            transform: translateY(7px) rotate(45deg);
-        }
-        .hamburger--open .bar:nth-child(2){
-            opacity: 0;
-        }
-        .hamburger--open .bar:nth-child(3){
-            transform: translateY(-7px) rotate(-45deg);
-        }
+    .hamburger:hover .hamburger__line {
+        background: #6da204;
     }
 
+    /* Barra de busqueda */
+    .search-bar {
+        flex: 1;
+        max-width: 400px;
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .search-bar__icon {
+        position: absolute;
+        left: 12px;
+        color: #568203;
+        pointer-events: none;
+    }
+
+    .search-bar__input {
+        width: 100%;
+        padding: 10px 12px 10px 44px;
+        border: 2px solid transparent;
+        border-radius: 25px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    .search-bar__input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .search-bar__input:focus {
+        outline: none;
+        border-color: #568203;
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Derecha */
+    .navbar__right {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .logo {
+        text-decoration: none;
+        font-size: 22px;
+        font-weight: 600;
+        letter-spacing: -0.5px;
+    }
+
+    .logo__text {
+        color: white;
+    }
+
+    .logo__highlight {
+        color: #568203;
+    }
+
+    .cart-icon {
+        display: flex;
+        align-items: center;
+    }
+
+    /* Menu mobile */
+    .mobile-menu {
+        display: none;
+        background: rgba(29, 29, 31, 0.98);
+        border-top: 1px solid rgba(86, 130, 4, 0.2);
+        padding: 1rem 0;
+    }
+
+    .mobile-menu--open {
+        display: block;
+    }
+
+    .mobile-menu__list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .mobile-menu__link {
+        display: block;
+        padding: 0.75rem 1.5rem;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        font-size: 15px;
+        transition: all 0.2s ease;
+    }
+
+    .mobile-menu__link:hover {
+        background: rgba(86, 130, 4, 0.2);
+        color: #568203;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+        .search-bar {
+            display: none;
+        }
+
+        .navbar__container {
+            padding: 0 1rem;
+        }
+
+        .logo {
+            font-size: 18px;
+        }
+    }
 </style>
+
 <script>
     document.addEventListener("astro:page-load", () => {
-   
-        const navEl = document.querySelector('.nav');
-        const hamburgerEl = document.querySelector('.hamburger');
+        const menuToggle = document.getElementById('menuToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
 
-        hamburgerEl?.addEventListener('click',()=>{
-            navEl?.classList.toggle('nav--open');
-            hamburgerEl.classList.toggle('hamburger--open')
-        })
-        navEl?.addEventListener('click',()=>{
-            navEl?.classList.remove('nav--open');
-            hamburgerEl?.classList.remove('hamburger--open')
-        })
+        menuToggle?.addEventListener('click', () => {
+            mobileMenu?.classList.toggle('mobile-menu--open');
+            menuToggle.classList.toggle('hamburger--open');
+        });
+
+        // Cerrar menu al hacer click en un link
+        document.querySelectorAll('.mobile-menu__link').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu?.classList.remove('mobile-menu--open');
+                menuToggle?.classList.remove('hamburger--open');
+            });
+        });
     });
 </script>

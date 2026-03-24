@@ -1,10 +1,7 @@
 ---
 import Navbar from "../components/Navbar.astro";
-import NavBarVertical from "@components/NavBarVertical.astro";
 import Footer from "../components/Footer.astro";
 import { ClientRouter } from "astro:transitions";
-import NavBarSearch from "@components/NavBarSearch.astro";
-
 
 interface Props {
 	title?: String;
@@ -23,9 +20,9 @@ interface Props {
 		<title>Guacamole Shop</title>
 		<ClientRouter />
 	</head>
-	<body class="flex flex-row min-h-screen bg-white-medium">
-		<NavBarSearch />
-		<main class="flex flex-col  flex-1">
+	<body>
+		<Navbar />
+		<main>
 			<slot />
 		</main>
 		<!-- <Footer /> -->
@@ -33,42 +30,20 @@ interface Props {
 </html>
 
 <style>
-	
 	html,
 	body {
-		/* Evitar 100vw (incluye scrollbar) que puede causar overflow horizontal */
 		width: 100%;
 		height: 100%;
 		box-sizing: border-box;
-		/* Como parche final, ocultamos cualquier overflow horizontal pequeño */
-		overflow-x: hidden;	
-	
-		
+		overflow-x: hidden;
 	}
 
-main{
-		padding-top:80px;
-		max-width: 1080px;
-		margin:auto;
-		/* Permitir que los hijos flex se encojan y no provoquen overflow */
+	main {
+		padding-top: 80px;
+		max-width: 1200px;
+		margin: 0 auto;
 		min-width: 0;
+		padding-left: 1rem;
+		padding-right: 1rem;
 	}
-
-/* Layout en grid: columna fija para el navbar y una columna flexible para el contenido.
-   Esto evita cálculos manuales y garantiza que el navbar ocupe toda la altura. */
-body {
-  display: grid;
-  grid-template-columns: 72px 1fr;
-  min-height: 100vh;
-}
-
-	
-	
-
-	/* main {
-		background-image: url("textura-de-papel-blanco.jpg") ;
-		background-size: cover;
-		
-	} */
 </style>
-
