@@ -1,6 +1,14 @@
 import { column, defineDb, defineTable } from 'astro:db';
 
-const Product = defineTable({
+export const Category = defineTable({
+  columns: {
+    id: column.text({ primaryKey: true, unique: true }),
+    name: column.text(),
+    slug: column.text({ unique: true }),
+  },
+});
+
+export const Product = defineTable({
     columns: {
         id: column.text({ primaryKey: true, unique: true }),
         title: column.text(),
@@ -8,10 +16,11 @@ const Product = defineTable({
         price: column.number(),
         sizes: column.text(),
         slug: column.text({ unique: true }),
+        categoryId: column.text({ optional: true }),
     }
 })
 
-const ProductImage = defineTable({
+export const ProductImage = defineTable({
   columns: {
     id: column.text({ primaryKey: true }),
     productId: column.text({ references: () => Product.columns.id }),
@@ -21,6 +30,7 @@ const ProductImage = defineTable({
 
 export default defineDb({
   tables: {
+    Category,
     Product,
     ProductImage
   },

@@ -2,19 +2,20 @@
 import ProductImage from '@components/products/ProductImage.astro';
 import Layout from '@layouts/Layout.astro';
 import { actions } from 'astro:actions';
-import { promise } from 'astro:schema';
 import ProductSliceShow from "src/components/products/ProductSliceShow.astro";
 export const prerender = false
 const {slug} = Astro.params;
 
 const {data,error} = await Astro.callAction(actions.getProductBySlug,slug ?? " "); 
 
+// Get categories for dropdown
+const {data: categoriesData} = await Astro.callAction(actions.getCategories, {});
 
 if (error) {
-  console.log('el eror: ',error)
     return Astro.redirect('/')
 }
 const {product,images} = data;
+const {categories} = categoriesData;
 ---
 
 <Layout title="Mantenimiento de producto">
@@ -60,6 +61,26 @@ const {product,images} = data;
           class="w-full p-2 border border-gray-300 rounded"
           rows="8">{product.description}</textarea
         >
+      </div>
+
+      <!-- Categoría -->
+      <div class="mb-4">
+        <label for="categoryId" class="block">Categoría</label>
+        <select
+          id="categoryId"
+          name="categoryId"
+          class="w-full p-2 border border-gray-300 rounded"
+        >
+          <option value="">Sin categoría</option>
+          {categories.map((category: { id: string; name: string }) => (
+            <option 
+              value={category.id} 
+              selected={product.categoryId === category.id}
+            >
+              {category.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -240,9 +261,6 @@ import { actions } from 'astro:actions';
 
       const formData = new FormData(form);
       formData.set('sizes', selectedSizes);
-
-      const formValues = Object.fromEntries(formData.entries());
-      console.log(formValues);
 
       const { data, error } = await actions.createUpdateProduct(formData);
 

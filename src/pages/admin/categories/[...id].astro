@@ -1,0 +1,142 @@
+---
+import Layout from "@layouts/Layout.astro";
+import { actions } from "astro:actions";
+
+export const prerender = false;
+
+const { id } = Astro.params;
+const isNew = id === "new";
+
+let category = null;
+
+if (!isNew && id) {
+    // Fetch existing category by ID
+    const { data, error } = await Astro.callAction(actions.getCategories, {});
+    
+    if (!error && data.categories) {
+        category = data.categories.find((c: any) => c.id === id);
+    }
+    
+    if (!category) {
+        return Astro.redirect("/admin/categories");
+    }
+}
+---
+
+<Layout title={isNew ? "Nueva Categoría" : "Editar Categoría"}>
+    <div class="max-w-2xl mx-auto mt-10">
+        <h1 class="text-2xl text-center text-black-dark font-bold mb-6">
+            {isNew ? "Nueva Categoría" : `Editar: ${category?.name || ""}`}
+        </h1>
+        
+        <a 
+            href="/admin/categories" 
+            class="text-blue-500 hover:underline text-sm mb-4 inline-block"
+        >
+            ← Volver a Categorías
+        </a>
+
+        <form id="category-form" class="bg-white shadow-md rounded-lg p-6">
+            {!isNew && <input type="hidden" name="id" value={id} />}
+            
+            <!-- Nombre -->
+            <div class="mb-4">
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
+                    Nombre
+                </label>
+                <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={category?.name || ""}
+                    required
+                    class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Ej: Guacamole Tradicional"
+                />
+            </div>
+
+            <!-- Slug -->
+            <div class="mb-4">
+                <label for="slug" class="block text-sm font-medium text-gray-700 mb-1">
+                    Slug
+                </label>
+                <input
+                    type="text"
+                    id="slug"
+                    name="slug"
+                    value={category?.slug || ""}
+                    required
+                    class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Ej: guacamole-tradicional"
+                />
+                <p class="text-xs text-gray-500 mt-1">
+                    Se usa en la URL: /productos/{category?.slug || 'slug'}
+                </p>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex justify-end gap-4 mt-6">
+                <a 
+                    href="/admin/categories"
+                    class="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50 transition"
+                >
+                    Cancelar
+                </a>
+                <button 
+                    type="submit"
+                    class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                >
+                    {isNew ? "Crear Categoría" : "Guardar Cambios"}
+                </button>
+            </div>
+        </form>
+    </div>
+</Layout>
+
+<script>
+    import { actions } from "astro:actions";
+    import { navigate } from "astro:transitions/client";
+
+    document.addEventListener("astro:page-load", () => {
+        const form = document.getElementById("category-form") as HTMLFormElement;
+        const nameInput = document.getElementById("name") as HTMLInputElement;
+        const slugInput = document.getElementById("slug") as HTMLInputElement;
+
+        if (!form) return;
+
+        // Auto-generate slug from name
+        nameInput?.addEventListener("input", () => {
+            if (slugInput && !slugInput.dataset.userModified) {
+                const slug = nameInput.value
+                    .toLowerCase()
+                    .replace(/\s+/g, "-")
+                    .replace(/[^a-z0-9-]/g, "")
+                    .trim();
+                slugInput.value = slug;
+            }
+        });
+
+        // Mark slug as user-modified if they type in it
+        slugInput?.addEventListener("input", () => {
+            if (slugInput) {
+                slugInput.dataset.userModified = "true";
+            }
+        });
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const formValues = Object.fromEntries(formData.entries());
+
+            const { data, error } = await actions.createUpdateCategory(formData);
+
+            if (error) {
+                alert(`Error: ${error.message}`);
+                return;
+            }
+
+            navigate("/admin/categories");
+        });
+    });
+</script>

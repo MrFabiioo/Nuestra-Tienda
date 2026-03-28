@@ -23,6 +23,7 @@ export const createUpdateProduct= defineAction({
             price: z.number(),
             sizes: z.string(),
             slug: z.string(),
+            categoryId: z.string().optional(),
 
             //TODO: imagen
             imageFiles:z.array(

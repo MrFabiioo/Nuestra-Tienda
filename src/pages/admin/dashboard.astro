@@ -24,11 +24,16 @@ const { products, totalPages } = data;
 <Layout title={`Dashboard`}>
     <p class="text-2xl text-center mt-10 text-black-dark font-bold">Listado de productos</p>
 
-    <div class="mx-6">
+    <div class="mx-6 flex gap-4">
         <a href="/admin/products/new-product"
         id="btn-nuevo-producto"
-        class="text-black-medium  border-black-dark border-2 bg-guacamole-pulpa w-full  px-4 py-2 transition">
+        class="text-black-medium border-black-dark border-2 bg-guacamole-pulpa px-4 py-2 transition">
         NUEVO PRODUCTO</a>
+        
+        <a href="/admin/categories"
+        id="btn-ver-categorias"
+        class="text-black-medium border-black-dark border-2 bg-guacamole-verde px-4 py-2 transition">
+        VER CATEGORÍAS</a>
     </div>
     
         
@@ -129,7 +134,8 @@ const { products, totalPages } = data;
     <Pagination pageParam={pageParam} totalPages={totalPages} />
 </Layout>
 <style>
-    #btn-nuevo-producto:hover{
-        transform: scale(1.1);
+    #btn-nuevo-producto:hover,
+    #btn-ver-categorias:hover {
+        transform: scale(1.05);
     }
 </style>
