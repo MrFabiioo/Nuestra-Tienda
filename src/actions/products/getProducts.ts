@@ -1,7 +1,7 @@
 
 
 import { defineAction } from "astro:actions";
-import { count, db, Product, ProductImage, sql } from "astro:db";
+import { Category, count, db, Product, ProductImage, sql } from "astro:db";
 import { z } from "astro:schema";
 import type {ProductWithImages} from '../../interfaces/products-with-images.interface'
 
@@ -31,7 +31,8 @@ export const getProductsByPage= defineAction({
                 select a.*,
                 (select GROUP_CONCAT(image,',') from
                     (select * from ${ProductImage} where productId = a.id limit 2)
-                ) as images
+                ) as images,
+                (select name from ${Category} where id = a.categoryId) as categoryName
                 from ${Product} a
                 LIMIT ${limit} OFFSET ${(page-1)*limit};
 

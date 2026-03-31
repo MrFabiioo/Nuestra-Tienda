@@ -6,4 +6,5 @@ export interface ProductWithImages{
     sizes: string,
     slug: string, 
     images:string,
+    categoryName?: string,
 }
