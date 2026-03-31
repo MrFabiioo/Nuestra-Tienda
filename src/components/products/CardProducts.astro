@@ -341,9 +341,6 @@ const sliderId = `slider-${title.replace(/\s+/g, '-').toLowerCase()}`;
                 }
             });
             
-            // Centrar slide inicial
-            setTimeout(scrollToCenter, 100);
-            
             // Recentrar en resize
             let resizeTimeout: number;
             window.addEventListener('resize', () => {
