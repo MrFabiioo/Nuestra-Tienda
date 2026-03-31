@@ -2,81 +2,39 @@
 import Layout from "@layouts/Layout.astro";
 import CardProducts from "@components/products/CardProducts.astro";
 import SliderImageAutomatic from "@components/SliderImageAutomatic.astro";
+import { actions } from "astro:actions";
 
-// Productos de Salsas y Aderezos
-const salsasProducts = [
-    {
-        name: "Guacamole Tradicional",
-        price: 10000,
-        description: "Ricoguacamole fresco y natural",
-        image: "/images/guacamole-caricatura.png",
-        slug: "/guacamole"
-    },
-    {
-        name: "Guacamole Picante",
-        price: 12000,
-        description: "Con toque de chile habanero",
-        image: "/images/guacamole-caricatura-partida.png",
-        slug: "/guacamole"
-    },
-    {
-        name: "Guacamole Especial",
-        price: 15000,
-        description: "Receta secreta de la casa",
-        image: "/images/guacamoleIA.png",
-        slug: "/guacamole"
-    }
-];
+export const prerender = false;
 
-// Productos de Charcuteria
-const charcuteriaProducts = [
-    {
-        name: "Chorizo Artesanal",
-        price: 18000,
-        description: "Chorizo de cerdo premium",
-        image: "/images/Chorizo-de-Cerdo.png",
-        slug: "/tienda"
-    },
-    {
-        name: "Chorizo Ahumado",
-        price: 20000,
-        description: "Con sabor ahumado tradicional",
-        image: "/images/Chorizo-de-Cerdo.png",
-        slug: "/tienda"
-    },
-    {
-        name: "Chorizo Picante",
-        price: 19000,
-        description: "Para los amantes del picante",
-        image: "/images/Chorizo-de-Cerdo.png",
-        slug: "/tienda"
-    }
-];
+const { data, error } = await Astro.callAction(actions.getProductsByCategory, {});
 
-// Productos de Postres
-const postresProducts = [
-    {
-        name: "Galletas de Avena",
-        price: 8000,
-        description: "Crujientes y saludables",
-        image: "/images/galletas de avena.png",
-        slug: "/tienda"
-    },
-    {
-        name: "Galletas con Chispas",
-        price: 9000,
-        description: "Con chocolate belga",
-        image: "/images/galletas de avena.png",
-        slug: "/tienda"
-    },
-    {
-        name: "Galletas Integrales",
-        price: 9500,
-        description: "Sin azucar agregada",
-        image: "/images/galletas de avena.png",
-        slug: "/tienda"
-    }
-];
+let productsByCategory: Array<{
+    categoryName: string;
+    products: Array<{
+        name: string;
+        price: number;
+        description: string;
+        image: string;
+        slug: string;
+    }>;
+}> = [];
+
+if (error) {
+    console.error('Error loading products:', error);
+} else if (data?.productsByCategory) {
+    // Map the data to match CardProducts expected format
+    productsByCategory = data.productsByCategory.map((category: any) => ({
+        categoryName: category.categoryName,
+        products: category.products.map((product: any) => ({
+            name: product.title,
+            price: product.price,
+            description: product.description,
+            // Only add /images/ prefix if image is NOT already an absolute URL
+            image: product.image?.startsWith('http') ? product.image : `/images/${product.image}`,
+            slug: `/products/${product.slug}`
+        }))
+    }));
+}
 ---
 
 <Layout>  
@@ -85,7 +43,16 @@ const postresProducts = [
     
     <SliderImageAutomatic />
     
-    <CardProducts title="Salsas y Aderezos" products={salsasProducts} />
-    <CardProducts title="Charcuteria" products={charcuteriaProducts} />
-    <CardProducts title="Postres" products={postresProducts} />
+    {productsByCategory.length > 0 ? (
+        productsByCategory.map((category) => (
+            <CardProducts 
+                title={category.categoryName} 
+                products={category.products} 
+            />
+        ))
+    ) : (
+        <div class="text-center py-10">
+            <p class="text-xl text-gray-600">No hay productos disponibles en este momento.</p>
+        </div>
+    )}
 </Layout>
