@@ -115,9 +115,11 @@ const sliderId = `slider-${title.replace(/\s+/g, '-').toLowerCase()}`;
     }
 
     .products-grid {
-        grid-template-columns: repeat(3, 1fr);
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 1.5rem;
         justify-items: center;
+        justify-content: center;
     }
 
     .grid-item {
