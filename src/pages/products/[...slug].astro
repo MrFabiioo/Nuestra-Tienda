@@ -19,160 +19,204 @@ const {product, images} = data;
 ---
 
 <Layout title={product.title} description={product.description}>
-    <div
-        class="mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-8 items-center font-unique"
-    >
-        <!-- Imagen del producto -->
-        <div class="relative">
-            <ProductSliceShow images={images.map(i=>i.image)}/>
-                <input type="hidden" name="" id="product-image" value={images?.[0]?.image || ''}/>
-        </div>
+    <div class="max-w-6xl mx-auto px-4 py-8 md:py-12">
+        <!-- Main Product Card -->
+        <div class="bg-white/60 backdrop-blur-xl rounded-3xl shadow-[0_4px_40px_-8px_rgba(0,0,0,0.15)] border border-white/40 overflow-hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2">
+                
+                <!-- Product Image Section -->
+                <div class="relative bg-gradient-to-br from-guacamole-f/30 to-white p-6 md:p-8 flex items-center justify-center">
+                    <div class="relative rounded-2xl overflow-hidden shadow-lg bg-white/80 backdrop-blur-sm p-2">
+                        <ProductSliceShow images={images.map(i=>i.image)}/>
+                        <input type="hidden" name="" id="product-image" value={images?.[0]?.image || ''}/>
+                    </div>
+                    <!-- Decorative badge -->
+                    <span class="absolute top-4 left-4 bg-guacamole-b text-white text-xs tracking-[0.15em] font-semibold px-3 py-1 rounded-full shadow-md">
+                        ARTESANAL
+                    </span>
+                </div>
 
-        <!-- Detalles del producto -->
-        <div class="flex flex-col gap-4">
-            <div class="flex gap-2">
-                <h1 class="text-4xl text-guacamole-a font-extrabold uppercase">
-                    {product.title}
-                    <input type="hidden" name="product-name" id="product-name" value={product.title}/>
-                </h1>
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="text-lg text-guacamole-pulpa font-semibold"
-                    >★★★★★</span
-                >
-                <span class="text-sm text-black uppercase"
-                    >2,500+ reseñas verificadas</span
-                >
-            </div>
-            <p class="text-lg text-black uppercase">
-                {product.description}
-            </p>
-            <div class="flex items-center gap-4">
-                <span class="text-xl font-bold text-black">{product.price}</span>
-                <input type="hidden" name="product-price" id="product-price" value={product.price}/>
-                <span class="text-sm text-guacamole-icons line-through"
-                    >$10.000</span
-                >
-            </div>
+                <!-- Product Details Section -->
+                <div class="p-6 md:p-8 md:py-10 flex flex-col gap-5">
+                    <!-- Title & Rating -->
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2">
+                            <h1 class="text-2xl md:text-3xl lg:text-4xl text-guacamole-a font-extrabold uppercase tracking-tight leading-tight">
+                                {product.title}
+                            </h1>
+                            <input type="hidden" name="product-name" id="product-name" value={product.title}/>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg text-guacamole-pulpa font-semibold">★★★★★</span>
+                            <span class="text-sm text-gray-500 uppercase font-medium">2,500+ reseñas verificadas</span>
+                        </div>
+                    </div>
 
-            <h3>Cantidad</h3>
-            <div>
-                <button id="decrement" class="btn-quantity">-</button>
-                <input id="quantity-input" class="w-[45px] text-center" type="number" value="1" />
-                <button id="increment" class="btn-quantity">+</button>
+                    <!-- Price -->
+                    <div class="flex items-baseline gap-3">
+                        <span class="text-2xl md:text-3xl font-bold text-gray-900">${product.price}</span>
+                        <input type="hidden" name="product-price" id="product-price" value={product.price}/>
+                        <span class="text-base text-gray-400 line-through">$10.000</span>
+                        <span class="text-xs bg-guacamole-f/50 text-guacamole-h font-semibold px-2 py-0.5 rounded-full">-20%</span>
+                    </div>
+
+                    <!-- Description -->
+                    <p class="text-gray-600 leading-relaxed text-sm md:text-base">
+                        {product.description}
+                    </p>
+
+                    <hr class="border-gray-200"/>
+
+                    <!-- Quantity Selector -->
+                    <div class="space-y-2">
+                        <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Cantidad</h3>
+                        <div class="flex items-center gap-3">
+                            <button id="decrement" class="qty-btn-group" aria-label="Disminuir cantidad">−</button>
+                            <input id="quantity-input" class="qty-input" type="number" value="1" readonly/>
+                            <button id="increment" class="qty-btn-group" aria-label="Aumentar cantidad">+</button>
+                            <span class="text-xs text-gray-400 ml-2">(máx. 5 unidades)</span>
+                        </div>
+                    </div>
+
+                    <!-- Size Options -->
+                    <div class="space-y-2">
+                        <h3 id="h3-g" class="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                            Tamaño:
+                        </h3>
+                        <ul class="flex flex-wrap gap-2">
+                            {
+                                product.sizes.split(',').map((t) => (
+                                    <li class="size-chip" data-size="">
+                                        {t.trim()}
+                                    </li>
+                                ))
+                            }
+                        </ul>
+                    </div>
+
+                    <!-- Add to Cart Button -->
+                    <div class="pt-2">
+                        <button id="add-card" class="add-to-cart-btn">
+                            <span>Agregar al Carrito</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 8a2 2 0 100-4 2 2 0 000 4z" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Guarantees -->
+                    <div class="flex flex-wrap gap-x-6 gap-y-2 text-xs text-gray-500 pt-2">
+                        <p class="flex items-center gap-1.5">
+                            <span class="text-guacamole-b">✓</span> Envío gratis &gt;$50
+                        </p>
+                        <p class="flex items-center gap-1.5">
+                            <span class="text-guacamole-b">✓</span> Garantía 30 días
+                        </p>
+                        <p class="flex items-center gap-1.5">
+                            <span class="text-guacamole-b">✓</span> Entrega en 24-48h
+                        </p>
+                    </div>
+                </div>
             </div>
-
-            <!-- Opciones de tamaño -->
-            <div>
-                <h3 id="h3-g" class="text-lg font-semibold text-amber-950">
-                    Tamaño:
-                </h3>
-                <ul class="flex gap-3">
-                    {
-                        product.sizes.split(',').map((t) => (
-                            <li class="cursor-pointer" data-size="">
-                                {t}
-                            </li>
-                        ))
-                    }
-                </ul>
-            </div>
-
-            <!-- Botón de compra -->
-            <button id="add-card" class="bg-guacamole-pulpa">agregar al carrito</button>
-
-            <!-- Garantías -->
-            <div class="text-sm text-black mt-4 uppercase">
-                <p>✔ Envío gratis en pedidos mayores a $50.</p>
-                <p>✔ Garantía de devolución de 30 días.</p>
-            </div>
-
-            <!-- Enlace a más detalles -->
         </div>
         
+        <input id="product-id" type="hidden" value={product.id}/>
     </div>
-    <input id="product-id" type="hidden" value={product.id}/>
 </Layout>
 
 <style>
+    /* Size selection - preserves original logic */
     .selected-size {
-        @apply text-amber-950 underline font-bold transition-all;
+        @apply bg-guacamole-b text-white shadow-md scale-105;
     }
 
-    input{
-        @apply bg-guacamole-f
+    .size-chip {
+        @apply px-4 py-2 rounded-full border-2 border-guacamole-b/30 text-guacamole-b font-semibold cursor-pointer transition-all duration-200 hover:border-guacamole-b hover:bg-guacamole-b/10;
     }
 
+    /* Quantity buttons - pill style */
+    .qty-btn-group {
+        @apply w-10 h-10 rounded-full border-2 border-guacamole-b text-guacamole-b font-bold text-xl flex items-center justify-center transition-all duration-200 hover:bg-guacamole-b hover:text-white hover:scale-105 active:scale-95;
+    }
+
+    .qty-input {
+        @apply w-16 h-10 text-center bg-white border-2 border-gray-200 rounded-full font-semibold text-gray-700 focus:outline-none focus:border-guacamole-b;
+    }
+
+    /* Remove spinners from number input */
     input[type="number"]::-webkit-outer-spin-button,
     input[type="number"]::-webkit-inner-spin-button {
         -webkit-appearance: none;
         margin: 0;
-        
+    }
+
+    /* Add to cart button - matches ProductCard styling */
+    .add-to-cart-btn {
+        @apply w-full py-4 bg-guacamole-pulpa text-white font-bold text-base tracking-wider uppercase rounded-full shadow-[0_4px_12px_rgba(220,211,41,0.4)] transition-all duration-300 hover:bg-guacamole-f hover:shadow-[0_6px_20px_rgba(220,211,41,0.5)] hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2;
     }
 </style>
 
 <script>
-import { navigate } from "astro:transitions/client";
-import { cartItems } from "src/store/cart.store";
-import { CartCookiesClient } from "src/utils/cart-cookies";
+    import { navigate } from "astro:transitions/client";
+    import { cartItems } from "src/store/cart.store";
+    import { CartCookiesClient } from "src/utils/cart-cookies";
 
-document.addEventListener('astro:page-load',()=>{
+    document.addEventListener('astro:page-load',()=>{
 
-    const sizeElments = document.querySelectorAll("li");
-    sizeElments.forEach((liElement) => {
-        liElement.addEventListener("click", () => {
-            sizeElments.forEach((s) => s.classList.remove("selected-size"));
-            liElement.classList.add("selected-size");
+        // Size selection - PRESERVED original toggle logic
+        const sizeElments = document.querySelectorAll("li");
+        sizeElments.forEach((liElement) => {
+            liElement.addEventListener("click", () => {
+                sizeElments.forEach((s) => s.classList.remove("selected-size"));
+                liElement.classList.add("selected-size");
+            });
         });
-    });
 
-    const quantityInput = document.querySelector('#quantity-input') as HTMLInputElement;
-    const producIdInput = document.querySelector('#product-id') as HTMLInputElement;
-    let quantity = 1;
+        // Quantity management - PRESERVED min=1, max=5 logic
+        const quantityInput = document.querySelector('#quantity-input') as HTMLInputElement;
+        const producIdInput = document.querySelector('#product-id') as HTMLInputElement;
+        let quantity = 1;
 
-    const incrementButton = document.querySelector('#increment') as HTMLButtonElement;
-    const decrementButton = document.querySelector('#decrement') as HTMLButtonElement;
-    const addToCardButton = document.querySelector('#add-card') as HTMLButtonElement;
+        const incrementButton = document.querySelector('#increment') as HTMLButtonElement;
+        const decrementButton = document.querySelector('#decrement') as HTMLButtonElement;
+        const addToCardButton = document.querySelector('#add-card') as HTMLButtonElement;
 
-    const productImageInput = document.querySelector('#product-image') as HTMLInputElement;
+        const productImageInput = document.querySelector('#product-image') as HTMLInputElement;
 
-    //console.log('productImageInput: ',productImageInput)
-    //console.log({ incrementButton, decrementButton, addToCardButton });
-    if(!incrementButton || !quantityInput) return;
-    incrementButton.addEventListener('click',()=>{
-       //console.log("click +");
-        quantity = Math.min(quantity+1,5);
-        quantityInput.value= quantity.toString();
-    });
-    decrementButton.addEventListener('click',()=>{
-       // console.log("click -");
-        quantity = Math.max(quantity-1,1);
-        quantityInput.value= quantity.toString();
-    });
+        if(!incrementButton || !quantityInput) return;
+        
+        // Increment - PRESERVED max=5 logic
+        incrementButton.addEventListener('click',()=>{
+            quantity = Math.min(quantity+1,5);
+            quantityInput.value= quantity.toString();
+        });
+        
+        // Decrement - PRESERVED min=1 logic
+        decrementButton.addEventListener('click',()=>{
+            quantity = Math.max(quantity-1,1);
+            quantityInput.value= quantity.toString();
+        });
 
-    addToCardButton.addEventListener('click',async()=>{
-        const size = document.querySelector('.selected-size')?.textContent;
-        if (!size) {
-            return alert('seleccione un tamaño')
-        }
+        // Add to cart - PRESERVED CartCookiesClient.addItem() logic
+        addToCardButton.addEventListener('click',async()=>{
+            const size = document.querySelector('.selected-size')?.textContent;
+            if (!size) {
+                return alert('seleccione un tamaño')
+            }
 
-        //addToCardButton.disabled = true;
+           const cart = CartCookiesClient.addItem({
+                productId:producIdInput.value,
+                size:size,
+                quantity:quantity,
+                name:(document.querySelector('#product-name') as HTMLInputElement).value,
+                price:parseFloat((document.querySelector('#product-price') as HTMLInputElement).value),
+                image:productImageInput.value,
+            })
 
-       const cart = CartCookiesClient.addItem({
-            productId:producIdInput.value,
-            size:size,
-            quantity:quantity,
-            name:(document.querySelector('#product-name') as HTMLInputElement).value,
-            price:parseFloat((document.querySelector('#product-price') as HTMLInputElement).value),
-            image:productImageInput.value,
+            cartItems.set(cart);
+
+           // PRESERVED navigation to /checkout
+           await navigate('/checkout')
         })
-
-        cartItems.set(cart)
-
-       // window.location.href='/cart';
-       await navigate('/checkout')
     })
-})
-    
-
 </script>

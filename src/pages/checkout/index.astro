@@ -87,7 +87,7 @@ const isEmpty = products.length === 0;
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <!-- Products Column -->
+          <!-- Main Content Column -->
           <div class="lg:col-span-2 space-y-6">
             <!-- Back button -->
             <a 
@@ -100,10 +100,158 @@ const isEmpty = products.length === 0;
               <span class="font-semibold">Continuar comprando</span>
             </a>
 
-            <!-- Products Card -->
+            <!-- Customer Form -->
             <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
               <div class="bg-guacamole-b px-6 py-4">
                 <h2 class="text-xl font-black text-white uppercase tracking-wide">
+                  Datos del Cliente
+                </h2>
+              </div>
+              
+              <form id="customer-form" class="p-6 space-y-6">
+                <!-- Section: Contact Information -->
+                <div class="space-y-4">
+                  <div class="border-b border-gray-100 pb-2">
+                    <h3 class="text-lg font-bold text-guacamole-icons">Información de contacto</h3>
+                    <p class="text-sm text-gray-500">¿Cómo te contactaremos?</p>
+                  </div>
+                  
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Nombre completo -->
+                    <div>
+                      <label for="fullName" class="block text-sm font-semibold text-guacamole-icons mb-2">
+                        Nombre completo <span class="text-red-500">*</span>
+                      </label>
+                      <input 
+                        type="text" 
+                        id="fullName" 
+                        name="fullName" 
+                        required
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-guacamole-b focus:ring-2 focus:ring-guacamole-b/20 outline-none transition-all text-guacamole-icons"
+                        placeholder="Juan Pérez"
+                      />
+                    </div>
+                    
+                    <!-- Teléfono -->
+                    <div>
+                      <label for="phone" class="block text-sm font-semibold text-guacamole-icons mb-2">
+                        Teléfono <span class="text-red-500">*</span>
+                      </label>
+                      <input 
+                        type="tel" 
+                        id="phone" 
+                        name="phone" 
+                        required
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-guacamole-b focus:ring-2 focus:ring-guacamole-b/20 outline-none transition-all text-guacamole-icons"
+                        placeholder="+58 412 123 4567"
+                      />
+                    </div>
+                  </div>
+                  
+                  <!-- Correo electrónico -->
+                  <div>
+                    <label for="email" class="block text-sm font-semibold text-guacamole-icons mb-2">
+                      Correo electrónico <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                      type="email" 
+                      id="email" 
+                      name="email" 
+                      required
+                      class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-guacamole-b focus:ring-2 focus:ring-guacamole-b/20 outline-none transition-all text-guacamole-icons"
+                      placeholder="juan@email.com"
+                    />
+                  </div>
+                </div>
+                
+                <!-- Section: Delivery Information -->
+                <div class="space-y-4 pt-4">
+                  <div class="border-b border-gray-100 pb-2">
+                    <h3 class="text-lg font-bold text-guacamole-icons">Dirección de entrega</h3>
+                    <p class="text-sm text-gray-500">¿A dónde entregamos tu pedido?</p>
+                  </div>
+                  
+                  <!-- Método de entrega -->
+                  <div>
+                    <label class="block text-sm font-semibold text-guacamole-icons mb-3">
+                      Método de entrega <span class="text-red-500">*</span>
+                    </label>
+                    <div class="flex flex-wrap gap-4">
+                      <label class="flex items-center gap-3 cursor-pointer">
+                        <input 
+                          type="radio" 
+                          name="deliveryMethod" 
+                          value="domicilio" 
+                          checked
+                          class="w-5 h-5 text-guacamole-b focus:ring-guacamole-b"
+                        />
+                        <span class="text-guacamole-icons font-medium">Domicilio</span>
+                      </label>
+                      <label class="flex items-center gap-3 cursor-pointer">
+                        <input 
+                          type="radio" 
+                          name="deliveryMethod" 
+                          value="recoger"
+                          class="w-5 h-5 text-guacamole-b focus:ring-guacamole-b"
+                        />
+                        <span class="text-guacamole-icons font-medium">Recoger en tienda</span>
+                      </label>
+                    </div>
+                  </div>
+                  
+                  <!-- Dirección -->
+                  <div>
+                    <label for="address" class="block text-sm font-semibold text-guacamole-icons mb-2">
+                      Dirección de entrega <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                      type="text" 
+                      id="address" 
+                      name="address" 
+                      required
+                      class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-guacamole-b focus:ring-2 focus:ring-guacamole-b/20 outline-none transition-all text-guacamole-icons"
+                      placeholder="Av. Principal, Calle 5, Edif. Miramar, Piso 3, Apto. 3B"
+                    />
+                  </div>
+                  
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Ciudad / Sector -->
+                    <div>
+                      <label for="city" class="block text-sm font-semibold text-guacamole-icons mb-2">
+                        Ciudad / Sector <span class="text-red-500">*</span>
+                      </label>
+                      <input 
+                        type="text" 
+                        id="city" 
+                        name="city" 
+                        required
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-guacamole-b focus:ring-2 focus:ring-guacamole-b/20 outline-none transition-all text-guacamole-icons"
+                        placeholder="Caracas, El Hatillo"
+                      />
+                    </div>
+                    
+                    <!-- Referencias / Notas -->
+                    <div>
+                      <label for="notes" class="block text-sm font-semibold text-guacamole-icons mb-2">
+                        Referencias / Notas <span class="text-gray-400">(opcional)</span>
+                      </label>
+                      <input 
+                        type="text" 
+                        id="notes" 
+                        name="notes"
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-guacamole-b focus:ring-2 focus:ring-guacamole-b/20 outline-none transition-all text-guacamole-icons"
+                        placeholder="Portón verde, llamar al llegar"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <!-- Products Card -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+              <div class="bg-guacamole-f px-6 py-4">
+                <h2 class="text-xl font-black text-black uppercase tracking-wide">
                   Productos ({products.length})
                 </h2>
               </div>
@@ -131,7 +279,7 @@ const isEmpty = products.length === 0;
                             {product.title}
                           </a>
                           <div class="flex items-center gap-3 mt-1 text-sm text-gray-500">
-                            <span class="bg-guacamole-fondo/20 px-2 py-1 rounded font-semibold text-guacamole-icons">
+                            <span class="bg-guacamole-fondo/20 px-2 py-1 rounded-xl font-semibold text-guacamole-icons">
                               {product.sizes}
                             </span>
                             <span>Cantidad: <strong>{product.quantity}</strong></span>
@@ -223,10 +371,10 @@ const isEmpty = products.length === 0;
                 <!-- Pay Button -->
                 <a
                   href="/pagos"
-                  class="group relative focus:ring-3 focus:outline-hidden w-full"
+                  id="proceed-to-payment"
+                  class="group block w-full bg-guacamole-pulpa text-white text-center font-bold text-sm py-4 px-8 tracking-wider uppercase rounded-full shadow-[0_4px_12px_rgba(86,130,3,0.3)] hover:bg-guacamole-f hover:shadow-[0_6px_20px_rgba(86,130,3,0.4)] hover:-translate-y-0.5 transition-all duration-300"
                 >
-                  <span class="absolute inset-0 translate-x-1.5 translate-y-1.5 bg-guacamole-icons transition-transform group-hover:translate-x-0 group-hover:translate-y-0 rounded-lg"></span>
-                  <span class="relative w-full inline-flex items-center justify-center gap-2 border-2 border-current px-8 py-4 text-sm font-bold tracking-widest text-white uppercase text-center rounded-lg">
+                  <span class="flex items-center justify-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                     </svg>
@@ -262,9 +410,38 @@ const isEmpty = products.length === 0;
 <script>
 import { CartCookiesClient } from "@utils/cart-cookies";
 import { navigate } from "astro:transitions/client";
-import { cartItems } from "src/store/cart.store";
 
 document.addEventListener('astro:page-load',()=>{
+  // Restore customer data from sessionStorage on page load
+  const savedCustomerData = sessionStorage.getItem('guacamole-customer-data');
+  if (savedCustomerData) {
+    try {
+      const data = JSON.parse(savedCustomerData);
+      const form = document.getElementById('customer-form') as HTMLFormElement;
+      if (form) {
+        (form.elements.namedItem('fullName') as HTMLInputElement).value = data.fullName || '';
+        (form.elements.namedItem('phone') as HTMLInputElement).value = data.phone || '';
+        (form.elements.namedItem('email') as HTMLInputElement).value = data.email || '';
+        (form.elements.namedItem('address') as HTMLInputElement).value = data.address || '';
+        (form.elements.namedItem('city') as HTMLInputElement).value = data.city || '';
+        (form.elements.namedItem('notes') as HTMLInputElement).value = data.notes || '';
+        const deliveryMethods = form.elements.namedItem('deliveryMethod') as RadioNodeList;
+        if (deliveryMethods) {
+          for (let i = 0; i < deliveryMethods.length; i++) {
+            const radio = deliveryMethods[i] as HTMLInputElement;
+            if (radio.value === data.deliveryMethod) {
+              radio.checked = true;
+              break;
+            }
+          }
+        }
+      }
+    } catch (e) {
+      // Ignore parse errors
+    }
+  }
+
+  // Handle delete buttons
   const deleteButtons = document.querySelectorAll('.btn-delete');
   deleteButtons.forEach(button => {
     button.addEventListener('click',(event)=>{
@@ -272,10 +449,40 @@ document.addEventListener('astro:page-load',()=>{
       const productId = target.dataset.id ?? "";
       const size= target.dataset.size ?? "";
       const cart =CartCookiesClient.removeItem(productId, size)
-      cartItems.set(cart);
       
       navigate('/checkout')
     })
   })
+
+  // Handle proceed to payment button with customer data persistence
+  const proceedButton = document.getElementById('proceed-to-payment');
+  if (proceedButton) {
+    proceedButton.addEventListener('click', (e) => {
+      const form = document.getElementById('customer-form') as HTMLFormElement;
+      if (!form) return;
+      
+      // Check form validity
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      
+      // Save customer data to sessionStorage before navigating
+      const formData = new FormData(form);
+      const customerData = {
+        fullName: formData.get('fullName'),
+        phone: formData.get('phone'),
+        email: formData.get('email'),
+        address: formData.get('address'),
+        city: formData.get('city'),
+        notes: formData.get('notes'),
+        deliveryMethod: formData.get('deliveryMethod')
+      };
+      sessionStorage.setItem('guacamole-customer-data', JSON.stringify(customerData));
+      
+      // Navigate to payment page
+      navigate('/pagos');
+    });
+  }
 });
 </script>

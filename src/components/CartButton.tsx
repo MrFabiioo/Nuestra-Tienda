@@ -14,6 +14,21 @@ export default function CartButton() {
   const [isOpen, setIsOpen] = useState(false);
   const cartRef = useRef<HTMLDivElement>(null);
 
+  // Close cart on route change and page refresh
+  useEffect(() => {
+    const closeCart = () => setIsOpen(false);
+    
+    // Close on initial page load (component mounts)
+    closeCart();
+    
+    // Listen for Astro's navigation events
+    document.addEventListener('astro:page-load', closeCart);
+    
+    return () => {
+      document.removeEventListener('astro:page-load', closeCart);
+    };
+  }, []);
+
   // Sync cart from cookies on mount
   useEffect(() => {
     const initialCart = CartCookiesClient.getCart();
@@ -68,10 +83,10 @@ export default function CartButton() {
       {isOpen && (
         <div
           ref={cartRef}
-          class="absolute top-full right-2 mt-2 w-80 max-h-[70vh] bg-white border-2 border-guacamole-b rounded-2xl shadow-xl z-50 flex flex-col overflow-hidden"
+          class="absolute top-full right-2 mt-2 w-80 max-h-[70vh] bg-white border-2 border-guacamole-b rounded-2xl shadow-xl z-50 flex flex-col overflow-visible"
         >
           {/* Header */}
-          <div class="flex items-center justify-between p-4 bg-guacamole-a text-white">
+          <div class="flex items-center justify-between p-4 bg-guacamole-a text-white rounded-t-[inherit]">
             <div class="flex items-center gap-2">
               <Cart />
               <h2 class="font-extrabold text-lg uppercase">Tu carrito</h2>
@@ -145,7 +160,7 @@ export default function CartButton() {
           {/* Footer with totals and actions */}
           {$cartItems.length > 0 && (
             <>
-              {/* Cart Total */}
+              {/* Cart Total + Actions Row */}
               <div class="border-t border-gray-200 p-4 bg-gray-50">
                 <div class="flex justify-between items-center mb-3">
                   <span class="text-sm text-gray-600 uppercase">Total</span>
@@ -154,13 +169,22 @@ export default function CartButton() {
                   </span>
                 </div>
 
-                {/* Clear Cart Button */}
-                <button
-                  onClick={handleClearCart}
-                  class="text-xs text-red-500 hover:text-red-700 underline mb-3 transition-colors"
-                >
-                  Vaciar carrito
-                </button>
+                {/* Action Row */}
+                <div class="flex items-center justify-between gap-3">
+                  <button
+                    onClick={handleClearCart}
+                    class="text-xs text-red-500 hover:text-red-700 underline transition-colors"
+                  >
+                    Vaciar carrito
+                  </button>
+
+                  <a
+                    href="/checkout"
+                    class="flex-1 bg-guacamole-pulpa text-white text-center font-bold text-sm py-2.5 px-4 tracking-wider uppercase rounded-full shadow-[0_4px_12px_rgba(86,130,3,0.3)] hover:bg-guacamole-f hover:shadow-[0_6px_20px_rgba(86,130,3,0.4)] hover:-translate-y-0.5 transition-all duration-300"
+                  >
+                    Ir a pagar
+                  </a>
+                </div>
               </div>
 
               {/* Guarantees */}
@@ -172,17 +196,6 @@ export default function CartButton() {
                   ✔ Garantía de devolución de 30 días
                 </p>
               </div>
-
-              {/* Checkout Button */}
-              <a
-                class="group relative focus:ring-3 focus:outline-hidden"
-                href="/checkout"
-              >
-                <span class="absolute inset-0 translate-x-1.5 translate-y-1.5 bg-guacamole-f transition-transform group-hover:translate-x-0 group-hover:translate-y-0"></span>
-                <span class="relative w-full inline-block border-2 border-current px-8 py-3 text-sm font-bold tracking-widest text-black uppercase text-center">
-                  Ir a pagar
-                </span>
-              </a>
             </>
           )}
         </div>
