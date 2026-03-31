@@ -27,7 +27,7 @@ const stars = "★".repeat(rating) + "☆".repeat(5 - rating);
 ---
 
 <div 
-  class="product-card group relative w-full max-w-[280px] mx-auto bg-white/60 backdrop-blur-xl border-4 rounded-3xl overflow-hidden shadow-[0_4px_40px_-8px_rgba(0,0,0,0.15)] transition-all duration-500 hover:shadow-[0_8px_60px_-4px_rgba(0,0,0,0.25)] hover:-translate-y-1 hover:scale-[1.015] cursor-pointer"
+  class="product-card group relative w-full max-w-[280px] mx-auto bg-white/60 backdrop-blur-xl border-4 rounded-3xl shadow-[0_4px_40px_-8px_rgba(0,0,0,0.15)] transition-all duration-500 hover:shadow-[0_8px_60px_-4px_rgba(0,0,0,0.25)] hover:-translate-y-1 hover:scale-[1.015] cursor-pointer"
   style={{ borderColor }}
 >
   <a href={slug}>
@@ -52,7 +52,7 @@ const stars = "★".repeat(rating) + "☆".repeat(5 - rating);
         href={slug}
         class="absolute bottom-0 left-0 right-0 bg-guacamole-pulpa text-white text-center font-bold text-sm py-3 tracking-wider uppercase opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-guacamole-f hover:scale-[1.02]"
       >
-        Comprar Ahora
+        Ver producto
       </a>
     </div>
   
@@ -80,16 +80,18 @@ const stars = "★".repeat(rating) + "☆".repeat(5 - rating);
     <div class="absolute inset-0 pointer-events-none rounded-3xl border border-white/20"></div>
   </a>
   
-  <!-- Botón Agregar al carrito (siempre visible en la parte inferior) -->
-  <button 
-    class="add-to-cart-btn w-full bg-guacamole-pulpa text-white text-center font-bold text-sm py-3 tracking-wider uppercase hover:bg-guacamole-f transition-all duration-300"
-    data-product-id={id}
-    data-product-name={name}
-    data-product-price={price}
-    data-product-image={image}
-  >
-    Agregar
-  </button>
+  <!-- Botón Agregar al carrito (semicircular, sobresale por el borde inferior) -->
+  <div class="add-to-cart-wrapper">
+    <button 
+      class="add-to-cart-btn bg-guacamole-pulpa text-white text-center font-bold text-sm py-3 tracking-wider uppercase hover:bg-guacamole-f transition-all duration-300"
+      data-product-id={id}
+      data-product-name={name}
+      data-product-price={price}
+      data-product-image={image}
+    >
+      Agregar
+    </button>
+  </div>
 </div>
 
 <input type="hidden" id="product-sizes-{id}" value="chico,mediano,grande" />
@@ -175,6 +177,31 @@ const stars = "★".repeat(rating) + "☆".repeat(5 - rating);
     border: none;
     cursor: pointer;
     flex-shrink: 0;
+  }
+
+  /* Wrapper para posicionar el botón semicircular */
+  .add-to-cart-wrapper {
+    position: absolute;
+    bottom: -1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    width: 70%;
+    max-width: 160px;
+  }
+
+  /* Botón semicircular */
+  .add-to-cart-btn {
+    width: 100%;
+    border-radius: 9999px;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    box-shadow: 0 4px 12px rgba(86, 130, 3, 0.3);
+  }
+
+  .add-to-cart-btn:hover {
+    box-shadow: 0 6px 20px rgba(86, 130, 3, 0.4);
+    transform: translateY(-1px);
   }
 
   .add-to-cart-btn:active {
