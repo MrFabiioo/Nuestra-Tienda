@@ -106,20 +106,12 @@ const sliderId = `slider-${title.replace(/\s+/g, '-').toLowerCase()}`;
         display: none;
     }
 
-    /* Carousel Container - defined BEFORE media query to avoid override */
+    /* Carousel Container - visible by default on mobile */
     .carousel-container {
         position: relative;
         display: flex;
         align-items: center;
         width: 100%;
-    }
-
-    .products-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 1.5rem;
-        justify-items: center;
-        justify-content: center;
     }
 
     .grid-item {
@@ -131,6 +123,10 @@ const sliderId = `slider-${title.replace(/\s+/g, '-').toLowerCase()}`;
     @media (min-width: 1200px) {
         .products-grid {
             display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            justify-items: center;
+            justify-content: center;
         }
         .carousel-container {
             display: none;
