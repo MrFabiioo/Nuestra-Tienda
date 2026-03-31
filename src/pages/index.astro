@@ -29,8 +29,9 @@ if (error) {
             name: product.title,
             price: product.price,
             description: product.description,
-            // Only add /images/ prefix if image is NOT already an absolute URL
-            image: product.image?.startsWith('http') ? product.image : `/images/${product.image}`,
+            // Use the image URL as-is from DB (Cloudinary full URL or /images/no-image.png fallback)
+            // The action already handles the fallback correctly
+            image: product.image,
             slug: `/products/${product.slug}`
         }))
     }));
