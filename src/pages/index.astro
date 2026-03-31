@@ -26,6 +26,7 @@ if (error) {
     productsByCategory = data.productsByCategory.map((category: any) => ({
         categoryName: category.categoryName,
         products: category.products.map((product: any) => ({
+            id: product.id,
             name: product.title,
             price: product.price,
             description: product.description,

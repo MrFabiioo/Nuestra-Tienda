@@ -1,5 +1,6 @@
 ---
 interface Props {
+  id: string;
   name: string;
   price: number;
   description: string;
@@ -11,6 +12,7 @@ interface Props {
 }
 
 const {
+  id,
   name,
   price,
   description,
@@ -25,12 +27,12 @@ const stars = "★".repeat(rating) + "☆".repeat(5 - rating);
 ---
 
 <div 
-  class="group relative w-full max-w-[280px] mx-auto bg-white/60 backdrop-blur-xl border-4 rounded-3xl overflow-hidden shadow-[0_4px_40px_-8px_rgba(0,0,0,0.15)] transition-all duration-500 hover:shadow-[0_8px_60px_-4px_rgba(0,0,0,0.25)] hover:-translate-y-1 hover:scale-[1.015] cursor-pointer"
+  class="product-card group relative w-full max-w-[280px] mx-auto bg-white/60 backdrop-blur-xl border-4 rounded-3xl overflow-hidden shadow-[0_4px_40px_-8px_rgba(0,0,0,0.15)] transition-all duration-500 hover:shadow-[0_8px_60px_-4px_rgba(0,0,0,0.25)] hover:-translate-y-1 hover:scale-[1.015] cursor-pointer"
   style={{ borderColor }}
 >
   <a href={slug}>
-    <!-- Imagen -->
-    <div class="relative aspect-[1/0.68] overflow-hidden">
+    <!-- Imagen con proporción dorada (φ ≈ 1.618) -->
+    <div class="card-image relative aspect-[1/0.618] overflow-hidden">
       <img
         src={image}
         alt={name}
@@ -45,7 +47,7 @@ const stars = "★".repeat(rating) + "☆".repeat(5 - rating);
         ${price.toLocaleString()}
       </span>
 
-      <!-- Boton Comprar -->
+      <!-- Boton Comprar (hover) -->
       <a 
         href={slug}
         class="absolute bottom-0 left-0 right-0 bg-guacamole-pulpa text-white text-center font-bold text-sm py-3 tracking-wider uppercase opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-guacamole-f hover:scale-[1.02]"
@@ -54,17 +56,17 @@ const stars = "★".repeat(rating) + "☆".repeat(5 - rating);
       </a>
     </div>
   
-    <!-- Contenido -->
-    <div class="px-5 py-6 flex flex-col gap-2.5">
-      <div class="flex items-center justify-between">
-        <h3 class="text-lg font-semibold tracking-tight text-neutral-900">
+    <!-- Contenido con altura consistente -->
+    <div class="card-content px-5 py-6 flex flex-col gap-2.5 min-h-[140px]">
+      <div class="flex items-center justify-between gap-2">
+        <h3 class="text-lg font-semibold tracking-tight text-neutral-900 line-clamp-1">
           {name}
         </h3>
-        <span class="text-lg text-guacamole-pulpa font-semibold">
+        <span class="text-lg text-guacamole-pulpa font-semibold shrink-0">
           {stars}
         </span>
       </div>
-      <p class="text-sm text-neutral-600 leading-relaxed line-clamp-3">
+      <p class="text-sm text-neutral-600 leading-relaxed line-clamp-3 mt-auto">
         {description}
       </p>
     </div>
@@ -73,8 +75,119 @@ const stars = "★".repeat(rating) + "☆".repeat(5 - rating);
     <span class="absolute top-6 right-[-42px] rotate-45 bg-black text-guacamole-pulpa text-[10px] tracking-[0.2em] font-mono px-10 py-1 shadow-[2px_2px_0px_rgba(0,0,0,0.7)] text-center">
       {tag}
     </span>
-  
+    
     <!-- Detalle visual sutil -->
     <div class="absolute inset-0 pointer-events-none rounded-3xl border border-white/20"></div>
   </a>
+  
+  <!-- Botón Agregar al carrito (siempre visible en la parte inferior) -->
+  <button 
+    class="add-to-cart-btn w-full bg-guacamole-pulpa text-white text-center font-bold text-sm py-3 tracking-wider uppercase hover:bg-guacamole-f transition-all duration-300"
+    data-product-id={id}
+    data-product-name={name}
+    data-product-price={price}
+    data-product-image={image}
+  >
+    Agregar
+  </button>
 </div>
+
+<input type="hidden" id="product-sizes-{id}" value="chico,mediano,grande" />
+
+<script>
+  import { navigate } from "astro:transitions/client";
+  import { itemsIncart } from "src/store/cart.store";
+  import { CartCookiesClient } from "src/utils/cart-cookies";
+
+  document.addEventListener('astro:page-load', initAddToCartButtons);
+  document.addEventListener('astro:beforematch', initAddToCartButtons);
+
+  function initAddToCartButtons() {
+    const buttons = document.querySelectorAll('.add-to-cart-btn');
+    
+    buttons.forEach((button) => {
+      button.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const btn = button as HTMLButtonElement;
+        const productId = btn.dataset.productId;
+        const productName = btn.dataset.productName;
+        const productPrice = parseFloat(btn.dataset.productPrice || '0');
+        const productImage = btn.dataset.productImage;
+        
+        if (!productId) return;
+        
+        // Get sizes from hidden input (default to "chico,mediano,grande" if not found)
+        const sizesInput = document.querySelector(`#product-sizes-${productId}`) as HTMLInputElement;
+        const sizes = sizesInput?.value?.split(',') || ['chico', 'mediano', 'grande'];
+        
+        // Use first available size
+        const selectedSize = sizes[0];
+        
+        const cart = CartCookiesClient.addItem({
+          productId: productId,
+          size: selectedSize,
+          quantity: 1,
+          name: productName,
+          price: productPrice,
+          image: productImage
+        });
+        
+        itemsIncart.set(cart.length);
+        
+        // Optional: show feedback
+        btn.textContent = '✓ Agregado';
+        setTimeout(() => {
+          btn.textContent = 'Agregar';
+        }, 1500);
+        
+        // Navigate to cart (optional - can be removed if not desired)
+        // await navigate('/cart');
+      });
+    });
+  }
+</script>
+
+<style>
+  /* Tarjeta con proporción dorada para consistencia */
+  .product-card {
+    /* Altura fija para desktop, permitir flexibilidad en mobile */
+    height: 100%;
+    min-height: 380px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Imagen con proporción áurea (φ = 1.618) */
+  .card-image {
+    aspect-ratio: 1 / 0.618;
+  }
+
+  /* Contenido con altura mínima consistente */
+  .card-content {
+    min-height: 140px;
+    flex: 1;
+  }
+
+  /* Botón Agregar al carrito */
+  .add-to-cart-btn {
+    border: none;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .add-to-cart-btn:active {
+    transform: scale(0.98);
+  }
+
+  @media (max-width: 640px) {
+    .product-card {
+      min-height: 320px;
+    }
+    
+    .card-content {
+      min-height: 120px;
+    }
+  }
+</style>

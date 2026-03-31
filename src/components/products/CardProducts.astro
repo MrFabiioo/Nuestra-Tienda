@@ -117,6 +117,14 @@ const sliderId = `slider-${title.replace(/\s+/g, '-').toLowerCase()}`;
     .grid-item {
         max-width: 280px;
         width: 100%;
+        height: 100%;
+        min-height: 380px;
+        display: flex;
+        align-items: stretch;
+    }
+
+    .grid-item :global(.product-card) {
+        width: 100%;
     }
 
     /* Desktop Grid - only show at 1200px+ */
@@ -127,6 +135,7 @@ const sliderId = `slider-${title.replace(/\s+/g, '-').toLowerCase()}`;
             gap: 1.5rem;
             justify-items: center;
             justify-content: center;
+            
         }
         .carousel-container {
             display: none;
@@ -165,6 +174,14 @@ const sliderId = `slider-${title.replace(/\s+/g, '-').toLowerCase()}`;
         max-width: 320px;
         padding: 0 0.5rem;
         box-sizing: border-box;
+        height: auto;
+        min-height: 380px;
+        display: flex;
+        align-items: stretch;
+    }
+
+    .carousel-slide :global(.product-card) {
+        width: 100%;
     }
 
     /* Botones de navegación - rojos circulares */
@@ -175,13 +192,13 @@ const sliderId = `slider-${title.replace(/\s+/g, '-').toLowerCase()}`;
         width: 48px;
         height: 48px;
         border-radius: 50%;
-        background: #dc2626;
+        background: transparent;
         border: 3px solid white;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: white;
+        color: grey;
         transition: all 0.3s ease;
         z-index: 20;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
@@ -189,7 +206,7 @@ const sliderId = `slider-${title.replace(/\s+/g, '-').toLowerCase()}`;
     }
 
     .carousel-btn:hover {
-        background: #b91c1c;
+        background: grey-200;
         transform: translateY(-50%) scale(1.1);
     }
 
@@ -215,6 +232,11 @@ const sliderId = `slider-${title.replace(/\s+/g, '-').toLowerCase()}`;
         .carousel-slide {
             width: 80vw;
             max-width: 280px;
+            min-height: 320px;
+        }
+
+        .grid-item {
+            min-height: 320px;
         }
 
         .carousel-btn {
