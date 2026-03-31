@@ -100,7 +100,7 @@ const total = products.reduce(
 <script>
 import { CartCookiesClient } from "@utils/cart-cookies";
 import { navigate } from "astro:transitions/client";
-import { itemsIncart } from "src/store/cart.store";
+import { cartItems } from "src/store/cart.store";
  document.addEventListener('astro:page-load',()=>{
 
    const deleteButtons = document.querySelectorAll('.btn-delete');
@@ -110,7 +110,7 @@ import { itemsIncart } from "src/store/cart.store";
        const productId = target.dataset.id ?? "";
        const size= target.dataset.size ?? "";
        const cart =CartCookiesClient.removeItem(productId,size)
-       itemsIncart.set(cart.length);
+        cartItems.set(cart);
       
        navigate('/cart')
      })

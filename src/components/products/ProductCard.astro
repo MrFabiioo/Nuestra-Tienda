@@ -85,6 +85,13 @@ const stars = "★".repeat(rating) + "☆".repeat(5 - rating);
   
   <!-- Botón Agregar al carrito (semicircular, sobresale por el borde inferior) -->
   <div class="add-to-cart-wrapper">
+    <!-- Selector de cantidad -->
+    <div class="quantity-selector">
+      <button class="qty-btn qty-decrease" data-action="decrease" aria-label="Disminuir cantidad">−</button>
+      <span class="qty-value">1</span>
+      <button class="qty-btn qty-increase" data-action="increase" aria-label="Aumentar cantidad">+</button>
+    </div>
+    
     <button 
       class="add-to-cart-btn bg-guacamole-pulpa text-white text-center font-bold text-sm py-3 tracking-wider uppercase hover:bg-guacamole-f transition-all duration-300"
       data-product-id={id}
@@ -101,7 +108,7 @@ const stars = "★".repeat(rating) + "☆".repeat(5 - rating);
 
 <script>
   import { navigate } from "astro:transitions/client";
-  import { itemsIncart } from "src/store/cart.store";
+  import { cartItems } from "src/store/cart.store";
   import { CartCookiesClient } from "src/utils/cart-cookies";
 
   document.addEventListener('astro:page-load', initAddToCartButtons);
@@ -125,21 +132,26 @@ const stars = "★".repeat(rating) + "☆".repeat(5 - rating);
         
         // Get sizes from hidden input (default to "chico,mediano,grande" if not found)
         const sizesInput = document.querySelector(`#product-sizes-${productId}`) as HTMLInputElement;
-        const sizes = sizesInput?.value?.split(',') || ['chico', 'mediano', 'grande'];
+        const sizes = sizesInput?.value?.split(',') || ['Normal', 'mediano', 'grande'];
         
         // Use first available size
         const selectedSize = sizes[0];
         
+        // Get quantity from sibling quantity selector
+        const wrapper = btn.closest('.add-to-cart-wrapper');
+        const qtyDisplay = wrapper?.querySelector('.qty-value');
+        const quantity = parseInt(qtyDisplay?.textContent || '1', 10);
+        
         const cart = CartCookiesClient.addItem({
           productId: productId,
           size: selectedSize,
-          quantity: 1,
+          quantity: quantity,
           name: productName,
           price: productPrice,
           image: productImage
         });
         
-        itemsIncart.set(cart.length);
+        cartItems.set(cart);
         
         // Optional: show feedback
         btn.textContent = '✓ Agregado';
@@ -147,8 +159,62 @@ const stars = "★".repeat(rating) + "☆".repeat(5 - rating);
           btn.textContent = 'Agregar';
         }, 1500);
         
+        // Reset quantity to 1 after adding
+        const qtyDecrease = wrapper?.querySelector('.qty-decrease') as HTMLButtonElement;
+        const qtyIncrease = wrapper?.querySelector('.qty-increase') as HTMLButtonElement;
+        if (qtyDisplay) {
+          qtyDisplay.textContent = '1';
+          // Update button states
+          if (qtyDecrease) qtyDecrease.disabled = true;
+          if (qtyIncrease) qtyIncrease.disabled = false;
+        }
+        
         // Navigate to cart (optional - can be removed if not desired)
         // await navigate('/cart');
+      });
+    });
+    
+    // Initialize quantity selector buttons
+    initQuantitySelectors();
+  }
+  
+  function initQuantitySelectors() {
+    const wrappers = document.querySelectorAll('.add-to-cart-wrapper');
+    
+    wrappers.forEach((wrapper) => {
+      const decreaseBtn = wrapper.querySelector('.qty-decrease') as HTMLButtonElement;
+      const increaseBtn = wrapper.querySelector('.qty-increase') as HTMLButtonElement;
+      const qtyDisplay = wrapper.querySelector('.qty-value') as HTMLSpanElement;
+      
+      if (!decreaseBtn || !increaseBtn || !qtyDisplay) return;
+      
+      // Initialize button states
+      decreaseBtn.disabled = true; // Start at quantity 1
+      
+      decreaseBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent bubbling to add-to-cart button
+        e.preventDefault();
+        
+        let currentQty = parseInt(qtyDisplay.textContent || '1', 10);
+        if (currentQty > 1) {
+          currentQty--;
+          qtyDisplay.textContent = currentQty.toString();
+          decreaseBtn.disabled = currentQty <= 1;
+          increaseBtn.disabled = false;
+        }
+      });
+      
+      increaseBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent bubbling to add-to-cart button
+        e.preventDefault();
+        
+        let currentQty = parseInt(qtyDisplay.textContent || '1', 10);
+        if (currentQty < 5) {
+          currentQty++;
+          qtyDisplay.textContent = currentQty.toString();
+          increaseBtn.disabled = currentQty >= 5;
+          decreaseBtn.disabled = false;
+        }
       });
     });
   }
@@ -216,6 +282,59 @@ const stars = "★".repeat(rating) + "☆".repeat(5 - rating);
 
   .add-to-cart-btn:active {
     transform: scale(0.98);
+  }
+
+  /* Quantity selector */
+  .quantity-selector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    background: white;
+    border-radius: 9999px;
+    padding: 0.25rem;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .qty-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: #568203;
+    color: white;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    line-height: 1;
+  }
+
+  .qty-btn:hover:not(:disabled) {
+    background: #3d5f02;
+    transform: scale(1.1);
+  }
+
+  .qty-btn:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+
+  .qty-btn:disabled {
+    background: #d1d5db;
+    color: #9ca3af;
+    cursor: not-allowed;
+  }
+
+  .qty-value {
+    min-width: 24px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 0.875rem;
+    color: #374151;
   }
 
   @media (max-width: 640px) {

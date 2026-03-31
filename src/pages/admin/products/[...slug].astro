@@ -123,7 +123,7 @@ const {categories} = categoriesData;
         <label for="sizes" class="block">Tamaños</label>
         <div class="flex ">
           {
-            ['Pequeño', 'Mediano', 'Grande', 'Exra-grande'].map((size) => (
+            ['Pequeño', 'Mediano', 'Grande', 'Exra-grande','Normal'].map((size) => (
               <button class:list={product.sizes.split(',').includes(size) ? 'active': ''} type="button" onclick="this.classList.toggle('active')" class="btn-size w-full active">{size}</button>
             ))
           }

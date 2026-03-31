@@ -113,7 +113,7 @@ const {product, images} = data;
 
 <script>
 import { navigate } from "astro:transitions/client";
-import { itemsIncart } from "src/store/cart.store";
+import { cartItems } from "src/store/cart.store";
 import { CartCookiesClient } from "src/utils/cart-cookies";
 
 document.addEventListener('astro:page-load',()=>{
@@ -167,7 +167,7 @@ document.addEventListener('astro:page-load',()=>{
             image:productImageInput.value,
         })
 
-        itemsIncart.set(cart.length)
+        cartItems.set(cart)
 
        // window.location.href='/cart';
       await navigate('/cart')

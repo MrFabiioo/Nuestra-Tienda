@@ -1,5 +1,5 @@
 ---
-import ShoppingCart from "./CartButton.jsx";
+import CartButton from "./CartButton.tsx";
 import SearchBar from "./SearchBar.astro";
 ---
 
@@ -22,7 +22,7 @@ import SearchBar from "./SearchBar.astro";
                 <span class="logo__highlight">Shop</span>
             </a>
             <div class="cart-icon">
-                <ShoppingCart client:only="preact" transition:persist />
+                <CartButton client:only="preact" transition:persist />
             </div>
         </div>
     </div>
