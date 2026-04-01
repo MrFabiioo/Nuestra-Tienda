@@ -25,10 +25,10 @@ const {product, images} = data;
             <div class="grid grid-cols-1 md:grid-cols-2">
                 
                 <!-- Product Image Section -->
-                <div class="relative bg-gradient-to-br from-guacamole-f/30 to-white p-6 md:p-8 flex items-center justify-center">
-                    <div class="relative rounded-2xl overflow-hidden shadow-lg bg-white/80 backdrop-blur-sm p-2">
+                <div class="relative bg-gradient-to-br from-guacamole-f/30 to-white p-3 md:p-8 flex items-center justify-center min-h-[280px] md:min-h-auto">
+                    <div class="relative rounded-2xl overflow-hidden shadow-lg w-full aspect-[1/1] flex items-center justify-center">
                         <ProductSliceShow images={images.map(i=>i.image)}/>
-                        <input type="hidden" name="" id="product-image" value={images?.[0]?.image || ''}/>
+                        <input type="hidden" name="" id="product-image"  value={images?.[0]?.image || ''}/>
                     </div>
                     <!-- Decorative badge -->
                     <span class="absolute top-4 left-4 bg-guacamole-b text-white text-xs tracking-[0.15em] font-semibold px-3 py-1 rounded-full shadow-md">
