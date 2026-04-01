@@ -32,7 +32,8 @@ export const getProductsByPage= defineAction({
                 (select GROUP_CONCAT(image,',') from
                     (select * from ${ProductImage} where productId = a.id limit 2)
                 ) as images,
-                (select name from ${Category} where id = a.categoryId) as categoryName
+                (select name from ${Category} where id = a.categoryId) as categoryName,
+                (select slug from ${Category} where id = a.categoryId) as categorySlug
                 from ${Product} a
                 LIMIT ${limit} OFFSET ${(page-1)*limit};
 

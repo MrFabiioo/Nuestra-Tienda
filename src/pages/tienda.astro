@@ -5,46 +5,254 @@ import { actions } from "astro:actions";
 import Pagination from "../components/shared/Pagination.astro";
 
 export const prerender = false
+
 const url = Astro.url;
 const pageParam = Number(url.searchParams.get('page') ?? 1);
 
-
-const {data,error} = await Astro.callAction(actions.getProductsByPage,{
-    page:pageParam
+// Fetch products
+const {data: productsData, error: productsError} = await Astro.callAction(actions.getProductsByPage,{
+    page: pageParam
 })
 
-if (error) {
+if (productsError || !productsData) {
     return Astro.redirect('/');
 }
 
-const  {products,totalPages} = data;
+const {products, totalPages} = productsData;
 
+// Fetch categories
+const {data: categoriesData, error: categoriesError} = await Astro.callAction(actions.getCategories, {})
 
+const categories = (categoriesError || !categoriesData) ? [] : categoriesData.categories;
+
+// Map categories to expected format for filter pills
+const categoryMap: Record<string, string> = {
+    'cat-salsas': 'Salsas y Aderezos',
+    'cat-charcuteria': 'Charcutería', 
+    'cat-postres': 'Postres'
+};
+
+// Get category names from the fetched categories or use fallback
+const categoryNames = categories.length > 0 
+    ? categories.reduce((acc, cat) => {
+        acc[cat.slug] = cat.name;
+        return acc;
+    }, {} as Record<string, string>)
+    : categoryMap;
 
 ---
 
 <Layout>
-    <div class="flex flex-col justify-center items-center">
-        <input
-            type="text"
-            placeholder="Buscar producto"
-            class="font-mono rounded-lg border border-black-medium w-80 p-4 mb-12 mt-6"
-            
-          />
-    </div>
-        
-    <section
-        class="grid sm:gap-6 gap-12 lg:grid-cols-4 md:grid-cols-2  w-full  max-w-screen grid-cols-1 place-items-center "
-    >
-        {
-            products.map((product)=>(
-                <Card product={product}/>
-            ))
-        }
+    <main class="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
+        <!-- Hero Section -->
+        <section class="py-12 px-4 text-center bg-gradient-to-r from-emerald-600/10 via-transparent to-green-600/10">
+            <h1 class="text-4xl md:text-5xl font-bold text-neutral-900 tracking-tight">
+                Nuestra Tienda
+            </h1>
+            <p class="mt-3 text-lg text-neutral-600 max-w-xl mx-auto">
+                Descubrí nuestros productos artesanales elaborados con los mejores ingredientes
+            </p>
+        </section>
 
+        <!-- Search & Filter Bar -->
+        <section class="px-4 pb-8 max-w-6xl mx-auto">
+            <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+                <!-- Search Input -->
+                <div class="relative w-full md:w-auto md:flex-1 max-w-lg">
+                    <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                        <svg class="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                    <input
+                        type="text"
+                        id="search-input"
+                        placeholder="Buscar productos..."
+                        class="w-full pl-12 pr-4 py-3 rounded-full border border-neutral-200 bg-white shadow-sm text-neutral-700 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-400 transition-all duration-300"
+                    />
+                </div>
 
-    </section>
+                <!-- Category Filter Pills -->
+                <div class="flex flex-wrap gap-2 justify-center" id="category-filters">
+                    <button 
+                        class="category-pill px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 bg-emerald-600 text-white shadow-md hover:shadow-lg hover:bg-emerald-700"
+                        data-category="todos"
+                    >
+                        Todos
+                    </button>
+                    {Object.entries(categoryNames).map(([slug, name]) => (
+                        <button 
+                            class="category-pill px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 bg-white text-neutral-600 border border-neutral-200 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700"
+                            data-category={slug}
+                        >
+                            {name}
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </section>
 
-    <Pagination pageParam={pageParam} totalPages={totalPages}/>
+        <!-- Results Count -->
+        <section class="px-4 pb-4 max-w-6xl mx-auto">
+            <p class="text-sm text-neutral-500" id="results-count">
+                Mostrando {products.length} productos
+            </p>
+        </section>
+
+        <!-- Product Grid -->
+        <section 
+            class="px-4 pb-12 max-w-6xl mx-auto"
+            id="product-grid"
+        >
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center">
+                {products.map((product) => (
+                    <div 
+                        class="product-card-wrapper"
+                        data-title={product.title?.toLowerCase() ?? ''}
+                        data-description={product.description?.toLowerCase() ?? ''}
+                        data-category={product.categorySlug ?? 'sin-categoria'}
+                    >
+                        <Card product={product} />
+                    </div>
+                ))}
+            </div>
+        </section>
+
+        <!-- Empty State -->
+        <section 
+            class="hidden px-4 pb-12 max-w-6xl mx-auto text-center"
+            id="empty-state"
+        >
+            <div class="py-16">
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-neutral-100 mb-6">
+                    <svg class="w-10 h-10 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold text-neutral-800 mb-2">
+                    No encontramos productos
+                </h3>
+                <p class="text-neutral-500 mb-6 max-w-md mx-auto">
+                    No hay productos que coincidan con tu búsqueda. Probá con otros términos o limpiá los filtros.
+                </p>
+                <button 
+                    id="clear-filters"
+                    class="inline-flex items-center px-6 py-3 rounded-full bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-colors duration-200"
+                >
+                    Limpiar filtros
+                </button>
+            </div>
+        </section>
+
+        <!-- Pagination -->
+        <section class="px-4 pb-12 max-w-6xl mx-auto">
+            <Pagination pageParam={pageParam} totalPages={totalPages} />
+        </section>
+    </main>
 </Layout>
 
+<script>
+    // Client-side search and filter functionality
+    // Use astro:page-load for ViewTransitions/ClientRouter compatibility
+    document.addEventListener('astro:page-load', () => {
+        const searchInput = document.getElementById('search-input') as HTMLInputElement;
+        const productCards = document.querySelectorAll('.product-card-wrapper');
+        const categoryPills = document.querySelectorAll('.category-pill');
+        const resultsCount = document.getElementById('results-count');
+        const emptyState = document.getElementById('empty-state');
+        const productGrid = document.getElementById('product-grid');
+        const clearFiltersBtn = document.getElementById('clear-filters');
+
+        let activeCategory = 'todos';
+
+        function filterProducts() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            let visibleCount = 0;
+
+            productCards.forEach((card) => {
+                const wrapper = card as HTMLElement;
+                const title = wrapper.dataset.title || '';
+                const description = wrapper.dataset.description || '';
+                const category = wrapper.dataset.category || '';
+
+                // Check search match
+                const matchesSearch = searchTerm === '' || 
+                    title.includes(searchTerm) || 
+                    description.includes(searchTerm);
+
+                // Check category match
+                const matchesCategory = activeCategory === 'todos' || 
+                    category === activeCategory;
+
+                if (matchesSearch && matchesCategory) {
+                    wrapper.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    wrapper.style.display = 'none';
+                }
+            });
+
+            // Update results count
+            if (resultsCount) {
+                resultsCount.textContent = `Mostrando ${visibleCount} productos`;
+            }
+
+            // Show/hide empty state
+            if (visibleCount === 0) {
+                emptyState?.classList.remove('hidden');
+                productGrid?.classList.add('hidden');
+            } else {
+                emptyState?.classList.add('hidden');
+                productGrid?.classList.remove('hidden');
+            }
+        }
+
+        // Search input event
+        searchInput?.addEventListener('input', filterProducts);
+
+        // Category filter events
+        categoryPills.forEach((pill) => {
+            pill.addEventListener('click', () => {
+                const button = pill as HTMLButtonElement;
+                
+                // Update active category
+                activeCategory = button.dataset.category || 'todos';
+
+                // Update pill styles
+                categoryPills.forEach((p) => {
+                    const btn = p as HTMLButtonElement;
+                    btn.classList.remove('bg-emerald-600', 'text-white', 'shadow-md', 'hover:shadow-lg', 'hover:bg-emerald-700');
+                    btn.classList.add('bg-white', 'text-neutral-600', 'border', 'border-neutral-200', 'hover:bg-emerald-50', 'hover:border-emerald-300', 'hover:text-emerald-700');
+                });
+
+                button.classList.remove('bg-white', 'text-neutral-600', 'border', 'border-neutral-200', 'hover:bg-emerald-50', 'hover:border-emerald-300', 'hover:text-emerald-700');
+                button.classList.add('bg-emerald-600', 'text-white', 'shadow-md', 'hover:shadow-lg', 'hover:bg-emerald-700');
+
+                filterProducts();
+            });
+        });
+
+        // Clear filters
+        clearFiltersBtn?.addEventListener('click', () => {
+            searchInput.value = '';
+            activeCategory = 'todos';
+
+            // Reset category pills
+            categoryPills.forEach((p) => {
+                const btn = p as HTMLButtonElement;
+                btn.classList.remove('bg-emerald-600', 'text-white', 'shadow-md', 'hover:shadow-lg', 'hover:bg-emerald-700');
+                btn.classList.add('bg-white', 'text-neutral-600', 'border', 'border-neutral-200', 'hover:bg-emerald-50', 'hover:border-emerald-300', 'hover:text-emerald-700');
+            });
+
+            // Set "Todos" as active
+            const todosPill = document.querySelector('[data-category="todos"]');
+            if (todosPill) {
+                const btn = todosPill as HTMLButtonElement;
+                btn.classList.remove('bg-white', 'text-neutral-600', 'border', 'border-neutral-200', 'hover:bg-emerald-50', 'hover:border-emerald-300', 'hover:text-emerald-700');
+                btn.classList.add('bg-emerald-600', 'text-white', 'shadow-md', 'hover:shadow-lg', 'hover:bg-emerald-700');
+            }
+
+            filterProducts();
+        });
+    });
+</script>

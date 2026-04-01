@@ -7,4 +7,13 @@ export interface ProductWithImages{
     slug: string, 
     images:string,
     categoryName?: string,
+    categoryId?: string,
+    categorySlug?: string,
+    product?: {
+        title: string;
+        description: string;
+        price: number;
+        slug: string;
+        images: string;
+    };
 }
