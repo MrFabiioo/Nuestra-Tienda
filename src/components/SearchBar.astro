@@ -4,31 +4,86 @@ import { allProducts } from "@data/products";
 const productsJson = JSON.stringify(allProducts);
 ---
 
-<div class="search-wrapper" id="searchWrapper">
+<!-- Botón de búsqueda para mobile (visible solo en mobile) -->
+<button
+    class="search-trigger"
+    id="searchTrigger"
+    aria-label="Abrir búsqueda"
+    aria-expanded="false"
+    aria-controls="searchWrapper"
+>
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+</button>
+
+<!-- Wrapper de búsqueda: visible en desktop, overlay en mobile -->
+<div class="search-wrapper" id="searchWrapper" role="search" aria-label="Buscar productos">
     <div class="search-box">
-        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
         <input 
-            type="text" 
+            type="search" 
             class="search-input" 
             id="searchInput"
-            placeholder="Buscar..."
+            placeholder="Buscar productos..."
             autocomplete="off"
+            aria-label="Buscar productos"
+            aria-autocomplete="list"
+            aria-expanded="false"
+            aria-controls="searchDropdown"
         />
+        <!-- Botón cerrar: solo visible en mobile overlay -->
+        <button class="search-close" id="searchClose" aria-label="Cerrar búsqueda">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
     </div>
 
     <!-- Dropdown de sugerencias -->
-    <div class="search-dropdown" id="searchDropdown">
+    <div
+        class="search-dropdown"
+        id="searchDropdown"
+        role="listbox"
+        aria-label="Resultados de búsqueda"
+        aria-live="polite"
+        aria-atomic="false"
+    >
         <div class="dropdown-results" id="dropdownResults"></div>
-        <div class="dropdown-empty" id="dropdownEmpty">
+        <div class="dropdown-empty" id="dropdownEmpty" role="status">
             No se encontraron productos
         </div>
     </div>
 </div>
 
 <style>
+    /* Botón trigger solo mobile */
+    .search-trigger {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 8px;
+        color: rgba(255, 255, 255, 0.8);
+        cursor: pointer;
+        transition: border-color 0.2s ease, color 0.2s ease;
+        flex-shrink: 0;
+    }
+
+    .search-trigger:hover {
+        border-color: rgba(86, 130, 4, 0.5);
+        color: #568203;
+    }
+
+    /* Wrapper */
     .search-wrapper {
         position: relative;
         width: 100%;
@@ -38,8 +93,8 @@ const productsJson = JSON.stringify(allProducts);
     .search-box {
         display: flex;
         align-items: center;
-        background: #f5f5f5;
-        border: 1px solid #e0e0e0;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.15);
         border-radius: 25px;
         padding: 0 16px;
         height: 44px;
@@ -48,12 +103,12 @@ const productsJson = JSON.stringify(allProducts);
 
     .search-box:focus-within {
         border-color: #568203;
-        box-shadow: 0 0 0 3px rgba(86, 130, 4, 0.15);
-        background: white;
+        box-shadow: 0 0 0 3px rgba(86, 130, 4, 0.2);
+        background: rgba(255, 255, 255, 0.12);
     }
 
     .search-icon {
-        color: #888;
+        color: rgba(255, 255, 255, 0.4);
         flex-shrink: 0;
         margin-right: 10px;
     }
@@ -67,12 +122,34 @@ const productsJson = JSON.stringify(allProducts);
         border: none;
         background: transparent;
         font-size: 14px;
-        color: #333;
+        color: rgba(255, 255, 255, 0.9);
         outline: none;
+        min-width: 0;
     }
 
     .search-input::placeholder {
-        color: #aaa;
+        color: rgba(255, 255, 255, 0.35);
+    }
+
+    /* Botón cerrar — oculto por defecto */
+    .search-close {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        background: transparent;
+        border: none;
+        color: rgba(255, 255, 255, 0.5);
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        transition: color 0.2s ease;
+    }
+
+    .search-close:hover {
+        color: rgba(255, 255, 255, 0.9);
     }
 
     /* Dropdown */
@@ -84,7 +161,7 @@ const productsJson = JSON.stringify(allProducts);
         background: white;
         border: 1px solid #e8e8e8;
         border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
         overflow: hidden;
         display: none;
         z-index: 1000;
@@ -120,15 +197,22 @@ const productsJson = JSON.stringify(allProducts);
         text-decoration: none;
         color: inherit;
         transition: background 0.15s ease;
+        border-bottom: 1px solid #f5f5f5;
     }
 
-    .search-result:hover {
-        background: #fff8e1;
+    .search-result:last-child {
+        border-bottom: none;
+    }
+
+    .search-result:hover,
+    .search-result:focus {
+        background: #f5fde8;
+        outline: none;
     }
 
     .search-result img {
-        width: 50px;
-        height: 50px;
+        width: 48px;
+        height: 48px;
         border-radius: 8px;
         object-fit: cover;
         background: #f0f0f0;
@@ -144,8 +228,8 @@ const productsJson = JSON.stringify(allProducts);
     .result-name {
         font-size: 14px;
         font-weight: 600;
-        color: #333;
-        margin-bottom: 3px;
+        color: #2d2d2d;
+        margin-bottom: 2px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -157,14 +241,14 @@ const productsJson = JSON.stringify(allProducts);
     }
 
     .result-arrow {
-        color: #ccc;
+        color: #c5c5c5;
         flex-shrink: 0;
-        margin-left: 10px;
+        margin-left: 8px;
     }
 
     /* Scrollbar personalizado */
     .dropdown-results::-webkit-scrollbar {
-        width: 6px;
+        width: 5px;
     }
 
     .dropdown-results::-webkit-scrollbar-track {
@@ -176,9 +260,44 @@ const productsJson = JSON.stringify(allProducts);
         border-radius: 3px;
     }
 
-    @media (max-width: 640px) {
+    /* --- RESPONSIVE --- */
+    @media (max-width: 767px) {
+        /* En mobile ocultamos el wrapper y mostramos el trigger */
         .search-wrapper {
             display: none;
+            position: fixed;
+            top: 64px; /* altura del navbar */
+            left: 0;
+            right: 0;
+            z-index: 49;
+            max-width: none;
+            padding: 0.75rem 1rem;
+            background: rgba(22, 22, 24, 0.98);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(86, 130, 4, 0.3);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .search-wrapper.mobile-open {
+            display: block;
+        }
+
+        .search-trigger {
+            display: flex;
+        }
+
+        .search-close {
+            display: flex;
+        }
+
+        .search-box {
+            background: rgba(255, 255, 255, 0.1);
+            height: 48px;
+            border-radius: 12px;
+        }
+
+        .search-dropdown {
+            top: calc(100% + 4px);
         }
     }
 </style>
@@ -191,13 +310,36 @@ const productsJson = JSON.stringify(allProducts);
     const searchDropdown = document.getElementById('searchDropdown');
     const dropdownResults = document.getElementById('dropdownResults');
     const dropdownEmpty = document.getElementById('dropdownEmpty');
+    const searchTrigger = document.getElementById('searchTrigger');
+    const searchClose = document.getElementById('searchClose');
 
     function showDropdown() {
         searchDropdown.classList.add('active');
+        searchInput?.setAttribute('aria-expanded', 'true');
     }
 
     function hideDropdown() {
         searchDropdown.classList.remove('active');
+        searchInput?.setAttribute('aria-expanded', 'false');
+    }
+
+    function openMobileSearch() {
+        searchWrapper?.classList.add('mobile-open');
+        searchTrigger?.setAttribute('aria-expanded', 'true');
+        searchTrigger?.setAttribute('aria-label', 'Cerrar búsqueda');
+        // Focus en el input con pequeño delay para animación
+        setTimeout(() => searchInput?.focus(), 50);
+    }
+
+    function closeMobileSearch() {
+        searchWrapper?.classList.remove('mobile-open');
+        hideDropdown();
+        searchTrigger?.setAttribute('aria-expanded', 'false');
+        searchTrigger?.setAttribute('aria-label', 'Abrir búsqueda');
+        searchInput.value = '';
+        dropdownResults.innerHTML = '';
+        dropdownEmpty?.classList.remove('show');
+        searchTrigger?.focus();
     }
 
     function renderResults(results) {
@@ -207,39 +349,35 @@ const productsJson = JSON.stringify(allProducts);
         } else {
             dropdownEmpty.classList.remove('show');
             dropdownResults.innerHTML = results.map(product => `
-<a href="/${product.slug}" 
-   class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 transition border-b border-gray-200">
-
-    <!-- Imagen -->
-    <img 
-        class="w-12 h-12 rounded-lg object-cover flex-shrink-0"
-        src="${product.image}" 
-        alt="${product.name}" 
-        loading="lazy"
-        decoding="async"
-    />
-
-    <!-- Contenido -->
-    <div class="flex flex-col flex-1 min-w-0">
-        <div class="text-sm font-semibold text-gray-800 truncate">
-            ${product.name}
-        </div>
-        <div class="text-xs text-gray-500">
-            ${product.category}
-        </div>
-    </div>
-
-    <!-- Flecha -->
-    <svg 
-        class="w-4 h-4 text-gray-400 flex-shrink-0"
-        xmlns="http://www.w3.org/2000/svg" 
-        fill="none" 
-        viewBox="0 0 24 24" 
-        stroke="currentColor"
-    >
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-    </svg>
-</a>
+                <a
+                    href="${product.slug}"
+                    class="search-result"
+                    role="option"
+                    tabindex="0"
+                >
+                    <img
+                        src="${product.image}"
+                        alt="${product.name}"
+                        loading="lazy"
+                        decoding="async"
+                    />
+                    <div class="result-content">
+                        <div class="result-name">${product.name}</div>
+                        <div class="result-category">${product.category}</div>
+                    </div>
+                    <svg
+                        class="result-arrow"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        aria-hidden="true"
+                    >
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
             `).join('');
         }
     }
@@ -262,8 +400,17 @@ const productsJson = JSON.stringify(allProducts);
         renderResults(results);
     }
 
-    // Event listeners
-    searchInput.addEventListener('input', (e) => {
+    // Trigger mobile
+    searchTrigger?.addEventListener('click', () => {
+        const isOpen = searchWrapper?.classList.contains('mobile-open');
+        isOpen ? closeMobileSearch() : openMobileSearch();
+    });
+
+    // Botón cerrar dentro del overlay mobile
+    searchClose?.addEventListener('click', closeMobileSearch);
+
+    // Input events
+    searchInput?.addEventListener('input', (e) => {
         const query = e.target.value;
         searchProducts(query);
         
@@ -274,7 +421,7 @@ const productsJson = JSON.stringify(allProducts);
         }
     });
 
-    searchInput.addEventListener('focus', () => {
+    searchInput?.addEventListener('focus', () => {
         if (searchInput.value.length > 0) {
             showDropdown();
         }
@@ -282,16 +429,50 @@ const productsJson = JSON.stringify(allProducts);
 
     // Cerrar al hacer click fuera
     document.addEventListener('click', (e) => {
-        if (!searchWrapper.contains(e.target)) {
+        if (searchWrapper && !searchWrapper.contains(e.target) && e.target !== searchTrigger) {
             hideDropdown();
         }
     });
 
-    // Cerrar con ESC
-    searchInput.addEventListener('keydown', (e) => {
+    // Teclado: ESC cierra
+    searchInput?.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
+            if (searchWrapper?.classList.contains('mobile-open')) {
+                closeMobileSearch();
+            } else {
+                hideDropdown();
+                searchInput.blur();
+            }
+        }
+
+        // Navegación por teclado en resultados
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            const firstResult = dropdownResults?.querySelector('.search-result');
+            if (firstResult) firstResult.focus();
+        }
+    });
+
+    // Navegación por teclado dentro del dropdown
+    dropdownResults?.addEventListener('keydown', (e) => {
+        const focused = document.activeElement;
+        if (!focused?.classList.contains('search-result')) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            const next = focused.nextElementSibling;
+            if (next) next.focus();
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            const prev = focused.previousElementSibling;
+            if (prev) {
+                prev.focus();
+            } else {
+                searchInput?.focus();
+            }
+        } else if (e.key === 'Escape') {
             hideDropdown();
-            searchInput.blur();
+            searchInput?.focus();
         }
     });
 </script>

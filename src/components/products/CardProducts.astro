@@ -2,6 +2,7 @@
 import ProductCard from "./ProductCard.astro";
 
 interface Product {
+    id?: string;
     name: string;
     price: number;
     description: string;
@@ -26,12 +27,10 @@ const sliderId = `slider-${title.replace(/\s+/g, '-').toLowerCase()}`;
         <h2 class="products-section__title">{title}</h2>
     </div>
 
-    <!-- Desktop: Grid de 3 columnas sin carousel -->
+    <!-- Desktop: Grid sin carousel -->
     <div class="products-grid">
         {products.map((product) => (
-            <div class="grid-item">
-                <ProductCard {...product} />
-            </div>
+            <ProductCard {...product} />
         ))}
     </div>
 
@@ -43,7 +42,7 @@ const sliderId = `slider-${title.replace(/\s+/g, '-').toLowerCase()}`;
             data-slider={sliderId}
             aria-label="Anterior"
         >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
         </button>
@@ -68,7 +67,7 @@ const sliderId = `slider-${title.replace(/\s+/g, '-').toLowerCase()}`;
             data-slider={sliderId}
             aria-label="Siguiente"
         >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
         </button>
@@ -80,25 +79,27 @@ const sliderId = `slider-${title.replace(/\s+/g, '-').toLowerCase()}`;
         background: white;
         border-radius: 1.5rem;
         padding: 2rem;
-        box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 2px 12px -2px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.04);
+        border: 1px solid #f1f5f9;
         margin: 2rem 0;
         position: relative;
     }
 
     .products-section__header {
         display: flex;
-        justify-content: center;
-        margin-bottom: 2rem;
+        justify-content: flex-start;
+        margin-bottom: 1.75rem;
     }
 
     .products-section__title {
-        font-size: 1.25rem;
+        font-size: 0.875rem;
         font-weight: 700;
-        padding: 0.5rem 1.5rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 0.375rem 1rem;
         border-radius: 9999px;
         background: #568203;
         color: white;
-        text-align: center;
     }
 
     /* Mobile first: grid hidden, carousel visible */
@@ -106,7 +107,7 @@ const sliderId = `slider-${title.replace(/\s+/g, '-').toLowerCase()}`;
         display: none;
     }
 
-    /* Carousel Container - visible by default on mobile */
+    /* Carousel Container */
     .carousel-container {
         position: relative;
         display: flex;
@@ -114,35 +115,19 @@ const sliderId = `slider-${title.replace(/\s+/g, '-').toLowerCase()}`;
         width: 100%;
     }
 
-    .grid-item {
-        max-width: 280px;
-        width: 100%;
-        height: 100%;
-        min-height: 380px;
-        display: flex;
-        align-items: stretch;
-    }
-
-    .grid-item :global(.product-card) {
-        width: 100%;
-    }
-
-    /* Desktop Grid - only show at 1200px+ */
-    @media (min-width: 1200px) {
+    /* Desktop Grid */
+    @media (min-width: 1024px) {
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            justify-items: center;
-            justify-content: center;
-            
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1.25rem;
         }
         .carousel-container {
             display: none;
         }
     }
 
-    /* Viewport con peek effect - muestra ~85% del slide para que se vea el peek */
+    /* Viewport con peek effect */
     .carousel-viewport {
         overflow-x: auto;
         overflow-y: hidden;
@@ -150,65 +135,56 @@ const sliderId = `slider-${title.replace(/\s+/g, '-').toLowerCase()}`;
         scroll-snap-type: x mandatory;
         scroll-behavior: smooth;
         -webkit-overflow-scrolling: touch;
-        scrollbar-width: none; /* Firefox */
-        -ms-overflow-style: none; /* IE */
-        padding: 1.5rem 0;
-        
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        padding: 1rem 0 1.5rem;
     }
 
     .carousel-viewport::-webkit-scrollbar {
-        display: none; /* Chrome/Safari */
+        display: none;
     }
 
-    /* Track con flexbox */
     .carousel-track {
         display: flex;
         gap: 0;
         width: max-content;
     }
 
-    /* Slide con scroll-snap-center y ancho fijo para peek */
     .carousel-slide {
         scroll-snap-align: center;
         flex-shrink: 0;
-        width: 85vw;
-        max-width: 320px;
+        width: 82vw;
+        max-width: 300px;
         padding: 0 0.5rem;
         box-sizing: border-box;
-        height: auto;
-        min-height: 380px;
-        display: flex;
-        align-items: stretch;
     }
 
-    .carousel-slide :global(.product-card) {
-        width: 100%;
-    }
-
-    /* Botones de navegación - rojos circulares */
+    /* Botones de navegación */
     .carousel-btn {
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
-        width: 48px;
-        height: 48px;
+        width: 36px;
+        height: 36px;
         border-radius: 50%;
-        background: transparent;
-        border: 3px solid white;
+        background: white;
+        border: 1px solid #e5e7eb;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: grey;
-        transition: all 0.3s ease;
+        color: #374151;
+        transition: all 0.2s ease;
         z-index: 20;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         flex-shrink: 0;
     }
 
     .carousel-btn:hover {
-        background: grey-200;
-        transform: translateY(-50%) scale(1.1);
+        background: #568203;
+        color: white;
+        border-color: #568203;
+        box-shadow: 0 4px 12px rgba(86, 130, 3, 0.3);
     }
 
     .carousel-btn:active {
@@ -216,50 +192,34 @@ const sliderId = `slider-${title.replace(/\s+/g, '-').toLowerCase()}`;
     }
 
     .carousel-btn--prev {
-        left: -24px;
+        left: -18px;
     }
 
     .carousel-btn--next {
-        right: -24px;
+        right: -18px;
     }
 
-    .carousel-btn svg {
-        width: 20px;
-        height: 20px;
-    }
-
-    /* Responsive adjustments */
     @media (max-width: 640px) {
         .carousel-slide {
             width: 80vw;
             max-width: 280px;
-            min-height: 320px;
-        }
-
-        .grid-item {
-            min-height: 320px;
-        }
-
-        .carousel-btn {
-            width: 40px;
-            height: 40px;
-        }
-
-        .carousel-btn--prev {
-            left: -20px;
-        }
-
-        .carousel-btn--next {
-            right: -20px;
-        }
-
-        .carousel-btn svg {
-            width: 16px;
-            height: 16px;
         }
 
         .products-section {
             padding: 1.5rem 1rem;
+        }
+
+        .carousel-btn {
+            width: 32px;
+            height: 32px;
+        }
+
+        .carousel-btn--prev {
+            left: -16px;
+        }
+
+        .carousel-btn--next {
+            right: -16px;
         }
     }
 </style>
@@ -269,107 +229,44 @@ const sliderId = `slider-${title.replace(/\s+/g, '-').toLowerCase()}`;
     document.addEventListener("astro:beforematch", initCarousels);
 
     function initCarousels() {
-        const carousels = document.querySelectorAll('.carousel-viewport');
+        const viewports = document.querySelectorAll('.carousel-viewport');
         
-        carousels.forEach((viewport) => {
-            const sliderId = viewport.id;
+        viewports.forEach((viewport) => {
+            if ((viewport as any).__carouselInitialized) return;
+            (viewport as any).__carouselInitialized = true;
+
             const container = viewport.closest('.carousel-container');
             const prevBtn = container?.querySelector('.carousel-btn--prev');
             const nextBtn = container?.querySelector('.carousel-btn--next');
             
-            // Scroll suave al centro
-            function scrollToCenter() {
-                const viewportRect = viewport.getBoundingClientRect();
-                const viewportCenter = viewportRect.left + viewportRect.width / 2;
-                
-                const slides = viewport.querySelectorAll('.carousel-slide');
-                let closestSlide: Element | null = null;
-                let minDistance = Infinity;
-                
-                slides.forEach((slide) => {
-                    const slideRect = slide.getBoundingClientRect();
-                    const slideCenter = slideRect.left + slideRect.width / 2;
-                    const distance = Math.abs(slideCenter - viewportCenter);
-                    
-                    if (distance < minDistance) {
-                        minDistance = distance;
-                        closestSlide = slide;
-                    }
+            function getSlides() {
+                return Array.from(viewport.querySelectorAll('.carousel-slide')) as HTMLElement[];
+            }
+
+            function getCurrentIndex(): number {
+                const slides = getSlides();
+                const center = (viewport as HTMLElement).scrollLeft + (viewport as HTMLElement).clientWidth / 2;
+                let idx = 0;
+                let minDist = Infinity;
+                slides.forEach((slide, i) => {
+                    const dist = Math.abs(slide.offsetLeft + slide.offsetWidth / 2 - center);
+                    if (dist < minDist) { minDist = dist; idx = i; }
                 });
-                
-                if (closestSlide) {
-                    (closestSlide as HTMLElement).scrollIntoView({
-                        behavior: 'smooth',
-                        inline: 'center',
-                        block: 'nearest'
-                    });
-                }
+                return idx;
+            }
+
+            function scrollToIndex(index: number) {
+                const slides = getSlides();
+                const target = slides[Math.max(0, Math.min(index, slides.length - 1))];
+                if (!target) return;
+                (viewport as HTMLElement).scrollTo({
+                    left: target.offsetLeft + target.offsetWidth / 2 - (viewport as HTMLElement).clientWidth / 2,
+                    behavior: 'smooth'
+                });
             }
             
-            // Botón anterior
-            prevBtn?.addEventListener('click', () => {
-                const slides = viewport.querySelectorAll('.carousel-slide');
-                const viewportCenter = viewport.scrollLeft + viewport.clientWidth / 2;
-                
-                let currentIndex = 0;
-                slides.forEach((slide, index) => {
-                    const slideLeft = (slide as HTMLElement).offsetLeft;
-                    const slideWidth = (slide as HTMLElement).offsetWidth;
-                    const slideCenter = slideLeft + slideWidth / 2;
-                    
-                    if (slideCenter < viewportCenter) {
-                        currentIndex = index;
-                    }
-                });
-                
-                // Ir al slide anterior
-                const targetIndex = Math.max(0, currentIndex - 1);
-                const targetSlide = slides[targetIndex] as HTMLElement;
-                
-                if (targetSlide) {
-                    const targetCenter = targetSlide.offsetLeft + targetSlide.offsetWidth / 2;
-                    viewport.scrollTo({
-                        left: targetCenter - viewport.clientWidth / 2,
-                        behavior: 'smooth'
-                    });
-                }
-            });
-            
-            // Botón siguiente
-            nextBtn?.addEventListener('click', () => {
-                const slides = viewport.querySelectorAll('.carousel-slide');
-                const viewportCenter = viewport.scrollLeft + viewport.clientWidth / 2;
-                
-                let currentIndex = slides.length - 1;
-                slides.forEach((slide, index) => {
-                    const slideLeft = (slide as HTMLElement).offsetLeft;
-                    const slideWidth = (slide as HTMLElement).offsetWidth;
-                    const slideCenter = slideLeft + slideWidth / 2;
-                    
-                    if (slideCenter < viewportCenter) {
-                        currentIndex = index;
-                    }
-                });
-                
-                // Ir al siguiente slide
-                const targetIndex = Math.min(slides.length - 1, currentIndex + 1);
-                const targetSlide = slides[targetIndex] as HTMLElement;
-                
-                if (targetSlide) {
-                    const targetCenter = targetSlide.offsetLeft + targetSlide.offsetWidth / 2;
-                    viewport.scrollTo({
-                        left: targetCenter - viewport.clientWidth / 2,
-                        behavior: 'smooth'
-                    });
-                }
-            });
-            
-            // Recentrar en resize
-            let resizeTimeout: number;
-            window.addEventListener('resize', () => {
-                clearTimeout(resizeTimeout);
-                resizeTimeout = window.setTimeout(scrollToCenter, 150);
-            });
+            prevBtn?.addEventListener('click', () => scrollToIndex(getCurrentIndex() - 1));
+            nextBtn?.addEventListener('click', () => scrollToIndex(getCurrentIndex() + 1));
         });
     }
 </script>

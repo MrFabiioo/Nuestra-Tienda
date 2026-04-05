@@ -45,7 +45,7 @@ const categoryNames = categories.length > 0
 <Layout>
     <main class="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
         <!-- Hero Section -->
-        <section class="py-12 px-4 text-center bg-gradient-to-r from-emerald-600/10 via-transparent to-green-600/10">
+        <section class="py-12 px-4 text-center bg-gradient-to-r from-guacamole-b/[.08] via-transparent to-guacamole-a/[.08]">
             <h1 class="text-4xl md:text-5xl font-bold text-neutral-900 tracking-tight">
                 Nuestra Tienda
             </h1>
@@ -68,21 +68,21 @@ const categoryNames = categories.length > 0
                         type="text"
                         id="search-input"
                         placeholder="Buscar productos..."
-                        class="w-full pl-12 pr-4 py-3 rounded-full border border-neutral-200 bg-white shadow-sm text-neutral-700 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-400 transition-all duration-300"
+                        class="w-full pl-12 pr-4 py-3 rounded-full border border-neutral-200 bg-white shadow-sm text-neutral-700 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-guacamole-b/30 focus:border-guacamole-b transition-all duration-300"
                     />
                 </div>
 
                 <!-- Category Filter Pills -->
                 <div class="flex flex-wrap gap-2 justify-center" id="category-filters">
                     <button 
-                        class="category-pill px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 bg-emerald-600 text-white shadow-md hover:shadow-lg hover:bg-emerald-700"
+                        class="category-pill px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 bg-guacamole-b text-white shadow-md hover:shadow-lg hover:bg-guacamole-a"
                         data-category="todos"
                     >
                         Todos
                     </button>
                     {Object.entries(categoryNames).map(([slug, name]) => (
                         <button 
-                            class="category-pill px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 bg-white text-neutral-600 border border-neutral-200 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700"
+                            class="category-pill px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 bg-white text-neutral-600 border border-neutral-200 hover:bg-guacamole-b/10 hover:border-guacamole-b/40 hover:text-guacamole-b"
                             data-category={slug}
                         >
                             {name}
@@ -104,7 +104,7 @@ const categoryNames = categories.length > 0
             class="px-4 pb-12 max-w-6xl mx-auto"
             id="product-grid"
         >
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {products.map((product) => (
                     <div 
                         class="product-card-wrapper"
@@ -137,7 +137,7 @@ const categoryNames = categories.length > 0
                 </p>
                 <button 
                     id="clear-filters"
-                    class="inline-flex items-center px-6 py-3 rounded-full bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-colors duration-200"
+                    class="inline-flex items-center px-6 py-3 rounded-full bg-guacamole-b text-white font-medium hover:bg-guacamole-a transition-colors duration-200"
                 >
                     Limpiar filtros
                 </button>
@@ -221,12 +221,12 @@ const categoryNames = categories.length > 0
                 // Update pill styles
                 categoryPills.forEach((p) => {
                     const btn = p as HTMLButtonElement;
-                    btn.classList.remove('bg-emerald-600', 'text-white', 'shadow-md', 'hover:shadow-lg', 'hover:bg-emerald-700');
-                    btn.classList.add('bg-white', 'text-neutral-600', 'border', 'border-neutral-200', 'hover:bg-emerald-50', 'hover:border-emerald-300', 'hover:text-emerald-700');
+                    btn.classList.remove('bg-guacamole-b', 'text-white', 'shadow-md', 'hover:shadow-lg', 'hover:bg-guacamole-a');
+                    btn.classList.add('bg-white', 'text-neutral-600', 'border', 'border-neutral-200', 'hover:bg-guacamole-b/10', 'hover:border-guacamole-b/40', 'hover:text-guacamole-b');
                 });
 
-                button.classList.remove('bg-white', 'text-neutral-600', 'border', 'border-neutral-200', 'hover:bg-emerald-50', 'hover:border-emerald-300', 'hover:text-emerald-700');
-                button.classList.add('bg-emerald-600', 'text-white', 'shadow-md', 'hover:shadow-lg', 'hover:bg-emerald-700');
+                button.classList.remove('bg-white', 'text-neutral-600', 'border', 'border-neutral-200', 'hover:bg-guacamole-b/10', 'hover:border-guacamole-b/40', 'hover:text-guacamole-b');
+                button.classList.add('bg-guacamole-b', 'text-white', 'shadow-md', 'hover:shadow-lg', 'hover:bg-guacamole-a');
 
                 filterProducts();
             });
@@ -240,16 +240,16 @@ const categoryNames = categories.length > 0
             // Reset category pills
             categoryPills.forEach((p) => {
                 const btn = p as HTMLButtonElement;
-                btn.classList.remove('bg-emerald-600', 'text-white', 'shadow-md', 'hover:shadow-lg', 'hover:bg-emerald-700');
-                btn.classList.add('bg-white', 'text-neutral-600', 'border', 'border-neutral-200', 'hover:bg-emerald-50', 'hover:border-emerald-300', 'hover:text-emerald-700');
+                btn.classList.remove('bg-guacamole-b', 'text-white', 'shadow-md', 'hover:shadow-lg', 'hover:bg-guacamole-a');
+                btn.classList.add('bg-white', 'text-neutral-600', 'border', 'border-neutral-200', 'hover:bg-guacamole-b/10', 'hover:border-guacamole-b/40', 'hover:text-guacamole-b');
             });
 
             // Set "Todos" as active
             const todosPill = document.querySelector('[data-category="todos"]');
             if (todosPill) {
                 const btn = todosPill as HTMLButtonElement;
-                btn.classList.remove('bg-white', 'text-neutral-600', 'border', 'border-neutral-200', 'hover:bg-emerald-50', 'hover:border-emerald-300', 'hover:text-emerald-700');
-                btn.classList.add('bg-emerald-600', 'text-white', 'shadow-md', 'hover:shadow-lg', 'hover:bg-emerald-700');
+                btn.classList.remove('bg-white', 'text-neutral-600', 'border', 'border-neutral-200', 'hover:bg-guacamole-b/10', 'hover:border-guacamole-b/40', 'hover:text-guacamole-b');
+                btn.classList.add('bg-guacamole-b', 'text-white', 'shadow-md', 'hover:shadow-lg', 'hover:bg-guacamole-a');
             }
 
             filterProducts();

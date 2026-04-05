@@ -3,20 +3,19 @@ import CartButton from "./CartButton";
 import SimpleCart from "@svg/SimpleCart.astro";
 import IconHome from "@svg/IconHome.astro";
 import IconShop from "@svg/IconShop.astro";
-import IconAdmin from "@svg/IconAdmin.astro";
 ---
-<nav class="nav-bar">
+<nav class="nav-bar" aria-label="Navegación lateral">
     <section class="section-one">
         <ul>
             <li class="menu">
-                <div class="bar-container">
+                <div class="bar-container" role="presentation">
                     <div class="bar"></div>
                     <div class="bar"></div>
                     <div class="bar"></div>
                 </div>
             </li>
             <li class="cart">
-                <div class="cart-container">
+                <div class="cart-container" role="presentation">
                     <SimpleCart />
                 </div>
             </li>
@@ -25,22 +24,16 @@ import IconAdmin from "@svg/IconAdmin.astro";
     <section class="section-two">
         <ul>
             <li class="li-container">
-                <span class="icon-container bg-guacamole-fondo">
+                <span class="icon-container bg-guacamole-fondo" aria-hidden="true">
                     <IconHome />
                 </span>
-                <a class="menu-text" href="/">Inicio</a>
+                <a class="menu-text" href="/" aria-label="Inicio">Inicio</a>
             </li>
             <li class="li-container">
-                <span class="icon-container">
+                <span class="icon-container" aria-hidden="true">
                     <IconShop />
                 </span>
-                <a class="menu-text" href="/tienda">Tienda</a>
-            </li>
-            <li class="li-container">
-                <span class="icon-container">
-                    <IconAdmin />
-                </span>
-                <a class="menu-text" href="/admin/dashboard">Admin</a>
+                <a class="menu-text" href="/tienda" aria-label="Tienda">Tienda</a>
             </li>
         </ul>
     </section>

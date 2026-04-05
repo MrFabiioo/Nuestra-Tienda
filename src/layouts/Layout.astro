@@ -4,25 +4,38 @@ import Footer from "../components/Footer.astro";
 import { ClientRouter } from "astro:transitions";
 
 interface Props {
-	title?: String;
+	title?: string;
 	description?: string;
 	image?: string;
 }
+
+const {
+	title = "GuacaShop",
+	description = "El mejor guacamole artesanal, hecho con amor y los ingredientes más frescos.",
+	image = "/og-image.png",
+} = Astro.props;
+
+const pageTitle = title === "GuacaShop" ? title : `${title} | GuacaShop`;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="es">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Guacamole Shop</title>
+		<meta name="description" content={description} />
+		<meta property="og:title" content={pageTitle} />
+		<meta property="og:description" content={description} />
+		<meta property="og:image" content={image} />
+		<meta property="og:type" content="website" />
+		<title>{pageTitle}</title>
 		<ClientRouter />
 	</head>
 	<body>
 		<Navbar />
-		<main>
+		<main id="main-content">
 			<slot />
 		</main>
 		<Footer />
@@ -36,6 +49,18 @@ interface Props {
 		height: 100%;
 		box-sizing: border-box;
 		overflow-x: hidden;
+	}
+
+	/* Focus-visible global: solo muestra outline al navegar con teclado */
+	:focus-visible {
+		outline: 2px solid #568203;
+		outline-offset: 3px;
+		border-radius: 4px;
+	}
+
+	/* Remover outline en click (ya cubierto por :focus-visible) */
+	:focus:not(:focus-visible) {
+		outline: none;
 	}
 
 	main {

@@ -11,73 +11,55 @@ const displayProduct = product.product ?? product;
 const currentImage = displayProduct.images.split(',');
 ---
 
-<div class="product-card group relative h-full bg-white rounded-2xl border border-neutral-200 shadow-sm hover:shadow-xl hover:shadow-emerald-900/10 transition-all duration-300 ease-out hover:-translate-y-1">
+<article class="product-card group relative bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-neutral-200/80 hover:border-neutral-200">
     <a href={`products/${displayProduct.slug}`} class="flex flex-col h-full">
         <!-- Imagen con proporción fija -->
-        <div class="relative aspect-[4/3] overflow-hidden rounded-t-2xl bg-neutral-100">
+        <div class="relative aspect-[4/3] overflow-hidden bg-neutral-50">
             <img
                 src={currentImage[0]}
                 alt={displayProduct.title}
-                class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                class="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+                loading="lazy"
             />
             
-            <!-- Degradado sutil para overlays -->
-            <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            
             <!-- Tag artesanal -->
-            <span class="absolute top-4 left-4 bg-guacamole-b/90 backdrop-blur-sm text-white text-xs font-semibold tracking-wider px-3 py-1 rounded-full shadow-lg">
+            <span class="absolute top-3 left-3 bg-guacamole-b text-white text-[10px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-full shadow-sm">
                 Artesanal
             </span>
         </div>
 
         <!-- Contenido -->
-        <div class="flex flex-col flex-grow p-5">
+        <div class="flex flex-col flex-grow px-5 pt-4 pb-5 gap-1">
             <!-- Título -->
-            <h3 class="text-lg font-bold text-neutral-900 leading-tight line-clamp-2 group-hover:text-guacamole-b transition-colors duration-200">
+            <h3 class="text-base font-bold text-neutral-900 leading-snug line-clamp-2 group-hover:text-guacamole-b transition-colors duration-200">
                 {displayProduct.title}
             </h3>
             
             <!-- Descripción -->
-            <p class="mt-2 text-sm text-neutral-500 leading-relaxed line-clamp-2 flex-grow">
+            <p class="text-sm text-neutral-500 leading-relaxed line-clamp-2 flex-grow mt-1">
                 {displayProduct.description}
             </p>
             
             <!-- Precio y CTA -->
-            <div class="mt-4 flex items-end justify-between gap-3">
-                <span class="text-xl font-bold text-guacamole-b">
-                    ${displayProduct.price}
+            <div class="mt-4 flex items-center justify-between gap-3">
+                <span class="text-xl font-bold text-guacamole-a tracking-tight">
+                    ${displayProduct.price.toLocaleString()}
                 </span>
-                <span class="inline-flex items-center justify-center px-4 py-2 bg-guacamole-b text-white text-sm font-semibold rounded-full shadow-md shadow-guacamole-b/30 group-hover:bg-guacamole-a group-hover:shadow-lg group-hover:shadow-guacamole-a/30 transition-all duration-200">
+                <span class="inline-flex items-center gap-1.5 px-4 py-2 bg-guacamole-b text-white text-sm font-semibold rounded-full transition-all duration-200 group-hover:bg-guacamole-a group-hover:shadow-md group-hover:shadow-guacamole-a/25">
                     Ver más
+                    <svg class="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                    </svg>
                 </span>
             </div>
         </div>
     </a>
-</div>
-
-<script>
-    const images = document.querySelectorAll('#card-img');
-    images.forEach((img) => {
-        const imageElement = img as HTMLImageElement;
-        const firstSrc = imageElement.dataset.first;
-        const secondSrc = imageElement.dataset.second;
-
-        imageElement.addEventListener('mouseenter', () => {
-            if (secondSrc) {
-                imageElement.src = secondSrc;
-            }
-        });
-
-        imageElement.addEventListener('mouseleave', () => {
-            if (firstSrc) {
-                imageElement.src = firstSrc;
-            }
-        });
-    });
-</script>
+</article>
 
 <style>
     .product-card {
-        min-height: 380px;
+        min-height: 340px;
+        display: flex;
+        flex-direction: column;
     }
 </style>

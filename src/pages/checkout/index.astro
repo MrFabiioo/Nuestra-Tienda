@@ -333,7 +333,7 @@ const isEmpty = products.length === 0;
                   
                   <div class="flex justify-between items-center">
                     <span class="font-semibold">Envío</span>
-                    <span class="font-bold text-green-600">Gratis</span>
+                    <span class="font-bold text-guacamole-b">Gratis</span>
                   </div>
                   
                   <div class="flex justify-between items-center">
@@ -343,7 +343,13 @@ const isEmpty = products.length === 0;
                 </div>
                 
                 <!-- Divider -->
-                <div class="border-t-2 border-guacamole-f pt-4">
+                <div
+                  class="border-t-2 border-guacamole-f pt-4"
+                  data-checkout-total
+                  data-subtotal={total}
+                  data-tax={total * 0.15}
+                  data-total={total * 1.15}
+                >
                   <div class="flex justify-between items-center">
                     <span class="text-xl font-black text-guacamole-icons uppercase">Total</span>
                     <span class="text-2xl font-black text-guacamole-pulpa">
@@ -458,6 +464,8 @@ document.addEventListener('astro:page-load',()=>{
   const proceedButton = document.getElementById('proceed-to-payment');
   if (proceedButton) {
     proceedButton.addEventListener('click', (e) => {
+      // Prevent default <a> navigation — we control it via navigate()
+      e.preventDefault();
       const form = document.getElementById('customer-form') as HTMLFormElement;
       if (!form) return;
       
@@ -479,6 +487,19 @@ document.addEventListener('astro:page-load',()=>{
         deliveryMethod: formData.get('deliveryMethod')
       };
       sessionStorage.setItem('guacamole-customer-data', JSON.stringify(customerData));
+
+      // Save order totals so pagos.astro can display the summary
+      const totalEl = document.querySelector('[data-checkout-total]') as HTMLElement | null;
+      if (totalEl) {
+        const subtotalRaw = totalEl.dataset.subtotal ?? '0';
+        const taxRaw = totalEl.dataset.tax ?? '0';
+        const totalRaw = totalEl.dataset.total ?? '0';
+        sessionStorage.setItem('guacamole-order-total', JSON.stringify({
+          subtotal: parseFloat(subtotalRaw),
+          tax: parseFloat(taxRaw),
+          total: parseFloat(totalRaw)
+        }));
+      }
       
       // Navigate to payment page
       navigate('/pagos');

@@ -15,35 +15,34 @@ const currentYear = new Date().getFullYear();
         </div>
 
         <!-- Enlaces -->
-        <div class="footer__links">
-            <h4 class="footer__title">Navegacion</h4>
+        <nav class="footer__links" aria-label="Navegación del pie de página">
+            <h4 class="footer__title">Navegación</h4>
             <ul class="footer__list">
                 <li><a href="/" class="footer__link">Inicio</a></li>
-                <li><a href="/tienda" class="footer__link">Productos</a></li>
-                <li><a href="/admin/dashboard" class="footer__link">Admin</a></li>
-                <li><a href="/guacamole" class="footer__link">Comprar</a></li>
+                <li><a href="/tienda" class="footer__link">Tienda</a></li>
+                <li><a href="/guacamole" class="footer__link">Guacamole</a></li>
             </ul>
-        </div>
+        </nav>
 
         <!-- Contacto -->
-        <div class="footer__contact">
+        <address class="footer__contact">
             <h4 class="footer__title">Contacto</h4>
             <ul class="footer__list">
                 <li class="footer__contact-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                         <polyline points="22,6 12,13 2,6"></polyline>
                     </svg>
-                    hola@guacamole.com
+                    <a href="mailto:hola@guacamole.com" class="footer__contact-link">hola@guacamole.com</a>
                 </li>
                 <li class="footer__contact-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                     </svg>
-                    +57 300 123 4567
+                    <a href="tel:+573001234567" class="footer__contact-link">+57 300 123 4567</a>
                 </li>
             </ul>
-        </div>
+        </address>
 
         <!-- Redes sociales -->
         <div class="footer__social">
@@ -161,11 +160,22 @@ const currentYear = new Date().getFullYear();
         gap: 0.75rem;
         color: rgba(255, 255, 255, 0.7);
         font-size: 0.9rem;
+        font-style: normal;
     }
 
     .footer__contact-item svg {
         color: #568203;
         flex-shrink: 0;
+    }
+
+    .footer__contact-link {
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .footer__contact-link:hover {
+        color: #568203;
     }
 
     /* Social */

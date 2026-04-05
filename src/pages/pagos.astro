@@ -2,408 +2,552 @@
 import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout>
-  <main
-    class="w-full flex flex-col sm:flex-row items-center justify-center bg-guacamole-fondo text-guacamole-icons font-mono p-4 md:p-10 gap-24 sm:gap-8 mt-12 mb-24"
-  >
-    <style>
-      /* Oculta todos los contenidos por defecto */
-      .tab-content {
-        display: none;
-      }
-      /* Muestra el contenido cuando el radio está checked */
-      #tab-bancolombia:checked ~ .tab-bancolombia,
-      #tab-tarjetas:checked ~ .tab-tarjetas,
-      #tab-especie:checked ~ .tab-especie {
-        display: block;
-      }
-      /* Opcional: resalta la pestaña activa */
-      input[type="radio"]:checked + label {
-        background-color: #cdb902; /* Cambia el color de fondo de la pestaña activa */
-        border-color: #000; /* Cambia el color del borde de la pestaña activa */
-        border-bottom: transparent;
-      }
-    </style>
+<Layout title="Método de Pago | Guacamole Shop" description="Elegí tu método de pago preferido para finalizar tu compra">
+  <main class="min-h-screen bg-guacamole-fondo/10 py-8 px-4 md:px-8">
 
-    <div class="w-full h-full relative text-center">
-      <!-- Radios ocultos para controlar las pestañas -->
-      <input type="radio" id="tab-bancolombia" name="tab" class="hidden" />
-      <div
-        class="group relative inline-block focus:ring-3 focus:outline-hidden"
-      >
-        <span
-          class="absolute inset-0 translate-x-1.5 translate-y-1.5 bg-guacamole-f transition-transform group-hover:translate-x-0 group-hover:translate-y-0"
-        ></span>
-        <label
-          id="label-tab-bancolombia"
-          for="tab-bancolombia"
-          class="flex justify-center w-72 text-center mx-auto text-black border-black cursor-pointer relative border-2 px-8 py-3 text-sm font-bold tracking-widest uppercase"
-        >
-          Bancolombia
-        </label>
+    <!-- Step indicator -->
+    <div class="max-w-6xl mx-auto mb-8">
+      <div class="flex items-center gap-2 text-sm text-gray-500 mb-4">
+        <a href="/tienda" class="hover:text-guacamole-b transition-colors">Tienda</a>
+        <span class="text-gray-300">/</span>
+        <a href="/checkout" class="hover:text-guacamole-b transition-colors">Checkout</a>
+        <span class="text-gray-300">/</span>
+        <span class="font-semibold text-guacamole-icons">Pago</span>
       </div>
 
-      <div
-        class="tab-content tab-bancolombia w-full  bg-guacamole-f text-black font-bold border-2 border-black px-3 md:px-6 py-1 md:py-3 text-sm md:text-xl mt-10  grid place-content-center"
-      >
-        <div class="space-y-8 my-6">
-          <details
-            class="group relative overflow-hidden rounded border border-black shadow-sm dark:white"
-          >
-            <summary
-              class="flex items-center justify-between gap-2 p-3 text-gray-700 transition-colors hover:text-gray-900  [&::-webkit-details-marker]:hidden"
-            >
-              <span class="text-sm font-semibold text-black uppercase"> Codigo QR </span>
-              <span class="transition-transform group-open:-rotate-180">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  class="size-4"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
-                </svg>
-              </span>
-            </summary>
-            <div
-              class="divide-y divide-gray-300 border-t border-gray-300 bg-white "
-            >
-              <picture>
-                <img src="/images/guacamoleIA.png" alt="Guacamole Image" />
-              </picture>
-            </div>
-          </details>
-          <details
-            class="group relative overflow-hidden rounded border border-black shadow-sm "
-          >
-            <summary
-              class="flex items-center justify-between gap-2 p-3 text-black transition-colors hover:text-gray-900 [&::-webkit-details-marker]:hidden"
-            >
-              <span class="text-sm font-semibold text-black uppercase "> Transferencia Bancaria </span>
-              <span class="transition-transform group-open:-rotate-180">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  class="size-4"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
-                </svg>
-              </span>
-            </summary>
-            <div
-              class="divide-y divide-black border-t border-black bg-white "
-            >
-              <h1
-                class="text-lg bg-guacamole-h text-center font-semibold text-black uppercase "
-              >
-                Bancolombia 331-85984-045 Ahorros
-              </h1>
-            </div>
-          </details>
-          <details
-            class="group relative overflow-hidden rounded border border-black shadow-sm"
-          >
-            <summary
-              class="flex items-center justify-between gap-2 p-3 text-black transition-colors hover:text-gray-900 [&::-webkit-details-marker]:hidden"
-            >
-              <span class="text-sm font-semibold text-black uppercase"> Nequi </span>
-              <span class="transition-transform group-open:-rotate-180">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  class="size-4"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
-                </svg>
-              </span>
-            </summary>
-            <div
-              class="divide-y divide-black border-t border-black bg-white "
-            >
-              <h1
-                class="text-lg bg-guacamole-h text-center font-semibold text-black "
-              >
-                3502018487
-              </h1>
-            </div>
-          </details>
-          
-          <a
-            class="group relative inline-block focus:ring-3 focus:outline-hidden mb-auto"
-            href="#"
-          >
-            <span
-              class="absolute inset-0 translate-x-1.5 translate-y-1.5 bg-guacamole-icons transition-transform group-hover:translate-x-0 group-hover:translate-y-0"
-            ></span>
-
-            <span
-              
-              class="relative inline-block border-2 border-current px-8 py-3 text-sm font-bold tracking-widest text-black uppercase"
-            >
-              Finalizar compra
-            </span>
-          </a>
-          
+      <!-- Progress Steps -->
+      <div class="flex items-center gap-0 mb-8">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-guacamole-b flex items-center justify-center text-white font-bold text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <span class="text-sm font-semibold text-guacamole-b hidden sm:block">Mis Datos</span>
+        </div>
+        <div class="flex-1 h-0.5 bg-guacamole-b mx-3 max-w-[80px]"></div>
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-guacamole-icons flex items-center justify-center text-white font-bold text-sm">2</div>
+          <span class="text-sm font-bold text-guacamole-icons hidden sm:block">Método de Pago</span>
+        </div>
+        <div class="flex-1 h-0.5 bg-gray-200 mx-3 max-w-[80px]"></div>
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-400 font-bold text-sm">3</div>
+          <span class="text-sm font-semibold text-gray-400 hidden sm:block">Confirmación</span>
         </div>
       </div>
+
+      <h1 class="text-3xl md:text-4xl font-black text-guacamole-icons uppercase tracking-wide">
+        Método de Pago
+      </h1>
+      <p class="text-gray-600 mt-1">Elegí cómo querés pagar tu pedido</p>
     </div>
-    <div class="w-full h-full relative text-center">
-      <input type="radio" id="tab-tarjetas" name="tab" class="hidden" />
-      <div
-        class="group relative inline-block focus:ring-3 focus:outline-hidden"
-      >
-        <span
-          class="absolute inset-0 translate-x-1.5 translate-y-1.5 bg-guacamole-f transition-transform group-hover:translate-x-0 group-hover:translate-y-0"
-        ></span>
-        <label
-          id="label-tab-tarjetas"
-          for="tab-tarjetas"
-          class="flex justify-center w-72 text-center mx-auto text-black border-black cursor-pointer relative border-2 px-8 py-3 text-sm font-bold tracking-widest uppercase"
+
+    <!-- Main Layout: 2 cols -->
+    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      <!-- Payment Methods Column -->
+      <div class="lg:col-span-2 space-y-4">
+
+        <!-- Back link -->
+        <a
+          href="/checkout"
+          class="inline-flex items-center gap-2 text-guacamole-icons hover:text-guacamole-b transition-colors mb-2"
         >
-          Tarjetas
-        </label>
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          <span class="font-semibold">Volver al checkout</span>
+        </a>
+
+        <!-- Payment Methods Card -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+          <div class="bg-guacamole-b px-6 py-4">
+            <h2 class="text-xl font-black text-white uppercase tracking-wide">
+              Elegí tu método de pago
+            </h2>
+          </div>
+
+          <div class="p-6">
+            <!-- Tab Buttons -->
+            <div class="flex flex-wrap gap-3 mb-6" role="tablist" aria-label="Métodos de pago">
+              <button
+                type="button"
+                role="tab"
+                aria-selected="true"
+                aria-controls="panel-bancolombia"
+                id="tab-btn-bancolombia"
+                class="payment-tab active-tab flex items-center gap-2 px-5 py-3 rounded-xl border-2 border-guacamole-b bg-guacamole-b text-white font-bold text-sm transition-all"
+                data-target="panel-bancolombia"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                Bancolombia
+              </button>
+
+              <button
+                type="button"
+                role="tab"
+                aria-selected="false"
+                aria-controls="panel-nequi"
+                id="tab-btn-nequi"
+                class="payment-tab flex items-center gap-2 px-5 py-3 rounded-xl border-2 border-gray-200 text-guacamole-icons font-bold text-sm transition-all hover:border-guacamole-b hover:text-guacamole-b"
+                data-target="panel-nequi"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                Nequi
+              </button>
+
+              <button
+                type="button"
+                role="tab"
+                aria-selected="false"
+                aria-controls="panel-transferencia"
+                id="tab-btn-transferencia"
+                class="payment-tab flex items-center gap-2 px-5 py-3 rounded-xl border-2 border-gray-200 text-guacamole-icons font-bold text-sm transition-all hover:border-guacamole-b hover:text-guacamole-b"
+                data-target="panel-transferencia"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                </svg>
+                Transferencia
+              </button>
+            </div>
+
+            <!-- Panel: Bancolombia -->
+            <div
+              id="panel-bancolombia"
+              role="tabpanel"
+              aria-labelledby="tab-btn-bancolombia"
+              class="payment-panel"
+            >
+              <div class="bg-guacamole-fondo/5 border border-guacamole-fondo/20 rounded-xl p-5 space-y-5">
+                <!-- Instructions -->
+                <div class="flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-lg p-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div>
+                    <p class="text-sm font-bold text-blue-700">¿Cómo pagar?</p>
+                    <p class="text-sm text-blue-600 mt-1">
+                      Escaneá el código QR desde la app de Bancolombia, o hacé una transferencia a la cuenta indicada. Una vez realizado el pago, tomá captura y comunicate con nosotros.
+                    </p>
+                  </div>
+                </div>
+
+                <!-- QR Code -->
+                <div class="text-center">
+                  <p class="text-sm font-semibold text-guacamole-icons mb-3 uppercase tracking-wide">Código QR — Bancolombia</p>
+                  <div class="inline-block bg-white rounded-xl border-2 border-guacamole-f p-3 shadow-sm">
+                    <img
+                      src="/images/guacamoleIA.png"
+                      alt="Código QR Bancolombia para pago"
+                      class="w-48 h-48 object-contain"
+                    />
+                  </div>
+                </div>
+
+                <!-- Account Info -->
+                <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                  <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wide">Datos de la cuenta</p>
+                  </div>
+                  <div class="p-4 space-y-3">
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-500">Banco</span>
+                      <span class="text-sm font-bold text-guacamole-icons">Bancolombia</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-500">Tipo</span>
+                      <span class="text-sm font-bold text-guacamole-icons">Cuenta de Ahorros</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-500">Número</span>
+                      <span class="text-sm font-bold text-guacamole-icons font-mono tracking-wider">331-85984-045</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel: Nequi -->
+            <div
+              id="panel-nequi"
+              role="tabpanel"
+              aria-labelledby="tab-btn-nequi"
+              class="payment-panel hidden"
+            >
+              <div class="bg-guacamole-fondo/5 border border-guacamole-fondo/20 rounded-xl p-5 space-y-5">
+                <!-- Instructions -->
+                <div class="flex items-start gap-3 bg-purple-50 border border-purple-100 rounded-lg p-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-purple-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div>
+                    <p class="text-sm font-bold text-purple-700">¿Cómo pagar con Nequi?</p>
+                    <p class="text-sm text-purple-600 mt-1">
+                      Abrí la app de Nequi, escaneá el QR o ingresá el número de celular. Indicá el monto exacto de tu pedido. Luego mandanos la captura del comprobante.
+                    </p>
+                  </div>
+                </div>
+
+                <!-- QR Code -->
+                <div class="text-center">
+                  <p class="text-sm font-semibold text-guacamole-icons mb-3 uppercase tracking-wide">Código QR — Nequi</p>
+                  <div class="inline-block bg-white rounded-xl border-2 border-purple-200 p-3 shadow-sm">
+                    <img
+                      src="/images/guacamoleIA.png"
+                      alt="Código QR Nequi para pago"
+                      class="w-48 h-48 object-contain"
+                    />
+                  </div>
+                </div>
+
+                <!-- Account Info -->
+                <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                  <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wide">Número Nequi</p>
+                  </div>
+                  <div class="p-4 flex justify-between items-center">
+                    <span class="text-sm text-gray-500">Celular</span>
+                    <span class="text-lg font-black text-guacamole-icons font-mono tracking-widest">350 201 8487</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel: Transferencia Bancaria -->
+            <div
+              id="panel-transferencia"
+              role="tabpanel"
+              aria-labelledby="tab-btn-transferencia"
+              class="payment-panel hidden"
+            >
+              <div class="bg-guacamole-fondo/5 border border-guacamole-fondo/20 rounded-xl p-5 space-y-5">
+                <!-- Instructions -->
+                <div class="flex items-start gap-3 bg-green-50 border border-green-100 rounded-lg p-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-green-600 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div>
+                    <p class="text-sm font-bold text-green-700">¿Cómo hacer la transferencia?</p>
+                    <p class="text-sm text-green-600 mt-1">
+                      Accedé a tu banca en línea o app, ingresá los datos de la cuenta indicados abajo, transferí el monto exacto y envianos el comprobante por WhatsApp o correo.
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Account Info -->
+                <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                  <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wide">Datos de transferencia</p>
+                  </div>
+                  <div class="p-4 space-y-3">
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-500">Banco</span>
+                      <span class="text-sm font-bold text-guacamole-icons">Bancolombia</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-500">Tipo</span>
+                      <span class="text-sm font-bold text-guacamole-icons">Cuenta de Ahorros</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-500">Número</span>
+                      <span class="text-sm font-bold text-guacamole-icons font-mono tracking-wider">331-85984-045</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-500">Titular</span>
+                      <span class="text-sm font-bold text-guacamole-icons">Guacamole Shop</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Important Note -->
+                <div class="flex items-start gap-3 bg-guacamole-f/10 border border-guacamole-f/30 rounded-lg p-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-guacamole-h mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <p class="text-sm text-guacamole-h font-semibold">
+                    Asegurate de transferir el monto exacto del pedido e indicar tu nombre completo como referencia.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Next Steps Card -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+          <div class="bg-guacamole-f px-6 py-4">
+            <h2 class="text-xl font-black text-black uppercase tracking-wide">
+              Próximos pasos
+            </h2>
+          </div>
+          <div class="p-6">
+            <ol class="space-y-4">
+              <li class="flex items-start gap-4">
+                <div class="w-8 h-8 rounded-full bg-guacamole-b/10 border-2 border-guacamole-b flex items-center justify-center shrink-0 mt-0.5">
+                  <span class="text-sm font-black text-guacamole-b">1</span>
+                </div>
+                <div>
+                  <p class="font-bold text-guacamole-icons">Realizá el pago</p>
+                  <p class="text-sm text-gray-500">Usá el método seleccionado arriba y transferí el monto exacto de tu pedido.</p>
+                </div>
+              </li>
+              <li class="flex items-start gap-4">
+                <div class="w-8 h-8 rounded-full bg-guacamole-b/10 border-2 border-guacamole-b flex items-center justify-center shrink-0 mt-0.5">
+                  <span class="text-sm font-black text-guacamole-b">2</span>
+                </div>
+                <div>
+                  <p class="font-bold text-guacamole-icons">Guardá el comprobante</p>
+                  <p class="text-sm text-gray-500">Tomá una captura de pantalla o guardá el número de transacción.</p>
+                </div>
+              </li>
+              <li class="flex items-start gap-4">
+                <div class="w-8 h-8 rounded-full bg-guacamole-b/10 border-2 border-guacamole-b flex items-center justify-center shrink-0 mt-0.5">
+                  <span class="text-sm font-black text-guacamole-b">3</span>
+                </div>
+                <div>
+                  <p class="font-bold text-guacamole-icons">Confirmá tu pedido</p>
+                  <p class="text-sm text-gray-500">Hacé clic en "Confirmar pago" abajo para enviarnos tu comprobante y finalizar.</p>
+                </div>
+              </li>
+            </ol>
+          </div>
+        </div>
+
       </div>
-      <div
-        class="tab-content tab-tarjetas w-full  bg-guacamole-f text-amber-950 font-bold border-2 border-black  px-3 md:px-6 py-1 md:py-3  text-sm md:text-xl mt-10"
-      >
-      <div class="space-y-8 my-6">
-        <details
-          class="group relative overflow-hidden rounded border border-gray-300 shadow-sm dark:border-gray-600"
-        >
-          <summary
-            class="flex items-center justify-between gap-2 p-3 text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-200 dark:hover:text-white [&::-webkit-details-marker]:hidden"
-          >
-            <span class="text-sm font-medium"> Codigo QR </span>
-            <span class="transition-transform group-open:-rotate-180">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                class="size-4"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
-              </svg>
-            </span>
-          </summary>
-          <div
-            class="divide-y divide-gray-300 border-t border-gray-300 bg-white dark:divide-gray-600 dark:border-gray-600 dark:bg-gray-900"
-          >
-            <picture>
-              <img src="/images/guacamoleIA.png" alt="Guacamole Image" />
-            </picture>
+
+      <!-- Summary Panel -->
+      <div class="lg:col-span-1">
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 sticky top-24">
+          <div class="bg-guacamole-f px-6 py-4">
+            <h2 class="text-xl font-black text-black uppercase tracking-wide">
+              Resumen del Pedido
+            </h2>
           </div>
-        </details>
-        
-        <details
-          class="group relative overflow-hidden rounded border border-gray-300 shadow-sm dark:border-gray-600"
-        >
-          <summary
-            class="flex items-center justify-between gap-2 p-3 text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-200 dark:hover:text-white [&::-webkit-details-marker]:hidden"
-          >
-            <span class="text-sm font-medium"> Transferencia Bancaria </span>
-            <span class="transition-transform group-open:-rotate-180">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                class="size-4"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
-              </svg>
-            </span>
-          </summary>
-          <div
-            class="divide-y divide-gray-300 border-t border-gray-300 bg-white dark:divide-gray-600 dark:border-gray-600 dark:bg-gray-900"
-          >
-            <h1
-              class="text-lg bg-guacamole-icons text-center font-semibold text-gray-700 dark:text-gray-200"
+
+          <div class="p-6 space-y-4">
+            <!-- Customer Info (from sessionStorage) -->
+            <div id="customer-summary" class="hidden space-y-2 pb-4 border-b border-gray-100">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">Entrega para</p>
+              <p id="summary-name" class="font-bold text-guacamole-icons text-sm"></p>
+              <p id="summary-address" class="text-sm text-gray-500"></p>
+            </div>
+
+            <!-- Order total placeholder (populated from sessionStorage) -->
+            <div id="order-summary-detail" class="space-y-3 text-gray-600 hidden">
+              <div class="flex justify-between items-center">
+                <span class="font-semibold text-sm">Subtotal</span>
+                <span id="summary-subtotal" class="font-bold text-guacamole-icons text-sm"></span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="font-semibold text-sm">Envío</span>
+                <span class="font-bold text-guacamole-b text-sm">Gratis</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="font-semibold text-sm">Impuesto (15%)</span>
+                <span id="summary-tax" class="font-bold text-guacamole-icons text-sm"></span>
+              </div>
+            </div>
+
+            <!-- Fallback if no data -->
+            <div id="order-summary-fallback" class="text-center py-4">
+              <p class="text-sm text-gray-400">Para ver el resumen, completá los datos en <a href="/checkout" class="text-guacamole-b hover:underline font-semibold">checkout</a>.</p>
+            </div>
+
+            <!-- Total -->
+            <div class="border-t-2 border-guacamole-f pt-4">
+              <div class="flex justify-between items-center">
+                <span class="text-xl font-black text-guacamole-icons uppercase">Total</span>
+                <span id="summary-total" class="text-2xl font-black text-guacamole-icons">—</span>
+              </div>
+            </div>
+
+            <!-- Confirm Payment Button -->
+            <button
+              type="button"
+              id="confirm-payment-btn"
+              class="group block w-full bg-guacamole-b text-white text-center font-bold text-sm py-4 px-8 tracking-wider uppercase rounded-full shadow-[0_4px_12px_rgba(86,130,3,0.3)] hover:bg-guacamole-a hover:shadow-[0_6px_20px_rgba(86,130,3,0.4)] hover:-translate-y-0.5 transition-all duration-300"
             >
-              Bancolombia 331-85984-045 Ahorros
-            </h1>
-          </div>
-        </details>
-        <details
-          class="group relative overflow-hidden rounded border border-gray-300 shadow-sm dark:border-gray-600"
-        >
-          <summary
-            class="flex items-center justify-between gap-2 p-3 text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-200 dark:hover:text-white [&::-webkit-details-marker]:hidden"
-          >
-            <span class="text-sm font-medium"> Nequi </span>
-            <span class="transition-transform group-open:-rotate-180">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                class="size-4"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
+              <span class="flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Confirmar Pago
+              </span>
+            </button>
+
+            <!-- Secure Badge -->
+            <p class="text-center text-xs text-gray-400 flex items-center justify-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
-            </span>
-          </summary>
-          <div
-            class="divide-y divide-gray-300 border-t border-gray-300 bg-white dark:divide-gray-600 dark:border-gray-600 dark:bg-gray-900"
-          >
-            <h1
-              class="text-lg bg-guacamole-icons text-center font-semibold text-gray-700 dark:text-gray-200"
-            >
-              3502018487
-            </h1>
+              Compra 100% segura
+            </p>
+
+            <!-- Trust Badges -->
+            <div class="bg-guacamole-fondo/10 rounded-lg p-4 space-y-2 border-t border-gray-100 mt-2">
+              <div class="flex items-center gap-2 text-sm text-guacamole-icons">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-guacamole-b shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                </svg>
+                <span class="font-semibold">Envío gratis en pedidos +$50</span>
+              </div>
+              <div class="flex items-center gap-2 text-sm text-guacamole-icons">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-guacamole-b shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="font-semibold">Garantía de devolución 30 días</span>
+              </div>
+            </div>
           </div>
-        </details>
-      </div>
-    </div>
-    </div>
-    <div class="w-full h-full relative text-center">
-      <input type="radio" id="tab-especie" name="tab" class="hidden" />
-      <div
-        class="group relative inline-block focus:ring-3 focus:outline-hidden"
-      >
-        <span
-          class="absolute inset-0 translate-x-1.5 translate-y-1.5 bg-guacamole-f transition-transform group-hover:translate-x-0 group-hover:translate-y-0"
-        ></span>
-        <label
-          id="label-tab-especie"
-          for="tab-especie"
-          class="flex justify-center w-72 text-center mx-auto text-black border-black cursor-pointer relative border-2 px-8 py-3 text-sm font-bold tracking-widest uppercase"
-        >
-          En especie
-        </label>
-      </div>
-      <div
-        class="tab-content tab-especie w-full  bg-guacamole-f text-amber-950 font-bold border-2 border-black  px-3 md:px-6 py-1 md:py-3  text-sm md:text-xl mt-10"
-      >
-        <div class="space-y-8 my-6">
-          <details
-          class="group relative overflow-hidden rounded border border-gray-300 shadow-sm dark:border-gray-600"
-        >
-          <summary
-            class="flex items-center justify-between gap-2 p-3 text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-200 dark:hover:text-white [&::-webkit-details-marker]:hidden"
-          >
-            <span class="text-sm font-medium"> Codigo QR </span>
-            <span class="transition-transform group-open:-rotate-180">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                class="size-4"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
-              </svg>
-            </span>
-          </summary>
-          <div
-            class="divide-y divide-gray-300 border-t border-gray-300 bg-white dark:divide-gray-600 dark:border-gray-600 dark:bg-gray-900"
-          >
-            <picture>
-              <img src="/images/guacamoleIA.png" alt="Guacamole Image" />
-            </picture>
-          </div>
-        </details>
-        <details
-          class="group relative overflow-hidden rounded border border-gray-300 shadow-sm dark:border-gray-600"
-        >
-          <summary
-            class="flex items-center justify-between gap-2 p-3 text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-200 dark:hover:text-white [&::-webkit-details-marker]:hidden"
-          >
-            <span class="text-sm font-medium"> Transferencia Bancaria </span>
-            <span class="transition-transform group-open:-rotate-180">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                class="size-4"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
-              </svg>
-            </span>
-          </summary>
-          <div
-            class="divide-y divide-gray-300 border-t border-gray-300 bg-white dark:divide-gray-600 dark:border-gray-600 dark:bg-gray-900"
-          >
-            <h1
-              class="text-lg bg-guacamole-icons text-center font-semibold text-gray-700 dark:text-gray-200"
-            >
-              Bancolombia 331-85984-045 Ahorros
-            </h1>
-          </div>
-        </details>
-        <details
-          class="group relative overflow-hidden rounded border border-gray-300 shadow-sm dark:border-gray-600"
-        >
-          <summary
-            class="flex items-center justify-between gap-2 p-3 text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-200 dark:hover:text-white [&::-webkit-details-marker]:hidden"
-          >
-            <span class="text-sm font-medium"> Nequi </span>
-            <span class="transition-transform group-open:-rotate-180">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                class="size-4"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
-              </svg>
-            </span>
-          </summary>
-          <div
-            class="divide-y divide-gray-300 border-t border-gray-300 bg-white dark:divide-gray-600 dark:border-gray-600 dark:bg-gray-900"
-          >
-            <h1
-              class="text-lg bg-guacamole-icons text-center font-semibold text-gray-700 dark:text-gray-200"
-            >
-              3502018487
-            </h1>
-          </div>
-        </details>
         </div>
       </div>
+
     </div>
+
+    <!-- Confirmation Modal -->
+    <div
+      id="confirm-modal"
+      class="hidden fixed inset-0 z-50 flex items-center justify-center px-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+    >
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="modal-backdrop"></div>
+      <div class="relative bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full text-center">
+        <div class="w-20 h-20 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h2 id="modal-title" class="text-2xl font-black text-guacamole-icons uppercase mb-3">¡Gracias por tu compra!</h2>
+        <p class="text-gray-600 mb-6">
+          Recibimos tu pedido. En breve nos comunicaremos para confirmar el pago y coordinar la entrega.
+        </p>
+        <a
+          href="/tienda"
+          class="group relative inline-block focus:ring-3 focus:outline-hidden"
+        >
+          <span class="absolute inset-0 translate-x-1.5 translate-y-1.5 bg-guacamole-f transition-transform group-hover:translate-x-0 group-hover:translate-y-0"></span>
+          <span class="relative inline-block border-2 border-current px-8 py-3 text-sm font-bold tracking-widest text-black uppercase">
+            Seguir comprando
+          </span>
+        </a>
+      </div>
+    </div>
+
   </main>
 </Layout>
+
+<script>
+  import { navigate } from "astro:transitions/client";
+
+  document.addEventListener('astro:page-load', () => {
+
+    // ─── Tab switching logic ───────────────────────────────────────────────
+    const tabs = document.querySelectorAll<HTMLButtonElement>('.payment-tab');
+    const panels = document.querySelectorAll<HTMLDivElement>('.payment-panel');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const targetId = tab.dataset.target;
+
+        // Update tab states
+        tabs.forEach(t => {
+          const isActive = t === tab;
+          t.setAttribute('aria-selected', String(isActive));
+          if (isActive) {
+            t.classList.add('active-tab', 'bg-guacamole-b', 'border-guacamole-b', 'text-white');
+            t.classList.remove('bg-white', 'border-gray-200', 'text-guacamole-icons');
+          } else {
+            t.classList.remove('active-tab', 'bg-guacamole-b', 'border-guacamole-b', 'text-white');
+            t.classList.add('bg-white', 'border-gray-200', 'text-guacamole-icons');
+          }
+        });
+
+        // Update panel visibility
+        panels.forEach(panel => {
+          if (panel.id === targetId) {
+            panel.classList.remove('hidden');
+          } else {
+            panel.classList.add('hidden');
+          }
+        });
+      });
+    });
+
+    // ─── Load customer data from sessionStorage ────────────────────────────
+    const savedCustomerData = sessionStorage.getItem('guacamole-customer-data');
+    const summaryContainer = document.getElementById('customer-summary');
+    const orderDetailContainer = document.getElementById('order-summary-detail');
+    const orderFallback = document.getElementById('order-summary-fallback');
+    const summaryName = document.getElementById('summary-name');
+    const summaryAddress = document.getElementById('summary-address');
+    const summaryTotal = document.getElementById('summary-total');
+    const summarySubtotal = document.getElementById('summary-subtotal');
+    const summaryTax = document.getElementById('summary-tax');
+
+    if (savedCustomerData) {
+      try {
+        const data = JSON.parse(savedCustomerData);
+
+        // Show customer info
+        if (summaryContainer && summaryName && summaryAddress && data.fullName) {
+          summaryName.textContent = data.fullName;
+          summaryAddress.textContent = [data.address, data.city].filter(Boolean).join(', ') || '';
+          summaryContainer.classList.remove('hidden');
+        }
+      } catch (e) {
+        // Silently ignore parse errors
+      }
+    }
+
+    // Load cart total from sessionStorage (set by checkout page)
+    const savedOrderTotal = sessionStorage.getItem('guacamole-order-total');
+    if (savedOrderTotal) {
+      try {
+        const { subtotal, tax, total } = JSON.parse(savedOrderTotal);
+
+        const fmt = (n: number) => new Intl.NumberFormat('es-CO', {
+          style: 'currency',
+          currency: 'COP',
+          maximumFractionDigits: 0
+        }).format(n);
+
+        if (summarySubtotal) summarySubtotal.textContent = fmt(subtotal);
+        if (summaryTax) summaryTax.textContent = fmt(tax);
+        if (summaryTotal) summaryTotal.textContent = fmt(total);
+        if (orderDetailContainer) orderDetailContainer.classList.remove('hidden');
+        if (orderFallback) orderFallback.classList.add('hidden');
+      } catch (e) {
+        // Fallback stays visible
+      }
+    }
+
+    // ─── Confirm Payment button ────────────────────────────────────────────
+    const confirmBtn = document.getElementById('confirm-payment-btn');
+    const confirmModal = document.getElementById('confirm-modal');
+    const modalBackdrop = document.getElementById('modal-backdrop');
+
+    if (confirmBtn && confirmModal) {
+      confirmBtn.addEventListener('click', () => {
+        // Clear session data
+        sessionStorage.removeItem('guacamole-customer-data');
+        sessionStorage.removeItem('guacamole-order-total');
+        // Show confirmation modal
+        confirmModal.classList.remove('hidden');
+      });
+    }
+
+    if (modalBackdrop) {
+      modalBackdrop.addEventListener('click', () => {
+        confirmModal?.classList.add('hidden');
+      });
+    }
+  });
+</script>
