@@ -199,15 +199,23 @@ export default function CartButton() {
 
       {/* Mini-Cart Panel */}
       {isOpen && (
-        <div
-          ref={cartRef}
-          role="dialog"
-          aria-label="Tu carrito de compras"
-          aria-modal="true"
-          class="absolute right-0 top-full z-50 mt-2 flex max-h-[80vh] w-[min(24rem,calc(100vw-0.75rem))] flex-col overflow-hidden rounded-[1.25rem] border border-guacamole-b/30 bg-white shadow-[0_20px_60px_rgba(0,0,0,0.25)] sm:mt-3 sm:rounded-2xl"
-        >
+        <>
+          <button
+            type="button"
+            aria-label="Cerrar carrito"
+            class="fixed inset-0 z-40 bg-[#1d1d1f]/45 backdrop-blur-[2px] sm:hidden"
+            onClick={() => setIsOpen(false)}
+          />
+
+          <div
+            ref={cartRef}
+            role="dialog"
+            aria-label="Tu carrito de compras"
+            aria-modal="true"
+            class="fixed inset-x-2 top-16 z-50 mt-2 flex max-h-[calc(100dvh-5rem)] w-auto flex-col overflow-hidden rounded-[1.25rem] border border-guacamole-b/30 bg-white shadow-[0_20px_60px_rgba(0,0,0,0.25)] sm:inset-x-auto sm:right-3 sm:top-16 sm:mt-0 sm:max-h-[min(80vh,calc(100dvh-5.5rem))] sm:w-[min(24rem,calc(100vw-1.5rem))] sm:rounded-2xl lg:absolute lg:right-0 lg:top-full lg:mt-3 lg:max-h-[80vh] lg:w-96"
+          >
           {/* Header - dark, mirrors navbar */}
-          <div class="flex items-start justify-between gap-3 border-b-2 border-guacamole-b/40 bg-[#1d1d1f] px-3.5 py-3 sm:items-center sm:px-5 sm:py-3.5">
+          <div class="shrink-0 flex items-start justify-between gap-3 border-b-2 border-guacamole-b/40 bg-[#1d1d1f] px-3.5 py-3 sm:items-center sm:px-5 sm:py-3.5">
             <div class="flex min-w-0 items-center gap-2 text-white sm:gap-2.5">
               <span class="text-guacamole-f opacity-90"><Cart /></span>
               <div class="flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2.5">
@@ -229,7 +237,7 @@ export default function CartButton() {
           </div>
 
           {/* Items - Scrollable */}
-          <div class="flex-1 overflow-y-auto">
+          <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain">
             {feedback && (
               <div class="border-b border-guacamole-f/30 bg-guacamole-fondo/15 px-3.5 py-3 sm:px-5" aria-live="polite">
                 <div class={`rounded-2xl border px-3 py-2.5 ${feedback.tone === 'success' ? 'border-guacamole-b/20 bg-white text-guacamole-icons' : 'border-neutral-200 bg-white text-guacamole-icons'}`}>
@@ -273,7 +281,7 @@ export default function CartButton() {
 
                     {/* Info */}
                     <div class="flex-1 min-w-0">
-                      <p class="line-clamp-2 pr-1 text-sm font-bold leading-snug text-guacamole-icons">
+                      <p class="line-clamp-2 break-words pr-1 text-sm font-bold leading-snug text-guacamole-icons">
                         {product.name}
                       </p>
                       <div class="mt-1 flex flex-wrap items-center gap-1.5 sm:gap-2">
@@ -316,9 +324,9 @@ export default function CartButton() {
 
           {/* Footer - Totals & CTA */}
           {$cartItems.length > 0 && (
-            <div class="border-t border-gray-100">
+            <div class="shrink-0 border-t border-gray-100 bg-white">
               {/* Price Breakdown */}
-              <div class="space-y-2 px-3.5 pb-2 pt-4 sm:px-5">
+              <div class="space-y-2 px-3.5 pb-2 pt-3.5 sm:px-5 sm:pt-4">
                 <div class="flex justify-between items-center text-sm text-gray-500">
                   <span class="font-medium">Subtotal</span>
                   <span class="font-semibold text-guacamole-icons">{formatPrice($totalPriceValue)}</span>
@@ -350,10 +358,10 @@ export default function CartButton() {
               </div>
 
               {/* CTA Primary */}
-                <div class="space-y-2 px-3.5 pb-3 sm:px-5">
+                <div class="space-y-2 px-3.5 pb-3.5 sm:px-5 sm:pb-3">
                   <a
                     href="/checkout"
-                  class="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-guacamole-pulpa px-4 py-3 text-sm font-black uppercase tracking-wider text-guacamole-icons shadow-[0_4px_12px_rgba(86,130,3,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-guacamole-f hover:shadow-[0_6px_20px_rgba(86,130,3,0.4)] sm:px-6"
+                  class="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-guacamole-pulpa px-4 py-3 text-center text-sm font-black uppercase tracking-wider text-guacamole-icons shadow-[0_4px_12px_rgba(86,130,3,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-guacamole-f hover:shadow-[0_6px_20px_rgba(86,130,3,0.4)] sm:px-6"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
@@ -365,7 +373,7 @@ export default function CartButton() {
                   </p>
                   <div class="flex flex-col gap-2 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
                     <a href="/tienda" class="text-xs font-semibold text-guacamole-b transition-colors hover:text-guacamole-a">← Seguir comprando</a>
-                    <button onClick={handleClearCart} class="text-xs text-gray-400 transition-colors hover:text-red-500">Limpiar carrito</button>
+                    <button onClick={handleClearCart} class="text-xs font-semibold text-gray-400 transition-colors hover:text-red-500">Limpiar carrito</button>
                 </div>
               </div>
 
@@ -380,7 +388,8 @@ export default function CartButton() {
               </div>
             </div>
           )}
-        </div>
+          </div>
+        </>
       )}
     </>
   );
