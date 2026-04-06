@@ -6,13 +6,26 @@ import Cart from './svgs/Cart';
 import { cartItems, totalQuantity, totalPrice } from 'src/store/cart.store';
 import { CartCookiesClient } from '@utils/cart-cookies';
 import type { CartItem } from '@interfaces/cart-item';
+import {
+  getCartFeedbackEventName,
+  getCartOpenEventName,
+  type CartFeedbackDetail,
+} from '@utils/cart-feedback';
+
+type InlineFeedback = {
+  tone: 'success' | 'neutral';
+  title: string;
+  message: string;
+};
 
 export default function CartButton() {
   const $cartItems = useStore(cartItems);
   const $totalQty = useStore(totalQuantity);
   const $totalPriceValue = useStore(totalPrice);
   const [isOpen, setIsOpen] = useState(false);
+  const [feedback, setFeedback] = useState<InlineFeedback | null>(null);
   const cartRef = useRef<HTMLDivElement>(null);
+  const feedbackTimeoutRef = useRef<number | null>(null);
 
   // Close cart on route change and page refresh
   useEffect(() => {
@@ -35,6 +48,89 @@ export default function CartButton() {
     cartItems.set(initialCart);
   }, []);
 
+  useEffect(() => {
+    const feedbackEventName = getCartFeedbackEventName();
+    const openEventName = getCartOpenEventName();
+
+    const clearFeedbackTimer = () => {
+      if (feedbackTimeoutRef.current) {
+        window.clearTimeout(feedbackTimeoutRef.current);
+      }
+    };
+
+    const buildFeedback = (detail: CartFeedbackDetail): InlineFeedback => {
+      const totalItemsLabel =
+        typeof detail.totalItems === 'number'
+          ? `${detail.totalItems} ${detail.totalItems === 1 ? 'item' : 'items'} en total`
+          : 'Tu carrito quedó actualizado';
+
+      switch (detail.type) {
+        case 'add':
+          return {
+            tone: 'success',
+            title: detail.productName ? `${detail.productName} ya está en tu carrito` : 'Producto agregado',
+            message:
+              detail.message ??
+              `Sumaste ${detail.quantity ?? 1} ${detail.quantity === 1 ? 'unidad' : 'unidades'}. ${totalItemsLabel}.`,
+          };
+        case 'remove':
+          return {
+            tone: 'neutral',
+            title: detail.productName ? `${detail.productName} se removió del carrito` : 'Producto removido',
+            message: detail.message ?? `${totalItemsLabel}. Podés seguir ajustándolo cuando quieras.`,
+          };
+        case 'clear':
+          return {
+            tone: 'neutral',
+            title: 'Carrito vaciado',
+            message: detail.message ?? 'Dejamos el carrito limpio para que arranques de nuevo cuando quieras.',
+          };
+      }
+    };
+
+    const handleFeedback = (event: Event) => {
+      const customEvent = event as CustomEvent<CartFeedbackDetail>;
+      setIsOpen(true);
+      setFeedback(buildFeedback(customEvent.detail));
+    };
+
+    const handleOpen = () => {
+      setIsOpen(true);
+    };
+
+    window.addEventListener(feedbackEventName, handleFeedback as EventListener);
+    window.addEventListener(openEventName, handleOpen);
+
+    return () => {
+      clearFeedbackTimer();
+      window.removeEventListener(feedbackEventName, handleFeedback as EventListener);
+      window.removeEventListener(openEventName, handleOpen);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!feedback) {
+      if (feedbackTimeoutRef.current) {
+        window.clearTimeout(feedbackTimeoutRef.current);
+      }
+      return;
+    }
+
+    if (feedbackTimeoutRef.current) {
+      window.clearTimeout(feedbackTimeoutRef.current);
+    }
+
+    feedbackTimeoutRef.current = window.setTimeout(() => {
+      setFeedback(null);
+    }, 3200);
+
+    return () => {
+      if (feedbackTimeoutRef.current) {
+        window.clearTimeout(feedbackTimeoutRef.current);
+      }
+    };
+  }, [feedback]);
+
   // Close cart when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -54,13 +150,26 @@ export default function CartButton() {
   };
 
   const handleRemoveItem = (productId: string, size: string) => {
+    const itemToRemove = $cartItems.find(
+      (item) => item.productId === productId && item.size === size
+    );
     const updatedCart = CartCookiesClient.removeItem(productId, size);
     cartItems.set(updatedCart);
+    setFeedback({
+      tone: 'neutral',
+      title: itemToRemove?.name ? `${itemToRemove.name} se removió del carrito` : 'Producto removido',
+      message: `Ahora tenés ${updatedCart.length} ${updatedCart.length === 1 ? 'producto distinto' : 'productos distintos'} en tu mini carrito.`,
+    });
   };
 
   const handleClearCart = () => {
     cartItems.set([]);
     Cookies.remove('cart');
+    setFeedback({
+      tone: 'neutral',
+      title: 'Carrito vaciado',
+      message: 'Tu selección se limpió por completo. Podés volver a cargarla en segundos.',
+    });
   };
 
   const formatPrice = (price: number) =>
@@ -121,6 +230,16 @@ export default function CartButton() {
 
           {/* Items - Scrollable */}
           <div class="flex-1 overflow-y-auto">
+            {feedback && (
+              <div class="border-b border-guacamole-f/30 bg-guacamole-fondo/15 px-3.5 py-3 sm:px-5" aria-live="polite">
+                <div class={`rounded-2xl border px-3 py-2.5 ${feedback.tone === 'success' ? 'border-guacamole-b/20 bg-white text-guacamole-icons' : 'border-neutral-200 bg-white text-guacamole-icons'}`}>
+                  <p class="text-[11px] font-black uppercase tracking-[0.18em] text-guacamole-b/80">Último cambio</p>
+                  <p class="mt-1 text-sm font-bold leading-snug">{feedback.title}</p>
+                  <p class="mt-1 text-xs leading-relaxed text-neutral-500">{feedback.message}</p>
+                </div>
+              </div>
+            )}
+
             {$cartItems.length === 0 ? (
               <div class="flex flex-col items-center justify-center gap-3.5 px-4 py-10 text-center sm:gap-4 sm:px-6 sm:py-12">
                 <div class="flex h-14 w-14 items-center justify-center rounded-full bg-guacamole-fondo/10 sm:h-16 sm:w-16">
@@ -231,19 +350,22 @@ export default function CartButton() {
               </div>
 
               {/* CTA Primary */}
-              <div class="space-y-2 px-3.5 pb-3 sm:px-5">
-                <a
-                  href="/checkout"
+                <div class="space-y-2 px-3.5 pb-3 sm:px-5">
+                  <a
+                    href="/checkout"
                   class="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-guacamole-pulpa px-4 py-3 text-sm font-black uppercase tracking-wider text-guacamole-icons shadow-[0_4px_12px_rgba(86,130,3,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-guacamole-f hover:shadow-[0_6px_20px_rgba(86,130,3,0.4)] sm:px-6"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                   </svg>
                   Ir a pagar
-                </a>
-                <div class="flex flex-col gap-2 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
-                  <a href="/tienda" class="text-xs font-semibold text-guacamole-b transition-colors hover:text-guacamole-a">← Seguir comprando</a>
-                  <button onClick={handleClearCart} class="text-xs text-gray-400 transition-colors hover:text-red-500">Vaciar carrito</button>
+                  </a>
+                  <p class="rounded-2xl bg-guacamole-fondo/10 px-3 py-2 text-center text-[11px] font-medium leading-relaxed text-guacamole-icons/75">
+                    Revisá tus productos acá y cuando estés listo seguís al checkout sin sorpresas.
+                  </p>
+                  <div class="flex flex-col gap-2 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
+                    <a href="/tienda" class="text-xs font-semibold text-guacamole-b transition-colors hover:text-guacamole-a">← Seguir comprando</a>
+                    <button onClick={handleClearCart} class="text-xs text-gray-400 transition-colors hover:text-red-500">Vaciar carrito</button>
                 </div>
               </div>
 

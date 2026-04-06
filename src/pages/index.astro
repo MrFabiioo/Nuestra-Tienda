@@ -43,7 +43,7 @@ if (error) {
 ---
 
 <Layout
-    description="Guacamole artesanal hecho con aguacates seleccionados, sin conservantes y preparado el mismo día. Pedí online y recibilo fresco en casa."
+    description="Tienda online de GuacaShop con catálogo fresco, compras simples y entregas coordinadas para pedir tus favoritos sin vueltas."
 >
     <!-- ═══════════════════════════════════════════════
          HERO SECTION — Editorial, premium, above the fold
@@ -56,20 +56,20 @@ if (error) {
             <!-- Eyebrow: label pequeño que ancla la marca -->
             <div class="hero__eyebrow">
                 <span class="hero__eyebrow-dot" aria-hidden="true"></span>
-                <span class="font-unique text-xs tracking-[0.2em] uppercase text-guacamole-b">Hecho a mano · 100% natural</span>
+                <span class="font-unique text-xs tracking-[0.2em] uppercase text-guacamole-b">Catálogo fresco · compra simple</span>
             </div>
 
             <!-- Headline principal — editorial y directo -->
             <h1 class="hero__headline">
-                El guacamole<br/>
-                <em class="hero__headline-accent">que se nota</em><br/>
-                en cada bocado.
+                Descubrí sabores<br/>
+                <em class="hero__headline-accent">hechos para compartir</em><br/>
+                en cada pedido.
             </h1>
 
             <!-- Sub-headline: propuesta de valor concreta -->
             <p class="hero__sub">
-                Ingredientes frescos, recetas artesanales y una preparación cuidada para que el sabor llegue bien.<br class="hero__sub-br" />
-                Pedí online y coordiná tu entrega de forma simple.
+                Explorá el catálogo, encontrá tus favoritos y resolvé tu compra online en minutos.<br class="hero__sub-br" />
+                Recetas frescas, combinaciones artesanales y una experiencia pensada para comprar sin vueltas.
             </p>
 
             <!-- Trust badges: rápidos, sin ruido visual -->
@@ -99,13 +99,13 @@ if (error) {
             <!-- CTAs -->
             <div class="hero__ctas">
                 <a href="/tienda" class="hero__cta-primary">
-                    Ver productos
+                    Ir a la tienda
                     <svg class="hero__cta-arrow" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                         <path d="M4 10h12M11 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </a>
-                <a href="/guacamole" class="hero__cta-secondary">
-                    Conocer el guacamole
+                <a href="#catalogo" class="hero__cta-secondary">
+                    Explorar catálogo
                 </a>
             </div>
         </div>
@@ -118,18 +118,20 @@ if (error) {
     <TrustBanner />
 
     <!-- Catálogo de productos por categoría -->
-    {productsByCategory.length > 0 ? (
-        productsByCategory.map((category) => (
-            <CardProducts 
-                title={category.categoryName} 
-                products={category.products} 
-            />
-        ))
-    ) : (
-        <div class="text-center py-10">
-            <p class="text-xl text-gray-600">No hay productos disponibles en este momento.</p>
-        </div>
-    )}
+    <section id="catalogo" aria-label="Catálogo destacado">
+        {productsByCategory.length > 0 ? (
+            productsByCategory.map((category) => (
+                <CardProducts 
+                    title={category.categoryName} 
+                    products={category.products} 
+                />
+            ))
+        ) : (
+            <div class="text-center py-10">
+                <p class="text-xl text-gray-600">No hay productos disponibles en este momento.</p>
+            </div>
+        )}
+    </section>
 
     <!-- Propuesta de valor + storytelling de marca -->
     <ValueProposition />

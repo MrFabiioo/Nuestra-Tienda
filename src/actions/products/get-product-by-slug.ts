@@ -1,7 +1,7 @@
 
 
 import { defineAction } from "astro:actions";
-import { db, eq, Product, ProductImage } from "astro:db";
+import { Category, db, eq, Product, ProductImage } from "astro:db";
 import { z } from "astro:schema";
 
 const newProduct ={
@@ -30,9 +30,16 @@ export const getProductBySlug= defineAction({
                 
             }
             const images = await db.select().from(ProductImage).where(eq(ProductImage.productId,product.id))
+            const [category] = product.categoryId
+                ? await db.select().from(Category).where(eq(Category.id, product.categoryId))
+                : [undefined];
             
             return {
-                product: product,
+                product: {
+                    ...product,
+                    categoryName: category?.name,
+                    categorySlug: category?.slug,
+                },
                 images: images//.map(img =>img.image)
             };
         }

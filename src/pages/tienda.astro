@@ -40,22 +40,84 @@ const categoryNames = categories.length > 0
     }, {} as Record<string, string>)
     : categoryMap;
 
+const totalCategories = Object.keys(categoryNames).length;
+
 ---
 
 <Layout>
     <main class="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
         <!-- Hero Section -->
-        <section class="py-12 px-4 text-center bg-gradient-to-r from-guacamole-b/[.08] via-transparent to-guacamole-a/[.08]">
-            <h1 class="text-4xl md:text-5xl font-bold text-neutral-900 tracking-tight">
-                Nuestra Tienda
-            </h1>
-            <p class="mt-3 text-lg text-neutral-600 max-w-xl mx-auto">
-                Descubrí nuestros productos artesanales elaborados con los mejores ingredientes
-            </p>
+        <section class="px-4 pb-8 pt-12 bg-gradient-to-r from-guacamole-b/[.08] via-transparent to-guacamole-a/[.08]">
+            <div class="mx-auto flex max-w-6xl flex-col gap-8 rounded-[2rem] border border-white/70 bg-white/75 px-6 py-8 shadow-sm backdrop-blur-sm md:px-10 md:py-10">
+                <div class="max-w-3xl">
+                    <span class="inline-flex items-center rounded-full border border-guacamole-b/15 bg-guacamole-b/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-guacamole-b">
+                        Catálogo completo
+                    </span>
+                    <h1 class="mt-4 text-4xl font-bold tracking-tight text-neutral-900 md:text-5xl">
+                        Tienda Guacamole: el punto de partida para explorar todo el catálogo
+                    </h1>
+                    <p class="mt-4 max-w-2xl text-lg leading-relaxed text-neutral-600">
+                        Encontrá desde acá toda la oferta disponible, usá búsqueda y filtros para descubrir más rápido, y recorré cada categoría con la misma estética limpia del resto de la experiencia.
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap gap-3 text-sm text-neutral-600">
+                    <span class="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 shadow-sm">
+                        <span class="h-2 w-2 rounded-full bg-guacamole-b"></span>
+                        {totalCategories} categorías para explorar
+                    </span>
+                    <span class="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 shadow-sm">
+                        <span class="h-2 w-2 rounded-full bg-guacamole-a"></span>
+                        {products.length} productos visibles en esta página
+                    </span>
+                    <span class="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 shadow-sm">
+                        <span class="h-2 w-2 rounded-full bg-neutral-900"></span>
+                        Búsqueda por nombre y descripción
+                    </span>
+                </div>
+
+                <div class="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.9fr)] lg:items-center">
+                    <div class="flex flex-wrap gap-3">
+                        <a href="#category-filters" class="inline-flex min-h-11 items-center justify-center rounded-full bg-guacamole-b px-6 py-3 text-sm font-semibold text-white transition-colors duration-200 hover:bg-guacamole-a">
+                            Explorar categorías
+                        </a>
+                        <a href="#product-grid" class="inline-flex min-h-11 items-center justify-center rounded-full border border-neutral-200 bg-white px-6 py-3 text-sm font-semibold text-neutral-700 transition-colors duration-200 hover:border-guacamole-b/40 hover:text-guacamole-b">
+                            Ver todo el catálogo
+                        </a>
+                    </div>
+
+                    <div class="rounded-3xl border border-neutral-200 bg-neutral-50/90 p-5 text-left shadow-sm">
+                        <p class="text-sm font-semibold uppercase tracking-[0.18em] text-guacamole-b">
+                            Cómo orientarte rápido
+                        </p>
+                        <ul class="mt-3 space-y-2 text-sm leading-relaxed text-neutral-600">
+                            <li>1. Empezá por la categoría que te interese.</li>
+                            <li>2. Afiná con el buscador si ya sabés qué querés.</li>
+                            <li>3. Entrá a cada producto para ver detalle y compra.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- Search & Filter Bar -->
         <section class="px-4 pb-8 max-w-6xl mx-auto">
+            <div class="mb-5 rounded-3xl border border-neutral-200 bg-white px-5 py-4 shadow-sm">
+                <div class="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                    <div class="max-w-2xl">
+                        <p class="text-sm font-semibold uppercase tracking-[0.18em] text-guacamole-b">
+                            Explorá desde acá
+                        </p>
+                        <h2 class="mt-1 text-2xl font-semibold tracking-tight text-neutral-900">
+                            Buscador y filtros para recorrer toda la tienda sin perderte
+                        </h2>
+                    </div>
+                    <p class="max-w-xl text-sm leading-relaxed text-neutral-500">
+                        Combiná búsqueda y categorías para descubrir productos nuevos o ir directo a lo que ya tenés en mente.
+                    </p>
+                </div>
+            </div>
+
             <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
                 <!-- Search Input -->
                 <div class="relative w-full md:w-auto md:flex-1 max-w-lg">
@@ -67,7 +129,7 @@ const categoryNames = categories.length > 0
                     <input
                         type="text"
                         id="search-input"
-                        placeholder="Buscar productos..."
+                        placeholder="Buscar por producto o ingrediente..."
                         class="w-full pl-12 pr-4 py-3 rounded-full border border-neutral-200 bg-white shadow-sm text-neutral-700 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-guacamole-b/30 focus:border-guacamole-b transition-all duration-300"
                     />
                 </div>
@@ -94,9 +156,14 @@ const categoryNames = categories.length > 0
 
         <!-- Results Count -->
         <section class="px-4 pb-4 max-w-6xl mx-auto">
-            <p class="text-sm text-neutral-500" id="results-count">
-                Mostrando {products.length} productos
-            </p>
+            <div class="flex flex-col gap-1 text-sm text-neutral-500 md:flex-row md:items-center md:justify-between">
+                <p id="results-count">
+                    Explorando {products.length} productos en esta página del catálogo
+                </p>
+                <p id="results-hint">
+                    Si no encontrás lo que buscás, probá otra categoría o seguí navegando con la paginación.
+                </p>
+            </div>
         </section>
 
         <!-- Product Grid -->
@@ -123,24 +190,56 @@ const categoryNames = categories.length > 0
             class="hidden px-4 pb-12 max-w-6xl mx-auto text-center"
             id="empty-state"
         >
-            <div class="py-16">
+            <div class="rounded-[2rem] border border-neutral-200 bg-white/95 px-6 py-12 shadow-sm md:px-10 md:py-14">
                 <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-neutral-100 mb-6">
                     <svg class="w-10 h-10 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
-                <h3 class="text-xl font-semibold text-neutral-800 mb-2">
+                <span class="inline-flex items-center rounded-full border border-guacamole-b/15 bg-guacamole-b/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-guacamole-b">
+                    Ajustemos la búsqueda
+                </span>
+                <h3 class="mt-5 text-xl font-semibold text-neutral-800 mb-2" id="empty-state-title">
                     No encontramos productos
                 </h3>
-                <p class="text-neutral-500 mb-6 max-w-md mx-auto">
+                <p class="text-neutral-500 mb-6 max-w-2xl mx-auto" id="empty-state-description">
                     No hay productos que coincidan con tu búsqueda. Probá con otros términos o limpiá los filtros.
                 </p>
-                <button 
-                    id="clear-filters"
-                    class="inline-flex items-center px-6 py-3 rounded-full bg-guacamole-b text-white font-medium hover:bg-guacamole-a transition-colors duration-200"
-                >
-                    Limpiar filtros
-                </button>
+
+                <div class="mb-8 flex flex-wrap items-center justify-center gap-2" id="empty-state-context">
+                    <span id="empty-search-chip" class="hidden rounded-full border border-neutral-200 bg-neutral-50 px-4 py-2 text-sm font-medium text-neutral-600"></span>
+                    <span id="empty-category-chip" class="hidden rounded-full border border-neutral-200 bg-neutral-50 px-4 py-2 text-sm font-medium text-neutral-600"></span>
+                </div>
+
+                <div class="mx-auto mb-8 grid max-w-3xl gap-3 text-left md:grid-cols-3">
+                    <div class="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4">
+                        <p class="text-sm font-semibold text-neutral-800">Probá términos más amplios</p>
+                        <p class="mt-1 text-sm leading-relaxed text-neutral-500">Usá nombres cortos, ingredientes o categorías para abrir más resultados.</p>
+                    </div>
+                    <div class="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4">
+                        <p class="text-sm font-semibold text-neutral-800">Volvé a “Todos”</p>
+                        <p class="mt-1 text-sm leading-relaxed text-neutral-500">Si estabas muy filtrado, limpiar te devuelve la vista completa de esta página.</p>
+                    </div>
+                    <div class="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4">
+                        <p class="text-sm font-semibold text-neutral-800">Seguí explorando</p>
+                        <p class="mt-1 text-sm leading-relaxed text-neutral-500">Podés cambiar de categoría o avanzar con la paginación para descubrir más productos.</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-center justify-center gap-3 sm:flex-row">
+                    <button 
+                        id="clear-filters"
+                        class="inline-flex min-h-11 items-center justify-center px-6 py-3 rounded-full bg-guacamole-b text-white font-medium hover:bg-guacamole-a transition-colors duration-200"
+                    >
+                        Limpiar búsqueda y filtros
+                    </button>
+                    <a
+                        href="#category-filters"
+                        class="inline-flex min-h-11 items-center justify-center rounded-full border border-neutral-200 bg-white px-6 py-3 text-sm font-semibold text-neutral-700 transition-colors duration-200 hover:border-guacamole-b/40 hover:text-guacamole-b"
+                    >
+                        Explorar categorías
+                    </a>
+                </div>
             </div>
         </section>
 
@@ -159,11 +258,97 @@ const categoryNames = categories.length > 0
         const productCards = document.querySelectorAll('.product-card-wrapper');
         const categoryPills = document.querySelectorAll('.category-pill');
         const resultsCount = document.getElementById('results-count');
+        const resultsHint = document.getElementById('results-hint');
         const emptyState = document.getElementById('empty-state');
+        const emptyStateTitle = document.getElementById('empty-state-title');
+        const emptyStateDescription = document.getElementById('empty-state-description');
+        const emptySearchChip = document.getElementById('empty-search-chip');
+        const emptyCategoryChip = document.getElementById('empty-category-chip');
         const productGrid = document.getElementById('product-grid');
         const clearFiltersBtn = document.getElementById('clear-filters');
 
         let activeCategory = 'todos';
+        const totalProductsOnPage = productCards.length;
+
+        function getCategoryLabel(categorySlug: string) {
+            if (categorySlug === 'todos') return 'Todas las categorías';
+
+            const activeButton = document.querySelector(`[data-category="${categorySlug}"]`) as HTMLButtonElement | null;
+
+            return activeButton?.textContent?.trim() || 'la categoría seleccionada';
+        }
+
+        function updateResultsCopy(searchTerm: string, visibleCount: number) {
+            if (!resultsCount || !resultsHint) return;
+
+            const hasSearch = searchTerm.length > 0;
+            const hasCategory = activeCategory !== 'todos';
+            const categoryLabel = getCategoryLabel(activeCategory);
+
+            if (!hasSearch && !hasCategory) {
+                resultsCount.textContent = `Explorando ${visibleCount} productos en esta página del catálogo`;
+                resultsHint.textContent = 'Si no encontrás lo que buscás, probá otra categoría o seguí navegando con la paginación.';
+                return;
+            }
+
+            const resultLabel = visibleCount === 1 ? 'resultado' : 'resultados';
+            const context: string[] = [];
+
+            if (hasSearch) context.push(`para “${searchTerm}”`);
+            if (hasCategory) context.push(`en ${categoryLabel}`);
+
+            resultsCount.textContent = `Mostrando ${visibleCount} ${resultLabel} ${context.join(' ')}`.trim();
+
+            if (visibleCount === 0) {
+                resultsHint.textContent = 'Probá limpiar la búsqueda, volver a “Todos” o pasar de página para abrir más opciones.';
+                return;
+            }
+
+            if (visibleCount < totalProductsOnPage) {
+                resultsHint.textContent = 'Si querés ampliar el resultado, usá términos más generales o quitá algún filtro activo.';
+                return;
+            }
+
+            resultsHint.textContent = 'Buen punto de partida: si todavía no ves lo ideal, cambiá de categoría o seguí con la paginación.';
+        }
+
+        function updateEmptyState(searchTerm: string) {
+            if (!emptyStateTitle || !emptyStateDescription || !emptySearchChip || !emptyCategoryChip) return;
+
+            const hasSearch = searchTerm.length > 0;
+            const hasCategory = activeCategory !== 'todos';
+            const categoryLabel = getCategoryLabel(activeCategory);
+
+            if (hasSearch && hasCategory) {
+                emptyStateTitle.textContent = `No encontramos coincidencias en ${categoryLabel}`;
+                emptyStateDescription.textContent = `No apareció ningún producto para “${searchTerm}” dentro de esta categoría. Probá con un término más amplio o cambiá el filtro para abrir más opciones.`;
+            } else if (hasSearch) {
+                emptyStateTitle.textContent = `No encontramos resultados para “${searchTerm}”`;
+                emptyStateDescription.textContent = 'Probá buscar por nombre corto, ingrediente o categoría. También podés limpiar la búsqueda para volver al catálogo completo de esta página.';
+            } else if (hasCategory) {
+                emptyStateTitle.textContent = `No hay productos visibles en ${categoryLabel}`;
+                emptyStateDescription.textContent = 'En esta página no hay productos para esa categoría. Probá volver a “Todos” o avanzar con la paginación para seguir explorando.';
+            } else {
+                emptyStateTitle.textContent = 'No encontramos productos';
+                emptyStateDescription.textContent = 'No hay productos que coincidan con tu búsqueda. Probá con otros términos o limpiá los filtros.';
+            }
+
+            if (hasSearch) {
+                emptySearchChip.textContent = `Búsqueda: “${searchTerm}”`;
+                emptySearchChip.classList.remove('hidden');
+            } else {
+                emptySearchChip.textContent = '';
+                emptySearchChip.classList.add('hidden');
+            }
+
+            if (hasCategory) {
+                emptyCategoryChip.textContent = `Filtro: ${categoryLabel}`;
+                emptyCategoryChip.classList.remove('hidden');
+            } else {
+                emptyCategoryChip.textContent = '';
+                emptyCategoryChip.classList.add('hidden');
+            }
+        }
 
         function filterProducts() {
             const searchTerm = searchInput.value.toLowerCase().trim();
@@ -193,9 +378,8 @@ const categoryNames = categories.length > 0
             });
 
             // Update results count
-            if (resultsCount) {
-                resultsCount.textContent = `Mostrando ${visibleCount} productos`;
-            }
+            updateResultsCopy(searchTerm, visibleCount);
+            updateEmptyState(searchTerm);
 
             // Show/hide empty state
             if (visibleCount === 0) {

@@ -79,7 +79,11 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
     >
         <div class="dropdown-results" id="dropdownResults"></div>
         <div class="dropdown-empty" id="dropdownEmpty" role="status">
-            No se encontraron productos
+            <p class="dropdown-empty__title">No encontramos coincidencias</p>
+            <p class="dropdown-empty__copy" id="dropdownEmptyCopy">
+                Probá con otro nombre, ingrediente o categoría. Si querés abrir más opciones, navegá la tienda completa.
+            </p>
+            <a href="/tienda" class="dropdown-empty__link">Ir a la tienda</a>
         </div>
     </div>
 </div>
@@ -205,6 +209,43 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
         color: #999;
         font-size: 14px;
         display: none;
+    }
+
+    .dropdown-empty__title {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 700;
+        color: #2d2d2d;
+    }
+
+    .dropdown-empty__copy {
+        margin: 8px auto 0;
+        max-width: 240px;
+        line-height: 1.5;
+        color: #6b7280;
+    }
+
+    .dropdown-empty__link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        margin-top: 14px;
+        padding: 0 16px;
+        border-radius: 999px;
+        background: rgba(86, 130, 4, 0.1);
+        color: #568203;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .dropdown-empty__link:hover,
+    .dropdown-empty__link:focus {
+        background: rgba(86, 130, 4, 0.16);
+        color: #3f6202;
+        outline: none;
     }
 
     .dropdown-empty.show {
@@ -333,6 +374,7 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
     const searchDropdown = document.getElementById('searchDropdown');
     const dropdownResults = document.getElementById('dropdownResults');
     const dropdownEmpty = document.getElementById('dropdownEmpty');
+    const dropdownEmptyCopy = document.getElementById('dropdownEmptyCopy');
     const searchTrigger = document.getElementById('searchTrigger');
     const searchClose = document.getElementById('searchClose');
 
@@ -411,6 +453,9 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
         if (!normalizedQuery) {
             dropdownResults.innerHTML = '';
             dropdownEmpty.classList.remove('show');
+            if (dropdownEmptyCopy) {
+                dropdownEmptyCopy.textContent = 'Probá con otro nombre, ingrediente o categoría. Si querés abrir más opciones, navegá la tienda completa.';
+            }
             return;
         }
 
@@ -419,6 +464,10 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
             product.category.toLowerCase().includes(normalizedQuery) ||
             product.description.toLowerCase().includes(normalizedQuery)
         ).slice(0, 8);
+
+        if (results.length === 0 && dropdownEmptyCopy) {
+            dropdownEmptyCopy.textContent = `No apareció nada para “${query.trim()}”. Probá con un término más general o explorá la tienda por categorías.`;
+        }
 
         renderResults(results);
     }

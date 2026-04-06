@@ -2,6 +2,7 @@
 import Layout from "@layouts/Layout.astro";
 import { actions } from "astro:actions";
 import ProductSliceShow from "src/components/products/ProductSliceShow.astro";
+import ProductCard from "src/components/products/ProductCard.astro";
 export const prerender = false;
 
 
@@ -14,8 +15,102 @@ if (error) {
     return Astro.redirect('/404')
 }
 
+const { data: catalogData, error: catalogError } = await Astro.callAction(actions.getProductsByCategory, {});
 const {product, images} = data;
-//console.log("images:-------------> ",images?.[0]?.image || '');
+
+type RelatedProductCard = {
+    name: string;
+    price: number;
+    description: string;
+    image: string;
+    slug: string;
+};
+
+const sizes = product.sizes
+    .split(',')
+    .map((size) => size.trim())
+    .filter(Boolean);
+
+const productDescription = product.description?.trim() ?? '';
+const descriptionParts = productDescription
+    .split(/(?<=[.!?])\s+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+const leadDescription = descriptionParts[0] ?? productDescription;
+const supportingDescription = descriptionParts.slice(1).join(' ');
+const categoryName = 'categoryName' in product
+    ? (product as { categoryName?: string }).categoryName
+    : undefined;
+const categoryLabel = categoryName ?? 'Selección premium';
+const productContext = [product.title, product.description, categoryName]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+const isFoodProduct = /(guacamole|salsa|aderezo|dip|postre|charcut|picada|snack|comida|food)/.test(productContext);
+const hasExtendedDescription = descriptionParts.length > 1;
+
+const keyFacts = [
+    {
+        label: 'Categoría',
+        value: categoryLabel,
+    },
+    {
+        label: 'Presentaciones',
+        value: `${sizes.length} ${sizes.length === 1 ? 'tamaño disponible' : 'tamaños disponibles'}`,
+    },
+    {
+        label: 'Compra flexible',
+        value: 'Podés sumar hasta 5 unidades por pedido',
+    },
+];
+
+const foodCareNotes = [
+    'Mantenelo refrigerado hasta el momento de consumirlo para conservar mejor su textura.',
+    'Si lo recibís frío, evitá cortar la cadena de frío hasta servirlo.',
+    'Una vez abierto, priorizá consumirlo según las indicaciones del envase.',
+];
+
+const usageIdeas = /(charcut|embutido|chorizo)/.test(productContext)
+    ? [
+        'Funciona bien para tablas, picadas o sandwiches donde querés subir el nivel del producto principal.',
+        'Puede ser una buena opción para resolver una entrada o sumar una proteína lista para compartir.',
+      ]
+    : /(postre|galleta|dulce)/.test(productContext)
+        ? [
+            'Sirve para cerrar una comida o resolver una merienda con una porción práctica.',
+            'Las distintas presentaciones te ayudan a elegir mejor si es para consumo individual o para compartir.',
+          ]
+        : /(guacamole|salsa|aderezo|dip)/.test(productContext)
+            ? [
+                'Es una compra útil para acompañar snacks, picadas o sumar un extra a wraps, tacos y sandwiches.',
+                'Las presentaciones disponibles te permiten elegir mejor si querés resolver una ocasión puntual o una mesa para compartir.',
+              ]
+            : [];
+
+const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.productsByCategory || !categoryName
+    ? []
+    : catalogData.productsByCategory
+        .filter((category) => category.categoryName === categoryName)
+        .flatMap((category) => category.products)
+        .filter((candidate) => candidate.slug !== product.slug)
+        .sort((a, b) => {
+            const priceDifference = Math.abs(a.price - product.price) - Math.abs(b.price - product.price);
+
+            if (priceDifference !== 0) {
+                return priceDifference;
+            }
+
+            return a.title.localeCompare(b.title, 'es');
+        })
+        .slice(0, 4)
+        .map((candidate) => ({
+            name: candidate.title,
+            price: candidate.price,
+            description: candidate.description,
+            image: candidate.image,
+            slug: `/products/${candidate.slug}`,
+        }));
 ---
 
 <Layout title={product.title} description={product.description}>
@@ -34,24 +129,52 @@ const {product, images} = data;
 
                 <!-- Product Details Section -->
                 <div class="p-6 md:p-8 md:py-10 flex flex-col gap-5">
+                    <div class="flex flex-wrap gap-2">
+                        <span class="inline-flex items-center rounded-full bg-guacamole-f/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-guacamole-b">
+                            {categoryLabel}
+                        </span>
+                        <span class="inline-flex items-center rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-600">
+                            Compra guiada desde este detalle
+                        </span>
+                    </div>
+
                     <!-- Title -->
-                    <div class="space-y-1">
+                    <div class="space-y-2">
                         <h1 class="text-2xl md:text-3xl font-bold text-neutral-900 leading-snug tracking-tight">
                             {product.title}
                         </h1>
                         <input type="hidden" name="product-name" id="product-name" value={product.title}/>
+                        <p class="text-sm md:text-base text-neutral-600 leading-relaxed">
+                            {leadDescription}
+                        </p>
                     </div>
 
                     <!-- Price -->
-                    <div class="flex items-baseline gap-2">
-                        <span class="text-2xl md:text-3xl font-bold text-neutral-900">${product.price}</span>
+                    <div class="space-y-1">
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-2xl md:text-3xl font-bold text-neutral-900">${product.price}</span>
+                            <span class="text-sm text-neutral-500">precio base</span>
+                        </div>
                         <input type="hidden" name="product-price" id="product-price" value={product.price}/>
                     </div>
 
-                    <!-- Description -->
-                    <p class="text-gray-600 leading-relaxed text-sm md:text-base">
-                        {product.description}
-                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {keyFacts.map((fact) => (
+                            <div class="rounded-2xl border border-neutral-200 bg-white/70 px-4 py-3 shadow-sm">
+                                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">{fact.label}</p>
+                                <p class="mt-1 text-sm font-semibold text-neutral-800 leading-snug">{fact.value}</p>
+                            </div>
+                        ))}
+                    </div>
+
+                    {hasExtendedDescription && (
+                        <div class="rounded-2xl border border-guacamole-f/30 bg-guacamole-f/10 px-4 py-4">
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-guacamole-b/80">Más contexto</p>
+                            <p class="mt-2 text-sm md:text-base text-neutral-700 leading-relaxed">
+                                {supportingDescription}
+                            </p>
+                        </div>
+                    )}
 
                     <hr class="border-gray-200"/>
 
@@ -71,10 +194,13 @@ const {product, images} = data;
                         <h3 id="h3-g" class="text-sm font-semibold text-gray-700 uppercase tracking-wide">
                             Tamaño:
                         </h3>
+                        <p class="text-sm text-neutral-500 leading-relaxed">
+                            Elegí la presentación antes de agregarlo al carrito para llevar exactamente la versión que necesitás.
+                        </p>
                         <ul class="flex flex-wrap gap-2">
                             {
-                                product.sizes.split(',').map((t) => (
-                                    <li class="size-chip" data-size="">
+                                sizes.map((t) => (
+                                    <li class="size-chip" data-size-option="true">
                                         {t.trim()}
                                     </li>
                                 ))
@@ -92,10 +218,97 @@ const {product, images} = data;
                         </button>
                     </div>
 
+                    <p id="cart-feedback-note" class="min-h-[1.25rem] text-xs font-medium text-neutral-500" aria-live="polite"></p>
+
+                    <p class="text-xs text-neutral-500 leading-relaxed">
+                        Vas directo al checkout con el producto, tamaño y cantidad ya definidos para evitar pasos innecesarios.
+                    </p>
+
 
                 </div>
             </div>
         </div>
+
+        <section class="mt-6 grid gap-4 md:grid-cols-2">
+            <article class="rounded-3xl border border-white/50 bg-white/70 p-5 shadow-[0_4px_30px_-10px_rgba(0,0,0,0.12)] backdrop-blur-xl">
+                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-guacamole-b/80">Resumen útil</p>
+                <h2 class="mt-2 text-xl font-bold text-neutral-900">Lo importante antes de comprar</h2>
+                <div class="mt-4 space-y-3">
+                    <div class="rounded-2xl bg-neutral-50 px-4 py-3 border border-neutral-200/80">
+                        <p class="text-sm font-semibold text-neutral-800">Qué estás eligiendo</p>
+                        <p class="mt-1 text-sm text-neutral-600 leading-relaxed">{leadDescription}</p>
+                    </div>
+
+                    <div class="rounded-2xl bg-neutral-50 px-4 py-3 border border-neutral-200/80">
+                        <p class="text-sm font-semibold text-neutral-800">Presentaciones disponibles</p>
+                        <p class="mt-1 text-sm text-neutral-600 leading-relaxed">
+                            Este producto se ofrece en {sizes.length} {sizes.length === 1 ? 'presentación' : 'presentaciones'} para que puedas elegir con más precisión según tu pedido.
+                        </p>
+                    </div>
+
+                    <div class="rounded-2xl bg-neutral-50 px-4 py-3 border border-neutral-200/80">
+                        <p class="text-sm font-semibold text-neutral-800">Cómo se compra</p>
+                        <p class="mt-1 text-sm text-neutral-600 leading-relaxed">
+                            Primero seleccionás tamaño, después cantidad y recién ahí lo llevás al checkout con la configuración ya resuelta.
+                        </p>
+                    </div>
+                </div>
+            </article>
+
+            <div class="grid gap-4">
+                {usageIdeas.length > 0 && (
+                    <article class="rounded-3xl border border-white/50 bg-white/70 p-5 shadow-[0_4px_30px_-10px_rgba(0,0,0,0.12)] backdrop-blur-xl">
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-guacamole-b/80">Ideas de uso</p>
+                        <h2 class="mt-2 text-xl font-bold text-neutral-900">Cómo puede encajar en tu mesa</h2>
+                        <ul class="mt-4 space-y-3">
+                            {usageIdeas.map((idea) => (
+                                <li class="rounded-2xl bg-neutral-50 px-4 py-3 border border-neutral-200/80 text-sm text-neutral-600 leading-relaxed">
+                                    {idea}
+                                </li>
+                            ))}
+                        </ul>
+                    </article>
+                )}
+
+                {isFoodProduct && (
+                    <article class="rounded-3xl border border-white/50 bg-white/70 p-5 shadow-[0_4px_30px_-10px_rgba(0,0,0,0.12)] backdrop-blur-xl">
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-guacamole-b/80">Conservación</p>
+                        <h2 class="mt-2 text-xl font-bold text-neutral-900">Recomendaciones generales</h2>
+                        <ul class="mt-4 space-y-3">
+                            {foodCareNotes.map((note) => (
+                                <li class="rounded-2xl bg-neutral-50 px-4 py-3 border border-neutral-200/80 text-sm text-neutral-600 leading-relaxed">
+                                    {note}
+                                </li>
+                            ))}
+                        </ul>
+                    </article>
+                )}
+            </div>
+        </section>
+
+        {relatedProducts.length > 0 && (
+            <section class="mt-10 rounded-3xl border border-white/50 bg-white/70 p-5 md:p-6 shadow-[0_4px_30px_-10px_rgba(0,0,0,0.12)] backdrop-blur-xl">
+                <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                    <div class="max-w-2xl">
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-guacamole-b/80">Productos relacionados</p>
+                        <h2 class="mt-2 text-xl md:text-2xl font-bold text-neutral-900">Seguí explorando dentro de {categoryLabel}</h2>
+                        <p class="mt-2 text-sm md:text-base text-neutral-600 leading-relaxed">
+                            Seleccionamos opciones de la misma categoría y priorizamos las que tienen un rango de precio parecido para que la recomendación sea coherente con este producto.
+                        </p>
+                    </div>
+
+                    <a href="/tienda" class="inline-flex min-h-11 items-center justify-center rounded-full border border-guacamole-b/20 px-5 py-3 text-sm font-semibold text-guacamole-b transition-colors duration-200 hover:border-guacamole-b/40 hover:bg-guacamole-b/5">
+                        Ver catálogo completo
+                    </a>
+                </div>
+
+                <div class="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    {relatedProducts.map((relatedProduct) => (
+                        <ProductCard {...relatedProduct} />
+                    ))}
+                </div>
+            </section>
+        )}
         
         <input id="product-id" type="hidden" value={product.id}/>
     </div>
@@ -137,11 +350,12 @@ const {product, images} = data;
     import { navigate } from "astro:transitions/client";
     import { cartItems } from "src/store/cart.store";
     import { CartCookiesClient } from "src/utils/cart-cookies";
+    import { emitCartFeedback } from "src/utils/cart-feedback";
 
     document.addEventListener('astro:page-load',()=>{
 
         // Size selection - PRESERVED original toggle logic
-        const sizeElments = document.querySelectorAll("li");
+        const sizeElments = document.querySelectorAll('[data-size-option]');
         sizeElments.forEach((liElement) => {
             liElement.addEventListener("click", () => {
                 sizeElments.forEach((s) => s.classList.remove("selected-size"));
@@ -157,10 +371,30 @@ const {product, images} = data;
         const incrementButton = document.querySelector('#increment') as HTMLButtonElement;
         const decrementButton = document.querySelector('#decrement') as HTMLButtonElement;
         const addToCardButton = document.querySelector('#add-card') as HTMLButtonElement;
+        const cartFeedbackNote = document.querySelector('#cart-feedback-note') as HTMLParagraphElement;
 
         const productImageInput = document.querySelector('#product-image') as HTMLInputElement;
 
-        if(!incrementButton || !quantityInput) return;
+        const setCartFeedback = (message: string, tone: 'default' | 'error' | 'success' = 'default') => {
+            if (!cartFeedbackNote) return;
+
+            cartFeedbackNote.textContent = message;
+            cartFeedbackNote.classList.remove('text-neutral-500', 'text-red-500', 'text-guacamole-b');
+
+            if (tone === 'error') {
+                cartFeedbackNote.classList.add('text-red-500');
+                return;
+            }
+
+            if (tone === 'success') {
+                cartFeedbackNote.classList.add('text-guacamole-b');
+                return;
+            }
+
+            cartFeedbackNote.classList.add('text-neutral-500');
+        };
+
+        if(!incrementButton || !quantityInput || !addToCardButton) return;
         
         // Increment - PRESERVED max=5 logic
         incrementButton.addEventListener('click',()=>{
@@ -178,22 +412,38 @@ const {product, images} = data;
         addToCardButton.addEventListener('click',async()=>{
             const size = document.querySelector('.selected-size')?.textContent;
             if (!size) {
-                return alert('seleccione un tamaño')
+                setCartFeedback('Elegí un tamaño antes de pasar al checkout.', 'error');
+                return;
             }
 
-           const cart = CartCookiesClient.addItem({
-                productId:producIdInput.value,
-                size:size,
-                quantity:quantity,
-                name:(document.querySelector('#product-name') as HTMLInputElement).value,
-                price:parseFloat((document.querySelector('#product-price') as HTMLInputElement).value),
-                image:productImageInput.value,
-            })
+            setCartFeedback('Preparando tu selección para el checkout...', 'success');
+            addToCardButton.disabled = true;
 
-            cartItems.set(cart);
+            try {
+                const cart = CartCookiesClient.addItem({
+                    productId:producIdInput.value,
+                    size:size,
+                    quantity:quantity,
+                    name:(document.querySelector('#product-name') as HTMLInputElement).value,
+                    price:parseFloat((document.querySelector('#product-price') as HTMLInputElement).value),
+                    image:productImageInput.value,
+                })
 
-           // PRESERVED navigation to /checkout
-           await navigate('/checkout')
+                cartItems.set(cart);
+                emitCartFeedback({
+                    type:'add',
+                    productName:(document.querySelector('#product-name') as HTMLInputElement).value,
+                    quantity:quantity,
+                    size:size,
+                    totalItems:cart.reduce((total, item) => total + item.quantity, 0),
+                    message:'Te llevamos al checkout con esta configuración ya resuelta.',
+                });
+
+                // PRESERVED navigation to /checkout
+                await navigate('/checkout')
+            } finally {
+                addToCardButton.disabled = false;
+            }
         })
     })
 </script>

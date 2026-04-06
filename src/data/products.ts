@@ -16,7 +16,7 @@ export const allProducts: Product[] = [
         price: 10000,
         description: "Ricoguacamole fresco y natural",
         image: "/images/guacamole-caricatura.png",
-        slug: "/guacamole",
+        slug: "/tienda",
         category: "Salsas y Aderezos"
     },
     {
@@ -25,7 +25,7 @@ export const allProducts: Product[] = [
         price: 12000,
         description: "Con toque de chile habanero",
         image: "/images/guacamole-caricatura-partida.png",
-        slug: "/guacamole",
+        slug: "/tienda",
         category: "Salsas y Aderezos"
     },
     {
@@ -34,7 +34,7 @@ export const allProducts: Product[] = [
         price: 15000,
         description: "Receta secreta de la casa",
         image: "/images/guacamoleIA.png",
-        slug: "/guacamole",
+        slug: "/tienda",
         category: "Salsas y Aderezos"
     },
     // Charcutería

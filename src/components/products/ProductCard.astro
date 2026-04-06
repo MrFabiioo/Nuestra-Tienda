@@ -93,6 +93,7 @@ const {
 <script>
   import { cartItems } from "src/store/cart.store";
   import { CartCookiesClient } from "src/utils/cart-cookies";
+  import { emitCartFeedback, emitCartOpen } from "src/utils/cart-feedback";
 
   document.addEventListener('astro:page-load', initProductCards);
   document.addEventListener('astro:beforematch', initProductCards);
@@ -123,6 +124,10 @@ const {
         
         const zone = btn.closest('.add-to-cart-zone');
         const qtyDisplay = zone?.querySelector('.qty-value');
+        const currentCart = CartCookiesClient.getCart();
+        const existingItem = currentCart.find(
+          (item) => item.productId === productId && item.size === 'Normal'
+        );
         const quantity = parseInt(qtyDisplay?.textContent || '1', 10);
         
         const cart = CartCookiesClient.addItem({
@@ -135,13 +140,28 @@ const {
         });
         
         cartItems.set(cart);
+        emitCartFeedback({
+          type: 'add',
+          productName,
+          quantity,
+          size: 'Normal',
+          totalItems: cart.reduce((total, item) => total + item.quantity, 0),
+          message: existingItem
+            ? `Le sumamos ${quantity} ${quantity === 1 ? 'unidad' : 'unidades'} más a tu selección.`
+            : `Quedó listo en tu mini carrito para que sigas comprando sin fricción.`,
+        });
+        emitCartOpen();
         
         // Feedback visual
-        btn.textContent = '✓ Agregado';
+        btn.textContent = existingItem ? `+${quantity} más` : '✓ Agregado';
+        btn.classList.remove('bg-guacamole-b');
         btn.classList.add('bg-guacamole-a');
+        btn.setAttribute('aria-label', `${productName} agregado al carrito`);
         setTimeout(() => {
           btn.textContent = 'Agregar';
+          btn.setAttribute('aria-label', `Agregar ${productName} al carrito`);
           btn.classList.remove('bg-guacamole-a');
+          btn.classList.add('bg-guacamole-b');
         }, 1500);
         
         // Reset qty
