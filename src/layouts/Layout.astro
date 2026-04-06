@@ -1,4 +1,5 @@
 ---
+import "../styles/global.css";
 import Navbar from "../components/Navbar.astro";
 import Footer from "../components/Footer.astro";
 import { ClientRouter } from "astro:transitions";
@@ -23,6 +24,7 @@ const pageTitle = title === "GuacaShop" ? title : `${title} | GuacaShop`;
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="color-scheme" content="light dark" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<meta name="description" content={description} />
@@ -31,6 +33,26 @@ const pageTitle = title === "GuacaShop" ? title : `${title} | GuacaShop`;
 		<meta property="og:image" content={image} />
 		<meta property="og:type" content="website" />
 		<title>{pageTitle}</title>
+		<script is:inline>
+			const storageKey = "guacashop-theme";
+			let storedTheme = null;
+
+			try {
+				storedTheme = window.localStorage.getItem(storageKey);
+			} catch {
+				storedTheme = null;
+			}
+
+			const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+			const resolvedTheme = storedTheme === "dark" || storedTheme === "light"
+				? storedTheme
+				: systemPrefersDark
+					? "dark"
+					: "light";
+
+			document.documentElement.dataset.theme = resolvedTheme;
+			document.documentElement.style.colorScheme = resolvedTheme;
+		</script>
 		<ClientRouter />
 	</head>
 	<body>
@@ -54,7 +76,7 @@ const pageTitle = title === "GuacaShop" ? title : `${title} | GuacaShop`;
 
 	/* Focus-visible global: solo muestra outline al navegar con teclado */
 	:focus-visible {
-		outline: 2px solid #568203;
+		outline: 2px solid var(--color-focus-ring);
 		outline-offset: 3px;
 		border-radius: 4px;
 	}
@@ -70,13 +92,13 @@ const pageTitle = title === "GuacaShop" ? title : `${title} | GuacaShop`;
 		left: 50%;
 		transform: translate(-50%, -200%);
 		padding: 0.75rem 1.25rem;
-		background: #568203;
-		color: #ffffff;
+		background: var(--color-accent-strong);
+		color: var(--color-text-on-accent);
 		text-decoration: none;
 		font-size: 0.95rem;
 		font-weight: 600;
 		border-radius: 999px;
-		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+		box-shadow: 0 10px 30px var(--color-shadow-soft);
 		z-index: 100;
 		transition: transform 0.2s ease;
 	}

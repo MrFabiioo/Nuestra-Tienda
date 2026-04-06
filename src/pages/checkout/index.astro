@@ -31,7 +31,7 @@ const checkoutBreadcrumbs = [
 ---
 
 <Layout title="Checkout | Guacamole Shop" description="Revisá tu pedido y prepará el pago">
-  <main class="min-h-screen bg-guacamole-fondo/10 py-8 px-4 md:px-8">
+  <main class="theme-checkout-page min-h-screen bg-guacamole-fondo/10 py-8 px-4 md:px-8">
     <div class="max-w-6xl mx-auto mb-6">
       <BreadcrumbTrail
         items={checkoutBreadcrumbs}
@@ -104,8 +104,8 @@ const checkoutBreadcrumbs = [
                 <span class="h-2 w-2 rounded-full bg-guacamole-b"></span>
                 Paso actual: validar pedido y datos
               </span>
-              <span class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 shadow-sm">
-                <span class="h-2 w-2 rounded-full bg-guacamole-f"></span>
+                <span class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 shadow-sm">
+                  <span class="h-2 w-2 rounded-full bg-guacamole-b/70"></span>
                 Próximo paso: elegir medio de pago
               </span>
             </div>
@@ -318,8 +318,8 @@ const checkoutBreadcrumbs = [
 
             <!-- Products Card -->
             <div class="premium-panel overflow-hidden rounded-3xl">
-              <div class="bg-guacamole-f px-6 py-4">
-                <h2 class="text-xl font-black text-black uppercase tracking-wide">
+              <div class="bg-guacamole-a px-6 py-4">
+                <h2 class="text-xl font-black text-white uppercase tracking-wide">
                   Tu selección ({products.length})
                 </h2>
               </div>
@@ -332,7 +332,7 @@ const checkoutBreadcrumbs = [
                       <img 
                         src={product.image} 
                         alt={product.title} 
-                        class="w-20 h-20 md:w-24 md:h-24 object-cover rounded-xl border-2 border-guacamole-f shadow-sm"
+                         class="h-20 w-20 rounded-xl border-2 border-guacamole-b/20 object-cover shadow-sm md:h-24 md:w-24"
                       />
                     </div>
                     
@@ -355,7 +355,7 @@ const checkoutBreadcrumbs = [
                         </div>
                         
                         <div class="text-right">
-                          <p class="text-xl font-black text-guacamole-pulpa">
+                          <p class="text-xl font-black text-guacamole-a">
                             {Formatter.currency(product.price * product.quantity)}
                           </p>
                           <p class="text-xs text-gray-400">
@@ -368,7 +368,7 @@ const checkoutBreadcrumbs = [
                        <button
                          data-id={product.productId}
                          data-size={product.sizes}
-                          class="btn-delete mt-3 inline-flex items-center gap-1 rounded-full border border-red-100 bg-red-50 px-3 py-1.5 text-sm font-semibold text-red-600 transition-colors hover:border-red-200 hover:bg-red-100 hover:text-red-700 disabled:cursor-wait disabled:border-red-100 disabled:bg-red-50 disabled:text-red-300"
+                         class="btn-delete mt-3 inline-flex items-center gap-1 rounded-full border border-guacamole-b/15 bg-guacamole-fondo/10 px-3 py-1.5 text-sm font-semibold text-guacamole-a transition-colors hover:border-guacamole-b/25 hover:bg-guacamole-fondo/15 hover:text-guacamole-b disabled:cursor-wait disabled:border-guacamole-b/10 disabled:bg-guacamole-fondo/10 disabled:text-guacamole-b/40"
                         >
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -385,8 +385,8 @@ const checkoutBreadcrumbs = [
           <!-- Summary Panel -->
           <div class="lg:col-span-1">
             <div class="premium-panel sticky top-24 rounded-3xl">
-              <div class="bg-guacamole-f px-6 py-4">
-                <h2 class="text-xl font-black text-black uppercase tracking-wide">
+              <div class="bg-guacamole-a px-6 py-4">
+                <h2 class="text-xl font-black text-white uppercase tracking-wide">
                   Resumen de tu pedido
                 </h2>
               </div>
@@ -412,7 +412,7 @@ const checkoutBreadcrumbs = [
                 
                 <!-- Divider -->
                 <div
-                  class="border-t-2 border-guacamole-f pt-4"
+                  class="border-t-2 border-guacamole-b/20 pt-4"
                   data-checkout-total
                   data-subtotal={total}
                   data-tax={total * 0.15}
@@ -420,7 +420,7 @@ const checkoutBreadcrumbs = [
                 >
                   <div class="flex justify-between items-center">
                     <span class="text-xl font-black text-guacamole-icons uppercase">Total</span>
-                    <span class="text-2xl font-black text-guacamole-pulpa">
+                    <span class="text-2xl font-black text-guacamole-a">
                       {Formatter.currency(total * 1.15)}
                     </span>
                   </div>
@@ -453,7 +453,7 @@ const checkoutBreadcrumbs = [
                 <a
                   href="/pagos"
                   id="proceed-to-payment"
-                  class="group block w-full rounded-full bg-guacamole-pulpa px-8 py-4 text-center text-sm font-bold uppercase tracking-wider text-white shadow-[0_4px_12px_rgba(86,130,3,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-guacamole-f hover:shadow-[0_6px_20px_rgba(86,130,3,0.4)]"
+                  class="group block w-full rounded-full bg-guacamole-b px-8 py-4 text-center text-sm font-bold uppercase tracking-wider text-white shadow-[0_4px_12px_rgba(86,130,3,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-guacamole-a hover:shadow-[0_6px_20px_rgba(62,97,2,0.35)]"
                 >
                   <span id="proceed-to-payment-label" class="flex items-center justify-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -492,6 +492,85 @@ const checkoutBreadcrumbs = [
 
   [data-field-wrapper] {
     scroll-margin-top: 7rem;
+  }
+
+  .theme-checkout-page {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--color-bg) 94%, transparent) 0%, color-mix(in srgb, var(--color-bg-alt) 96%, transparent) 100%);
+    color: var(--color-text);
+  }
+
+  .theme-checkout-page .premium-panel,
+  .theme-checkout-page .premium-subtle-panel {
+    border-color: var(--color-border);
+    background: color-mix(in srgb, var(--color-surface) 96%, transparent);
+    box-shadow: 0 18px 36px var(--color-shadow-strong);
+  }
+
+  .theme-checkout-page .bg-guacamole-b,
+  .theme-checkout-page .bg-guacamole-a {
+    background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-strong) 100%);
+    color: var(--color-text-on-accent);
+  }
+
+  .theme-checkout-page .bg-white,
+  .theme-checkout-page .bg-neutral-50,
+  .theme-checkout-page .bg-gray-50,
+  .theme-checkout-page .bg-guacamole-fondo\/10,
+  .theme-checkout-page .bg-guacamole-fondo\/20,
+  .theme-checkout-page .bg-guacamole-b\/5 {
+    background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+  }
+
+  .theme-checkout-page .border-gray-200,
+  .theme-checkout-page .border-gray-100,
+  .theme-checkout-page .border-neutral-200,
+  .theme-checkout-page .border-guacamole-fondo\/40,
+  .theme-checkout-page .border-guacamole-fondo\/30,
+  .theme-checkout-page .border-guacamole-fondo\/25,
+  .theme-checkout-page .border-guacamole-b\/20 {
+    border-color: var(--color-border);
+  }
+
+  .theme-checkout-page .text-gray-600,
+  .theme-checkout-page .text-black-medium {
+    color: var(--color-text-muted);
+  }
+
+  .theme-checkout-page .text-gray-500,
+  .theme-checkout-page .text-gray-400 {
+    color: var(--color-text-subtle);
+  }
+
+  .theme-checkout-page .text-guacamole-icons,
+  .theme-checkout-page .text-black-dark {
+    color: var(--color-text);
+  }
+
+  .theme-checkout-page .text-guacamole-a,
+  .theme-checkout-page .text-guacamole-b {
+    color: var(--color-accent);
+  }
+
+  .theme-checkout-page .hover\:bg-gray-50:hover,
+  .theme-checkout-page .hover\:bg-guacamole-fondo\/10:hover,
+  .theme-checkout-page .hover\:bg-guacamole-fondo\/15:hover {
+    background: var(--color-surface-soft);
+  }
+
+  .theme-checkout-page .hover\:text-guacamole-b:hover,
+  .theme-checkout-page .hover\:text-guacamole-a:hover,
+  .theme-checkout-page .hover\:underline:hover {
+    color: var(--color-accent-strong);
+  }
+
+  .theme-checkout-page .btn-delete,
+  .theme-checkout-page .rounded-2xl.border.border-gray-100.bg-gray-50,
+  .theme-checkout-page .rounded-2xl.border.border-guacamole-fondo\/25.bg-guacamole-fondo\/10 {
+    background: var(--color-surface-soft);
+  }
+
+  .theme-checkout-page #checkout-feedback {
+    color: var(--color-text-muted);
   }
 </style>
 

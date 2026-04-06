@@ -3,6 +3,87 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+    --color-accent: #568203;
+    --color-accent-strong: #3e6102;
+    --color-accent-soft: #dcebb0;
+    --color-focus-ring: #568203;
+    --color-text-on-accent: #f8faf6;
+    --color-bg: #eef6d0;
+    --color-bg-alt: #f6f8ee;
+    --color-surface: #f8fbef;
+    --color-surface-muted: #e3efbd;
+    --color-surface-elevated: rgba(248, 251, 239, 0.9);
+    --color-surface-soft: rgba(86, 130, 3, 0.08);
+    --color-surface-soft-strong: rgba(86, 130, 3, 0.14);
+    --color-text: #18320b;
+    --color-text-muted: rgba(24, 50, 11, 0.72);
+    --color-text-subtle: rgba(24, 50, 11, 0.52);
+    --color-border: rgba(86, 130, 3, 0.18);
+    --color-border-strong: rgba(86, 130, 3, 0.28);
+    --color-navbar-bg: linear-gradient(135deg, rgba(233, 243, 204, 0.97) 0%, rgba(220, 235, 176, 0.96) 100%);
+    --color-navbar-border: rgba(86, 130, 3, 0.2);
+    --color-navbar-shadow: rgba(62, 97, 2, 0.12);
+    --color-footer-bg: linear-gradient(180deg, rgba(227, 239, 189, 0.98) 0%, rgba(220, 235, 176, 0.98) 100%);
+    --color-footer-shadow: rgba(62, 97, 2, 0.12);
+    --color-hero-bg: linear-gradient(135deg, #eef5df 0%, #dce9bf 48%, #f4f7ea 100%);
+    --color-shadow-soft: rgba(24, 50, 11, 0.18);
+    --color-shadow-strong: rgba(24, 50, 11, 0.14);
+    --color-overlay-soft: rgba(86, 130, 3, 0.12);
+    --color-overlay-strong: rgba(86, 130, 3, 0.2);
+}
+
+:root[data-theme='dark'] {
+    --color-accent: #84a903;
+    --color-accent-strong: #568203;
+    --color-accent-soft: #dcebb0;
+    --color-focus-ring: #84a903;
+    --color-text-on-accent: #f8faf6;
+    --color-bg: #0f1a08;
+    --color-bg-alt: #152111;
+    --color-surface: #111213;
+    --color-surface-muted: #182012;
+    --color-surface-elevated: rgba(17, 18, 19, 0.88);
+    --color-surface-soft: rgba(86, 130, 3, 0.12);
+    --color-surface-soft-strong: rgba(86, 130, 3, 0.18);
+    --color-text: rgba(241, 243, 249, 0.96);
+    --color-text-muted: rgba(241, 243, 249, 0.72);
+    --color-text-subtle: rgba(241, 243, 249, 0.5);
+    --color-border: rgba(86, 130, 3, 0.24);
+    --color-border-strong: rgba(132, 169, 3, 0.3);
+    --color-navbar-bg: linear-gradient(135deg, rgba(17, 18, 19, 0.96) 0%, rgba(24, 32, 18, 0.95) 52%, rgba(15, 26, 8, 0.96) 100%);
+    --color-navbar-border: rgba(86, 130, 3, 0.28);
+    --color-navbar-shadow: rgba(7, 12, 5, 0.24);
+    --color-footer-bg: linear-gradient(180deg, rgba(15, 26, 8, 0.98) 0%, rgba(17, 18, 19, 0.98) 100%);
+    --color-footer-shadow: rgba(7, 12, 5, 0.18);
+    --color-hero-bg: linear-gradient(135deg, #0b120a 0%, #162212 45%, #10200e 100%);
+    --color-shadow-soft: rgba(0, 0, 0, 0.25);
+    --color-shadow-strong: rgba(0, 0, 0, 0.3);
+    --color-overlay-soft: rgba(86, 130, 3, 0.08);
+    --color-overlay-strong: rgba(86, 130, 3, 0.16);
+}
+
+html {
+    background: var(--color-bg);
+    color: var(--color-text);
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    background: linear-gradient(180deg, var(--color-bg) 0%, var(--color-bg-alt) 100%);
+    color: var(--color-text);
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+a,
+button,
+input,
+textarea,
+select {
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+
 @layer utilities {
     @keyframes premium-shimmer {
         0% {
@@ -45,15 +126,23 @@
     }
 
     .premium-field {
-        @apply w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-guacamole-icons outline-none transition-all duration-200 placeholder:text-gray-400;
+        @apply w-full rounded-2xl px-4 py-3 outline-none transition-all duration-200;
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-elevated);
+        color: var(--color-text);
     }
 
     .premium-field:hover {
-        @apply border-gray-300;
+        border-color: var(--color-border-strong);
     }
 
     .premium-field:focus {
-        @apply border-guacamole-b ring-4 ring-guacamole-b/10;
+        border-color: var(--color-accent);
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent) 14%, transparent);
+    }
+
+    .premium-field::placeholder {
+        color: var(--color-text-subtle);
     }
 
     .premium-field[aria-invalid='true'] {
@@ -61,7 +150,8 @@
     }
 
     .field-help {
-        @apply mt-2 text-xs leading-5 text-gray-500;
+        @apply mt-2 text-xs leading-5;
+        color: var(--color-text-muted);
     }
 
     .field-error {
@@ -69,27 +159,53 @@
     }
 
     .premium-chip {
-        @apply inline-flex items-center gap-2 rounded-full border border-guacamole-b/20 bg-white/80 px-3 py-1 text-xs font-bold uppercase tracking-[0.22em] text-guacamole-b;
+        @apply inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.22em];
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-elevated);
+        color: var(--color-accent);
     }
 
     .premium-panel {
-        @apply rounded-2xl border border-gray-100 bg-white/95 shadow-lg;
+        @apply rounded-2xl;
+        border: 1px solid var(--color-border);
+        background: color-mix(in srgb, var(--color-surface) 96%, transparent);
+        box-shadow: 0 18px 36px var(--color-shadow-strong);
     }
 
     .premium-subtle-panel {
-        @apply rounded-3xl border border-neutral-200/80 bg-white/90 shadow-sm backdrop-blur-sm;
+        @apply rounded-3xl backdrop-blur-sm;
+        border: 1px solid var(--color-border);
+        background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+        box-shadow: 0 10px 24px var(--color-shadow-soft);
     }
 
     .premium-action-secondary {
-        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-neutral-200 bg-white px-5 py-3 text-sm font-semibold text-neutral-700 shadow-sm transition-colors duration-200 hover:border-guacamole-b/40 hover:text-guacamole-b;
+        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold shadow-sm transition-colors duration-200;
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-elevated);
+        color: var(--color-text);
+    }
+
+    .premium-action-secondary:hover {
+        border-color: var(--color-border-strong);
+        background: color-mix(in srgb, var(--color-surface-elevated) 86%, var(--color-accent) 14%);
+        color: var(--color-accent);
     }
 
     .premium-action-primary {
-        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-guacamole-b px-6 py-3 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(86,130,3,0.25)] transition-all duration-200 hover:bg-guacamole-a hover:shadow-[0_6px_18px_rgba(86,130,3,0.3)];
+        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white transition-all duration-200;
+        background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-strong) 100%);
+        color: var(--color-text-on-accent);
+        box-shadow: 0 8px 24px color-mix(in srgb, var(--color-accent) 28%, transparent);
+    }
+
+    .premium-action-primary:hover {
+        background: linear-gradient(135deg, var(--color-accent-strong) 0%, var(--color-accent) 100%);
+        box-shadow: 0 12px 28px color-mix(in srgb, var(--color-accent-strong) 34%, transparent);
     }
 
     .premium-skeleton {
-        background: linear-gradient(110deg, rgba(226, 232, 240, 0.9) 8%, rgba(255, 255, 255, 0.95) 18%, rgba(226, 232, 240, 0.9) 33%);
+        background: linear-gradient(110deg, color-mix(in srgb, var(--color-surface-muted) 88%, white 12%) 8%, color-mix(in srgb, var(--color-surface) 92%, white 8%) 18%, color-mix(in srgb, var(--color-surface-muted) 88%, white 12%) 33%);
         background-size: 200% 100%;
         animation: premium-shimmer 1.35s linear infinite;
     }
@@ -99,6 +215,46 @@
     }
 
     .premium-skeleton-card {
-        @apply rounded-[1.75rem] border border-neutral-200/70 bg-white/85 p-4 shadow-sm backdrop-blur-sm;
+        @apply rounded-[1.75rem] p-4 backdrop-blur-sm;
+        border: 1px solid var(--color-border);
+        background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+        box-shadow: 0 10px 24px var(--color-shadow-soft);
+    }
+
+    .theme-cart-panel {
+        border: 1px solid var(--color-border-strong);
+        background: color-mix(in srgb, var(--color-surface) 96%, transparent);
+        box-shadow: 0 20px 60px var(--color-shadow-soft);
+    }
+
+    .theme-cart-header {
+        border-bottom: 1px solid var(--color-border-strong);
+        background: linear-gradient(135deg, color-mix(in srgb, var(--color-bg-alt) 82%, var(--color-accent) 18%) 0%, color-mix(in srgb, var(--color-bg) 84%, var(--color-accent-strong) 16%) 100%);
+        color: var(--color-text);
+    }
+
+    .theme-soft-surface {
+        background: var(--color-surface-soft);
+        border-color: var(--color-border);
+    }
+
+    .theme-text-primary {
+        color: var(--color-text);
+    }
+
+    .theme-text-muted {
+        color: var(--color-text-muted);
+    }
+
+    .theme-text-subtle {
+        color: var(--color-text-subtle);
+    }
+
+    .theme-overlay {
+        background: color-mix(in srgb, var(--color-bg) 35%, black 65%);
+    }
+
+    .theme-danger-ghost:hover {
+        background: color-mix(in srgb, #ef4444 10%, var(--color-surface) 90%);
     }
 }

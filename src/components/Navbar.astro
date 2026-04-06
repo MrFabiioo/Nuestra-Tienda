@@ -23,6 +23,16 @@ import SearchBar from "./SearchBar.astro";
                     <li><a href="/pagos" class="desktop-nav__link">Pagos</a></li>
                 </ul>
             </nav>
+            <button
+                class="theme-toggle"
+                type="button"
+                data-theme-toggle
+                aria-label="Cambiar entre tema claro y oscuro"
+                aria-pressed="false"
+            >
+                <span class="theme-toggle__icon" aria-hidden="true">☼</span>
+                <span class="theme-toggle__label" data-theme-label>Modo claro</span>
+            </button>
             <div class="cart-icon">
                 <CartButton client:only="preact" transition:persist>
                     <button
@@ -64,14 +74,15 @@ import SearchBar from "./SearchBar.astro";
 
 <style>
     .navbar {
-        background: rgba(29, 29, 31, 0.95);
+        background: var(--color-navbar-bg);
         backdrop-filter: blur(20px) saturate(180%);
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
         z-index: 50;
-        border-bottom: 2px solid rgba(86, 130, 4, 0.3);
+        border-bottom: 1px solid var(--color-navbar-border);
+        box-shadow: 0 10px 28px var(--color-navbar-shadow);
     }
 
     .navbar__container {
@@ -95,11 +106,11 @@ import SearchBar from "./SearchBar.astro";
     }
 
     .logo__text {
-        color: white;
+        color: var(--color-text);
     }
 
     .logo__highlight {
-        color: #568203;
+        color: var(--color-accent);
     }
 
     /* Nav desktop */
@@ -118,7 +129,7 @@ import SearchBar from "./SearchBar.astro";
     .desktop-nav__link {
         display: block;
         padding: 0.4rem 0.875rem;
-        color: rgba(255, 255, 255, 0.75);
+        color: var(--color-text-muted);
         text-decoration: none;
         font-size: 14px;
         font-weight: 500;
@@ -128,8 +139,8 @@ import SearchBar from "./SearchBar.astro";
 
     .desktop-nav__link:hover,
     .desktop-nav__link[aria-current="page"] {
-        color: #568203;
-        background: rgba(86, 130, 4, 0.1);
+        color: var(--color-text);
+        background: var(--color-overlay-strong);
     }
 
     /* Derecha */
@@ -137,6 +148,42 @@ import SearchBar from "./SearchBar.astro";
         display: flex;
         align-items: center;
         gap: 0.75rem;
+    }
+
+    .theme-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        min-height: 40px;
+        padding: 0.55rem 0.85rem;
+        border-radius: 999px;
+        border: 1px solid var(--color-navbar-border);
+        background: var(--color-overlay-soft);
+        color: var(--color-text);
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.85rem;
+        font-weight: 600;
+        line-height: 1;
+    }
+
+    .theme-toggle:hover {
+        background: var(--color-overlay-strong);
+        border-color: var(--color-accent);
+    }
+
+    .theme-toggle__icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.35rem;
+        height: 1.35rem;
+        color: var(--color-accent);
+        font-size: 1rem;
+    }
+
+    .theme-toggle__label {
+        white-space: nowrap;
     }
 
     .cart-icon {
@@ -173,7 +220,7 @@ import SearchBar from "./SearchBar.astro";
         width: 18px;
         height: 18px;
         border-radius: 999px;
-        border: 2px solid rgba(29, 29, 31, 0.95);
+        border: 2px solid var(--color-surface);
     }
 
     /* Hamburguesa */
@@ -184,8 +231,8 @@ import SearchBar from "./SearchBar.astro";
         gap: 5px;
         width: 40px;
         height: 40px;
-        background: transparent;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: var(--color-overlay-soft);
+        border: 1px solid var(--color-navbar-border);
         border-radius: 8px;
         cursor: pointer;
         padding: 8px;
@@ -193,13 +240,14 @@ import SearchBar from "./SearchBar.astro";
     }
 
     .hamburger:hover {
-        border-color: rgba(86, 130, 4, 0.5);
+        border-color: var(--color-accent);
+        background: var(--color-overlay-strong);
     }
 
     .hamburger__line {
         width: 100%;
         height: 2px;
-        background: #568203;
+        background: var(--color-accent);
         border-radius: 2px;
         transition: all 0.3s ease;
         transform-origin: center;
@@ -222,8 +270,8 @@ import SearchBar from "./SearchBar.astro";
     /* Menu mobile */
     .mobile-menu {
         display: none;
-        background: rgba(22, 22, 24, 0.98);
-        border-top: 1px solid rgba(86, 130, 4, 0.2);
+        background: var(--color-navbar-bg);
+        border-top: 1px solid var(--color-navbar-border);
         padding: 0.5rem 0 1rem;
     }
 
@@ -240,7 +288,7 @@ import SearchBar from "./SearchBar.astro";
     .mobile-menu__link {
         display: block;
         padding: 0.875rem 1.5rem;
-        color: rgba(255, 255, 255, 0.8);
+        color: var(--color-text-muted);
         text-decoration: none;
         font-size: 15px;
         font-weight: 500;
@@ -250,9 +298,9 @@ import SearchBar from "./SearchBar.astro";
 
     .mobile-menu__link:hover,
     .mobile-menu__link[aria-current="page"] {
-        background: rgba(86, 130, 4, 0.12);
-        color: #6da204;
-        border-left-color: #568203;
+        background: var(--color-overlay-strong);
+        color: var(--color-text);
+        border-left-color: var(--color-accent);
     }
 
     /* Responsive: en tablet/desktop mostramos nav y ocultamos hamburguesa */
@@ -279,13 +327,61 @@ import SearchBar from "./SearchBar.astro";
             width: 44px;
             height: 44px;
         }
+
+        .theme-toggle {
+            min-width: 40px;
+            padding: 0.55rem;
+        }
+
+        .theme-toggle__label {
+            display: none;
+        }
     }
 </style>
 
 <script>
     document.addEventListener("astro:page-load", () => {
+        const storageKey = 'guacashop-theme';
+        const root = document.documentElement;
         const menuToggle = document.getElementById('menuToggle') as HTMLButtonElement | null;
         const mobileMenu = document.getElementById('mobileMenu');
+        const themeToggle = document.querySelector('[data-theme-toggle]') as HTMLButtonElement | null;
+        const themeLabel = themeToggle?.querySelector('[data-theme-label]') as HTMLSpanElement | null;
+
+        function getResolvedTheme() {
+            let storedTheme: string | null = null;
+
+            try {
+                storedTheme = window.localStorage.getItem(storageKey);
+            } catch {
+                storedTheme = null;
+            }
+
+            if (storedTheme === 'dark' || storedTheme === 'light') {
+                return storedTheme;
+            }
+
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+
+        function syncThemeToggle(theme: 'dark' | 'light') {
+            const isDark = theme === 'dark';
+            root.dataset.theme = theme;
+            root.style.colorScheme = theme;
+            themeToggle?.setAttribute('aria-pressed', String(isDark));
+            themeToggle?.setAttribute('aria-label', isDark ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro');
+
+            if (themeLabel) {
+                themeLabel.textContent = isDark ? 'Modo oscuro' : 'Modo claro';
+            }
+
+            const icon = themeToggle?.querySelector('.theme-toggle__icon');
+            if (icon) {
+                icon.textContent = isDark ? '☾' : '☼';
+            }
+        }
+
+        syncThemeToggle(getResolvedTheme() as 'dark' | 'light');
 
         function openMenu() {
             mobileMenu?.classList.add('mobile-menu--open');
@@ -306,6 +402,18 @@ import SearchBar from "./SearchBar.astro";
         menuToggle?.addEventListener('click', () => {
             const isOpen = mobileMenu?.classList.contains('mobile-menu--open');
             isOpen ? closeMenu() : openMenu();
+        });
+
+        themeToggle?.addEventListener('click', () => {
+            const nextTheme = (root.dataset.theme === 'dark' ? 'light' : 'dark') as 'dark' | 'light';
+
+            try {
+                window.localStorage.setItem(storageKey, nextTheme);
+            } catch {
+                // noop: si storage no está disponible, igual aplicamos el tema en memoria
+            }
+
+            syncThemeToggle(nextTheme);
         });
 
         document.querySelectorAll('.mobile-menu__link').forEach(link => {

@@ -127,17 +127,17 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
         width: 40px;
         height: 40px;
         background: transparent;
-        border: 1px solid rgba(255, 255, 255, 0.15);
+        border: 1px solid var(--color-border);
         border-radius: 8px;
-        color: rgba(255, 255, 255, 0.8);
+        color: var(--color-text-muted);
         cursor: pointer;
         transition: border-color 0.2s ease, color 0.2s ease;
         flex-shrink: 0;
     }
 
     .search-trigger:hover {
-        border-color: rgba(86, 130, 4, 0.5);
-        color: #568203;
+        border-color: var(--color-border-strong);
+        color: var(--color-accent);
     }
 
     /* Wrapper */
@@ -150,8 +150,8 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
     .search-box {
         display: flex;
         align-items: center;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.15);
+        background: color-mix(in srgb, var(--color-surface-elevated) 86%, transparent);
+        border: 1px solid var(--color-border);
         border-radius: 25px;
         padding: 0 16px;
         height: 44px;
@@ -159,19 +159,19 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
     }
 
     .search-box:focus-within {
-        border-color: #568203;
-        box-shadow: 0 0 0 3px rgba(86, 130, 4, 0.2);
-        background: rgba(255, 255, 255, 0.12);
+        border-color: var(--color-accent);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 18%, transparent);
+        background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
     }
 
     .search-icon {
-        color: rgba(255, 255, 255, 0.4);
+        color: var(--color-text-subtle);
         flex-shrink: 0;
         margin-right: 10px;
     }
 
     .search-box:focus-within .search-icon {
-        color: #568203;
+        color: var(--color-accent);
     }
 
     .search-input {
@@ -179,13 +179,13 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
         border: none;
         background: transparent;
         font-size: 14px;
-        color: rgba(255, 255, 255, 0.9);
+        color: var(--color-text);
         outline: none;
         min-width: 0;
     }
 
     .search-input::placeholder {
-        color: rgba(255, 255, 255, 0.35);
+        color: var(--color-text-subtle);
     }
 
     /* Botón cerrar — oculto por defecto */
@@ -197,7 +197,7 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
         height: 28px;
         background: transparent;
         border: none;
-        color: rgba(255, 255, 255, 0.5);
+        color: var(--color-text-muted);
         cursor: pointer;
         padding: 4px;
         border-radius: 50%;
@@ -206,7 +206,7 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
     }
 
     .search-close:hover {
-        color: rgba(255, 255, 255, 0.9);
+        color: var(--color-text);
     }
 
     /* Dropdown */
@@ -215,10 +215,10 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
         top: calc(100% + 8px);
         left: 0;
         right: 0;
-        background: white;
-        border: 1px solid #e8e8e8;
+        background: color-mix(in srgb, var(--color-surface) 96%, transparent);
+        border: 1px solid var(--color-border);
         border-radius: 12px;
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
+        box-shadow: 0 12px 30px var(--color-shadow-soft);
         overflow: hidden;
         display: none;
         z-index: 1000;
@@ -236,8 +236,8 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
     .dropdown-loading {
         display: none;
         padding: 16px;
-        border-bottom: 1px solid #f3f4f6;
-        background: linear-gradient(180deg, rgba(248, 250, 252, 0.95) 0%, rgba(255, 255, 255, 0.96) 100%);
+        border-bottom: 1px solid var(--color-border);
+        background: linear-gradient(180deg, color-mix(in srgb, var(--color-surface-elevated) 95%, transparent) 0%, color-mix(in srgb, var(--color-surface) 96%, transparent) 100%);
     }
 
     .dropdown-loading.show {
@@ -254,14 +254,14 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
         font-weight: 800;
         letter-spacing: 0.18em;
         text-transform: uppercase;
-        color: #568203;
+        color: var(--color-accent);
     }
 
     .dropdown-loading__title {
         margin: 6px 0 0;
         font-size: 13px;
         line-height: 1.5;
-        color: #4b5563;
+        color: var(--color-text-muted);
     }
 
     .dropdown-loading__list {
@@ -302,7 +302,7 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
     .dropdown-empty {
         padding: 24px 16px;
         text-align: center;
-        color: #999;
+        color: var(--color-text-subtle);
         font-size: 14px;
         display: none;
     }
@@ -311,14 +311,14 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
         margin: 0;
         font-size: 14px;
         font-weight: 700;
-        color: #2d2d2d;
+        color: var(--color-text);
     }
 
     .dropdown-empty__copy {
         margin: 8px auto 0;
         max-width: 240px;
         line-height: 1.5;
-        color: #6b7280;
+        color: var(--color-text-muted);
     }
 
     .dropdown-empty__link {
@@ -329,8 +329,8 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
         margin-top: 14px;
         padding: 0 16px;
         border-radius: 999px;
-        background: rgba(86, 130, 4, 0.1);
-        color: #568203;
+        background: var(--color-surface-soft);
+        color: var(--color-accent);
         font-size: 13px;
         font-weight: 700;
         text-decoration: none;
@@ -339,8 +339,8 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
 
     .dropdown-empty__link:hover,
     .dropdown-empty__link:focus {
-        background: rgba(86, 130, 4, 0.16);
-        color: #3f6202;
+        background: var(--color-surface-soft-strong);
+        color: var(--color-accent-strong);
         outline: none;
     }
 
@@ -357,7 +357,7 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
         text-decoration: none;
         color: inherit;
         transition: background 0.15s ease;
-        border-bottom: 1px solid #f5f5f5;
+        border-bottom: 1px solid var(--color-border);
     }
 
     .search-result:last-child {
@@ -366,7 +366,7 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
 
     .search-result:hover,
     .search-result:focus {
-        background: #f5fde8;
+        background: var(--color-surface-soft);
         outline: none;
     }
 
@@ -375,7 +375,7 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
         height: 48px;
         border-radius: 8px;
         object-fit: cover;
-        background: #f0f0f0;
+        background: var(--color-surface-muted);
         margin-right: 14px;
         flex-shrink: 0;
     }
@@ -388,7 +388,7 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
     .result-name {
         font-size: 14px;
         font-weight: 600;
-        color: #2d2d2d;
+        color: var(--color-text);
         margin-bottom: 2px;
         white-space: nowrap;
         overflow: hidden;
@@ -397,11 +397,11 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
 
     .result-category {
         font-size: 12px;
-        color: #999;
+        color: var(--color-text-subtle);
     }
 
     .result-arrow {
-        color: #c5c5c5;
+        color: var(--color-text-subtle);
         flex-shrink: 0;
         margin-left: 8px;
     }
@@ -416,7 +416,7 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
     }
 
     .dropdown-results::-webkit-scrollbar-thumb {
-        background: #ddd;
+        background: var(--color-border-strong);
         border-radius: 3px;
     }
 
@@ -432,10 +432,10 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
             z-index: 49;
             max-width: none;
             padding: 0.75rem 1rem;
-            background: rgba(22, 22, 24, 0.98);
+            background: color-mix(in srgb, var(--color-bg) 94%, transparent);
             backdrop-filter: blur(16px);
-            border-bottom: 1px solid rgba(86, 130, 4, 0.3);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid var(--color-border);
+            box-shadow: 0 8px 20px var(--color-shadow-soft);
         }
 
         .search-wrapper.mobile-open {
@@ -451,7 +451,7 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
         }
 
         .search-box {
-            background: rgba(255, 255, 255, 0.1);
+            background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
             height: 48px;
             border-radius: 12px;
         }
