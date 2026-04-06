@@ -47,21 +47,21 @@ const totalCategories = Object.keys(categoryNames).length;
 <Layout>
     <main class="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
         <!-- Hero Section -->
-        <section class="px-4 pb-8 pt-12 bg-gradient-to-r from-guacamole-b/[.08] via-transparent to-guacamole-a/[.08]">
-            <div class="mx-auto flex max-w-6xl flex-col gap-8 rounded-[2rem] border border-white/70 bg-white/75 px-6 py-8 shadow-sm backdrop-blur-sm md:px-10 md:py-10">
+        <section class="bg-gradient-to-r from-guacamole-b/[.08] via-transparent to-guacamole-a/[.08] px-4 pb-6 pt-8 md:pb-8 md:pt-10">
+            <div class="mx-auto flex max-w-6xl flex-col gap-6 rounded-[1.75rem] border border-white/70 bg-white/75 px-5 py-6 shadow-sm backdrop-blur-sm sm:px-6 sm:py-7 md:gap-8 md:rounded-[2rem] md:px-10 md:py-10">
                 <div class="max-w-3xl">
                     <span class="inline-flex items-center rounded-full border border-guacamole-b/15 bg-guacamole-b/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-guacamole-b">
                         Catálogo completo
                     </span>
-                    <h1 class="mt-4 text-4xl font-bold tracking-tight text-neutral-900 md:text-5xl">
-                        Tienda Guacamole: el punto de partida para explorar todo el catálogo
+                    <h1 class="mt-4 text-3xl font-bold leading-tight tracking-tight text-neutral-900 sm:text-4xl md:text-5xl">
+                        Tienda Guacamole: todo el catálogo en un solo lugar
                     </h1>
-                    <p class="mt-4 max-w-2xl text-lg leading-relaxed text-neutral-600">
-                        Encontrá desde acá toda la oferta disponible, usá búsqueda y filtros para descubrir más rápido, y recorré cada categoría con la misma estética limpia del resto de la experiencia.
+                    <p class="mt-3 max-w-2xl text-base leading-relaxed text-neutral-600 sm:mt-4 sm:text-lg">
+                        Descubrí la selección disponible, filtrá por categoría o buscá directo lo que necesitás para comprar más rápido y con claridad.
                     </p>
                 </div>
 
-                <div class="flex flex-wrap gap-3 text-sm text-neutral-600">
+                <div class="grid gap-2 text-sm text-neutral-600 sm:flex sm:flex-wrap sm:gap-3">
                     <span class="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 shadow-sm">
                         <span class="h-2 w-2 rounded-full bg-guacamole-b"></span>
                         {totalCategories} categorías para explorar
@@ -72,12 +72,12 @@ const totalCategories = Object.keys(categoryNames).length;
                     </span>
                     <span class="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 shadow-sm">
                         <span class="h-2 w-2 rounded-full bg-neutral-900"></span>
-                        Búsqueda por nombre y descripción
+                        Búsqueda por nombre, ingrediente y descripción
                     </span>
                 </div>
 
                 <div class="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.9fr)] lg:items-center">
-                    <div class="flex flex-wrap gap-3">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                         <a href="#category-filters" class="inline-flex min-h-11 items-center justify-center rounded-full bg-guacamole-b px-6 py-3 text-sm font-semibold text-white transition-colors duration-200 hover:bg-guacamole-a">
                             Explorar categorías
                         </a>
@@ -86,14 +86,14 @@ const totalCategories = Object.keys(categoryNames).length;
                         </a>
                     </div>
 
-                    <div class="rounded-3xl border border-neutral-200 bg-neutral-50/90 p-5 text-left shadow-sm">
+                    <div class="rounded-3xl border border-neutral-200 bg-neutral-50/90 p-4 text-left shadow-sm sm:p-5">
                         <p class="text-sm font-semibold uppercase tracking-[0.18em] text-guacamole-b">
-                            Cómo orientarte rápido
+                            Cómo recorrer la tienda
                         </p>
                         <ul class="mt-3 space-y-2 text-sm leading-relaxed text-neutral-600">
-                            <li>1. Empezá por la categoría que te interese.</li>
-                            <li>2. Afiná con el buscador si ya sabés qué querés.</li>
-                            <li>3. Entrá a cada producto para ver detalle y compra.</li>
+                            <li>1. Empezá por la categoría que mejor encaje con tu antojo.</li>
+                            <li>2. Usá el buscador si ya tenés un producto o ingrediente en mente.</li>
+                            <li>3. Entrá al detalle para revisar tamaños, precio y compra.</li>
                         </ul>
                     </div>
                 </div>
@@ -101,26 +101,26 @@ const totalCategories = Object.keys(categoryNames).length;
         </section>
 
         <!-- Search & Filter Bar -->
-        <section class="px-4 pb-8 max-w-6xl mx-auto">
-            <div class="mb-5 rounded-3xl border border-neutral-200 bg-white px-5 py-4 shadow-sm">
-                <div class="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+        <section class="mx-auto max-w-6xl px-4 pb-8">
+            <div class="mb-4 rounded-3xl border border-neutral-200 bg-white px-4 py-4 shadow-sm sm:mb-5 sm:px-5">
+                <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                     <div class="max-w-2xl">
                         <p class="text-sm font-semibold uppercase tracking-[0.18em] text-guacamole-b">
                             Explorá desde acá
                         </p>
-                        <h2 class="mt-1 text-2xl font-semibold tracking-tight text-neutral-900">
-                            Buscador y filtros para recorrer toda la tienda sin perderte
+                        <h2 class="mt-1 text-xl font-semibold tracking-tight text-neutral-900 sm:text-2xl">
+                            Buscador y filtros para encontrar más rápido lo que querés
                         </h2>
                     </div>
-                    <p class="max-w-xl text-sm leading-relaxed text-neutral-500">
-                        Combiná búsqueda y categorías para descubrir productos nuevos o ir directo a lo que ya tenés en mente.
+                    <p class="max-w-xl text-sm leading-relaxed text-neutral-500 md:text-right">
+                        Combiná búsqueda y categorías para descubrir algo nuevo o ir directo a tu próxima compra.
                     </p>
                 </div>
             </div>
 
-            <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <!-- Search Input -->
-                <div class="relative w-full md:w-auto md:flex-1 max-w-lg">
+                <div class="relative w-full max-w-lg md:w-auto md:flex-1">
                     <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                         <svg class="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -129,22 +129,22 @@ const totalCategories = Object.keys(categoryNames).length;
                     <input
                         type="text"
                         id="search-input"
-                        placeholder="Buscar por producto o ingrediente..."
+                        placeholder="Buscar por producto, ingrediente o antojo..."
                         class="w-full pl-12 pr-4 py-3 rounded-full border border-neutral-200 bg-white shadow-sm text-neutral-700 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-guacamole-b/30 focus:border-guacamole-b transition-all duration-300"
                     />
                 </div>
 
                 <!-- Category Filter Pills -->
-                <div class="flex flex-wrap gap-2 justify-center" id="category-filters">
+                <div class="flex w-full gap-2 overflow-x-auto pb-1 md:w-auto md:flex-wrap md:justify-center md:pb-0" id="category-filters">
                     <button 
-                        class="category-pill px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 bg-guacamole-b text-white shadow-md hover:shadow-lg hover:bg-guacamole-a"
+                        class="category-pill shrink-0 rounded-full bg-guacamole-b px-4 py-2 text-sm font-medium text-white shadow-md transition-all duration-200 hover:bg-guacamole-a hover:shadow-lg"
                         data-category="todos"
                     >
                         Todos
                     </button>
                     {Object.entries(categoryNames).map(([slug, name]) => (
                         <button 
-                            class="category-pill px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 bg-white text-neutral-600 border border-neutral-200 hover:bg-guacamole-b/10 hover:border-guacamole-b/40 hover:text-guacamole-b"
+                            class="category-pill shrink-0 rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-600 transition-all duration-200 hover:border-guacamole-b/40 hover:bg-guacamole-b/10 hover:text-guacamole-b"
                             data-category={slug}
                         >
                             {name}
@@ -155,23 +155,23 @@ const totalCategories = Object.keys(categoryNames).length;
         </section>
 
         <!-- Results Count -->
-        <section class="px-4 pb-4 max-w-6xl mx-auto">
-            <div class="flex flex-col gap-1 text-sm text-neutral-500 md:flex-row md:items-center md:justify-between">
+        <section class="mx-auto max-w-6xl px-4 pb-4">
+            <div class="flex flex-col gap-2 rounded-2xl border border-neutral-100 bg-white/75 px-4 py-3 text-sm text-neutral-500 shadow-sm md:flex-row md:items-center md:justify-between">
                 <p id="results-count">
-                    Explorando {products.length} productos en esta página del catálogo
+                    Estás viendo {products.length} productos en esta página de la tienda
                 </p>
                 <p id="results-hint">
-                    Si no encontrás lo que buscás, probá otra categoría o seguí navegando con la paginación.
+                    Si todavía no aparece lo que buscás, cambiá de categoría o seguí explorando con la paginación.
                 </p>
             </div>
         </section>
 
         <!-- Product Grid -->
         <section 
-            class="px-4 pb-12 max-w-6xl mx-auto"
+            class="mx-auto max-w-6xl px-4 pb-10 md:pb-12"
             id="product-grid"
         >
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4 xl:gap-6">
                 {products.map((product) => (
                     <div 
                         class="product-card-wrapper"
@@ -187,23 +187,23 @@ const totalCategories = Object.keys(categoryNames).length;
 
         <!-- Empty State -->
         <section 
-            class="hidden px-4 pb-12 max-w-6xl mx-auto text-center"
+            class="mx-auto hidden max-w-6xl px-4 pb-10 text-center md:pb-12"
             id="empty-state"
         >
-            <div class="rounded-[2rem] border border-neutral-200 bg-white/95 px-6 py-12 shadow-sm md:px-10 md:py-14">
+            <div class="rounded-[2rem] border border-neutral-200 bg-white/95 px-5 py-10 shadow-sm sm:px-6 md:px-10 md:py-14">
                 <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-neutral-100 mb-6">
                     <svg class="w-10 h-10 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
                 <span class="inline-flex items-center rounded-full border border-guacamole-b/15 bg-guacamole-b/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-guacamole-b">
-                    Ajustemos la búsqueda
+                    Probemos otro camino
                 </span>
                 <h3 class="mt-5 text-xl font-semibold text-neutral-800 mb-2" id="empty-state-title">
-                    No encontramos productos
+                    No vimos productos para esa búsqueda
                 </h3>
                 <p class="text-neutral-500 mb-6 max-w-2xl mx-auto" id="empty-state-description">
-                    No hay productos que coincidan con tu búsqueda. Probá con otros términos o limpiá los filtros.
+                    En esta página no encontramos coincidencias. Probá con otra palabra, cambiá la categoría o limpiá los filtros para volver a empezar.
                 </p>
 
                 <div class="mb-8 flex flex-wrap items-center justify-center gap-2" id="empty-state-context">
@@ -213,16 +213,16 @@ const totalCategories = Object.keys(categoryNames).length;
 
                 <div class="mx-auto mb-8 grid max-w-3xl gap-3 text-left md:grid-cols-3">
                     <div class="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4">
-                        <p class="text-sm font-semibold text-neutral-800">Probá términos más amplios</p>
-                        <p class="mt-1 text-sm leading-relaxed text-neutral-500">Usá nombres cortos, ingredientes o categorías para abrir más resultados.</p>
+                        <p class="text-sm font-semibold text-neutral-800">Buscá con menos detalle</p>
+                        <p class="mt-1 text-sm leading-relaxed text-neutral-500">Probá con un nombre más corto, un ingrediente o una categoría para abrir más opciones.</p>
                     </div>
                     <div class="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4">
                         <p class="text-sm font-semibold text-neutral-800">Volvé a “Todos”</p>
-                        <p class="mt-1 text-sm leading-relaxed text-neutral-500">Si estabas muy filtrado, limpiar te devuelve la vista completa de esta página.</p>
+                        <p class="mt-1 text-sm leading-relaxed text-neutral-500">Si filtraste mucho, limpiar te devuelve la vista completa de esta página en un clic.</p>
                     </div>
                     <div class="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4">
-                        <p class="text-sm font-semibold text-neutral-800">Seguí explorando</p>
-                        <p class="mt-1 text-sm leading-relaxed text-neutral-500">Podés cambiar de categoría o avanzar con la paginación para descubrir más productos.</p>
+                        <p class="text-sm font-semibold text-neutral-800">Seguí recorriendo la tienda</p>
+                        <p class="mt-1 text-sm leading-relaxed text-neutral-500">Podés cambiar de categoría o avanzar de página para descubrir más productos disponibles.</p>
                     </div>
                 </div>
 
@@ -231,7 +231,7 @@ const totalCategories = Object.keys(categoryNames).length;
                         id="clear-filters"
                         class="inline-flex min-h-11 items-center justify-center px-6 py-3 rounded-full bg-guacamole-b text-white font-medium hover:bg-guacamole-a transition-colors duration-200"
                     >
-                        Limpiar búsqueda y filtros
+                        Reiniciar búsqueda y filtros
                     </button>
                     <a
                         href="#category-filters"
@@ -244,7 +244,7 @@ const totalCategories = Object.keys(categoryNames).length;
         </section>
 
         <!-- Pagination -->
-        <section class="px-4 pb-12 max-w-6xl mx-auto">
+        <section class="mx-auto max-w-6xl px-4 pb-12">
             <Pagination pageParam={pageParam} totalPages={totalPages} />
         </section>
     </main>
@@ -286,8 +286,8 @@ const totalCategories = Object.keys(categoryNames).length;
             const categoryLabel = getCategoryLabel(activeCategory);
 
             if (!hasSearch && !hasCategory) {
-                resultsCount.textContent = `Explorando ${visibleCount} productos en esta página del catálogo`;
-                resultsHint.textContent = 'Si no encontrás lo que buscás, probá otra categoría o seguí navegando con la paginación.';
+                resultsCount.textContent = `Estás viendo ${visibleCount} productos en esta página de la tienda`;
+                resultsHint.textContent = 'Si todavía no aparece lo que buscás, cambiá de categoría o seguí explorando con la paginación.';
                 return;
             }
 
@@ -300,16 +300,16 @@ const totalCategories = Object.keys(categoryNames).length;
             resultsCount.textContent = `Mostrando ${visibleCount} ${resultLabel} ${context.join(' ')}`.trim();
 
             if (visibleCount === 0) {
-                resultsHint.textContent = 'Probá limpiar la búsqueda, volver a “Todos” o pasar de página para abrir más opciones.';
+                resultsHint.textContent = 'Probá reiniciar la búsqueda, volver a “Todos” o pasar de página para abrir más opciones.';
                 return;
             }
 
             if (visibleCount < totalProductsOnPage) {
-                resultsHint.textContent = 'Si querés ampliar el resultado, usá términos más generales o quitá algún filtro activo.';
+                resultsHint.textContent = 'Si querés abrir más resultados, usá términos más amplios o sacá algún filtro activo.';
                 return;
             }
 
-            resultsHint.textContent = 'Buen punto de partida: si todavía no ves lo ideal, cambiá de categoría o seguí con la paginación.';
+            resultsHint.textContent = 'Buen punto de partida: si todavía no ves lo ideal, probá otra categoría o seguí avanzando en la tienda.';
         }
 
         function updateEmptyState(searchTerm: string) {
@@ -320,17 +320,17 @@ const totalCategories = Object.keys(categoryNames).length;
             const categoryLabel = getCategoryLabel(activeCategory);
 
             if (hasSearch && hasCategory) {
-                emptyStateTitle.textContent = `No encontramos coincidencias en ${categoryLabel}`;
-                emptyStateDescription.textContent = `No apareció ningún producto para “${searchTerm}” dentro de esta categoría. Probá con un término más amplio o cambiá el filtro para abrir más opciones.`;
+                emptyStateTitle.textContent = `No vimos coincidencias en ${categoryLabel}`;
+                emptyStateDescription.textContent = `No apareció ningún producto para “${searchTerm}” dentro de esta categoría. Probá con una búsqueda más amplia o cambiá el filtro para abrir más opciones.`;
             } else if (hasSearch) {
-                emptyStateTitle.textContent = `No encontramos resultados para “${searchTerm}”`;
-                emptyStateDescription.textContent = 'Probá buscar por nombre corto, ingrediente o categoría. También podés limpiar la búsqueda para volver al catálogo completo de esta página.';
+                emptyStateTitle.textContent = `No vimos resultados para “${searchTerm}”`;
+                emptyStateDescription.textContent = 'Probá buscar por nombre corto, ingrediente o categoría. También podés reiniciar la búsqueda para volver al catálogo completo de esta página.';
             } else if (hasCategory) {
                 emptyStateTitle.textContent = `No hay productos visibles en ${categoryLabel}`;
-                emptyStateDescription.textContent = 'En esta página no hay productos para esa categoría. Probá volver a “Todos” o avanzar con la paginación para seguir explorando.';
+                emptyStateDescription.textContent = 'En esta página no hay productos para esa categoría. Probá volver a “Todos” o avanzar con la paginación para seguir explorando la tienda.';
             } else {
-                emptyStateTitle.textContent = 'No encontramos productos';
-                emptyStateDescription.textContent = 'No hay productos que coincidan con tu búsqueda. Probá con otros términos o limpiá los filtros.';
+                emptyStateTitle.textContent = 'No vimos productos para esa búsqueda';
+                emptyStateDescription.textContent = 'En esta página no encontramos coincidencias. Probá con otra palabra o reiniciá los filtros.';
             }
 
             if (hasSearch) {

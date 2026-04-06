@@ -61,29 +61,29 @@ export default function CartButton() {
     const buildFeedback = (detail: CartFeedbackDetail): InlineFeedback => {
       const totalItemsLabel =
         typeof detail.totalItems === 'number'
-          ? `${detail.totalItems} ${detail.totalItems === 1 ? 'item' : 'items'} en total`
-          : 'Tu carrito quedó actualizado';
+          ? `${detail.totalItems} ${detail.totalItems === 1 ? 'producto en total' : 'productos en total'}`
+          : 'Tu carrito ya quedó al día';
 
       switch (detail.type) {
         case 'add':
           return {
             tone: 'success',
-            title: detail.productName ? `${detail.productName} ya está en tu carrito` : 'Producto agregado',
+            title: detail.productName ? `${detail.productName} ya está en tu carrito` : 'Producto agregado al carrito',
             message:
               detail.message ??
-              `Sumaste ${detail.quantity ?? 1} ${detail.quantity === 1 ? 'unidad' : 'unidades'}. ${totalItemsLabel}.`,
+              `Sumaste ${detail.quantity ?? 1} ${detail.quantity === 1 ? 'unidad' : 'unidades'}. Ahora tenés ${totalItemsLabel}.`,
           };
         case 'remove':
           return {
             tone: 'neutral',
-            title: detail.productName ? `${detail.productName} se removió del carrito` : 'Producto removido',
-            message: detail.message ?? `${totalItemsLabel}. Podés seguir ajustándolo cuando quieras.`,
+            title: detail.productName ? `${detail.productName} salió del carrito` : 'Producto quitado del carrito',
+            message: detail.message ?? `Listo, actualizamos tu selección. Ahora tenés ${totalItemsLabel}.`,
           };
         case 'clear':
           return {
             tone: 'neutral',
-            title: 'Carrito vaciado',
-            message: detail.message ?? 'Dejamos el carrito limpio para que arranques de nuevo cuando quieras.',
+            title: 'Carrito reiniciado',
+            message: detail.message ?? 'Dejamos el carrito limpio para que vuelvas a armar tu pedido cuando quieras.',
           };
       }
     };
@@ -157,7 +157,7 @@ export default function CartButton() {
     cartItems.set(updatedCart);
     setFeedback({
       tone: 'neutral',
-      title: itemToRemove?.name ? `${itemToRemove.name} se removió del carrito` : 'Producto removido',
+      title: itemToRemove?.name ? `${itemToRemove.name} salió del carrito` : 'Producto quitado del carrito',
       message: `Ahora tenés ${updatedCart.length} ${updatedCart.length === 1 ? 'producto distinto' : 'productos distintos'} en tu mini carrito.`,
     });
   };
@@ -167,7 +167,7 @@ export default function CartButton() {
     Cookies.remove('cart');
     setFeedback({
       tone: 'neutral',
-      title: 'Carrito vaciado',
+      title: 'Carrito reiniciado',
       message: 'Tu selección se limpió por completo. Podés volver a cargarla en segundos.',
     });
   };
@@ -214,7 +214,7 @@ export default function CartButton() {
                 <h2 class="truncate text-sm font-black uppercase leading-none tracking-wide sm:text-base">Tu carrito</h2>
                 {$cartItems.length > 0 && (
                   <span class="shrink-0 rounded-full border border-guacamole-b/30 bg-guacamole-b/20 px-2 py-0.5 text-[11px] font-bold text-guacamole-f sm:text-xs">
-                    {$totalQty} {$totalQty === 1 ? 'item' : 'items'}
+                    {$totalQty} {$totalQty === 1 ? 'producto' : 'productos'}
                   </span>
                 )}
               </div>
@@ -248,8 +248,8 @@ export default function CartButton() {
                   </svg>
                 </div>
                 <div>
-                  <p class="text-guacamole-icons font-bold text-base">Tu carrito está vacío</p>
-                  <p class="mt-1 text-sm text-gray-400">¡Agrega algunos productos y empezá!</p>
+                  <p class="text-guacamole-icons font-bold text-base">Tu carrito está esperando tu pedido</p>
+                  <p class="mt-1 text-sm text-gray-400">Sumá productos desde la tienda y armalo a tu ritmo.</p>
                 </div>
                 <a href="/tienda" class="mt-1 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-guacamole-b transition-colors hover:text-guacamole-a">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -358,14 +358,14 @@ export default function CartButton() {
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                   </svg>
-                  Ir a pagar
+                  Revisar pedido
                   </a>
                   <p class="rounded-2xl bg-guacamole-fondo/10 px-3 py-2 text-center text-[11px] font-medium leading-relaxed text-guacamole-icons/75">
-                    Revisá tus productos acá y cuando estés listo seguís al checkout sin sorpresas.
+                    Revisá tu selección acá y, cuando quieras cerrar la compra, seguís al checkout con todo claro.
                   </p>
                   <div class="flex flex-col gap-2 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
                     <a href="/tienda" class="text-xs font-semibold text-guacamole-b transition-colors hover:text-guacamole-a">← Seguir comprando</a>
-                    <button onClick={handleClearCart} class="text-xs text-gray-400 transition-colors hover:text-red-500">Vaciar carrito</button>
+                    <button onClick={handleClearCart} class="text-xs text-gray-400 transition-colors hover:text-red-500">Limpiar carrito</button>
                 </div>
               </div>
 

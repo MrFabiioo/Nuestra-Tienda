@@ -24,7 +24,7 @@ const total = products.reduce(
 const isEmpty = products.length === 0;
 ---
 
-<Layout title="Checkout | Guacamole Shop" description="Finaliza tu compra">
+<Layout title="Checkout | Guacamole Shop" description="Revisá tu pedido y prepará el pago">
   <main class="min-h-screen bg-guacamole-fondo/10 py-8 px-4 md:px-8">
     
     {isEmpty ? (
@@ -39,11 +39,11 @@ const isEmpty = products.length === 0;
           </div>
           
           <h1 class="text-3xl md:text-4xl font-black text-guacamole-icons uppercase tracking-wide mb-4">
-            Tu carrito está vacío
+            Tu pedido todavía está vacío
           </h1>
           
           <p class="text-lg text-gray-600 mb-8">
-            Parece que aún no has añadido ningún producto a tu carrito.
+            Sumá productos desde la tienda para revisar tu compra y avanzar al pago cuando quieras.
           </p>
           
           <a 
@@ -52,7 +52,7 @@ const isEmpty = products.length === 0;
           >
             <span class="absolute inset-0 translate-x-1.5 translate-y-1.5 bg-guacamole-f transition-transform group-hover:translate-x-0 group-hover:translate-y-0"></span>
             <span class="relative inline-block border-2 border-current px-8 py-4 text-sm font-bold tracking-widest text-black uppercase text-center">
-              Continuar comprando
+              Ir a la tienda
             </span>
           </a>
           
@@ -79,10 +79,10 @@ const isEmpty = products.length === 0;
         <!-- Header -->
         <div class="mb-8">
           <h1 class="text-3xl md:text-4xl font-black text-guacamole-icons uppercase tracking-wide">
-            Finalizar Compra
+            Revisar pedido
           </h1>
           <p class="text-gray-600 mt-2">
-            Revisa tus productos y procede al pago
+            Revisá tus productos, completá tus datos y dejá listo el paso a pago.
           </p>
         </div>
 
@@ -97,14 +97,14 @@ const isEmpty = products.length === 0;
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
               </svg>
-              <span class="font-semibold">Continuar comprando</span>
+              <span class="font-semibold">Volver a la tienda</span>
             </a>
 
             <!-- Customer Form -->
             <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
               <div class="bg-guacamole-b px-6 py-4">
                 <h2 class="text-xl font-black text-white uppercase tracking-wide">
-                  Datos del Cliente
+                  Tus datos
                 </h2>
               </div>
               
@@ -113,7 +113,7 @@ const isEmpty = products.length === 0;
                 <div class="space-y-4">
                   <div class="border-b border-gray-100 pb-2">
                     <h3 class="text-lg font-bold text-guacamole-icons">Información de contacto</h3>
-                    <p class="text-sm text-gray-500">¿Cómo te contactaremos?</p>
+                    <p class="text-sm text-gray-500">Así te confirmamos el pedido y cualquier detalle de entrega.</p>
                   </div>
                   
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -167,8 +167,8 @@ const isEmpty = products.length === 0;
                 <!-- Section: Delivery Information -->
                 <div class="space-y-4 pt-4">
                   <div class="border-b border-gray-100 pb-2">
-                    <h3 class="text-lg font-bold text-guacamole-icons">Dirección de entrega</h3>
-                    <p class="text-sm text-gray-500">¿A dónde entregamos tu pedido?</p>
+                    <h3 class="text-lg font-bold text-guacamole-icons">Entrega y referencias</h3>
+                    <p class="text-sm text-gray-500">Contanos dónde lo entregamos o si preferís retirarlo.</p>
                   </div>
                   
                   <!-- Método de entrega -->
@@ -194,7 +194,7 @@ const isEmpty = products.length === 0;
                           value="recoger"
                           class="w-5 h-5 text-guacamole-b focus:ring-guacamole-b"
                         />
-                        <span class="text-guacamole-icons font-medium">Recoger en tienda</span>
+                        <span class="text-guacamole-icons font-medium">Retiro acordado</span>
                       </label>
                     </div>
                   </div>
@@ -210,7 +210,7 @@ const isEmpty = products.length === 0;
                       name="address" 
                       required
                       class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-guacamole-b focus:ring-2 focus:ring-guacamole-b/20 outline-none transition-all text-guacamole-icons"
-                      placeholder="Av. Principal, Calle 5, Edif. Miramar, Piso 3, Apto. 3B"
+                          placeholder="Av. Principal, Calle 5, Edif. Miramar, Piso 3, Apto. 3B"
                     />
                   </div>
                   
@@ -240,7 +240,7 @@ const isEmpty = products.length === 0;
                         id="notes" 
                         name="notes"
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-guacamole-b focus:ring-2 focus:ring-guacamole-b/20 outline-none transition-all text-guacamole-icons"
-                        placeholder="Portón verde, llamar al llegar"
+                          placeholder="Portón verde, tocar timbre o llamar al llegar"
                       />
                     </div>
                   </div>
@@ -252,7 +252,7 @@ const isEmpty = products.length === 0;
             <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
               <div class="bg-guacamole-f px-6 py-4">
                 <h2 class="text-xl font-black text-black uppercase tracking-wide">
-                  Productos ({products.length})
+                  Tu selección ({products.length})
                 </h2>
               </div>
               
@@ -305,7 +305,7 @@ const isEmpty = products.length === 0;
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
-                        Remover
+                        Quitar
                       </button>
                     </div>
                   </div>
@@ -319,7 +319,7 @@ const isEmpty = products.length === 0;
             <div class="bg-white rounded-2xl shadow-lg border border-gray-100 sticky top-24">
               <div class="bg-guacamole-f px-6 py-4">
                 <h2 class="text-xl font-black text-black uppercase tracking-wide">
-                  Resumen del Pedido
+                  Resumen de tu pedido
                 </h2>
               </div>
               
@@ -332,8 +332,8 @@ const isEmpty = products.length === 0;
                   </div>
                   
                   <div class="flex justify-between items-center">
-                    <span class="font-semibold">Envío</span>
-                    <span class="font-bold text-guacamole-b">Gratis</span>
+                    <span class="font-semibold">Entrega</span>
+                    <span class="font-bold text-guacamole-b">A coordinar</span>
                   </div>
                   
                   <div class="flex justify-between items-center">
@@ -384,7 +384,7 @@ const isEmpty = products.length === 0;
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                     </svg>
-                    Proceder al Pago
+                    Continuar a medios de pago
                   </span>
                 </a>
                 

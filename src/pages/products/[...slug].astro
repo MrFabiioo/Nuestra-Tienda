@@ -114,21 +114,21 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
 ---
 
 <Layout title={product.title} description={product.description}>
-    <div class="max-w-6xl mx-auto px-4 py-8 md:py-12">
+    <div class="mx-auto max-w-6xl px-4 py-6 sm:py-8 md:py-10">
         <!-- Main Product Card -->
-        <div class="bg-white/60 backdrop-blur-xl rounded-3xl shadow-[0_4px_40px_-8px_rgba(0,0,0,0.15)] border border-white/40 overflow-hidden">
+        <div class="overflow-hidden rounded-[1.75rem] border border-white/40 bg-white/60 shadow-[0_4px_40px_-8px_rgba(0,0,0,0.15)] backdrop-blur-xl md:rounded-3xl">
             <div class="grid grid-cols-1 md:grid-cols-2">
                 
                 <!-- Product Image Section -->
-                <div class="relative bg-gradient-to-br from-guacamole-f/20 to-white p-3 md:p-8 flex items-center justify-center min-h-[280px] md:min-h-auto">
-                    <div class="relative rounded-2xl overflow-hidden shadow-lg w-full aspect-[1/1] flex items-center justify-center">
+                <div class="relative flex min-h-[240px] items-center justify-center bg-gradient-to-br from-guacamole-f/20 to-white p-3 sm:min-h-[280px] md:min-h-auto md:p-6 lg:p-8">
+                    <div class="relative flex aspect-[1/1] w-full max-w-[420px] items-center justify-center overflow-hidden rounded-2xl shadow-lg">
                         <ProductSliceShow images={images.map(i=>i.image)}/>
                         <input type="hidden" name="" id="product-image"  value={images?.[0]?.image || ''}/>
                     </div>
                 </div>
 
                 <!-- Product Details Section -->
-                <div class="p-6 md:p-8 md:py-10 flex flex-col gap-5">
+                <div class="flex flex-col gap-4 p-5 sm:p-6 md:gap-5 md:p-8 md:py-10">
                     <div class="flex flex-wrap gap-2">
                         <span class="inline-flex items-center rounded-full bg-guacamole-f/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-guacamole-b">
                             {categoryLabel}
@@ -140,25 +140,25 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
 
                     <!-- Title -->
                     <div class="space-y-2">
-                        <h1 class="text-2xl md:text-3xl font-bold text-neutral-900 leading-snug tracking-tight">
+                        <h1 class="text-2xl font-bold leading-snug tracking-tight text-neutral-900 sm:text-[2rem] md:text-3xl">
                             {product.title}
                         </h1>
                         <input type="hidden" name="product-name" id="product-name" value={product.title}/>
-                        <p class="text-sm md:text-base text-neutral-600 leading-relaxed">
+                        <p class="text-sm leading-relaxed text-neutral-600 sm:text-base md:max-w-[52ch]">
                             {leadDescription}
                         </p>
                     </div>
 
                     <!-- Price -->
                     <div class="space-y-1">
-                        <div class="flex items-baseline gap-2">
-                            <span class="text-2xl md:text-3xl font-bold text-neutral-900">${product.price}</span>
+                        <div class="flex flex-wrap items-baseline gap-2">
+                            <span class="text-2xl font-bold text-neutral-900 sm:text-3xl">${product.price}</span>
                             <span class="text-sm text-neutral-500">precio base</span>
                         </div>
                         <input type="hidden" name="product-price" id="product-price" value={product.price}/>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
                         {keyFacts.map((fact) => (
                             <div class="rounded-2xl border border-neutral-200 bg-white/70 px-4 py-3 shadow-sm">
                                 <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">{fact.label}</p>
@@ -170,7 +170,7 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
                     {hasExtendedDescription && (
                         <div class="rounded-2xl border border-guacamole-f/30 bg-guacamole-f/10 px-4 py-4">
                             <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-guacamole-b/80">Más contexto</p>
-                            <p class="mt-2 text-sm md:text-base text-neutral-700 leading-relaxed">
+                            <p class="mt-2 text-sm leading-relaxed text-neutral-700 md:max-w-[58ch] md:text-base">
                                 {supportingDescription}
                             </p>
                         </div>
@@ -181,11 +181,11 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
                     <!-- Quantity Selector -->
                     <div class="space-y-2">
                         <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Cantidad</h3>
-                        <div class="flex items-center gap-3">
+                        <div class="flex flex-wrap items-center gap-3">
                             <button id="decrement" class="qty-btn-group" aria-label="Disminuir cantidad">−</button>
                             <input id="quantity-input" class="qty-input" type="number" value="1" readonly/>
                             <button id="increment" class="qty-btn-group" aria-label="Aumentar cantidad">+</button>
-                            <span class="text-xs text-gray-400 ml-2">(máx. 5 unidades)</span>
+                            <span class="text-xs text-gray-400 sm:ml-2">(máx. 5 unidades)</span>
                         </div>
                     </div>
 
@@ -197,7 +197,7 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
                         <p class="text-sm text-neutral-500 leading-relaxed">
                             Elegí la presentación antes de agregarlo al carrito para llevar exactamente la versión que necesitás.
                         </p>
-                        <ul class="flex flex-wrap gap-2">
+                        <ul class="flex flex-wrap gap-2.5">
                             {
                                 sizes.map((t) => (
                                     <li class="size-chip" data-size-option="true">
@@ -209,7 +209,7 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
                     </div>
 
                     <!-- Add to Cart Button -->
-                    <div class="pt-2">
+                    <div class="pt-1 sm:pt-2">
                         <button id="add-card" class="add-to-cart-btn">
                             <span>Agregar al Carrito</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -220,7 +220,7 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
 
                     <p id="cart-feedback-note" class="min-h-[1.25rem] text-xs font-medium text-neutral-500" aria-live="polite"></p>
 
-                    <p class="text-xs text-neutral-500 leading-relaxed">
+                    <p class="text-xs leading-relaxed text-neutral-500 sm:text-sm sm:max-w-[54ch]">
                         Vas directo al checkout con el producto, tamaño y cantidad ya definidos para evitar pasos innecesarios.
                     </p>
 
@@ -229,24 +229,24 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
             </div>
         </div>
 
-        <section class="mt-6 grid gap-4 md:grid-cols-2">
-            <article class="rounded-3xl border border-white/50 bg-white/70 p-5 shadow-[0_4px_30px_-10px_rgba(0,0,0,0.12)] backdrop-blur-xl">
+        <section class="mt-5 grid gap-3 sm:mt-6 sm:gap-4 md:grid-cols-2">
+            <article class="rounded-3xl border border-white/50 bg-white/70 p-4 shadow-[0_4px_30px_-10px_rgba(0,0,0,0.12)] backdrop-blur-xl sm:p-5">
                 <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-guacamole-b/80">Resumen útil</p>
                 <h2 class="mt-2 text-xl font-bold text-neutral-900">Lo importante antes de comprar</h2>
                 <div class="mt-4 space-y-3">
-                    <div class="rounded-2xl bg-neutral-50 px-4 py-3 border border-neutral-200/80">
+                    <div class="rounded-2xl border border-neutral-200/80 bg-neutral-50 px-4 py-3">
                         <p class="text-sm font-semibold text-neutral-800">Qué estás eligiendo</p>
                         <p class="mt-1 text-sm text-neutral-600 leading-relaxed">{leadDescription}</p>
                     </div>
 
-                    <div class="rounded-2xl bg-neutral-50 px-4 py-3 border border-neutral-200/80">
+                    <div class="rounded-2xl border border-neutral-200/80 bg-neutral-50 px-4 py-3">
                         <p class="text-sm font-semibold text-neutral-800">Presentaciones disponibles</p>
                         <p class="mt-1 text-sm text-neutral-600 leading-relaxed">
                             Este producto se ofrece en {sizes.length} {sizes.length === 1 ? 'presentación' : 'presentaciones'} para que puedas elegir con más precisión según tu pedido.
                         </p>
                     </div>
 
-                    <div class="rounded-2xl bg-neutral-50 px-4 py-3 border border-neutral-200/80">
+                    <div class="rounded-2xl border border-neutral-200/80 bg-neutral-50 px-4 py-3">
                         <p class="text-sm font-semibold text-neutral-800">Cómo se compra</p>
                         <p class="mt-1 text-sm text-neutral-600 leading-relaxed">
                             Primero seleccionás tamaño, después cantidad y recién ahí lo llevás al checkout con la configuración ya resuelta.
@@ -255,9 +255,9 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
                 </div>
             </article>
 
-            <div class="grid gap-4">
+            <div class="grid gap-3 sm:gap-4">
                 {usageIdeas.length > 0 && (
-                    <article class="rounded-3xl border border-white/50 bg-white/70 p-5 shadow-[0_4px_30px_-10px_rgba(0,0,0,0.12)] backdrop-blur-xl">
+                    <article class="rounded-3xl border border-white/50 bg-white/70 p-4 shadow-[0_4px_30px_-10px_rgba(0,0,0,0.12)] backdrop-blur-xl sm:p-5">
                         <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-guacamole-b/80">Ideas de uso</p>
                         <h2 class="mt-2 text-xl font-bold text-neutral-900">Cómo puede encajar en tu mesa</h2>
                         <ul class="mt-4 space-y-3">
@@ -271,7 +271,7 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
                 )}
 
                 {isFoodProduct && (
-                    <article class="rounded-3xl border border-white/50 bg-white/70 p-5 shadow-[0_4px_30px_-10px_rgba(0,0,0,0.12)] backdrop-blur-xl">
+                    <article class="rounded-3xl border border-white/50 bg-white/70 p-4 shadow-[0_4px_30px_-10px_rgba(0,0,0,0.12)] backdrop-blur-xl sm:p-5">
                         <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-guacamole-b/80">Conservación</p>
                         <h2 class="mt-2 text-xl font-bold text-neutral-900">Recomendaciones generales</h2>
                         <ul class="mt-4 space-y-3">
@@ -287,12 +287,12 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
         </section>
 
         {relatedProducts.length > 0 && (
-            <section class="mt-10 rounded-3xl border border-white/50 bg-white/70 p-5 md:p-6 shadow-[0_4px_30px_-10px_rgba(0,0,0,0.12)] backdrop-blur-xl">
+            <section class="mt-8 rounded-3xl border border-white/50 bg-white/70 p-4 shadow-[0_4px_30px_-10px_rgba(0,0,0,0.12)] backdrop-blur-xl sm:p-5 md:mt-10 md:p-6">
                 <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                     <div class="max-w-2xl">
                         <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-guacamole-b/80">Productos relacionados</p>
                         <h2 class="mt-2 text-xl md:text-2xl font-bold text-neutral-900">Seguí explorando dentro de {categoryLabel}</h2>
-                        <p class="mt-2 text-sm md:text-base text-neutral-600 leading-relaxed">
+                        <p class="mt-2 text-sm leading-relaxed text-neutral-600 md:max-w-[58ch] md:text-base">
                             Seleccionamos opciones de la misma categoría y priorizamos las que tienen un rango de precio parecido para que la recomendación sea coherente con este producto.
                         </p>
                     </div>
@@ -302,7 +302,7 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
                     </a>
                 </div>
 
-                <div class="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <div class="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                     {relatedProducts.map((relatedProduct) => (
                         <ProductCard {...relatedProduct} />
                     ))}
