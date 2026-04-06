@@ -2,6 +2,7 @@
 import Layout from '@layouts/Layout.astro'
 import { actions } from 'astro:actions';
 import {Formatter} from '@utils/formatter'
+import BreadcrumbTrail from '../../components/shared/BreadcrumbTrail.astro';
 
 const cart = Astro.cookies.get('cart');
 
@@ -22,10 +23,24 @@ const total = products.reduce(
 );
 
 const isEmpty = products.length === 0;
+const checkoutBreadcrumbs = [
+  { label: 'Inicio', href: '/' },
+  { label: 'Tienda', href: '/tienda' },
+  { label: 'Checkout' },
+];
 ---
 
 <Layout title="Checkout | Guacamole Shop" description="Revisá tu pedido y prepará el pago">
   <main class="min-h-screen bg-guacamole-fondo/10 py-8 px-4 md:px-8">
+    <div class="max-w-6xl mx-auto mb-6">
+      <BreadcrumbTrail
+        items={checkoutBreadcrumbs}
+        eyebrow="Paso 1 de 2"
+        summary={isEmpty
+          ? 'Tu checkout está listo para recibir productos. Volvé a la tienda para armar el pedido y después completás tus datos acá.'
+          : 'Estás revisando tu pedido antes de pagar. Si necesitás ajustar productos, podés volver a la tienda o entrar al detalle desde esta misma pantalla.'}
+      />
+    </div>
     
     {isEmpty ? (
       <!-- Empty Cart State -->
@@ -75,33 +90,51 @@ const isEmpty = products.length === 0;
       </div>
     ) : (
       <!-- Checkout with Items -->
-      <div class="max-w-6xl mx-auto">
-        <!-- Header -->
-        <div class="mb-8">
-          <h1 class="text-3xl md:text-4xl font-black text-guacamole-icons uppercase tracking-wide">
-            Revisar pedido
-          </h1>
-          <p class="text-gray-600 mt-2">
-            Revisá tus productos, completá tus datos y dejá listo el paso a pago.
-          </p>
-        </div>
+        <div class="max-w-6xl mx-auto">
+          <!-- Header -->
+          <div class="mb-8 space-y-3">
+            <span class="premium-chip">
+              Paso 1 de 2 · Datos y entrega
+            </span>
+            <h1 class="text-3xl md:text-4xl font-black text-guacamole-icons uppercase tracking-wide">
+              Revisar pedido
+            </h1>
+            <p class="text-gray-600 mt-2">
+              Revisá tus productos, completá tus datos con calma y dejá listo el paso a pago sin fricción.
+            </p>
+            <div class="mt-4 flex flex-wrap gap-3 text-sm text-gray-600">
+              <span class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 shadow-sm">
+                <span class="h-2 w-2 rounded-full bg-guacamole-b"></span>
+                Paso actual: validar pedido y datos
+              </span>
+              <span class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 shadow-sm">
+                <span class="h-2 w-2 rounded-full bg-guacamole-f"></span>
+                Próximo paso: elegir medio de pago
+              </span>
+            </div>
+          </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <!-- Main Content Column -->
           <div class="lg:col-span-2 space-y-6">
             <!-- Back button -->
-            <a 
-              href="/tienda" 
-              class="inline-flex items-center gap-2 text-guacamole-icons hover:text-guacamole-b transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-              </svg>
-              <span class="font-semibold">Volver a la tienda</span>
-            </a>
+            <div class="flex flex-wrap gap-3">
+              <a
+                href="/tienda"
+                class="inline-flex items-center gap-2 text-guacamole-icons hover:text-guacamole-b transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                <span class="font-semibold">Volver a la tienda</span>
+              </a>
+              <span class="inline-flex items-center rounded-full border border-guacamole-b/20 bg-guacamole-b/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-guacamole-b">
+                Estás a un paso del pago
+              </span>
+            </div>
 
             <!-- Customer Form -->
-            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            <div class="premium-panel overflow-hidden">
               <div class="bg-guacamole-b px-6 py-4">
                 <h2 class="text-xl font-black text-white uppercase tracking-wide">
                   Tus datos
@@ -109,16 +142,23 @@ const isEmpty = products.length === 0;
               </div>
               
               <form id="customer-form" class="p-6 space-y-6">
+                <div id="form-feedback" class="hidden rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert"></div>
+
+                <div class="rounded-2xl border border-guacamole-fondo/40 bg-guacamole-fondo/10 px-4 py-4 text-sm text-guacamole-icons">
+                  <p class="font-bold">Tus datos se usan solo para confirmar el pedido y coordinar la entrega o el retiro.</p>
+                  <p class="mt-1 text-gray-600">Los campos con <span class="font-bold text-red-500">*</span> son los mínimos para avanzar a pago sin perder contexto.</p>
+                </div>
+
                 <!-- Section: Contact Information -->
                 <div class="space-y-4">
                   <div class="border-b border-gray-100 pb-2">
                     <h3 class="text-lg font-bold text-guacamole-icons">Información de contacto</h3>
-                    <p class="text-sm text-gray-500">Así te confirmamos el pedido y cualquier detalle de entrega.</p>
+                    <p class="text-sm text-gray-500">Así te confirmamos el pedido y cualquier detalle importante de entrega.</p>
                   </div>
                   
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Nombre completo -->
-                    <div>
+                    <div data-field-wrapper>
                       <label for="fullName" class="block text-sm font-semibold text-guacamole-icons mb-2">
                         Nombre completo <span class="text-red-500">*</span>
                       </label>
@@ -127,13 +167,16 @@ const isEmpty = products.length === 0;
                         id="fullName" 
                         name="fullName" 
                         required
-                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-guacamole-b focus:ring-2 focus:ring-guacamole-b/20 outline-none transition-all text-guacamole-icons"
-                        placeholder="Juan Pérez"
+                        autocomplete="name"
+                        class="premium-field"
+                        placeholder="Ej. Juan Pérez"
                       />
+                      <p class="field-help">Usá nombre y apellido para identificar tu pedido más rápido.</p>
+                      <p class="field-error hidden" data-field-error></p>
                     </div>
                     
                     <!-- Teléfono -->
-                    <div>
+                    <div data-field-wrapper>
                       <label for="phone" class="block text-sm font-semibold text-guacamole-icons mb-2">
                         Teléfono <span class="text-red-500">*</span>
                       </label>
@@ -142,14 +185,18 @@ const isEmpty = products.length === 0;
                         id="phone" 
                         name="phone" 
                         required
-                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-guacamole-b focus:ring-2 focus:ring-guacamole-b/20 outline-none transition-all text-guacamole-icons"
+                        autocomplete="tel"
+                        inputmode="tel"
+                        class="premium-field"
                         placeholder="+58 412 123 4567"
                       />
+                      <p class="field-help">Te contactamos por acá si surge algo con la entrega o el retiro.</p>
+                      <p class="field-error hidden" data-field-error></p>
                     </div>
                   </div>
                   
                   <!-- Correo electrónico -->
-                  <div>
+                  <div data-field-wrapper>
                     <label for="email" class="block text-sm font-semibold text-guacamole-icons mb-2">
                       Correo electrónico <span class="text-red-500">*</span>
                     </label>
@@ -158,9 +205,12 @@ const isEmpty = products.length === 0;
                       id="email" 
                       name="email" 
                       required
-                      class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-guacamole-b focus:ring-2 focus:ring-guacamole-b/20 outline-none transition-all text-guacamole-icons"
+                      autocomplete="email"
+                      class="premium-field"
                       placeholder="juan@email.com"
                     />
+                    <p class="field-help">Acá te llega la confirmación del pedido y cualquier actualización relevante.</p>
+                    <p class="field-error hidden" data-field-error></p>
                   </div>
                 </div>
                 
@@ -168,39 +218,47 @@ const isEmpty = products.length === 0;
                 <div class="space-y-4 pt-4">
                   <div class="border-b border-gray-100 pb-2">
                     <h3 class="text-lg font-bold text-guacamole-icons">Entrega y referencias</h3>
-                    <p class="text-sm text-gray-500">Contanos dónde lo entregamos o si preferís retirarlo.</p>
+                    <p class="text-sm text-gray-500">Dejanos el contexto justo para que la coordinación salga prolija desde el primer mensaje.</p>
                   </div>
                   
                   <!-- Método de entrega -->
-                  <div>
+                  <div data-field-wrapper>
                     <label class="block text-sm font-semibold text-guacamole-icons mb-3">
                       Método de entrega <span class="text-red-500">*</span>
                     </label>
-                    <div class="flex flex-wrap gap-4">
-                      <label class="flex items-center gap-3 cursor-pointer">
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <label class="flex cursor-pointer items-start gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-4 transition-all hover:border-guacamole-b hover:bg-guacamole-fondo/10">
                         <input 
                           type="radio" 
                           name="deliveryMethod" 
                           value="domicilio" 
                           checked
-                          class="w-5 h-5 text-guacamole-b focus:ring-guacamole-b"
+                          class="mt-1 h-5 w-5 text-guacamole-b focus:ring-guacamole-b"
                         />
-                        <span class="text-guacamole-icons font-medium">Domicilio</span>
+                        <span>
+                          <span class="block font-semibold text-guacamole-icons">Domicilio</span>
+                          <span class="mt-1 block text-sm text-gray-500">Ideal si querés recibir tu pedido en una dirección específica.</span>
+                        </span>
                       </label>
-                      <label class="flex items-center gap-3 cursor-pointer">
+                      <label class="flex cursor-pointer items-start gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-4 transition-all hover:border-guacamole-b hover:bg-guacamole-fondo/10">
                         <input 
                           type="radio" 
                           name="deliveryMethod" 
                           value="recoger"
-                          class="w-5 h-5 text-guacamole-b focus:ring-guacamole-b"
+                          class="mt-1 h-5 w-5 text-guacamole-b focus:ring-guacamole-b"
                         />
-                        <span class="text-guacamole-icons font-medium">Retiro acordado</span>
+                        <span>
+                          <span class="block font-semibold text-guacamole-icons">Retiro acordado</span>
+                          <span class="mt-1 block text-sm text-gray-500">Perfecto si preferís coordinar un punto de encuentro o retiro pautado.</span>
+                        </span>
                       </label>
                     </div>
+                    <p class="field-help">Elegí la opción que mejor te quede y después dejá las referencias necesarias para evitar idas y vueltas.</p>
+                    <p class="field-error hidden" data-field-error></p>
                   </div>
                   
                   <!-- Dirección -->
-                  <div>
+                  <div data-field-wrapper>
                     <label for="address" class="block text-sm font-semibold text-guacamole-icons mb-2">
                       Dirección de entrega <span class="text-red-500">*</span>
                     </label>
@@ -209,14 +267,17 @@ const isEmpty = products.length === 0;
                       id="address" 
                       name="address" 
                       required
-                      class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-guacamole-b focus:ring-2 focus:ring-guacamole-b/20 outline-none transition-all text-guacamole-icons"
-                          placeholder="Av. Principal, Calle 5, Edif. Miramar, Piso 3, Apto. 3B"
+                      autocomplete="street-address"
+                      class="premium-field"
+                      placeholder="Av. Principal, Calle 5, Edif. Miramar, Piso 3, Apto. 3B"
                     />
+                    <p class="field-help">Si elegiste retiro acordado, podés usar este espacio para la referencia principal o el punto de encuentro.</p>
+                    <p class="field-error hidden" data-field-error></p>
                   </div>
                   
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Ciudad / Sector -->
-                    <div>
+                    <div data-field-wrapper>
                       <label for="city" class="block text-sm font-semibold text-guacamole-icons mb-2">
                         Ciudad / Sector <span class="text-red-500">*</span>
                       </label>
@@ -225,25 +286,35 @@ const isEmpty = products.length === 0;
                         id="city" 
                         name="city" 
                         required
-                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-guacamole-b focus:ring-2 focus:ring-guacamole-b/20 outline-none transition-all text-guacamole-icons"
+                        autocomplete="address-level2"
+                        class="premium-field"
                         placeholder="Caracas, El Hatillo"
                       />
+                      <p class="field-help">Sumá la ciudad y el sector para hacer la coordinación más precisa.</p>
+                      <p class="field-error hidden" data-field-error></p>
                     </div>
                     
                     <!-- Referencias / Notas -->
-                    <div>
+                    <div data-field-wrapper>
                       <label for="notes" class="block text-sm font-semibold text-guacamole-icons mb-2">
                         Referencias / Notas <span class="text-gray-400">(opcional)</span>
                       </label>
-                      <input 
-                        type="text" 
-                        id="notes" 
+                      <textarea
+                        id="notes"
                         name="notes"
-                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-guacamole-b focus:ring-2 focus:ring-guacamole-b/20 outline-none transition-all text-guacamole-icons"
-                          placeholder="Portón verde, tocar timbre o llamar al llegar"
-                      />
+                        rows="4"
+                        class="premium-field min-h-[112px] resize-y"
+                        placeholder="Ej. Portón verde, tocar timbre o llamar al llegar"
+                      ></textarea>
+                      <p class="field-help">Acá entran los detalles finos: torre, piso, horario, timbre o datos de acceso.</p>
+                      <p class="field-error hidden" data-field-error></p>
                     </div>
                   </div>
+                </div>
+
+                <div class="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-4 text-sm text-gray-600">
+                  <p class="font-semibold text-guacamole-icons">Antes de pasar a pago</p>
+                  <p class="mt-1">Chequeá que el teléfono y la dirección estén bien escritos. Ese detalle hace que la confirmación sea mucho más ágil.</p>
                 </div>
               </form>
             </div>
@@ -297,11 +368,11 @@ const isEmpty = products.length === 0;
                       </div>
                       
                       <!-- Remove Button -->
-                      <button
-                        data-id={product.productId}
-                        data-size={product.sizes}
-                        class="mt-3 text-sm text-red-500 hover:text-red-700 font-semibold flex items-center gap-1 transition-colors btn-delete"
-                      >
+                       <button
+                         data-id={product.productId}
+                         data-size={product.sizes}
+                         class="mt-3 flex items-center gap-1 text-sm font-semibold text-red-500 transition-colors hover:text-red-700 disabled:cursor-wait disabled:text-red-300 btn-delete"
+                       >
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
@@ -360,6 +431,7 @@ const isEmpty = products.length === 0;
                 
                 <!-- Trust Badges -->
                 <div class="bg-guacamole-fondo/10 rounded-lg p-4 space-y-2">
+                  <p class="text-xs font-bold uppercase tracking-[0.22em] text-guacamole-b">Checklist premium</p>
                   <div class="flex items-center gap-2 text-sm text-guacamole-icons">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-guacamole-b" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
@@ -372,21 +444,30 @@ const isEmpty = products.length === 0;
                     </svg>
                     <span class="font-semibold">Garantía de devolución de 30 días</span>
                   </div>
+                  <div class="flex items-center gap-2 text-sm text-guacamole-icons">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-guacamole-b" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10m-11 8h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    <span class="font-semibold">Confirmación por WhatsApp o correo después del pago</span>
+                  </div>
                 </div>
                 
                 <!-- Pay Button -->
                 <a
                   href="/pagos"
                   id="proceed-to-payment"
-                  class="group block w-full bg-guacamole-pulpa text-white text-center font-bold text-sm py-4 px-8 tracking-wider uppercase rounded-full shadow-[0_4px_12px_rgba(86,130,3,0.3)] hover:bg-guacamole-f hover:shadow-[0_6px_20px_rgba(86,130,3,0.4)] hover:-translate-y-0.5 transition-all duration-300"
+                  class="group block w-full rounded-full bg-guacamole-pulpa px-8 py-4 text-center text-sm font-bold uppercase tracking-wider text-white shadow-[0_4px_12px_rgba(86,130,3,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-guacamole-f hover:shadow-[0_6px_20px_rgba(86,130,3,0.4)]"
                 >
-                  <span class="flex items-center justify-center gap-2">
+                  <span id="proceed-to-payment-label" class="flex items-center justify-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                     </svg>
                     Continuar a medios de pago
                   </span>
                 </a>
+                <p id="checkout-feedback" class="min-h-[1.25rem] text-center text-xs font-medium text-gray-500" aria-live="polite">
+                  Completá tus datos y, cuando esté todo listo, seguimos al pago sin perder tu pedido.
+                </p>
                 
                 <!-- Secure Badge -->
                 <p class="text-center text-xs text-gray-400 flex items-center justify-center gap-1">
@@ -411,6 +492,10 @@ const isEmpty = products.length === 0;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+
+  [data-field-wrapper] {
+    scroll-margin-top: 7rem;
+  }
 </style>
 
 <script>
@@ -418,19 +503,165 @@ import { CartCookiesClient } from "@utils/cart-cookies";
 import { navigate } from "astro:transitions/client";
 
 document.addEventListener('astro:page-load',()=>{
+  const form = document.getElementById('customer-form') as HTMLFormElement | null;
+  const checkoutFeedback = document.getElementById('checkout-feedback') as HTMLParagraphElement | null;
+  const feedbackBox = document.getElementById('form-feedback') as HTMLDivElement | null;
+
+  const validationMessages: Record<string, string> = {
+    fullName: 'Decinos tu nombre completo para identificar el pedido.',
+    phone: 'Necesitamos un teléfono válido para coordinar cualquier detalle.',
+    email: 'Ingresá un correo válido para enviarte la confirmación.',
+    address: 'Sumá una dirección o punto de referencia para la entrega o el retiro.',
+    city: 'Indicá la ciudad o el sector para cerrar bien la coordinación.',
+    deliveryMethod: 'Elegí cómo preferís recibir tu pedido.'
+  };
+
+  const setCheckoutFeedback = (message: string, tone: 'default' | 'error' | 'success' = 'default') => {
+    if (!checkoutFeedback) return;
+
+    checkoutFeedback.textContent = message;
+    checkoutFeedback.classList.remove('text-gray-500', 'text-red-500', 'text-guacamole-b');
+
+    if (tone === 'error') {
+      checkoutFeedback.classList.add('text-red-500');
+      return;
+    }
+
+    if (tone === 'success') {
+      checkoutFeedback.classList.add('text-guacamole-b');
+      return;
+    }
+
+    checkoutFeedback.classList.add('text-gray-500');
+  };
+
+  const showFormFeedback = (message: string) => {
+    if (!feedbackBox) return;
+
+    feedbackBox.textContent = message;
+    feedbackBox.classList.remove('hidden');
+  };
+
+  const hideFormFeedback = () => {
+    if (!feedbackBox) return;
+
+    feedbackBox.textContent = '';
+    feedbackBox.classList.add('hidden');
+  };
+
+  const setFieldError = (field: HTMLElement, message: string) => {
+    const wrapper = field.closest('[data-field-wrapper]');
+    const errorEl = wrapper?.querySelector<HTMLElement>('[data-field-error]');
+
+    field.setAttribute('aria-invalid', 'true');
+
+    if (errorEl) {
+      errorEl.textContent = message;
+      errorEl.classList.remove('hidden');
+    }
+  };
+
+  const clearFieldError = (field: HTMLElement) => {
+    const wrapper = field.closest('[data-field-wrapper]');
+    const errorEl = wrapper?.querySelector<HTMLElement>('[data-field-error]');
+
+    field.removeAttribute('aria-invalid');
+
+    if (errorEl) {
+      errorEl.textContent = '';
+      errorEl.classList.add('hidden');
+    }
+  };
+
+  const getFieldMessage = (field: HTMLInputElement | HTMLTextAreaElement) => {
+    if (field.validity.valueMissing) {
+      return validationMessages[field.name] ?? 'Este campo es obligatorio.';
+    }
+
+    if (field.validity.typeMismatch && field.name === 'email') {
+      return 'Ese correo no parece válido. Revisalo antes de seguir.';
+    }
+
+    return '';
+  };
+
+  const validateForm = () => {
+    if (!form) return true;
+
+    hideFormFeedback();
+
+    const invalidFields: HTMLElement[] = [];
+    const methodRadios = Array.from(form.querySelectorAll<HTMLInputElement>('input[name="deliveryMethod"]'));
+    const hasDeliveryMethod = methodRadios.some((radio) => radio.checked);
+
+    if (!hasDeliveryMethod && methodRadios.length > 0) {
+      methodRadios.forEach((radio) => setFieldError(radio, validationMessages.deliveryMethod));
+      invalidFields.push(methodRadios[0]);
+    } else {
+      methodRadios.forEach((radio) => clearFieldError(radio));
+    }
+
+    form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input, textarea').forEach((field) => {
+      if (field.type === 'radio') return;
+
+      const message = getFieldMessage(field);
+      if (message) {
+        setFieldError(field, message);
+        invalidFields.push(field);
+        return;
+      }
+
+      clearFieldError(field);
+    });
+
+    if (invalidFields.length > 0) {
+      showFormFeedback('Hay algunos datos para ajustar antes de pasar al pago. Revisá los campos marcados y seguimos.');
+      invalidFields[0].focus();
+      return false;
+    }
+
+    return true;
+  };
+
+  if (form) {
+    form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input, textarea').forEach((field) => {
+      if (field.type === 'radio') {
+        field.addEventListener('change', () => {
+          Array.from(form.querySelectorAll<HTMLInputElement>('input[name="deliveryMethod"]')).forEach((radio) => clearFieldError(radio));
+          hideFormFeedback();
+        });
+        return;
+      }
+
+      field.addEventListener('input', () => {
+        if (field.checkValidity()) {
+          clearFieldError(field);
+        }
+      });
+
+      field.addEventListener('blur', () => {
+        const message = getFieldMessage(field);
+        if (message) {
+          setFieldError(field, message);
+        } else {
+          clearFieldError(field);
+        }
+      });
+    });
+  }
+
   // Restore customer data from sessionStorage on page load
   const savedCustomerData = sessionStorage.getItem('guacamole-customer-data');
   if (savedCustomerData) {
     try {
       const data = JSON.parse(savedCustomerData);
-      const form = document.getElementById('customer-form') as HTMLFormElement;
       if (form) {
         (form.elements.namedItem('fullName') as HTMLInputElement).value = data.fullName || '';
         (form.elements.namedItem('phone') as HTMLInputElement).value = data.phone || '';
         (form.elements.namedItem('email') as HTMLInputElement).value = data.email || '';
         (form.elements.namedItem('address') as HTMLInputElement).value = data.address || '';
         (form.elements.namedItem('city') as HTMLInputElement).value = data.city || '';
-        (form.elements.namedItem('notes') as HTMLInputElement).value = data.notes || '';
+        (form.elements.namedItem('notes') as HTMLTextAreaElement).value = data.notes || '';
         const deliveryMethods = form.elements.namedItem('deliveryMethod') as RadioNodeList;
         if (deliveryMethods) {
           for (let i = 0; i < deliveryMethods.length; i++) {
@@ -451,10 +682,17 @@ document.addEventListener('astro:page-load',()=>{
   const deleteButtons = document.querySelectorAll('.btn-delete');
   deleteButtons.forEach(button => {
     button.addEventListener('click',(event)=>{
-      const target = event.target as HTMLButtonElement;
+      const target = event.currentTarget as HTMLButtonElement;
+      if (target.disabled) return;
+
+      target.disabled = true;
+      target.setAttribute('aria-busy', 'true');
+      target.textContent = 'Quitando...';
+      setCheckoutFeedback('Actualizando tu pedido...', 'success');
+
       const productId = target.dataset.id ?? "";
       const size= target.dataset.size ?? "";
-      const cart =CartCookiesClient.removeItem(productId, size)
+      CartCookiesClient.removeItem(productId, size)
       
       navigate('/checkout')
     })
@@ -462,18 +700,36 @@ document.addEventListener('astro:page-load',()=>{
 
   // Handle proceed to payment button with customer data persistence
   const proceedButton = document.getElementById('proceed-to-payment');
+  const proceedButtonLabel = document.getElementById('proceed-to-payment-label');
   if (proceedButton) {
+    const setProceedPending = (isPending: boolean, label: string) => {
+      proceedButton.classList.toggle('pointer-events-none', isPending);
+      proceedButton.classList.toggle('opacity-80', isPending);
+      proceedButton.setAttribute('aria-disabled', String(isPending));
+      proceedButton.setAttribute('aria-busy', String(isPending));
+
+      if (proceedButtonLabel) {
+        proceedButtonLabel.innerHTML = isPending
+          ? '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12a8 8 0 018-8m0 0a8 8 0 018 8m-8-8v8" /></svg>' + label
+          : '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>' + label;
+      }
+    };
+
     proceedButton.addEventListener('click', (e) => {
       // Prevent default <a> navigation — we control it via navigate()
       e.preventDefault();
-      const form = document.getElementById('customer-form') as HTMLFormElement;
       if (!form) return;
+
+       if (proceedButton.getAttribute('aria-disabled') === 'true') return;
       
       // Check form validity
-      if (!form.checkValidity()) {
-        form.reportValidity();
+      if (!validateForm()) {
+        setCheckoutFeedback('Falta completar algunos datos antes de pasar al pago.', 'error');
         return;
       }
+
+      setProceedPending(true, 'Abriendo medios de pago...');
+      setCheckoutFeedback('Guardamos tus datos y te llevamos al pago.', 'success');
       
       // Save customer data to sessionStorage before navigating
       const formData = new FormData(form);

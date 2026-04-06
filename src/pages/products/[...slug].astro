@@ -3,6 +3,7 @@ import Layout from "@layouts/Layout.astro";
 import { actions } from "astro:actions";
 import ProductSliceShow from "src/components/products/ProductSliceShow.astro";
 import ProductCard from "src/components/products/ProductCard.astro";
+import BreadcrumbTrail from "src/components/shared/BreadcrumbTrail.astro";
 export const prerender = false;
 
 
@@ -111,12 +112,25 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
             image: candidate.image,
             slug: `/products/${candidate.slug}`,
         }));
+
+const productBreadcrumbs = [
+    { label: 'Inicio', href: '/' },
+    { label: 'Tienda', href: '/tienda' },
+    { label: categoryLabel, href: '/tienda' },
+    { label: product.title },
+];
 ---
 
 <Layout title={product.title} description={product.description}>
     <div class="mx-auto max-w-6xl px-4 py-6 sm:py-8 md:py-10">
+        <BreadcrumbTrail
+            items={productBreadcrumbs}
+            eyebrow="Tu recorrido"
+            summary="Estás viendo el detalle del producto. Desde acá podés volver a la tienda, revisar opciones relacionadas o seguir directo al checkout con esta configuración."
+        />
+
         <!-- Main Product Card -->
-        <div class="overflow-hidden rounded-[1.75rem] border border-white/40 bg-white/60 shadow-[0_4px_40px_-8px_rgba(0,0,0,0.15)] backdrop-blur-xl md:rounded-3xl">
+        <div class="mt-5 overflow-hidden rounded-[1.75rem] border border-white/40 bg-white/60 shadow-[0_4px_40px_-8px_rgba(0,0,0,0.15)] backdrop-blur-xl md:rounded-3xl">
             <div class="grid grid-cols-1 md:grid-cols-2">
                 
                 <!-- Product Image Section -->
@@ -130,6 +144,9 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
                 <!-- Product Details Section -->
                 <div class="flex flex-col gap-4 p-5 sm:p-6 md:gap-5 md:p-8 md:py-10">
                     <div class="flex flex-wrap gap-2">
+                        <a href="/tienda" class="inline-flex items-center rounded-full border border-neutral-200 bg-white px-3 py-1 text-xs font-medium text-neutral-600 transition-colors duration-200 hover:border-guacamole-b/40 hover:text-guacamole-b">
+                            ← Volver a la tienda
+                        </a>
                         <span class="inline-flex items-center rounded-full bg-guacamole-f/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-guacamole-b">
                             {categoryLabel}
                         </span>
@@ -182,7 +199,7 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
                     <div class="space-y-2">
                         <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Cantidad</h3>
                         <div class="flex flex-wrap items-center gap-3">
-                            <button id="decrement" class="qty-btn-group" aria-label="Disminuir cantidad">−</button>
+                            <button id="decrement" class="qty-btn-group" aria-label="Disminuir cantidad" disabled>−</button>
                             <input id="quantity-input" class="qty-input" type="number" value="1" readonly/>
                             <button id="increment" class="qty-btn-group" aria-label="Aumentar cantidad">+</button>
                             <span class="text-xs text-gray-400 sm:ml-2">(máx. 5 unidades)</span>
@@ -210,8 +227,8 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
 
                     <!-- Add to Cart Button -->
                     <div class="pt-1 sm:pt-2">
-                        <button id="add-card" class="add-to-cart-btn">
-                            <span>Agregar al Carrito</span>
+                        <button id="add-card" class="add-to-cart-btn" disabled aria-disabled="true">
+                            <span id="add-card-label">Elegí un tamaño</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 8a2 2 0 100-4 2 2 0 000 4z" />
                             </svg>
@@ -221,7 +238,7 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
                     <p id="cart-feedback-note" class="min-h-[1.25rem] text-xs font-medium text-neutral-500" aria-live="polite"></p>
 
                     <p class="text-xs leading-relaxed text-neutral-500 sm:text-sm sm:max-w-[54ch]">
-                        Vas directo al checkout con el producto, tamaño y cantidad ya definidos para evitar pasos innecesarios.
+                        Elegí un tamaño para habilitar el checkout rápido con esta configuración.
                     </p>
 
 
@@ -326,7 +343,7 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
 
     /* Quantity buttons - pill style */
     .qty-btn-group {
-        @apply w-10 h-10 rounded-full border-2 border-guacamole-b text-guacamole-b font-bold text-xl flex items-center justify-center transition-all duration-200 hover:bg-guacamole-b hover:text-white hover:scale-105 active:scale-95;
+        @apply flex h-10 w-10 items-center justify-center rounded-full border-2 border-guacamole-b text-xl font-bold text-guacamole-b transition-all duration-200 hover:scale-105 hover:bg-guacamole-b hover:text-white active:scale-95 disabled:cursor-not-allowed disabled:border-neutral-200 disabled:text-neutral-300 disabled:hover:scale-100 disabled:hover:bg-transparent disabled:hover:text-neutral-300;
     }
 
     .qty-input {
@@ -342,7 +359,7 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
 
     /* Add to cart button - matches ProductCard styling */
     .add-to-cart-btn {
-        @apply w-full py-4 bg-guacamole-pulpa text-white font-bold text-base tracking-wider uppercase rounded-full shadow-[0_4px_12px_rgba(220,211,41,0.4)] transition-all duration-300 hover:bg-guacamole-f hover:shadow-[0_6px_20px_rgba(220,211,41,0.5)] hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2;
+        @apply flex w-full items-center justify-center gap-2 rounded-full bg-guacamole-pulpa py-4 text-base font-bold uppercase tracking-wider text-white shadow-[0_4px_12px_rgba(220,211,41,0.4)] transition-all duration-300 hover:scale-[1.02] hover:bg-guacamole-f hover:shadow-[0_6px_20px_rgba(220,211,41,0.5)] active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-neutral-300 disabled:text-white/90 disabled:shadow-none disabled:hover:scale-100 disabled:hover:bg-neutral-300;
     }
 </style>
 
@@ -360,6 +377,10 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
             liElement.addEventListener("click", () => {
                 sizeElments.forEach((s) => s.classList.remove("selected-size"));
                 liElement.classList.add("selected-size");
+                addToCardButton.disabled = false;
+                addToCardButton.setAttribute('aria-disabled', 'false');
+                addToCartLabel.textContent = 'Agregar al carrito';
+                setCartFeedback('Tamaño listo. Si querés, te llevamos directo al checkout.', 'success');
             });
         });
 
@@ -371,6 +392,7 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
         const incrementButton = document.querySelector('#increment') as HTMLButtonElement;
         const decrementButton = document.querySelector('#decrement') as HTMLButtonElement;
         const addToCardButton = document.querySelector('#add-card') as HTMLButtonElement;
+        const addToCartLabel = document.querySelector('#add-card-label') as HTMLSpanElement;
         const cartFeedbackNote = document.querySelector('#cart-feedback-note') as HTMLParagraphElement;
 
         const productImageInput = document.querySelector('#product-image') as HTMLInputElement;
@@ -394,22 +416,35 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
             cartFeedbackNote.classList.add('text-neutral-500');
         };
 
-        if(!incrementButton || !quantityInput || !addToCardButton) return;
+        if(!incrementButton || !quantityInput || !addToCardButton || !decrementButton || !addToCartLabel) return;
+
+        const syncQuantityButtons = () => {
+            decrementButton.disabled = quantity <= 1;
+            incrementButton.disabled = quantity >= 5;
+        };
+
+        syncQuantityButtons();
         
         // Increment - PRESERVED max=5 logic
         incrementButton.addEventListener('click',()=>{
             quantity = Math.min(quantity+1,5);
             quantityInput.value= quantity.toString();
+            syncQuantityButtons();
         });
         
         // Decrement - PRESERVED min=1 logic
         decrementButton.addEventListener('click',()=>{
             quantity = Math.max(quantity-1,1);
             quantityInput.value= quantity.toString();
+            syncQuantityButtons();
         });
 
         // Add to cart - PRESERVED CartCookiesClient.addItem() logic
         addToCardButton.addEventListener('click',async()=>{
+            if (addToCardButton.disabled) {
+                return;
+            }
+
             const size = document.querySelector('.selected-size')?.textContent;
             if (!size) {
                 setCartFeedback('Elegí un tamaño antes de pasar al checkout.', 'error');
@@ -418,6 +453,9 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
 
             setCartFeedback('Preparando tu selección para el checkout...', 'success');
             addToCardButton.disabled = true;
+            addToCardButton.setAttribute('aria-busy', 'true');
+            addToCardButton.setAttribute('aria-disabled', 'true');
+            addToCartLabel.textContent = 'Preparando checkout...';
 
             try {
                 const cart = CartCookiesClient.addItem({
@@ -443,6 +481,9 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
                 await navigate('/checkout')
             } finally {
                 addToCardButton.disabled = false;
+                addToCardButton.removeAttribute('aria-busy');
+                addToCardButton.setAttribute('aria-disabled', document.querySelector('.selected-size') ? 'false' : 'true');
+                addToCartLabel.textContent = document.querySelector('.selected-size') ? 'Agregar al carrito' : 'Elegí un tamaño';
             }
         })
     })

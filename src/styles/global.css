@@ -33,4 +33,36 @@
             2px 2px 0 0 theme('colors.guacamole-a');
         transform: translate(2px, 2px);
     }
+
+    .premium-field {
+        @apply w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-guacamole-icons outline-none transition-all duration-200 placeholder:text-gray-400;
+    }
+
+    .premium-field:hover {
+        @apply border-gray-300;
+    }
+
+    .premium-field:focus {
+        @apply border-guacamole-b ring-4 ring-guacamole-b/10;
+    }
+
+    .premium-field[aria-invalid='true'] {
+        @apply border-red-300 bg-red-50/60 text-red-900 ring-4 ring-red-100;
+    }
+
+    .field-help {
+        @apply mt-2 text-xs leading-5 text-gray-500;
+    }
+
+    .field-error {
+        @apply mt-2 text-xs font-semibold leading-5 text-red-600;
+    }
+
+    .premium-chip {
+        @apply inline-flex items-center gap-2 rounded-full border border-guacamole-b/20 bg-white/80 px-3 py-1 text-xs font-bold uppercase tracking-[0.22em] text-guacamole-b;
+    }
+
+    .premium-panel {
+        @apply rounded-2xl border border-gray-100 bg-white/95 shadow-lg;
+    }
 }

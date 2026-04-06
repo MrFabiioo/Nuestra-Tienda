@@ -78,11 +78,12 @@ const {
       </div>
 
       <button 
-        class="add-to-cart-btn w-full flex-1 rounded-full bg-guacamole-b px-3 py-2 text-sm font-bold uppercase tracking-wide text-white transition-all duration-200 hover:bg-guacamole-a hover:shadow-md hover:shadow-guacamole-a/25 active:scale-[0.97] sm:w-auto"
+        class="add-to-cart-btn w-full flex-1 rounded-full bg-guacamole-b px-3 py-2 text-sm font-bold uppercase tracking-wide text-white transition-all duration-200 hover:bg-guacamole-a hover:shadow-md hover:shadow-guacamole-a/25 active:scale-[0.97] disabled:cursor-wait disabled:opacity-80 disabled:hover:bg-guacamole-b disabled:hover:shadow-none sm:w-auto"
         data-product-id={id}
         data-product-name={name}
         data-product-price={price}
         data-product-image={image}
+        aria-live="polite"
       >
         Agregar
       </button>
@@ -115,6 +116,8 @@ const {
         e.stopPropagation();
         
         const btn = button as HTMLButtonElement;
+        if (btn.disabled) return;
+
         const productId = btn.dataset.productId;
         const productName = btn.dataset.productName;
         const productPrice = parseFloat(btn.dataset.productPrice || '0');
@@ -129,6 +132,10 @@ const {
           (item) => item.productId === productId && item.size === 'Normal'
         );
         const quantity = parseInt(qtyDisplay?.textContent || '1', 10);
+
+        btn.disabled = true;
+        btn.setAttribute('aria-busy', 'true');
+        btn.textContent = 'Agregando...';
         
         const cart = CartCookiesClient.addItem({
           productId,
@@ -160,6 +167,8 @@ const {
         setTimeout(() => {
           btn.textContent = 'Agregar';
           btn.setAttribute('aria-label', `Agregar ${productName} al carrito`);
+          btn.removeAttribute('aria-busy');
+          btn.disabled = false;
           btn.classList.remove('bg-guacamole-a');
           btn.classList.add('bg-guacamole-b');
         }, 1500);

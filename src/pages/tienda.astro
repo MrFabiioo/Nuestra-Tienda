@@ -3,6 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import Card from "../components/Card.astro";
 import { actions } from "astro:actions";
 import Pagination from "../components/shared/Pagination.astro";
+import BreadcrumbTrail from "../components/shared/BreadcrumbTrail.astro";
 
 export const prerender = false
 
@@ -41,6 +42,10 @@ const categoryNames = categories.length > 0
     : categoryMap;
 
 const totalCategories = Object.keys(categoryNames).length;
+const storeBreadcrumbs = [
+    { label: 'Inicio', href: '/' },
+    { label: 'Tienda' },
+];
 
 ---
 
@@ -48,7 +53,15 @@ const totalCategories = Object.keys(categoryNames).length;
     <main class="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
         <!-- Hero Section -->
         <section class="bg-gradient-to-r from-guacamole-b/[.08] via-transparent to-guacamole-a/[.08] px-4 pb-6 pt-8 md:pb-8 md:pt-10">
-            <div class="mx-auto flex max-w-6xl flex-col gap-6 rounded-[1.75rem] border border-white/70 bg-white/75 px-5 py-6 shadow-sm backdrop-blur-sm sm:px-6 sm:py-7 md:gap-8 md:rounded-[2rem] md:px-10 md:py-10">
+            <div class="mx-auto max-w-6xl">
+                <BreadcrumbTrail
+                    items={storeBreadcrumbs}
+                    eyebrow="Ubicación"
+                    summary={`Estás en el catálogo general${pageParam > 1 ? `, página ${pageParam}` : ''}. Desde acá podés descubrir productos, entrar al detalle o volver al inicio sin perder el recorrido.`}
+                />
+            </div>
+
+            <div class="mx-auto mt-4 flex max-w-6xl flex-col gap-6 rounded-[1.75rem] border border-white/70 bg-white/75 px-5 py-6 shadow-sm backdrop-blur-sm sm:px-6 sm:py-7 md:gap-8 md:rounded-[2rem] md:px-10 md:py-10">
                 <div class="max-w-3xl">
                     <span class="inline-flex items-center rounded-full border border-guacamole-b/15 bg-guacamole-b/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-guacamole-b">
                         Catálogo completo
@@ -94,6 +107,7 @@ const totalCategories = Object.keys(categoryNames).length;
                             <li>1. Empezá por la categoría que mejor encaje con tu antojo.</li>
                             <li>2. Usá el buscador si ya tenés un producto o ingrediente en mente.</li>
                             <li>3. Entrá al detalle para revisar tamaños, precio y compra.</li>
+                            <li>4. Si ya avanzaste hasta checkout o pagos, podés volver a esta tienda para ajustar tu pedido.</li>
                         </ul>
                     </div>
                 </div>
