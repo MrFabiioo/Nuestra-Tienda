@@ -77,6 +77,36 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
         aria-live="polite"
         aria-atomic="false"
     >
+        <div class="dropdown-loading" id="dropdownLoading" role="status" aria-live="polite" aria-hidden="true">
+            <div class="dropdown-loading__copy">
+                <p class="dropdown-loading__eyebrow">Buscando en el catálogo</p>
+                <p class="dropdown-loading__title">Te acercamos coincidencias útiles...</p>
+            </div>
+
+            <div class="dropdown-loading__list" aria-hidden="true">
+                <div class="dropdown-loading__item">
+                    <span class="dropdown-loading__thumb premium-skeleton"></span>
+                    <div class="dropdown-loading__content">
+                        <span class="dropdown-loading__line premium-skeleton-line"></span>
+                        <span class="dropdown-loading__line dropdown-loading__line--short premium-skeleton-line"></span>
+                    </div>
+                </div>
+                <div class="dropdown-loading__item">
+                    <span class="dropdown-loading__thumb premium-skeleton"></span>
+                    <div class="dropdown-loading__content">
+                        <span class="dropdown-loading__line premium-skeleton-line"></span>
+                        <span class="dropdown-loading__line dropdown-loading__line--short premium-skeleton-line"></span>
+                    </div>
+                </div>
+                <div class="dropdown-loading__item">
+                    <span class="dropdown-loading__thumb premium-skeleton"></span>
+                    <div class="dropdown-loading__content">
+                        <span class="dropdown-loading__line premium-skeleton-line"></span>
+                        <span class="dropdown-loading__line dropdown-loading__line--short premium-skeleton-line"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="dropdown-results" id="dropdownResults"></div>
         <div class="dropdown-empty" id="dropdownEmpty" role="status">
             <p class="dropdown-empty__title">No encontramos coincidencias</p>
@@ -201,6 +231,72 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
     .dropdown-results {
         max-height: 360px;
         overflow-y: auto;
+    }
+
+    .dropdown-loading {
+        display: none;
+        padding: 16px;
+        border-bottom: 1px solid #f3f4f6;
+        background: linear-gradient(180deg, rgba(248, 250, 252, 0.95) 0%, rgba(255, 255, 255, 0.96) 100%);
+    }
+
+    .dropdown-loading.show {
+        display: block;
+    }
+
+    .dropdown-loading__copy {
+        margin-bottom: 14px;
+    }
+
+    .dropdown-loading__eyebrow {
+        margin: 0;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #568203;
+    }
+
+    .dropdown-loading__title {
+        margin: 6px 0 0;
+        font-size: 13px;
+        line-height: 1.5;
+        color: #4b5563;
+    }
+
+    .dropdown-loading__list {
+        display: grid;
+        gap: 10px;
+    }
+
+    .dropdown-loading__item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 0;
+    }
+
+    .dropdown-loading__thumb {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        flex-shrink: 0;
+    }
+
+    .dropdown-loading__content {
+        display: grid;
+        gap: 8px;
+        flex: 1;
+    }
+
+    .dropdown-loading__line {
+        display: block;
+        width: 100%;
+        height: 11px;
+    }
+
+    .dropdown-loading__line--short {
+        width: 55%;
     }
 
     .dropdown-empty {
@@ -373,10 +469,13 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
     const searchInput = document.getElementById('searchInput');
     const searchDropdown = document.getElementById('searchDropdown');
     const dropdownResults = document.getElementById('dropdownResults');
+    const dropdownLoading = document.getElementById('dropdownLoading');
     const dropdownEmpty = document.getElementById('dropdownEmpty');
     const dropdownEmptyCopy = document.getElementById('dropdownEmptyCopy');
     const searchTrigger = document.getElementById('searchTrigger');
     const searchClose = document.getElementById('searchClose');
+    let searchTimer: number | null = null;
+    let searchRequestId = 0;
 
     function showDropdown() {
         searchDropdown.classList.add('active');
@@ -386,6 +485,27 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
     function hideDropdown() {
         searchDropdown.classList.remove('active');
         searchInput?.setAttribute('aria-expanded', 'false');
+    }
+
+    function showLoadingState() {
+        dropdownLoading?.classList.add('show');
+        dropdownLoading?.setAttribute('aria-hidden', 'false');
+        dropdownEmpty?.classList.remove('show');
+        if (dropdownResults) {
+            dropdownResults.innerHTML = '';
+        }
+    }
+
+    function hideLoadingState() {
+        dropdownLoading?.classList.remove('show');
+        dropdownLoading?.setAttribute('aria-hidden', 'true');
+    }
+
+    function clearSearchTimer() {
+        if (searchTimer) {
+            window.clearTimeout(searchTimer);
+            searchTimer = null;
+        }
     }
 
     function openMobileSearch() {
@@ -398,16 +518,26 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
 
     function closeMobileSearch() {
         searchWrapper?.classList.remove('mobile-open');
+        clearSearchTimer();
+        hideLoadingState();
         hideDropdown();
         searchTrigger?.setAttribute('aria-expanded', 'false');
         searchTrigger?.setAttribute('aria-label', 'Abrir búsqueda');
-        searchInput.value = '';
-        dropdownResults.innerHTML = '';
+        if (searchInput) {
+            searchInput.value = '';
+        }
+
+        if (dropdownResults) {
+            dropdownResults.innerHTML = '';
+        }
+
         dropdownEmpty?.classList.remove('show');
         searchTrigger?.focus();
     }
 
     function renderResults(results) {
+        hideLoadingState();
+
         if (results.length === 0) {
             dropdownResults.innerHTML = '';
             dropdownEmpty.classList.add('show');
@@ -449,9 +579,15 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
 
     function searchProducts(query) {
         const normalizedQuery = query.toLowerCase().trim();
+        clearSearchTimer();
+        searchRequestId += 1;
         
         if (!normalizedQuery) {
-            dropdownResults.innerHTML = '';
+            hideLoadingState();
+            if (dropdownResults) {
+                dropdownResults.innerHTML = '';
+            }
+
             dropdownEmpty.classList.remove('show');
             if (dropdownEmptyCopy) {
                 dropdownEmptyCopy.textContent = 'Probá con otro nombre, ingrediente o categoría. Si querés abrir más opciones, navegá la tienda completa.';
@@ -459,17 +595,24 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
             return;
         }
 
-        const results = products.filter(product => 
-            product.name.toLowerCase().includes(normalizedQuery) ||
-            product.category.toLowerCase().includes(normalizedQuery) ||
-            product.description.toLowerCase().includes(normalizedQuery)
-        ).slice(0, 8);
+        showLoadingState();
+        const currentRequestId = searchRequestId;
 
-        if (results.length === 0 && dropdownEmptyCopy) {
-            dropdownEmptyCopy.textContent = `No apareció nada para “${query.trim()}”. Probá con un término más general o explorá la tienda por categorías.`;
-        }
+        searchTimer = window.setTimeout(() => {
+            if (currentRequestId !== searchRequestId) return;
 
-        renderResults(results);
+            const results = products.filter(product => 
+                product.name.toLowerCase().includes(normalizedQuery) ||
+                product.category.toLowerCase().includes(normalizedQuery) ||
+                product.description.toLowerCase().includes(normalizedQuery)
+            ).slice(0, 8);
+
+            if (results.length === 0 && dropdownEmptyCopy) {
+                dropdownEmptyCopy.textContent = `No apareció nada para “${query.trim()}”. Probá con un término más general o explorá la tienda por categorías.`;
+            }
+
+            renderResults(results);
+        }, 140);
     }
 
     // Trigger mobile
@@ -483,7 +626,7 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
 
     // Input events
     searchInput?.addEventListener('input', (e) => {
-        const query = e.target.value;
+        const query = (e.target as HTMLInputElement).value;
         searchProducts(query);
         
         if (query.length > 0) {
@@ -492,16 +635,19 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
             hideDropdown();
         }
     });
-
+    
     searchInput?.addEventListener('focus', () => {
         if (searchInput.value.length > 0) {
             showDropdown();
+            searchProducts(searchInput.value);
         }
     });
 
     // Cerrar al hacer click fuera
     document.addEventListener('click', (e) => {
         if (searchWrapper && !searchWrapper.contains(e.target) && e.target !== searchTrigger) {
+            clearSearchTimer();
+            hideLoadingState();
             hideDropdown();
         }
     });
@@ -509,6 +655,9 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
     // Teclado: ESC cierra
     searchInput?.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
+            clearSearchTimer();
+            hideLoadingState();
+
             if (searchWrapper?.classList.contains('mobile-open')) {
                 closeMobileSearch();
             } else {
@@ -543,6 +692,8 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
                 searchInput?.focus();
             }
         } else if (e.key === 'Escape') {
+            clearSearchTimer();
+            hideLoadingState();
             hideDropdown();
             searchInput?.focus();
         }

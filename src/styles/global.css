@@ -4,6 +4,16 @@
 @tailwind utilities;
 
 @layer utilities {
+    @keyframes premium-shimmer {
+        0% {
+            background-position: 200% 0;
+        }
+
+        100% {
+            background-position: -200% 0;
+        }
+    }
+
     .shadow-button {
         box-shadow: 5px 5px 0 theme('colors.black');
     }
@@ -64,5 +74,31 @@
 
     .premium-panel {
         @apply rounded-2xl border border-gray-100 bg-white/95 shadow-lg;
+    }
+
+    .premium-subtle-panel {
+        @apply rounded-3xl border border-neutral-200/80 bg-white/90 shadow-sm backdrop-blur-sm;
+    }
+
+    .premium-action-secondary {
+        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-neutral-200 bg-white px-5 py-3 text-sm font-semibold text-neutral-700 shadow-sm transition-colors duration-200 hover:border-guacamole-b/40 hover:text-guacamole-b;
+    }
+
+    .premium-action-primary {
+        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-guacamole-b px-6 py-3 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(86,130,3,0.25)] transition-all duration-200 hover:bg-guacamole-a hover:shadow-[0_6px_18px_rgba(86,130,3,0.3)];
+    }
+
+    .premium-skeleton {
+        background: linear-gradient(110deg, rgba(226, 232, 240, 0.9) 8%, rgba(255, 255, 255, 0.95) 18%, rgba(226, 232, 240, 0.9) 33%);
+        background-size: 200% 100%;
+        animation: premium-shimmer 1.35s linear infinite;
+    }
+
+    .premium-skeleton-line {
+        @apply premium-skeleton rounded-full;
+    }
+
+    .premium-skeleton-card {
+        @apply rounded-[1.75rem] border border-neutral-200/70 bg-white/85 p-4 shadow-sm backdrop-blur-sm;
     }
 }

@@ -22,7 +22,7 @@ const paymentBreadcrumbs = [
       />
 
       <!-- Progress Steps -->
-      <div class="flex items-center gap-0 mb-8 mt-5">
+      <div class="premium-subtle-panel mb-8 mt-5 flex items-center gap-0 px-4 py-4 sm:px-5">
         <div class="flex items-center gap-2">
           <div class="w-8 h-8 rounded-full bg-guacamole-b flex items-center justify-center text-white font-bold text-sm">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -48,7 +48,7 @@ const paymentBreadcrumbs = [
       </h1>
       <p class="text-gray-600 mt-1">Elegí el medio que te quede más cómodo, seguí los pasos indicados y confirmá el comprobante cuando ya esté listo.</p>
       <div class="mt-4 flex flex-wrap gap-3 text-sm text-gray-600">
-        <a href="/checkout" class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 shadow-sm transition-colors hover:border-guacamole-b/40 hover:text-guacamole-b">
+        <a href="/checkout" class="premium-action-secondary">
           <span>←</span>
           <span>Volver a checkout</span>
         </a>
@@ -57,7 +57,7 @@ const paymentBreadcrumbs = [
           Último paso: elegir medio y confirmar pago
         </span>
       </div>
-      <div class="mt-4 rounded-2xl border border-guacamole-fondo/40 bg-white/90 px-4 py-4 text-sm text-gray-600 shadow-sm">
+      <div class="premium-subtle-panel mt-4 px-4 py-4 text-sm text-gray-600">
         <p class="font-semibold text-guacamole-icons">Tip para un checkout premium</p>
         <p class="mt-1">Tené a mano el monto exacto, hacé el pago por el canal que prefieras y guardá la captura o referencia antes de tocar el botón de confirmación.</p>
       </div>
@@ -72,16 +72,16 @@ const paymentBreadcrumbs = [
           <!-- Back link -->
         <a
           href="/checkout"
-          class="inline-flex items-center gap-2 text-guacamole-icons hover:text-guacamole-b transition-colors mb-2"
+          class="premium-action-secondary mb-2"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
-          <span class="font-semibold">Volver al checkout</span>
+          <span>Volver al checkout</span>
         </a>
 
         <!-- Payment Methods Card -->
-        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div class="premium-panel overflow-hidden rounded-3xl">
           <div class="bg-guacamole-b px-6 py-4">
             <h2 class="text-xl font-black text-white uppercase tracking-wide">
               Elegí tu medio de pago
@@ -102,7 +102,7 @@ const paymentBreadcrumbs = [
                 aria-selected="true"
                 aria-controls="panel-bancolombia"
                 id="tab-btn-bancolombia"
-                class="payment-tab active-tab flex items-center gap-2 px-5 py-3 rounded-xl border-2 border-guacamole-b bg-guacamole-b text-white font-bold text-sm transition-all"
+                class="payment-tab active-tab inline-flex min-h-11 items-center gap-2 rounded-full border-2 border-guacamole-b bg-guacamole-b px-5 py-3 text-sm font-bold text-white transition-all"
                 data-target="panel-bancolombia"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -117,7 +117,7 @@ const paymentBreadcrumbs = [
                 aria-selected="false"
                 aria-controls="panel-nequi"
                 id="tab-btn-nequi"
-                class="payment-tab flex items-center gap-2 px-5 py-3 rounded-xl border-2 border-gray-200 text-guacamole-icons font-bold text-sm transition-all hover:border-guacamole-b hover:text-guacamole-b"
+                class="payment-tab inline-flex min-h-11 items-center gap-2 rounded-full border-2 border-gray-200 bg-white px-5 py-3 text-sm font-bold text-guacamole-icons transition-all hover:border-guacamole-b hover:text-guacamole-b"
                 data-target="panel-nequi"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -132,7 +132,7 @@ const paymentBreadcrumbs = [
                 aria-selected="false"
                 aria-controls="panel-transferencia"
                 id="tab-btn-transferencia"
-                class="payment-tab flex items-center gap-2 px-5 py-3 rounded-xl border-2 border-gray-200 text-guacamole-icons font-bold text-sm transition-all hover:border-guacamole-b hover:text-guacamole-b"
+                class="payment-tab inline-flex min-h-11 items-center gap-2 rounded-full border-2 border-gray-200 bg-white px-5 py-3 text-sm font-bold text-guacamole-icons transition-all hover:border-guacamole-b hover:text-guacamole-b"
                 data-target="panel-transferencia"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -317,7 +317,7 @@ const paymentBreadcrumbs = [
         </div>
 
         <!-- Next Steps Card -->
-        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div class="premium-panel overflow-hidden rounded-3xl">
           <div class="bg-guacamole-f px-6 py-4">
             <h2 class="text-xl font-black text-black uppercase tracking-wide">
               Qué sigue ahora
@@ -364,7 +364,7 @@ const paymentBreadcrumbs = [
 
       <!-- Summary Panel -->
       <div class="lg:col-span-1">
-        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 sticky top-24">
+        <div class="premium-panel sticky top-24 rounded-3xl">
           <div class="bg-guacamole-f px-6 py-4">
             <h2 class="text-xl font-black text-black uppercase tracking-wide">
               Resumen de tu pedido
@@ -441,7 +441,7 @@ const paymentBreadcrumbs = [
             </p>
 
             <!-- Trust Badges -->
-            <div class="bg-guacamole-fondo/10 rounded-lg p-4 space-y-2 border-t border-gray-100 mt-2">
+            <div class="mt-2 space-y-2 rounded-2xl border border-guacamole-fondo/25 bg-guacamole-fondo/10 p-4">
               <p class="text-xs font-bold uppercase tracking-[0.22em] text-guacamole-b">Confianza de compra</p>
               <div class="flex items-center gap-2 text-sm text-guacamole-icons">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-guacamole-b shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -477,7 +477,7 @@ const paymentBreadcrumbs = [
       aria-labelledby="modal-title"
     >
       <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="modal-backdrop"></div>
-      <div class="relative bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full text-center">
+      <div class="relative w-full max-w-md rounded-3xl bg-white p-8 text-center shadow-2xl">
         <div class="w-20 h-20 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -490,12 +490,9 @@ const paymentBreadcrumbs = [
         <p class="mb-6 text-sm text-gray-500">Si necesitás volver a comprar, tu carrito ya quedó limpio para arrancar desde cero.</p>
         <a
           href="/tienda"
-          class="group relative inline-block focus:ring-3 focus:outline-hidden"
+          class="premium-action-primary"
         >
-          <span class="absolute inset-0 translate-x-1.5 translate-y-1.5 bg-guacamole-f transition-transform group-hover:translate-x-0 group-hover:translate-y-0"></span>
-          <span class="relative inline-block border-2 border-current px-8 py-3 text-sm font-bold tracking-widest text-black uppercase">
-            Seguir comprando
-          </span>
+          Seguir comprando
         </a>
       </div>
     </div>
