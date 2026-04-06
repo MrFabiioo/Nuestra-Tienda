@@ -51,9 +51,9 @@ const catalogSkeletonCards = Array.from({ length: 4 });
 ---
 
 <Layout>
-    <main class="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
+    <main class="store-page min-h-screen">
         <!-- Hero Section -->
-        <section class="bg-gradient-to-r from-guacamole-b/[.08] via-transparent to-guacamole-a/[.08] px-4 pb-6 pt-8 md:pb-8 md:pt-10">
+        <section class="store-hero-section px-4 pb-6 pt-8 md:pb-8 md:pt-10">
             <div class="mx-auto max-w-6xl">
                 <BreadcrumbTrail
                     items={storeBreadcrumbs}
@@ -62,49 +62,49 @@ const catalogSkeletonCards = Array.from({ length: 4 });
                 />
             </div>
 
-            <div class="mx-auto mt-4 flex max-w-6xl flex-col gap-6 rounded-[1.75rem] border border-white/70 bg-white/75 px-5 py-6 shadow-sm backdrop-blur-sm sm:px-6 sm:py-7 md:gap-8 md:rounded-[2rem] md:px-10 md:py-10">
+            <div class="store-hero-shell mx-auto mt-4 flex max-w-6xl flex-col gap-6 rounded-[1.75rem] px-5 py-6 sm:px-6 sm:py-7 md:gap-8 md:rounded-[2rem] md:px-10 md:py-10">
                 <div class="max-w-3xl">
-                    <span class="inline-flex items-center rounded-full border border-guacamole-b/15 bg-guacamole-b/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-guacamole-b">
+                    <span class="store-eyebrow inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em]">
                         Catálogo completo
                     </span>
-                    <h1 class="mt-4 text-3xl font-bold leading-tight tracking-tight text-neutral-900 sm:text-4xl md:text-5xl">
+                    <h1 class="store-heading mt-4 text-3xl font-bold leading-tight tracking-tight sm:text-4xl md:text-5xl">
                         Tienda Guacamole: todo el catálogo en un solo lugar
                     </h1>
-                    <p class="mt-3 max-w-2xl text-base leading-relaxed text-neutral-600 sm:mt-4 sm:text-lg">
+                    <p class="store-copy mt-3 max-w-2xl text-base leading-relaxed sm:mt-4 sm:text-lg">
                         Descubrí la selección disponible, filtrá por categoría o buscá directo lo que necesitás para comprar más rápido y con claridad.
                     </p>
                 </div>
 
-                <div class="grid gap-2 text-sm text-neutral-600 sm:flex sm:flex-wrap sm:gap-3">
-                    <span class="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 shadow-sm">
+                <div class="store-copy grid gap-2 text-sm sm:flex sm:flex-wrap sm:gap-3">
+                    <span class="store-stat-pill inline-flex items-center gap-2 rounded-full px-4 py-2">
                         <span class="h-2 w-2 rounded-full bg-guacamole-b"></span>
                         {totalCategories} categorías para explorar
                     </span>
-                    <span class="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 shadow-sm">
+                    <span class="store-stat-pill inline-flex items-center gap-2 rounded-full px-4 py-2">
                         <span class="h-2 w-2 rounded-full bg-guacamole-a"></span>
                         {products.length} productos visibles en esta página
                     </span>
-                    <span class="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 shadow-sm">
-                        <span class="h-2 w-2 rounded-full bg-neutral-900"></span>
+                    <span class="store-stat-pill inline-flex items-center gap-2 rounded-full px-4 py-2">
+                        <span class="store-stat-dot h-2 w-2 rounded-full"></span>
                         Búsqueda por nombre, ingrediente y descripción
                     </span>
                 </div>
 
                 <div class="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.9fr)] lg:items-center">
                     <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                        <a href="#category-filters" class="inline-flex min-h-11 items-center justify-center rounded-full bg-guacamole-b px-6 py-3 text-sm font-semibold text-white transition-colors duration-200 hover:bg-guacamole-a">
+                        <a href="#category-filters" class="premium-action-primary">
                             Explorar categorías
                         </a>
-                        <a href="#product-grid" class="inline-flex min-h-11 items-center justify-center rounded-full border border-neutral-200 bg-white px-6 py-3 text-sm font-semibold text-neutral-700 transition-colors duration-200 hover:border-guacamole-b/40 hover:text-guacamole-b">
+                        <a href="#product-grid" class="premium-action-secondary">
                             Ver todo el catálogo
                         </a>
                     </div>
 
-                    <div class="rounded-3xl border border-neutral-200 bg-neutral-50/90 p-4 text-left shadow-sm sm:p-5">
-                        <p class="text-sm font-semibold uppercase tracking-[0.18em] text-guacamole-b">
+                    <div class="store-tip-panel rounded-3xl p-4 text-left sm:p-5">
+                        <p class="store-accent-label text-sm font-semibold uppercase tracking-[0.18em]">
                             Cómo recorrer la tienda
                         </p>
-                        <ul class="mt-3 space-y-2 text-sm leading-relaxed text-neutral-600">
+                        <ul class="store-copy mt-3 space-y-2 text-sm leading-relaxed">
                             <li>1. Empezá por la categoría que mejor encaje con tu antojo.</li>
                             <li>2. Usá el buscador si ya tenés un producto o ingrediente en mente.</li>
                             <li>3. Entrá al detalle para revisar tamaños, precio y compra.</li>
@@ -117,17 +117,17 @@ const catalogSkeletonCards = Array.from({ length: 4 });
 
         <!-- Search & Filter Bar -->
         <section class="mx-auto max-w-6xl px-4 pb-8">
-            <div class="mb-4 rounded-3xl border border-neutral-200 bg-white px-4 py-4 shadow-sm sm:mb-5 sm:px-5">
+            <div class="store-filter-header mb-4 rounded-3xl px-4 py-4 sm:mb-5 sm:px-5">
                 <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                     <div class="max-w-2xl">
-                        <p class="text-sm font-semibold uppercase tracking-[0.18em] text-guacamole-b">
+                        <p class="store-accent-label text-sm font-semibold uppercase tracking-[0.18em]">
                             Explorá desde acá
                         </p>
-                        <h2 class="mt-1 text-xl font-semibold tracking-tight text-neutral-900 sm:text-2xl">
+                        <h2 class="store-heading mt-1 text-xl font-semibold tracking-tight sm:text-2xl">
                             Buscador y filtros para encontrar más rápido lo que querés
                         </h2>
                     </div>
-                    <p class="max-w-xl text-sm leading-relaxed text-neutral-500 md:text-right">
+                    <p class="store-copy max-w-xl text-sm leading-relaxed md:text-right">
                         Combiná búsqueda y categorías para descubrir algo nuevo o ir directo a tu próxima compra.
                     </p>
                 </div>
@@ -137,7 +137,7 @@ const catalogSkeletonCards = Array.from({ length: 4 });
                 <!-- Search Input -->
                 <div class="relative w-full max-w-lg md:w-auto md:flex-1">
                     <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                        <svg class="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="store-search-icon h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                     </div>
@@ -145,21 +145,21 @@ const catalogSkeletonCards = Array.from({ length: 4 });
                         type="text"
                         id="search-input"
                         placeholder="Buscar por producto, ingrediente o antojo..."
-                        class="w-full pl-12 pr-4 py-3 rounded-full border border-neutral-200 bg-white shadow-sm text-neutral-700 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-guacamole-b/30 focus:border-guacamole-b transition-all duration-300"
+                        class="store-search-input premium-field w-full pl-12 pr-4 py-3 shadow-sm transition-all duration-300"
                     />
                 </div>
 
                 <!-- Category Filter Pills -->
                 <div class="flex w-full gap-2 overflow-x-auto pb-1 md:w-auto md:flex-wrap md:justify-center md:pb-0" id="category-filters">
                     <button 
-                        class="category-pill shrink-0 rounded-full bg-guacamole-b px-4 py-2 text-sm font-medium text-white shadow-md transition-all duration-200 hover:bg-guacamole-a hover:shadow-lg"
+                        class="category-pill store-filter-pill is-active shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200"
                         data-category="todos"
                     >
                         Todos
                     </button>
                     {Object.entries(categoryNames).map(([slug, name]) => (
                         <button 
-                            class="category-pill shrink-0 rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-600 transition-all duration-200 hover:border-guacamole-b/40 hover:bg-guacamole-b/10 hover:text-guacamole-b"
+                            class="category-pill store-filter-pill shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200"
                             data-category={slug}
                         >
                             {name}
@@ -171,7 +171,7 @@ const catalogSkeletonCards = Array.from({ length: 4 });
 
         <!-- Results Count -->
         <section class="mx-auto max-w-6xl px-4 pb-4">
-            <div class="flex flex-col gap-2 rounded-2xl border border-neutral-100 bg-white/75 px-4 py-3 text-sm text-neutral-500 shadow-sm md:flex-row md:items-center md:justify-between">
+            <div class="store-results-panel flex flex-col gap-2 rounded-2xl px-4 py-3 text-sm md:flex-row md:items-center md:justify-between">
                 <div class="flex flex-col gap-2">
                     <p id="results-count">
                         Estás viendo {products.length} productos en esta página de la tienda
@@ -194,7 +194,7 @@ const catalogSkeletonCards = Array.from({ length: 4 });
             aria-busy="false"
         >
             <div class="relative">
-                <div class="catalog-grid-loading pointer-events-none absolute inset-0 z-10 hidden grid-cols-1 gap-4 rounded-[2rem] bg-white/55 p-2 backdrop-blur-[2px] sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4 xl:gap-6" id="catalog-grid-loading" aria-hidden="true">
+                <div class="catalog-grid-loading store-grid-loading pointer-events-none absolute inset-0 z-10 hidden grid-cols-1 gap-4 rounded-[2rem] p-2 backdrop-blur-[2px] sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4 xl:gap-6" id="catalog-grid-loading" aria-hidden="true">
                     {catalogSkeletonCards.map(() => (
                         <div class="premium-skeleton-card overflow-hidden">
                             <div class="premium-skeleton h-44 rounded-[1.25rem]"></div>
@@ -231,52 +231,52 @@ const catalogSkeletonCards = Array.from({ length: 4 });
             class="mx-auto hidden max-w-6xl px-4 pb-10 text-center md:pb-12"
             id="empty-state"
         >
-            <div class="rounded-[2rem] border border-neutral-200 bg-white/95 px-5 py-10 shadow-sm sm:px-6 md:px-10 md:py-14">
-                <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-neutral-100 mb-6">
-                    <svg class="w-10 h-10 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="store-empty-panel rounded-[2rem] px-5 py-10 sm:px-6 md:px-10 md:py-14">
+                <div class="store-empty-icon mb-6 inline-flex h-20 w-20 items-center justify-center rounded-full">
+                    <svg class="store-empty-icon-svg h-10 w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
-                <span class="inline-flex items-center rounded-full border border-guacamole-b/15 bg-guacamole-b/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-guacamole-b">
+                <span class="store-eyebrow inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em]">
                     Probemos otro camino
                 </span>
-                <h3 class="mt-5 text-xl font-semibold text-neutral-800 mb-2" id="empty-state-title">
+                <h3 class="store-heading mb-2 mt-5 text-xl font-semibold" id="empty-state-title">
                     No vimos productos para esa búsqueda
                 </h3>
-                <p class="text-neutral-500 mb-6 max-w-2xl mx-auto" id="empty-state-description">
+                <p class="store-copy mx-auto mb-6 max-w-2xl" id="empty-state-description">
                     En esta página no encontramos coincidencias. Probá con otra palabra, cambiá la categoría o limpiá los filtros para volver a empezar.
                 </p>
 
                 <div class="mb-8 flex flex-wrap items-center justify-center gap-2" id="empty-state-context">
-                    <span id="empty-search-chip" class="hidden rounded-full border border-neutral-200 bg-neutral-50 px-4 py-2 text-sm font-medium text-neutral-600"></span>
-                    <span id="empty-category-chip" class="hidden rounded-full border border-neutral-200 bg-neutral-50 px-4 py-2 text-sm font-medium text-neutral-600"></span>
+                    <span id="empty-search-chip" class="store-empty-chip hidden rounded-full px-4 py-2 text-sm font-medium"></span>
+                    <span id="empty-category-chip" class="store-empty-chip hidden rounded-full px-4 py-2 text-sm font-medium"></span>
                 </div>
 
                 <div class="mx-auto mb-8 grid max-w-3xl gap-3 text-left md:grid-cols-3">
-                    <div class="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4">
-                        <p class="text-sm font-semibold text-neutral-800">Buscá con menos detalle</p>
-                        <p class="mt-1 text-sm leading-relaxed text-neutral-500">Probá con un nombre más corto, un ingrediente o una categoría para abrir más opciones.</p>
+                    <div class="store-empty-card rounded-2xl px-4 py-4">
+                        <p class="store-heading text-sm font-semibold">Buscá con menos detalle</p>
+                        <p class="store-copy mt-1 text-sm leading-relaxed">Probá con un nombre más corto, un ingrediente o una categoría para abrir más opciones.</p>
                     </div>
-                    <div class="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4">
-                        <p class="text-sm font-semibold text-neutral-800">Volvé a “Todos”</p>
-                        <p class="mt-1 text-sm leading-relaxed text-neutral-500">Si filtraste mucho, limpiar te devuelve la vista completa de esta página en un clic.</p>
+                    <div class="store-empty-card rounded-2xl px-4 py-4">
+                        <p class="store-heading text-sm font-semibold">Volvé a “Todos”</p>
+                        <p class="store-copy mt-1 text-sm leading-relaxed">Si filtraste mucho, limpiar te devuelve la vista completa de esta página en un clic.</p>
                     </div>
-                    <div class="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4">
-                        <p class="text-sm font-semibold text-neutral-800">Seguí recorriendo la tienda</p>
-                        <p class="mt-1 text-sm leading-relaxed text-neutral-500">Podés cambiar de categoría o avanzar de página para descubrir más productos disponibles.</p>
+                    <div class="store-empty-card rounded-2xl px-4 py-4">
+                        <p class="store-heading text-sm font-semibold">Seguí recorriendo la tienda</p>
+                        <p class="store-copy mt-1 text-sm leading-relaxed">Podés cambiar de categoría o avanzar de página para descubrir más productos disponibles.</p>
                     </div>
                 </div>
 
                 <div class="flex flex-col items-center justify-center gap-3 sm:flex-row">
                     <button 
                         id="clear-filters"
-                        class="inline-flex min-h-11 items-center justify-center px-6 py-3 rounded-full bg-guacamole-b text-white font-medium hover:bg-guacamole-a transition-colors duration-200"
+                        class="premium-action-primary"
                     >
                         Reiniciar búsqueda y filtros
                     </button>
                     <a
                         href="#category-filters"
-                        class="inline-flex min-h-11 items-center justify-center rounded-full border border-neutral-200 bg-white px-6 py-3 text-sm font-semibold text-neutral-700 transition-colors duration-200 hover:border-guacamole-b/40 hover:text-guacamole-b"
+                        class="premium-action-secondary"
                     >
                         Explorar categorías
                     </a>
@@ -476,12 +476,10 @@ const catalogSkeletonCards = Array.from({ length: 4 });
                 // Update pill styles
                 categoryPills.forEach((p) => {
                     const btn = p as HTMLButtonElement;
-                    btn.classList.remove('bg-guacamole-b', 'text-white', 'shadow-md', 'hover:shadow-lg', 'hover:bg-guacamole-a');
-                    btn.classList.add('bg-white', 'text-neutral-600', 'border', 'border-neutral-200', 'hover:bg-guacamole-b/10', 'hover:border-guacamole-b/40', 'hover:text-guacamole-b');
+                    btn.classList.remove('is-active');
                 });
 
-                button.classList.remove('bg-white', 'text-neutral-600', 'border', 'border-neutral-200', 'hover:bg-guacamole-b/10', 'hover:border-guacamole-b/40', 'hover:text-guacamole-b');
-                button.classList.add('bg-guacamole-b', 'text-white', 'shadow-md', 'hover:shadow-lg', 'hover:bg-guacamole-a');
+                button.classList.add('is-active');
 
                 runFilterWithFeedback();
             });
@@ -495,19 +493,119 @@ const catalogSkeletonCards = Array.from({ length: 4 });
             // Reset category pills
             categoryPills.forEach((p) => {
                 const btn = p as HTMLButtonElement;
-                btn.classList.remove('bg-guacamole-b', 'text-white', 'shadow-md', 'hover:shadow-lg', 'hover:bg-guacamole-a');
-                btn.classList.add('bg-white', 'text-neutral-600', 'border', 'border-neutral-200', 'hover:bg-guacamole-b/10', 'hover:border-guacamole-b/40', 'hover:text-guacamole-b');
+                btn.classList.remove('is-active');
             });
 
             // Set "Todos" as active
             const todosPill = document.querySelector('[data-category="todos"]');
             if (todosPill) {
                 const btn = todosPill as HTMLButtonElement;
-                btn.classList.remove('bg-white', 'text-neutral-600', 'border', 'border-neutral-200', 'hover:bg-guacamole-b/10', 'hover:border-guacamole-b/40', 'hover:text-guacamole-b');
-                btn.classList.add('bg-guacamole-b', 'text-white', 'shadow-md', 'hover:shadow-lg', 'hover:bg-guacamole-a');
+                btn.classList.add('is-active');
             }
 
             runFilterWithFeedback();
         });
     });
 </script>
+
+<style>
+    .store-page {
+        background:
+            linear-gradient(180deg, color-mix(in srgb, var(--color-bg-alt) 90%, transparent) 0%, color-mix(in srgb, var(--color-bg) 96%, transparent) 100%);
+    }
+
+    .store-hero-section {
+        background:
+            linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 12%, transparent) 0%, transparent 46%, color-mix(in srgb, var(--color-accent-strong) 12%, transparent) 100%),
+            linear-gradient(180deg, color-mix(in srgb, var(--color-bg-alt) 84%, transparent) 0%, transparent 100%);
+    }
+
+    .store-hero-shell,
+    .store-filter-header,
+    .store-results-panel,
+    .store-empty-panel {
+        border: 1px solid var(--color-border);
+        background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+        box-shadow: 0 14px 30px var(--color-shadow-soft);
+        backdrop-filter: blur(14px);
+    }
+
+    .store-tip-panel,
+    .store-empty-card {
+        border: 1px solid var(--color-border);
+        background: color-mix(in srgb, var(--color-surface) 94%, var(--color-accent) 6%);
+        box-shadow: 0 10px 24px var(--color-shadow-soft);
+    }
+
+    .store-eyebrow {
+        border: 1px solid color-mix(in srgb, var(--color-accent) 22%, transparent);
+        background: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface-elevated) 88%);
+        color: var(--color-accent);
+    }
+
+    .store-accent-label {
+        color: color-mix(in srgb, var(--color-accent) 82%, var(--color-text) 18%);
+    }
+
+    .store-heading {
+        color: var(--color-text);
+    }
+
+    .store-copy,
+    .store-results-panel {
+        color: var(--color-text-muted);
+    }
+
+    .store-stat-pill,
+    .store-empty-chip {
+        border: 1px solid var(--color-border);
+        background: color-mix(in srgb, var(--color-surface-elevated) 92%, transparent);
+        color: var(--color-text-muted);
+        box-shadow: 0 8px 18px var(--color-shadow-soft);
+    }
+
+    .store-stat-dot {
+        background: var(--color-text);
+    }
+
+    .store-search-input {
+        border-radius: 9999px;
+        box-shadow: 0 8px 18px var(--color-shadow-soft);
+    }
+
+    .store-search-icon {
+        color: var(--color-text-subtle);
+    }
+
+    .store-filter-pill {
+        border: 1px solid var(--color-border);
+        background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+        color: var(--color-text-muted);
+        box-shadow: 0 6px 16px var(--color-shadow-soft);
+    }
+
+    .store-filter-pill:hover {
+        border-color: var(--color-border-strong);
+        background: color-mix(in srgb, var(--color-surface-elevated) 84%, var(--color-accent) 16%);
+        color: var(--color-accent);
+    }
+
+    .store-filter-pill.is-active {
+        border-color: color-mix(in srgb, var(--color-accent) 48%, transparent);
+        background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-strong) 100%);
+        color: var(--color-text-on-accent);
+        box-shadow: 0 12px 24px color-mix(in srgb, var(--color-accent) 24%, transparent);
+    }
+
+    .store-grid-loading {
+        background: color-mix(in srgb, var(--color-surface-elevated) 74%, transparent);
+    }
+
+    .store-empty-icon {
+        background: var(--color-surface-soft-strong);
+    }
+
+    .store-empty-icon-svg {
+        color: var(--color-accent);
+    }
+</style>

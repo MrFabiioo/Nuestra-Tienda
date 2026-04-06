@@ -60,7 +60,8 @@ const images = [
     position: relative;
     overflow: hidden;
     border-radius: 1rem;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--color-border);
+    box-shadow: 0 14px 40px var(--color-shadow-soft);
   }
 
   .slider-wrapper {
@@ -96,22 +97,23 @@ const images = [
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.7);
+    background: color-mix(in srgb, var(--color-surface-elevated) 90%, transparent);
     backdrop-filter: blur(4px);
-    border: none;
+    border: 1px solid var(--color-border);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #333;
+    color: var(--color-text);
     transition: all 0.3s ease;
     z-index: 10;
   }
 
   .slider-btn:hover {
-    background: rgba(255, 255, 255, 0.95);
+    background: color-mix(in srgb, var(--color-surface-elevated) 92%, var(--color-accent) 8%);
+    border-color: var(--color-border-strong);
     transform: translateY(-50%) scale(1.1);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 20px var(--color-shadow-soft);
   }
 
   .slider-btn:active {
@@ -145,22 +147,23 @@ const images = [
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.5);
-    border: 2px solid rgba(255, 255, 255, 0.8);
+    background: color-mix(in srgb, var(--color-surface-elevated) 72%, transparent);
+    border: 2px solid color-mix(in srgb, var(--color-border-strong) 80%, transparent);
     cursor: pointer;
     transition: all 0.3s ease;
     padding: 0;
   }
 
   .dot:hover {
-    background: rgba(255, 255, 255, 0.8);
+    background: color-mix(in srgb, var(--color-surface-elevated) 88%, var(--color-accent) 12%);
     transform: scale(1.2);
   }
 
   .dot.active {
-    background: white;
+    background: var(--color-accent);
+    border-color: var(--color-accent);
     transform: scale(1.2);
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--color-accent) 48%, transparent);
   }
 
   @media (max-width: 768px) {

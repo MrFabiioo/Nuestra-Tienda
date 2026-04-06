@@ -91,17 +91,17 @@
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: #568203;
-    background: rgba(86, 130, 3, 0.1);
+    color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-surface-soft) 92%, transparent);
     padding: 0.25rem 0.875rem;
     border-radius: 999px;
-    border: 1px solid rgba(86, 130, 3, 0.25);
+    border: 1px solid var(--color-border);
   }
 
   .hiw-title {
     font-size: clamp(1.5rem, 3vw, 2rem);
     font-weight: 800;
-    color: #1a1a1a;
+    color: var(--color-text);
     letter-spacing: -0.02em;
     margin: 0;
     line-height: 1.25;
@@ -109,7 +109,7 @@
 
   .hiw-subtitle {
     font-size: 1rem;
-    color: #5a5a5a;
+    color: var(--color-text-muted);
     margin: 0;
     max-width: 420px;
     line-height: 1.6;
@@ -134,7 +134,7 @@
     left: calc(33.33% - 0px);
     right: calc(33.33% - 0px);
     height: 2px;
-    background: linear-gradient(90deg, rgba(86, 130, 3, 0.3), rgba(86, 130, 3, 0.3));
+    background: linear-gradient(90deg, color-mix(in srgb, var(--color-accent) 28%, transparent), color-mix(in srgb, var(--color-accent) 28%, transparent));
     z-index: 0;
     pointer-events: none;
   }
@@ -148,15 +148,15 @@
     position: relative;
     z-index: 1;
     padding: 1.5rem 1rem;
-    background: white;
-    border: 1px solid #ebebeb;
+    background: color-mix(in srgb, var(--color-surface-elevated) 95%, transparent);
+    border: 1px solid var(--color-border);
     border-radius: 1rem;
     transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
   }
 
   .hiw-step:hover {
-    border-color: rgba(86, 130, 3, 0.35);
-    box-shadow: 0 8px 28px rgba(86, 130, 3, 0.09);
+    border-color: var(--color-border-strong);
+    box-shadow: 0 12px 30px var(--color-shadow-soft);
     transform: translateY(-3px);
   }
 
@@ -164,7 +164,7 @@
     font-size: 0.7rem;
     font-weight: 800;
     letter-spacing: 0.08em;
-    color: #568203;
+    color: var(--color-accent);
     font-variant-numeric: tabular-nums;
   }
 
@@ -174,16 +174,16 @@
     justify-content: center;
     width: 60px;
     height: 60px;
-    background: linear-gradient(135deg, rgba(86, 130, 3, 0.14), rgba(86, 130, 3, 0.06));
+    background: linear-gradient(135deg, var(--color-surface-soft-strong), color-mix(in srgb, var(--color-surface-soft) 78%, transparent));
     border-radius: 50%;
-    color: #568203;
-    border: 2px solid rgba(86, 130, 3, 0.2);
+    color: var(--color-accent);
+    border: 2px solid var(--color-border);
   }
 
   .hiw-step__title {
     font-size: 1.05rem;
     font-weight: 700;
-    color: #1a1a1a;
+    color: var(--color-text);
     margin: 0;
     letter-spacing: -0.01em;
   }
@@ -191,7 +191,7 @@
   .hiw-step__desc {
     font-size: 0.875rem;
     line-height: 1.65;
-    color: #5a5a5a;
+    color: var(--color-text-muted);
     margin: 0;
   }
 
@@ -206,27 +206,27 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    background: #568203;
-    color: white;
+    background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-strong) 100%);
+    color: var(--color-text-on-accent);
     text-decoration: none;
     font-size: 0.95rem;
     font-weight: 600;
     padding: 0.8rem 2rem;
     border-radius: 0.625rem;
     transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
-    box-shadow: 0 4px 14px rgba(86, 130, 3, 0.3);
+    box-shadow: 0 8px 22px color-mix(in srgb, var(--color-accent) 28%, transparent);
     letter-spacing: 0.01em;
   }
 
   .hiw-cta:hover {
-    background: #3E6102;
+    background: linear-gradient(135deg, var(--color-accent-strong) 0%, var(--color-accent) 100%);
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(86, 130, 3, 0.4);
+    box-shadow: 0 12px 28px color-mix(in srgb, var(--color-accent-strong) 34%, transparent);
   }
 
   .hiw-cta:active {
     transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(86, 130, 3, 0.25);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--color-accent-strong) 24%, transparent);
   }
 
   /* ── Responsive ─────────────────────────────── */

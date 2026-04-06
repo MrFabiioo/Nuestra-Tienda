@@ -130,24 +130,24 @@ const hasNext = currentPage < totalPages;
     }
 
     .pagination__arrow--active {
-        background: white;
-        color: #3E6102;
-        border: 1.5px solid #568203;
+        background: color-mix(in srgb, var(--color-surface-elevated) 96%, transparent);
+        color: var(--color-accent);
+        border: 1.5px solid var(--color-border-strong);
         text-decoration: none;
-        box-shadow: 0 1px 3px rgba(86, 130, 3, 0.12);
+        box-shadow: 0 8px 18px var(--color-shadow-soft);
     }
 
     .pagination__arrow--active:hover {
-        background: #568203;
-        color: white;
-        box-shadow: 0 4px 12px rgba(86, 130, 3, 0.25);
+        background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-strong) 100%);
+        color: var(--color-text-on-accent);
+        box-shadow: 0 12px 24px color-mix(in srgb, var(--color-accent) 26%, transparent);
         transform: translateY(-1px);
     }
 
     .pagination__arrow--disabled {
         background: transparent;
-        color: #d1d5db;
-        border: 1.5px solid #e5e7eb;
+        color: var(--color-text-subtle);
+        border: 1.5px solid var(--color-border);
         cursor: not-allowed;
     }
 
@@ -181,23 +181,23 @@ const hasNext = currentPage < totalPages;
     }
 
     .pagination__page--current {
-        background: #568203;
-        color: white;
+        background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-strong) 100%);
+        color: var(--color-text-on-accent);
         font-weight: 700;
-        box-shadow: 0 2px 8px rgba(86, 130, 3, 0.3);
+        box-shadow: 0 10px 20px color-mix(in srgb, var(--color-accent) 26%, transparent);
     }
 
     .pagination__page--link {
-        color: #374151;
+        color: var(--color-text-muted);
         background: transparent;
         text-decoration: none;
         border: 1px solid transparent;
     }
 
     .pagination__page--link:hover {
-        background: #f0fdf4;
-        color: #3E6102;
-        border-color: #bbf7d0;
+        background: color-mix(in srgb, var(--color-surface-elevated) 84%, var(--color-accent) 16%);
+        color: var(--color-accent);
+        border-color: var(--color-border-strong);
     }
 
     .pagination__ellipsis {
@@ -206,7 +206,7 @@ const hasNext = currentPage < totalPages;
         justify-content: center;
         width: 36px;
         height: 36px;
-        color: #9ca3af;
+        color: var(--color-text-subtle);
         font-size: 1rem;
         letter-spacing: -0.05em;
     }
