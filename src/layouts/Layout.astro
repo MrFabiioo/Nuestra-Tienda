@@ -34,8 +34,9 @@ const pageTitle = title === "GuacaShop" ? title : `${title} | GuacaShop`;
 		<ClientRouter />
 	</head>
 	<body>
+		<a class="skip-link" href="#main-content">Saltar al contenido principal</a>
 		<Navbar />
-		<main id="main-content">
+		<main id="main-content" tabindex="-1">
 			<slot />
 		</main>
 		<Footer />
@@ -63,6 +64,27 @@ const pageTitle = title === "GuacaShop" ? title : `${title} | GuacaShop`;
 		outline: none;
 	}
 
+	.skip-link {
+		position: fixed;
+		top: 1rem;
+		left: 50%;
+		transform: translate(-50%, -200%);
+		padding: 0.75rem 1.25rem;
+		background: #568203;
+		color: #ffffff;
+		text-decoration: none;
+		font-size: 0.95rem;
+		font-weight: 600;
+		border-radius: 999px;
+		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+		z-index: 100;
+		transition: transform 0.2s ease;
+	}
+
+	.skip-link:focus-visible {
+		transform: translate(-50%, 0);
+	}
+
 	main {
 		padding-top: 80px;
 		max-width: 1200px;
@@ -70,5 +92,6 @@ const pageTitle = title === "GuacaShop" ? title : `${title} | GuacaShop`;
 		min-width: 0;
 		padding-left: 1rem;
 		padding-right: 1rem;
+		scroll-margin-top: 96px;
 	}
 </style>

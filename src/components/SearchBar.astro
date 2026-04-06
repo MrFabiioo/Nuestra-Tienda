@@ -1,7 +1,30 @@
 ---
+import { actions } from "astro:actions";
 import { allProducts } from "@data/products";
 
-const productsJson = JSON.stringify(allProducts);
+const fallbackProducts = allProducts.map((product) => ({
+    id: product.id,
+    name: product.name,
+    description: product.description,
+    image: product.image,
+    slug: product.slug,
+    category: product.category,
+}));
+
+const { data, error } = await Astro.callAction(actions.getProductsByCategory, {});
+
+const catalogProducts = data?.productsByCategory?.flatMap((category) =>
+    category.products.map((product) => ({
+        id: product.id,
+        name: product.title,
+        description: product.description,
+        image: product.image || "/images/no-image.png",
+        slug: `/products/${product.slug}`,
+        category: category.categoryName,
+    }))
+) ?? fallbackProducts;
+
+const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
 ---
 
 <!-- Botón de búsqueda para mobile (visible solo en mobile) -->
