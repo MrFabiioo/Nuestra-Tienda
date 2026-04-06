@@ -22,124 +22,140 @@ const { products, totalPages } = data;
 ---
 
 <Layout title={`Dashboard`}>
-    <p class="text-2xl text-center mt-10 text-black-dark font-bold">Listado de productos</p>
+    <section class="px-2 py-8 sm:px-4 lg:px-6">
+        <div class="premium-subtle-panel px-5 py-6 sm:px-7">
+            <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                <div class="max-w-3xl">
+                    <span class="premium-chip">Admin · productos</span>
+                    <h1 class="mt-4 text-3xl font-black tracking-tight theme-text-primary sm:text-4xl">Listado de productos</h1>
+                    <p class="theme-text-muted mt-3 max-w-2xl text-sm leading-relaxed sm:text-base">
+                        Vista editorial para revisar catálogo, precio, categoría y acceso rápido a edición con buena legibilidad en light y dark mode.
+                    </p>
+                </div>
 
-    <div class="mx-6 flex gap-4">
-        <a href="/admin/products/new-product"
-        id="btn-nuevo-producto"
-        class="text-black-medium border-black-dark border-2 bg-guacamole-pulpa px-4 py-2 transition">
-        NUEVO PRODUCTO</a>
-        
-        <a href="/admin/categories"
-        id="btn-ver-categorias"
-        class="text-black-medium border-black-dark border-2 bg-guacamole-verde px-4 py-2 transition">
-        VER CATEGORÍAS</a>
-    </div>
-    
-        
-<!--     
+                <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-end">
+                    <a href="/admin/products/new-product" id="btn-nuevo-producto" class="premium-action-primary">
+                        Nuevo producto
+                    </a>
 
-    <table class="my-6 text-center mx-6 ">
-        <thead class="bg-gray-200 h-12  text-black-medium rounded-lg">
-            <tr class="">
-                <th class="text-left ">Imagen</th>
-                <th class="text-center">Titulo</th>
-                <th class="text-center">Precio</th>
-                <th class="text-center">Tamaños </th>
-            </tr>
-        </thead>
-        <tbody class="">
-            {
-                products.map((p) => (
-                    <tr class="my-6">
-                        <td class="my-6">
-                            <ProductImage
-                                src={p.images.split(",")[0]}
-                                alt={p.title}
-                                className={`w-20 h-20`}
-                            />
-                        </td>
-                        <td>
-                            <a
-                                class="hover:underline cursor-pointer"
-                                href={`/admin/products/${p.slug}`}
-                            >
-                                {p.title}
-                            </a>
-                        </td>
-                        <td>{Formatter.currency(p.price)}</td>
-                        <td>{p.sizes}</td>
-                    </tr>
-                ))
-            }
-        </tbody>
-    </table> -->
+                    <a href="/admin/categories" id="btn-ver-categorias" class="premium-action-secondary">
+                        Ver categorías
+                    </a>
+                </div>
+            </div>
 
-   
- 
-<div class="relative flex flex-col  h-full overflow-scroll text-gray-700 bg-white shadow-md rounded-lg bg-clip-border my-6 mx-6">
-  <table class="w-full text-left table-auto min-w-max">
-    <thead>
-      <tr class="border-b border-slate-300 bg-slate-50">
-        <th class="p-4 text-xl font-normal leading-none text-slate-500">Imagen</th>
-        <th class="p-4 text-xl font-normal leading-none text-slate-500">Nombre</th>
-        <th class="p-4 text-xl font-normal leading-none text-slate-500">Categoría</th>
-        <th class="p-4 text-xl font-normal leading-none text-slate-500">Id</th>
-        <th class="p-4 text-xl font-normal leading-none text-slate-500">Precio</th>
-        <th class="p-4 text-xl font-normal leading-none text-slate-500">Descripción</th>
-        <th class="p-4 text-xl font-normal leading-none text-slate-500"></th>
-      </tr>
-    </thead>
-    <tbody>
-      {
-        products.map((p)=>(
-            <tr class="hover:bg-slate-50">
-            <td class="p-4 border-b border-slate-200 py-5">
-              <ProductImage
-                                src={p.images.split(",")[0]}
-                                alt={p.title}
-                                className={`w-20 h-20`}
-                            />
-            </td>
-            <td class="p-4 border-b border-slate-200 py-5">
-              <p class="block font-semibold text-lg text-slate-800">
-                <a class="hover:underline cursor-pointer"
-                   href={`/admin/products/${p.slug}`}>{p.title}
-                </a>
-              </p>
-            </td>
-            <td class="p-4 border-b border-slate-200 py-5">
-              <p class="text-lg text-slate-500">{p.categoryName ?? '-'}</p>
-            </td>
-            <td class="p-4 border-b border-slate-200 py-5">
-              <p class="text-lg text-slate-500">{p.id}</p>
-            </td>
-            <td class="p-4 border-b border-slate-200 py-5">
-              <p class="text-lg text-slate-500">$ {p.price}</p>
-            </td>
-            <td class="p-4 border-b border-slate-200 py-5">
-              <p class="text-lg text-slate-500">{p.description}</p>
-            </td>
-            <td class="p-4 border-b border-slate-200 py-5">
-              <button type="button" class="text-slate-500 hover:text-slate-700">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </td>
-          </tr>
-        ))
+            <div class="mt-6 grid gap-3 sm:grid-cols-3">
+                <div class="theme-soft-surface rounded-2xl border px-4 py-3">
+                    <p class="admin-table-subcopy text-[0.72rem] font-bold uppercase tracking-[0.18em]">Productos visibles</p>
+                    <p class="admin-table-title mt-2 text-2xl font-black">{products.length}</p>
+                </div>
 
-          
-      }
-    </tbody>
-  </table>
-</div>
-    <Pagination pageParam={pageParam} totalPages={totalPages} />
+                <div class="theme-soft-surface rounded-2xl border px-4 py-3">
+                    <p class="admin-table-subcopy text-[0.72rem] font-bold uppercase tracking-[0.18em]">Página actual</p>
+                    <p class="admin-table-title mt-2 text-2xl font-black">{pageParam}</p>
+                </div>
+
+                <div class="theme-soft-surface rounded-2xl border px-4 py-3">
+                    <p class="admin-table-subcopy text-[0.72rem] font-bold uppercase tracking-[0.18em]">Páginas totales</p>
+                    <p class="admin-table-title mt-2 text-2xl font-black">{totalPages}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6">
+            {products.length === 0 ? (
+                <div class="admin-empty-state premium-panel">
+                    <div class="admin-empty-state__icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-7 w-7">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5m-16.5 0A2.25 2.25 0 016 4.5h12a2.25 2.25 0 012.25 2.25m-16.5 0v10.5A2.25 2.25 0 006 19.5h12a2.25 2.25 0 002.25-2.25V6.75m-10.5 4.5h4.5" />
+                        </svg>
+                    </div>
+
+                    <h2 class="admin-table-title text-xl font-bold">Todavía no hay productos cargados</h2>
+                    <p class="admin-table-copy mt-2 max-w-xl text-sm leading-relaxed sm:text-base">
+                        Podés crear el primer producto para empezar a poblar el catálogo y después administrarlo desde esta misma tabla.
+                    </p>
+
+                    <a href="/admin/products/new-product" class="premium-action-primary mt-6">
+                        Crear primer producto
+                    </a>
+                </div>
+            ) : (
+                <div class="admin-table-shell">
+                    <div class="admin-table-scroll">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Imagen</th>
+                                    <th>Producto</th>
+                                    <th>Categoría</th>
+                                    <th>Precio</th>
+                                    <th class="hidden xl:table-cell">Descripción</th>
+                                    <th class="text-right">Acción</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {products.map((p) => (
+                                    <tr>
+                                        <td>
+                                            <div class="admin-table-thumbnail">
+                                                <ProductImage
+                                                    src={p.images.split(",")[0]}
+                                                    alt={p.title}
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            </div>
+                                        </td>
+
+                                        <td>
+                                            <div class="min-w-[15rem]">
+                                                <a class="admin-table-link admin-table-title text-base font-bold sm:text-lg" href={`/admin/products/${p.slug}`}>
+                                                    {p.title}
+                                                </a>
+
+                                                <div class="mt-2 flex flex-wrap items-center gap-2">
+                                                    <span class="admin-table-badge admin-table-badge--accent">
+                                                        {p.sizes?.split(',').length ?? 0} tamaños
+                                                    </span>
+                                                    <span class="admin-table-subcopy text-xs font-medium">
+                                                        ID: <span class="font-semibold">{p.id}</span>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <td>
+                                            <span class="admin-table-badge">
+                                                {p.categoryName ?? 'Sin categoría'}
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <div class="admin-table-title text-base font-bold sm:text-lg">{Formatter.currency(p.price)}</div>
+                                            <p class="admin-table-subcopy mt-1 text-xs">Precio base del producto</p>
+                                        </td>
+
+                                        <td class="hidden xl:table-cell">
+                                            <p class="admin-table-copy line-clamp-2 max-w-md text-sm leading-relaxed">
+                                                {p.description || 'Sin descripción cargada.'}
+                                            </p>
+                                        </td>
+
+                                        <td class="text-right">
+                                            <a href={`/admin/products/${p.slug}`} class="admin-table-action">
+                                                Editar
+                                            </a>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
+        </div>
+
+        <Pagination pageParam={pageParam} totalPages={totalPages} />
+    </section>
 </Layout>
-<style>
-    #btn-nuevo-producto:hover,
-    #btn-ver-categorias:hover {
-        transform: scale(1.05);
-    }
-</style>

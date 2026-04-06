@@ -125,7 +125,7 @@ const checkoutBreadcrumbs = [
                 </svg>
                 <span>Volver a la tienda</span>
               </a>
-              <span class="inline-flex items-center rounded-full border border-guacamole-b/20 bg-guacamole-b/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-guacamole-b">
+              <span class="checkout-status-pill inline-flex items-center rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em]">
                 Estás a un paso del pago
               </span>
             </div>
@@ -224,7 +224,7 @@ const checkoutBreadcrumbs = [
                       Método de entrega <span class="text-red-500">*</span>
                     </label>
                     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <label class="flex cursor-pointer items-start gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-4 transition-all hover:border-guacamole-b hover:bg-guacamole-fondo/10">
+                      <label class="checkout-delivery-option flex cursor-pointer items-start gap-3 rounded-2xl px-4 py-4 transition-all">
                         <input 
                           type="radio" 
                           name="deliveryMethod" 
@@ -237,7 +237,7 @@ const checkoutBreadcrumbs = [
                           <span class="mt-1 block text-sm text-gray-500">Ideal si querés recibir tu pedido en una dirección específica.</span>
                         </span>
                       </label>
-                      <label class="flex cursor-pointer items-start gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-4 transition-all hover:border-guacamole-b hover:bg-guacamole-fondo/10">
+                      <label class="checkout-delivery-option flex cursor-pointer items-start gap-3 rounded-2xl px-4 py-4 transition-all">
                         <input 
                           type="radio" 
                           name="deliveryMethod" 
@@ -309,7 +309,7 @@ const checkoutBreadcrumbs = [
                   </div>
                 </div>
 
-                <div class="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-4 text-sm text-gray-600">
+                <div class="checkout-review-note rounded-2xl px-4 py-4 text-sm text-gray-600">
                   <p class="font-semibold text-guacamole-icons">Antes de pasar a pago</p>
                   <p class="mt-1">Chequeá que el teléfono y la dirección estén bien escritos. Ese detalle hace que la confirmación sea mucho más ágil.</p>
                 </div>
@@ -541,6 +541,19 @@ const checkoutBreadcrumbs = [
     color: var(--color-text-subtle);
   }
 
+  .theme-checkout-page .text-red-700,
+  .theme-checkout-page .text-red-500 {
+    color: var(--color-danger);
+  }
+
+  .theme-checkout-page .border-red-200 {
+    border-color: var(--color-danger-border);
+  }
+
+  .theme-checkout-page .bg-red-50 {
+    background: color-mix(in srgb, var(--color-danger-surface) 90%, var(--color-surface) 10%);
+  }
+
   .theme-checkout-page .text-guacamole-icons,
   .theme-checkout-page .text-black-dark {
     color: var(--color-text);
@@ -569,8 +582,38 @@ const checkoutBreadcrumbs = [
     background: var(--color-surface-soft);
   }
 
+  .theme-checkout-page .checkout-status-pill,
+  .theme-checkout-page .checkout-review-note,
+  .theme-checkout-page .checkout-delivery-option {
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+  }
+
+  .theme-checkout-page .checkout-status-pill {
+    color: var(--color-accent);
+  }
+
+  .theme-checkout-page .checkout-review-note {
+    background: color-mix(in srgb, var(--color-surface-soft) 88%, transparent);
+  }
+
+  .theme-checkout-page .checkout-delivery-option:hover {
+    border-color: var(--color-border-strong);
+    background: color-mix(in srgb, var(--color-surface-soft) 82%, var(--color-accent) 18%);
+  }
+
+  .theme-checkout-page .checkout-delivery-option:has(input:checked) {
+    border-color: color-mix(in srgb, var(--color-accent) 42%, var(--color-border) 58%);
+    background: color-mix(in srgb, var(--color-surface-soft) 74%, var(--color-accent) 26%);
+    box-shadow: 0 10px 24px var(--color-shadow-soft);
+  }
+
   .theme-checkout-page #checkout-feedback {
     color: var(--color-text-muted);
+  }
+
+  .theme-checkout-page #form-feedback {
+    box-shadow: 0 10px 24px color-mix(in srgb, var(--color-danger-ring) 90%, transparent);
   }
 </style>
 

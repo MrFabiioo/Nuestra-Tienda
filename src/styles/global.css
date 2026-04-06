@@ -21,6 +21,11 @@
     --color-text-subtle: rgba(24, 50, 11, 0.52);
     --color-border: rgba(86, 130, 3, 0.18);
     --color-border-strong: rgba(86, 130, 3, 0.28);
+    --color-danger: #b42318;
+    --color-danger-text: #8f1d14;
+    --color-danger-border: rgba(180, 35, 24, 0.22);
+    --color-danger-surface: rgba(180, 35, 24, 0.08);
+    --color-danger-ring: rgba(180, 35, 24, 0.14);
     --color-navbar-bg: linear-gradient(135deg, rgba(233, 243, 204, 0.97) 0%, rgba(220, 235, 176, 0.96) 100%);
     --color-navbar-border: rgba(86, 130, 3, 0.2);
     --color-navbar-shadow: rgba(62, 97, 2, 0.12);
@@ -51,6 +56,11 @@
     --color-text-subtle: rgba(241, 243, 249, 0.5);
     --color-border: rgba(86, 130, 3, 0.24);
     --color-border-strong: rgba(132, 169, 3, 0.3);
+    --color-danger: #ff7b72;
+    --color-danger-text: rgba(255, 214, 210, 0.96);
+    --color-danger-border: rgba(255, 123, 114, 0.28);
+    --color-danger-surface: rgba(255, 123, 114, 0.12);
+    --color-danger-ring: rgba(255, 123, 114, 0.16);
     --color-navbar-bg: linear-gradient(135deg, rgba(17, 18, 19, 0.96) 0%, rgba(24, 32, 18, 0.95) 52%, rgba(15, 26, 8, 0.96) 100%);
     --color-navbar-border: rgba(86, 130, 3, 0.28);
     --color-navbar-shadow: rgba(7, 12, 5, 0.24);
@@ -146,7 +156,10 @@ select {
     }
 
     .premium-field[aria-invalid='true'] {
-        @apply border-red-300 bg-red-50/60 text-red-900 ring-4 ring-red-100;
+        border-color: var(--color-danger-border);
+        background: color-mix(in srgb, var(--color-danger-surface) 92%, var(--color-surface) 8%);
+        color: var(--color-danger-text);
+        box-shadow: 0 0 0 4px var(--color-danger-ring);
     }
 
     .field-help {
@@ -155,7 +168,8 @@ select {
     }
 
     .field-error {
-        @apply mt-2 text-xs font-semibold leading-5 text-red-600;
+        @apply mt-2 text-xs font-semibold leading-5;
+        color: var(--color-danger);
     }
 
     .premium-chip {
@@ -202,6 +216,179 @@ select {
     .premium-action-primary:hover {
         background: linear-gradient(135deg, var(--color-accent-strong) 0%, var(--color-accent) 100%);
         box-shadow: 0 12px 28px color-mix(in srgb, var(--color-accent-strong) 34%, transparent);
+    }
+
+    .premium-action-ghost {
+        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-all duration-200;
+        border: 1px solid transparent;
+        background: transparent;
+        color: var(--color-text-muted);
+    }
+
+    .premium-action-ghost:hover {
+        border-color: var(--color-border);
+        background: color-mix(in srgb, var(--color-surface-soft) 84%, transparent);
+        color: var(--color-accent);
+    }
+
+    .premium-action-destructive {
+        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition-all duration-200;
+        border: 1px solid var(--color-danger-border);
+        background: color-mix(in srgb, var(--color-danger-surface) 88%, var(--color-surface) 12%);
+        color: var(--color-danger-text);
+        box-shadow: 0 10px 24px color-mix(in srgb, var(--color-danger) 10%, transparent);
+    }
+
+    .premium-action-destructive:hover {
+        border-color: color-mix(in srgb, var(--color-danger) 45%, transparent);
+        background: color-mix(in srgb, var(--color-danger-surface) 78%, var(--color-surface) 22%);
+        color: var(--color-danger);
+    }
+
+    .premium-icon-button {
+        @apply inline-flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200;
+        border: 1px solid var(--color-border);
+        background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+        color: var(--color-text-muted);
+        box-shadow: 0 10px 20px var(--color-shadow-soft);
+    }
+
+    .premium-icon-button:hover {
+        border-color: var(--color-border-strong);
+        background: color-mix(in srgb, var(--color-surface-elevated) 86%, var(--color-accent) 14%);
+        color: var(--color-accent);
+        transform: translateY(-1px);
+    }
+
+    .premium-icon-button--destructive {
+        border-color: var(--color-danger-border);
+        background: color-mix(in srgb, var(--color-danger-surface) 88%, var(--color-surface) 12%);
+        color: var(--color-danger-text);
+    }
+
+    .premium-icon-button--destructive:hover {
+        border-color: color-mix(in srgb, var(--color-danger) 45%, transparent);
+        background: color-mix(in srgb, var(--color-danger-surface) 78%, var(--color-surface) 22%);
+        color: var(--color-danger);
+    }
+
+    .admin-shell {
+        @apply space-y-6 pb-8 pt-10;
+    }
+
+    .admin-shell__header {
+        @apply flex flex-col gap-4 rounded-[2rem] p-6 md:flex-row md:items-end md:justify-between;
+        border: 1px solid var(--color-border);
+        background:
+            radial-gradient(circle at top left, color-mix(in srgb, var(--color-accent) 14%, transparent) 0%, transparent 42%),
+            linear-gradient(135deg, color-mix(in srgb, var(--color-surface) 94%, transparent) 0%, color-mix(in srgb, var(--color-surface-elevated) 92%, var(--color-accent) 8%) 100%);
+        box-shadow: 0 24px 48px var(--color-shadow-soft);
+    }
+
+    .admin-shell__eyebrow {
+        @apply text-xs font-bold uppercase tracking-[0.28em];
+        color: var(--color-accent);
+    }
+
+    .admin-shell__title {
+        @apply mt-3 text-3xl font-bold tracking-tight;
+        color: var(--color-text);
+    }
+
+    .admin-shell__copy {
+        @apply mt-2 max-w-2xl text-sm leading-6;
+        color: var(--color-text-muted);
+    }
+
+    .admin-chip-row {
+        @apply flex flex-wrap gap-2;
+    }
+
+    .admin-chip {
+        @apply inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold;
+        border: 1px solid var(--color-border);
+        background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+        color: var(--color-text-muted);
+    }
+
+    .admin-chip strong {
+        color: var(--color-text);
+    }
+
+    .admin-table-wrap {
+        @apply overflow-hidden rounded-[2rem];
+        border: 1px solid var(--color-border);
+        background: color-mix(in srgb, var(--color-surface) 96%, transparent);
+        box-shadow: 0 24px 48px var(--color-shadow-soft);
+    }
+
+    .admin-table-scroll {
+        @apply overflow-x-auto;
+    }
+
+    .admin-table {
+        @apply min-w-full border-separate;
+        border-spacing: 0;
+    }
+
+    .admin-table thead th {
+        @apply px-5 py-4 text-left text-xs font-bold uppercase tracking-[0.2em];
+        border-bottom: 1px solid var(--color-border);
+        background: color-mix(in srgb, var(--color-surface-soft) 88%, var(--color-surface) 12%);
+        color: var(--color-text-subtle);
+    }
+
+    .admin-table tbody tr {
+        background: transparent;
+    }
+
+    .admin-table tbody tr:hover {
+        background: color-mix(in srgb, var(--color-surface-soft) 88%, transparent);
+    }
+
+    .admin-table tbody td {
+        @apply px-5 py-4 align-top;
+        border-bottom: 1px solid var(--color-border);
+        color: var(--color-text-muted);
+    }
+
+    .admin-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .admin-table__primary {
+        @apply text-base font-semibold;
+        color: var(--color-text);
+    }
+
+    .admin-table__link {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .admin-table__link:hover {
+        color: var(--color-accent);
+        text-decoration: underline;
+        text-decoration-color: color-mix(in srgb, var(--color-accent) 50%, transparent);
+        text-underline-offset: 0.22em;
+    }
+
+    .admin-table__secondary {
+        @apply mt-1 text-sm leading-5;
+        color: var(--color-text-subtle);
+    }
+
+    .admin-table__actions {
+        @apply flex flex-wrap items-center gap-2;
+    }
+
+    .admin-empty-state {
+        @apply flex flex-col items-center justify-center gap-3 px-6 py-12 text-center;
+        color: var(--color-text-muted);
+    }
+
+    .admin-empty-state strong {
+        color: var(--color-text);
     }
 
     .premium-skeleton {
@@ -255,6 +442,135 @@ select {
     }
 
     .theme-danger-ghost:hover {
-        background: color-mix(in srgb, #ef4444 10%, var(--color-surface) 90%);
+        background: color-mix(in srgb, var(--color-danger-surface) 88%, var(--color-surface) 12%);
+        color: var(--color-danger);
+    }
+
+    .admin-table-shell {
+        @apply overflow-hidden rounded-[1.75rem];
+        border: 1px solid var(--color-border);
+        background: color-mix(in srgb, var(--color-surface) 96%, transparent);
+        box-shadow: 0 18px 42px var(--color-shadow-strong);
+    }
+
+    .admin-table-scroll {
+        overflow-x: auto;
+    }
+
+    .admin-table {
+        @apply w-full min-w-[880px] border-separate border-spacing-0;
+        color: var(--color-text);
+    }
+
+    .admin-table thead th {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--color-border-strong);
+        background: linear-gradient(135deg, color-mix(in srgb, var(--color-bg-alt) 88%, var(--color-accent) 12%) 0%, color-mix(in srgb, var(--color-bg) 92%, var(--color-accent-strong) 8%) 100%);
+        color: var(--color-text-muted);
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .admin-table tbody tr {
+        background: color-mix(in srgb, var(--color-surface) 97%, transparent);
+    }
+
+    .admin-table tbody tr:hover {
+        background: color-mix(in srgb, var(--color-surface-elevated) 82%, var(--color-accent) 18%);
+    }
+
+    .admin-table tbody td {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--color-border);
+        vertical-align: middle;
+    }
+
+    .admin-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .admin-table-title {
+        color: var(--color-text);
+    }
+
+    .admin-table-copy {
+        color: var(--color-text-muted);
+    }
+
+    .admin-table-subcopy {
+        color: var(--color-text-subtle);
+    }
+
+    .admin-table-link {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .admin-table-link:hover {
+        color: var(--color-accent);
+    }
+
+    .admin-table-badge {
+        @apply inline-flex items-center rounded-full px-3 py-1 text-[0.72rem] font-bold uppercase tracking-[0.16em];
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-soft);
+        color: var(--color-text-muted);
+    }
+
+    .admin-table-badge--accent {
+        border-color: color-mix(in srgb, var(--color-accent) 26%, var(--color-border));
+        background: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface));
+        color: var(--color-accent);
+    }
+
+    .admin-table-thumbnail {
+        @apply h-16 w-16 overflow-hidden rounded-2xl;
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-soft);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .admin-table-thumbnail img {
+        @apply h-full w-full object-cover;
+    }
+
+    .admin-table-action {
+        @apply inline-flex min-h-10 items-center justify-center rounded-full px-4 text-sm font-semibold no-underline;
+        border: 1px solid var(--color-border);
+        background: color-mix(in srgb, var(--color-surface-elevated) 88%, var(--color-accent) 12%);
+        color: var(--color-text);
+    }
+
+    .admin-table-action:hover {
+        border-color: var(--color-border-strong);
+        color: var(--color-accent);
+        background: color-mix(in srgb, var(--color-surface-elevated) 80%, var(--color-accent) 20%);
+    }
+
+    .admin-table-action--danger {
+        color: var(--color-danger);
+        border-color: var(--color-danger-border);
+        background: color-mix(in srgb, var(--color-danger-surface) 82%, var(--color-surface) 18%);
+    }
+
+    .admin-table-action--danger:hover {
+        color: var(--color-danger-text);
+        border-color: color-mix(in srgb, var(--color-danger) 42%, var(--color-danger-border));
+        background: color-mix(in srgb, var(--color-danger-surface) 92%, var(--color-surface) 8%);
+    }
+
+    .admin-empty-state {
+        @apply flex flex-col items-center justify-center rounded-[1.75rem] px-6 py-14 text-center;
+        border: 1px dashed var(--color-border-strong);
+        background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+    }
+
+    .admin-empty-state__icon {
+        @apply mb-4 flex h-14 w-14 items-center justify-center rounded-full;
+        background: var(--color-surface-soft);
+        color: var(--color-accent);
     }
 }

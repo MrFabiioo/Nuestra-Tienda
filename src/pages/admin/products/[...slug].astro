@@ -15,7 +15,8 @@ if (error) {
     return Astro.redirect('/')
 }
 const {product,images} = data;
-const {categories} = categoriesData;
+const categories = categoriesData?.categories ?? [];
+const selectedCategoryId = 'categoryId' in product ? product.categoryId : null;
 ---
 
 <Layout title="Mantenimiento de producto">
@@ -75,7 +76,7 @@ const {categories} = categoriesData;
           {categories.map((category: { id: string; name: string }) => (
             <option 
               value={category.id} 
-              selected={product.categoryId === category.id}
+              selected={selectedCategoryId === category.id}
             >
               {category.name}
             </option>
@@ -189,32 +190,70 @@ const {categories} = categoriesData;
         <!-- Slideshow -->
         <ProductSliceShow images={images.map(i=>i.image)} />
 
-        <table class="w-full border">
-          <thead>
-            <tr>
-              <th>Imagen</th>
-              <th>Eliminar</th>
-            </tr>
-          </thead>
-          <tbody>
-            {
-              images.map(({image,id}) => (
-                <tr class="border" id={id}>
-                  <td class="flex justify-center">
-                    <ProductImage
-                      src={image}
-                      alt={product.title}
-                      className="w-16 h-16 rounded"
-                    />
-                  </td>
-                  <td class="text-center">
-                    <button data-id={id} class="btn-delete-image w-10">X</button>
-                  </td>
+        <div class="admin-table-shell mt-6">
+          <div class="flex items-center justify-between border-b px-5 py-4 theme-soft-surface">
+            <div>
+              <p class="admin-table-subcopy text-[0.72rem] font-bold uppercase tracking-[0.18em]">Galería actual</p>
+              <h3 class="admin-table-title mt-1 text-lg font-bold">Imágenes del producto</h3>
+            </div>
+
+            <span class="admin-table-badge admin-table-badge--accent">{images.length} {images.length === 1 ? 'imagen' : 'imágenes'}</span>
+          </div>
+
+          <div class="admin-table-scroll">
+            <table class="admin-table min-w-[640px]">
+              <thead>
+                <tr>
+                  <th>Preview</th>
+                  <th>Referencia</th>
+                  <th class="text-right">Acción</th>
                 </tr>
-              ))
-            }
-          </tbody>
-        </table>
+              </thead>
+
+              <tbody>
+                {images.length === 0 ? (
+                  <tr>
+                    <td colspan="3">
+                      <div class="flex flex-col items-center justify-center px-4 py-10 text-center">
+                        <p class="admin-table-title text-base font-semibold">No hay imágenes cargadas todavía</p>
+                        <p class="admin-table-copy mt-2 max-w-md text-sm leading-relaxed">
+                          Subí archivos desde el panel superior y la galería va a aparecer acá automáticamente.
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  images.map(({image,id}, index) => (
+                    <tr id={id}>
+                      <td>
+                        <div class="admin-table-thumbnail">
+                          <ProductImage
+                            src={image}
+                            alt={product.title}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                      </td>
+
+                      <td>
+                        <div class="min-w-[16rem]">
+                          <p class="admin-table-title text-sm font-bold">Imagen {index + 1}</p>
+                          <p class="admin-table-copy mt-1 break-all text-xs leading-relaxed">{image}</p>
+                        </div>
+                      </td>
+
+                      <td class="text-right">
+                        <button data-id={id} class="btn-delete-image admin-table-action admin-table-action--danger">
+                          Eliminar
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </form>
@@ -222,7 +261,7 @@ const {categories} = categoriesData;
   <style>
     .btn-size,
     .btn-delete-image {
-      @apply rounded border cursor-pointer border-gray-300  h-10 mr-4 hover:bg-blue-300 hover:text-white transition-all ;
+      @apply cursor-pointer transition-all;
     }
 
     .active {

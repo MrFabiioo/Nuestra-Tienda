@@ -22,7 +22,7 @@ const paymentBreadcrumbs = [
       />
 
       <!-- Progress Steps -->
-      <div class="premium-subtle-panel mb-8 mt-5 flex items-center gap-0 px-4 py-4 sm:px-5">
+      <div class="payment-steps-shell premium-subtle-panel mb-8 mt-5 flex items-center gap-0 px-4 py-4 sm:px-5">
         <div class="flex items-center gap-2">
           <div class="w-8 h-8 rounded-full bg-guacamole-b flex items-center justify-center text-white font-bold text-sm">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -52,12 +52,12 @@ const paymentBreadcrumbs = [
           <span>←</span>
           <span>Volver a checkout</span>
         </a>
-        <span class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 shadow-sm">
+        <span class="payment-status-pill inline-flex items-center gap-2 rounded-full px-4 py-2 shadow-sm">
           <span class="h-2 w-2 rounded-full bg-guacamole-b"></span>
           Último paso: elegir medio y confirmar pago
         </span>
       </div>
-      <div class="premium-subtle-panel mt-4 px-4 py-4 text-sm text-gray-600">
+      <div class="payment-tip-card premium-subtle-panel mt-4 px-4 py-4 text-sm text-gray-600">
         <p class="font-semibold text-guacamole-icons">Tip para un checkout premium</p>
         <p class="mt-1">Tené a mano el monto exacto, hacé el pago por el canal que prefieras y guardá la captura o referencia antes de tocar el botón de confirmación.</p>
       </div>
@@ -477,7 +477,7 @@ const paymentBreadcrumbs = [
       aria-labelledby="modal-title"
     >
       <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="modal-backdrop"></div>
-      <div class="relative w-full max-w-md rounded-3xl bg-white p-8 text-center shadow-2xl">
+      <div class="payment-confirm-card relative w-full max-w-md rounded-3xl p-8 text-center shadow-2xl">
         <div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-guacamole-fondo/15">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-guacamole-a" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -560,6 +560,10 @@ const paymentBreadcrumbs = [
     color: var(--color-text-subtle);
   }
 
+  .theme-payment-page .text-red-500 {
+    color: var(--color-danger);
+  }
+
   .theme-payment-page .bg-gray-200 {
     background: var(--color-surface-soft-strong);
   }
@@ -567,6 +571,22 @@ const paymentBreadcrumbs = [
   .theme-payment-page .payment-tab:not(.active-tab) {
     background: color-mix(in srgb, var(--color-surface-elevated) 95%, transparent);
     color: var(--color-text);
+  }
+
+  .theme-payment-page .payment-steps-shell,
+  .theme-payment-page .payment-status-pill,
+  .theme-payment-page .payment-tip-card,
+  .theme-payment-page .payment-confirm-card {
+    border: 1px solid var(--color-border);
+  }
+
+  .theme-payment-page .payment-status-pill {
+    background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+    color: var(--color-accent);
+  }
+
+  .theme-payment-page .payment-tip-card {
+    background: color-mix(in srgb, var(--color-surface-soft) 88%, transparent);
   }
 
   .theme-payment-page .payment-tab:hover {
@@ -579,7 +599,14 @@ const paymentBreadcrumbs = [
     color: var(--color-text-muted);
   }
 
-  .theme-payment-page #confirm-modal .relative {
+  .theme-payment-page #confirm-payment-btn:disabled {
+    background: color-mix(in srgb, var(--color-surface-soft-strong) 88%, var(--color-surface) 12%);
+    color: var(--color-text-subtle);
+    box-shadow: none;
+  }
+
+  .theme-payment-page #confirm-modal .relative,
+  .theme-payment-page .payment-confirm-card {
     background: color-mix(in srgb, var(--color-surface) 98%, transparent);
     color: var(--color-text);
   }

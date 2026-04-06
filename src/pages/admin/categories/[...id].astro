@@ -24,24 +24,44 @@ if (!isNew && id) {
 ---
 
 <Layout title={isNew ? "Nueva Categoría" : "Editar Categoría"}>
-    <div class="max-w-2xl mx-auto mt-10">
-        <h1 class="text-2xl text-center text-black-dark font-bold mb-6">
-            {isNew ? "Nueva Categoría" : `Editar: ${category?.name || ""}`}
-        </h1>
-        
-        <a 
-            href="/admin/categories" 
-            class="text-blue-500 hover:underline text-sm mb-4 inline-block"
-        >
-            ← Volver a Categorías
-        </a>
+    <section class="admin-shell max-w-3xl mx-auto">
+        <div class="admin-shell__header">
+            <div class="space-y-4">
+                <a
+                    href="/admin/categories"
+                    class="premium-action-ghost w-fit"
+                >
+                    <span aria-hidden="true">←</span>
+                    Volver a categorías
+                </a>
 
-        <form id="category-form" class="bg-white shadow-md rounded-lg p-6">
+                <div>
+                    <p class="admin-shell__eyebrow">Dashboard admin</p>
+                    <h1 class="admin-shell__title">
+                        {isNew ? "Nueva categoría" : `Editar categoría: ${category?.name || ""}`}
+                    </h1>
+                    <p class="admin-shell__copy">
+                        Ajustá el nombre visible y el slug con el mismo lenguaje visual premium que ya usa el storefront, sin tocar la lógica CRUD.
+                    </p>
+                </div>
+
+                <div class="admin-chip-row">
+                    {isNew ? (
+                        <span class="admin-chip">Alta rápida</span>
+                    ) : (
+                        <span class="admin-chip"><strong>ID</strong> #{category?.id}</span>
+                    )}
+                    <span class="premium-chip">{isNew ? "Modo creación" : "Modo edición"}</span>
+                </div>
+            </div>
+        </div>
+
+        <form id="category-form" class="premium-panel space-y-6 p-6 md:p-8">
             {!isNew && <input type="hidden" name="id" value={id} />}
             
-            <!-- Nombre -->
-            <div class="mb-4">
-                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
+            <div class="grid gap-6 md:grid-cols-2">
+                <div>
+                <label for="name" class="block text-sm font-semibold theme-text-primary mb-2">
                     Nombre
                 </label>
                 <input
@@ -50,14 +70,14 @@ if (!isNew && id) {
                     name="name"
                     value={category?.name || ""}
                     required
-                    class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    class="premium-field"
                     placeholder="Ej: Guacamole Tradicional"
                 />
-            </div>
+                <p class="field-help">Este nombre se muestra en el admin y puede ayudarte a identificar mejor la categoría.</p>
+                </div>
 
-            <!-- Slug -->
-            <div class="mb-4">
-                <label for="slug" class="block text-sm font-medium text-gray-700 mb-1">
+                <div>
+                <label for="slug" class="block text-sm font-semibold theme-text-primary mb-2">
                     Slug
                 </label>
                 <input
@@ -66,31 +86,38 @@ if (!isNew && id) {
                     name="slug"
                     value={category?.slug || ""}
                     required
-                    class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    class="premium-field"
                     placeholder="Ej: guacamole-tradicional"
                 />
-                <p class="text-xs text-gray-500 mt-1">
+                <p class="field-help">
                     Se usa en la URL: /productos/{category?.slug || 'slug'}
                 </p>
+                </div>
             </div>
 
-            <!-- Botones -->
-            <div class="flex justify-end gap-4 mt-6">
+            <div class="rounded-[1.5rem] border px-4 py-4 theme-soft-surface md:px-5">
+                <div class="admin-chip-row">
+                    <span class="premium-chip">Edición segura</span>
+                    <span class="admin-chip">Sin cambios sobre la lógica de negocio</span>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap justify-end gap-3 pt-2">
                 <a 
                     href="/admin/categories"
-                    class="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50 transition"
+                    class="premium-action-secondary"
                 >
                     Cancelar
                 </a>
                 <button 
                     type="submit"
-                    class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                    class="premium-action-primary"
                 >
                     {isNew ? "Crear Categoría" : "Guardar Cambios"}
                 </button>
             </div>
         </form>
-    </div>
+    </section>
 </Layout>
 
 <script>
@@ -127,9 +154,8 @@ if (!isNew && id) {
             e.preventDefault();
 
             const formData = new FormData(form);
-            const formValues = Object.fromEntries(formData.entries());
 
-            const { data, error } = await actions.createUpdateCategory(formData);
+            const { error } = await actions.createUpdateCategory(formData);
 
             if (error) {
                 alert(`Error: ${error.message}`);

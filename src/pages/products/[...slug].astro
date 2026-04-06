@@ -122,7 +122,7 @@ const productBreadcrumbs = [
 ---
 
 <Layout title={product.title} description={product.description}>
-    <div class="mx-auto max-w-6xl px-4 py-6 sm:py-8 md:py-10">
+    <div class="theme-product-page mx-auto max-w-6xl px-4 py-6 sm:py-8 md:py-10">
         <BreadcrumbTrail
             items={productBreadcrumbs}
             eyebrow="Tu recorrido"
@@ -130,11 +130,11 @@ const productBreadcrumbs = [
         />
 
         <!-- Main Product Card -->
-        <div class="mt-5 overflow-hidden rounded-[1.75rem] border border-white/40 bg-white/60 shadow-[0_4px_40px_-8px_rgba(0,0,0,0.15)] backdrop-blur-xl md:rounded-3xl">
+        <div class="product-detail-panel mt-5 overflow-hidden rounded-[1.75rem] md:rounded-3xl">
             <div class="grid grid-cols-1 md:grid-cols-2">
                 
                 <!-- Product Image Section -->
-                <div class="relative flex min-h-[240px] items-center justify-center bg-gradient-to-br from-guacamole-f/20 to-white p-3 sm:min-h-[280px] md:min-h-auto md:p-6 lg:p-8">
+                <div class="product-detail-media relative flex min-h-[240px] items-center justify-center p-3 sm:min-h-[280px] md:min-h-auto md:p-6 lg:p-8">
                     <div class="relative flex aspect-[1/1] w-full max-w-[420px] items-center justify-center overflow-hidden rounded-2xl shadow-lg">
                         <ProductSliceShow images={images.map(i=>i.image)}/>
                         <input type="hidden" name="" id="product-image"  value={images?.[0]?.image || ''}/>
@@ -144,13 +144,13 @@ const productBreadcrumbs = [
                 <!-- Product Details Section -->
                 <div class="flex flex-col gap-4 p-5 sm:p-6 md:gap-5 md:p-8 md:py-10">
                     <div class="flex flex-wrap gap-2">
-                        <a href="/tienda" class="inline-flex items-center rounded-full border border-neutral-200 bg-white px-3 py-1 text-xs font-medium text-neutral-600 transition-colors duration-200 hover:border-guacamole-b/40 hover:text-guacamole-b">
+                        <a href="/tienda" class="detail-link-pill inline-flex items-center rounded-full px-3 py-1 text-xs font-medium transition-colors duration-200">
                             ← Volver a la tienda
                         </a>
                         <span class="inline-flex items-center rounded-full bg-guacamole-f/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-guacamole-b">
                             {categoryLabel}
                         </span>
-                        <span class="inline-flex items-center rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-600">
+                        <span class="detail-context-chip inline-flex items-center rounded-full px-3 py-1 text-xs font-medium">
                             Compra guiada desde este detalle
                         </span>
                     </div>
@@ -177,7 +177,7 @@ const productBreadcrumbs = [
 
                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
                         {keyFacts.map((fact) => (
-                            <div class="rounded-2xl border border-neutral-200 bg-white/70 px-4 py-3 shadow-sm">
+                            <div class="detail-fact-card rounded-2xl px-4 py-3 shadow-sm">
                                 <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">{fact.label}</p>
                                 <p class="mt-1 text-sm font-semibold text-neutral-800 leading-snug">{fact.value}</p>
                             </div>
@@ -185,7 +185,7 @@ const productBreadcrumbs = [
                     </div>
 
                     {hasExtendedDescription && (
-                        <div class="rounded-2xl border border-guacamole-f/30 bg-guacamole-f/10 px-4 py-4">
+                        <div class="detail-note-card rounded-2xl px-4 py-4">
                             <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-guacamole-b/80">Más contexto</p>
                             <p class="mt-2 text-sm leading-relaxed text-neutral-700 md:max-w-[58ch] md:text-base">
                                 {supportingDescription}
@@ -193,7 +193,7 @@ const productBreadcrumbs = [
                         </div>
                     )}
 
-                    <hr class="border-gray-200"/>
+                    <hr class="detail-divider"/>
 
                     <!-- Quantity Selector -->
                     <div class="space-y-2">
@@ -235,7 +235,7 @@ const productBreadcrumbs = [
                         </button>
                     </div>
 
-                    <p id="cart-feedback-note" class="min-h-[1.25rem] text-xs font-medium text-neutral-500" aria-live="polite"></p>
+                    <p id="cart-feedback-note" class="theme-text-muted min-h-[1.25rem] text-xs font-medium" aria-live="polite"></p>
 
                     <p class="text-xs leading-relaxed text-neutral-500 sm:text-sm sm:max-w-[54ch]">
                         Elegí un tamaño para habilitar el checkout rápido con esta configuración.
@@ -247,23 +247,23 @@ const productBreadcrumbs = [
         </div>
 
         <section class="mt-5 grid gap-3 sm:mt-6 sm:gap-4 md:grid-cols-2">
-            <article class="rounded-3xl border border-white/50 bg-white/70 p-4 shadow-[0_4px_30px_-10px_rgba(0,0,0,0.12)] backdrop-blur-xl sm:p-5">
+            <article class="detail-glass-card rounded-3xl p-4 sm:p-5">
                 <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-guacamole-b/80">Resumen útil</p>
                 <h2 class="mt-2 text-xl font-bold text-neutral-900">Lo importante antes de comprar</h2>
                 <div class="mt-4 space-y-3">
-                    <div class="rounded-2xl border border-neutral-200/80 bg-neutral-50 px-4 py-3">
+                    <div class="detail-soft-card rounded-2xl px-4 py-3">
                         <p class="text-sm font-semibold text-neutral-800">Qué estás eligiendo</p>
                         <p class="mt-1 text-sm text-neutral-600 leading-relaxed">{leadDescription}</p>
                     </div>
 
-                    <div class="rounded-2xl border border-neutral-200/80 bg-neutral-50 px-4 py-3">
+                    <div class="detail-soft-card rounded-2xl px-4 py-3">
                         <p class="text-sm font-semibold text-neutral-800">Presentaciones disponibles</p>
                         <p class="mt-1 text-sm text-neutral-600 leading-relaxed">
                             Este producto se ofrece en {sizes.length} {sizes.length === 1 ? 'presentación' : 'presentaciones'} para que puedas elegir con más precisión según tu pedido.
                         </p>
                     </div>
 
-                    <div class="rounded-2xl border border-neutral-200/80 bg-neutral-50 px-4 py-3">
+                    <div class="detail-soft-card rounded-2xl px-4 py-3">
                         <p class="text-sm font-semibold text-neutral-800">Cómo se compra</p>
                         <p class="mt-1 text-sm text-neutral-600 leading-relaxed">
                             Primero seleccionás tamaño, después cantidad y recién ahí lo llevás al checkout con la configuración ya resuelta.
@@ -274,12 +274,12 @@ const productBreadcrumbs = [
 
             <div class="grid gap-3 sm:gap-4">
                 {usageIdeas.length > 0 && (
-                    <article class="rounded-3xl border border-white/50 bg-white/70 p-4 shadow-[0_4px_30px_-10px_rgba(0,0,0,0.12)] backdrop-blur-xl sm:p-5">
+                    <article class="detail-glass-card rounded-3xl p-4 sm:p-5">
                         <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-guacamole-b/80">Ideas de uso</p>
                         <h2 class="mt-2 text-xl font-bold text-neutral-900">Cómo puede encajar en tu mesa</h2>
                         <ul class="mt-4 space-y-3">
                             {usageIdeas.map((idea) => (
-                                <li class="rounded-2xl bg-neutral-50 px-4 py-3 border border-neutral-200/80 text-sm text-neutral-600 leading-relaxed">
+                                <li class="detail-soft-card rounded-2xl px-4 py-3 text-sm text-neutral-600 leading-relaxed">
                                     {idea}
                                 </li>
                             ))}
@@ -288,12 +288,12 @@ const productBreadcrumbs = [
                 )}
 
                 {isFoodProduct && (
-                    <article class="rounded-3xl border border-white/50 bg-white/70 p-4 shadow-[0_4px_30px_-10px_rgba(0,0,0,0.12)] backdrop-blur-xl sm:p-5">
+                    <article class="detail-glass-card rounded-3xl p-4 sm:p-5">
                         <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-guacamole-b/80">Conservación</p>
                         <h2 class="mt-2 text-xl font-bold text-neutral-900">Recomendaciones generales</h2>
                         <ul class="mt-4 space-y-3">
                             {foodCareNotes.map((note) => (
-                                <li class="rounded-2xl bg-neutral-50 px-4 py-3 border border-neutral-200/80 text-sm text-neutral-600 leading-relaxed">
+                                <li class="detail-soft-card rounded-2xl px-4 py-3 text-sm text-neutral-600 leading-relaxed">
                                     {note}
                                 </li>
                             ))}
@@ -304,7 +304,7 @@ const productBreadcrumbs = [
         </section>
 
         {relatedProducts.length > 0 && (
-            <section class="mt-8 rounded-3xl border border-white/50 bg-white/70 p-4 shadow-[0_4px_30px_-10px_rgba(0,0,0,0.12)] backdrop-blur-xl sm:p-5 md:mt-10 md:p-6">
+            <section class="detail-glass-card mt-8 rounded-3xl p-4 sm:p-5 md:mt-10 md:p-6">
                 <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                     <div class="max-w-2xl">
                         <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-guacamole-b/80">Productos relacionados</p>
@@ -314,7 +314,7 @@ const productBreadcrumbs = [
                         </p>
                     </div>
 
-                    <a href="/tienda" class="inline-flex min-h-11 items-center justify-center rounded-full border border-guacamole-b/20 px-5 py-3 text-sm font-semibold text-guacamole-b transition-colors duration-200 hover:border-guacamole-b/40 hover:bg-guacamole-b/5">
+                    <a href="/tienda" class="detail-link-pill inline-flex min-h-11 items-center justify-center rounded-full px-5 py-3 text-sm font-semibold transition-colors duration-200">
                         Ver catálogo completo
                     </a>
                 </div>
@@ -334,20 +334,50 @@ const productBreadcrumbs = [
 <style>
     /* Size selection - preserves original logic */
     .selected-size {
-        @apply bg-guacamole-b text-white shadow-md scale-105;
+        @apply scale-105 text-white shadow-md;
+        border-color: var(--color-accent-strong);
+        background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-strong) 100%);
     }
 
     .size-chip {
-        @apply px-4 py-2 rounded-full border-2 border-guacamole-b/30 text-guacamole-b font-semibold cursor-pointer transition-all duration-200 hover:border-guacamole-b hover:bg-guacamole-b/10;
+        @apply cursor-pointer rounded-full border-2 px-4 py-2 font-semibold transition-all duration-200;
+        border-color: color-mix(in srgb, var(--color-accent) 28%, var(--color-border) 72%);
+        background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+        color: var(--color-accent);
+    }
+
+    .size-chip:hover {
+        border-color: var(--color-accent);
+        background: color-mix(in srgb, var(--color-surface-soft) 84%, var(--color-accent) 16%);
     }
 
     /* Quantity buttons - pill style */
     .qty-btn-group {
-        @apply flex h-10 w-10 items-center justify-center rounded-full border-2 border-guacamole-b text-xl font-bold text-guacamole-b transition-all duration-200 hover:scale-105 hover:bg-guacamole-b hover:text-white active:scale-95 disabled:cursor-not-allowed disabled:border-neutral-200 disabled:text-neutral-300 disabled:hover:scale-100 disabled:hover:bg-transparent disabled:hover:text-neutral-300;
+        @apply flex h-10 w-10 items-center justify-center rounded-full border-2 text-xl font-bold transition-all duration-200 active:scale-95 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:bg-transparent;
+        border-color: var(--color-accent);
+        color: var(--color-accent);
+    }
+
+    .qty-btn-group:hover {
+        transform: scale(1.05);
+        background: var(--color-accent);
+        color: var(--color-text-on-accent);
+    }
+
+    .qty-btn-group:disabled {
+        border-color: var(--color-border);
+        color: var(--color-text-subtle);
     }
 
     .qty-input {
-        @apply w-16 h-10 text-center bg-white border-2 border-gray-200 rounded-full font-semibold text-gray-700 focus:outline-none focus:border-guacamole-b;
+        @apply h-10 w-16 rounded-full border-2 text-center font-semibold focus:outline-none;
+        border-color: var(--color-border);
+        background: var(--color-surface-elevated);
+        color: var(--color-text);
+    }
+
+    .qty-input:focus {
+        border-color: var(--color-accent);
     }
 
     /* Remove spinners from number input */
@@ -359,7 +389,94 @@ const productBreadcrumbs = [
 
     /* Add to cart button - matches ProductCard styling */
     .add-to-cart-btn {
-        @apply flex w-full items-center justify-center gap-2 rounded-full bg-guacamole-pulpa py-4 text-base font-bold uppercase tracking-wider text-white shadow-[0_4px_12px_rgba(220,211,41,0.4)] transition-all duration-300 hover:scale-[1.02] hover:bg-guacamole-f hover:shadow-[0_6px_20px_rgba(220,211,41,0.5)] active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-neutral-300 disabled:text-white/90 disabled:shadow-none disabled:hover:scale-100 disabled:hover:bg-neutral-300;
+        @apply flex w-full items-center justify-center gap-2 rounded-full py-4 text-base font-bold uppercase tracking-wider text-white transition-all duration-300 active:scale-[0.98] disabled:cursor-not-allowed disabled:shadow-none disabled:hover:scale-100;
+        background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-strong) 100%);
+        color: var(--color-text-on-accent);
+        box-shadow: 0 10px 24px color-mix(in srgb, var(--color-accent) 28%, transparent);
+    }
+
+    .add-to-cart-btn:hover {
+        transform: scale(1.02);
+        background: linear-gradient(135deg, var(--color-accent-strong) 0%, var(--color-accent) 100%);
+        box-shadow: 0 14px 30px color-mix(in srgb, var(--color-accent-strong) 34%, transparent);
+    }
+
+    .add-to-cart-btn:disabled {
+        background: var(--color-surface-soft-strong);
+        color: var(--color-text-subtle);
+    }
+
+    .theme-product-page {
+        color: var(--color-text);
+    }
+
+    .theme-product-page .text-neutral-900,
+    .theme-product-page .text-neutral-800,
+    .theme-product-page .text-gray-700,
+    .theme-product-page .text-guacamole-icons {
+        color: var(--color-text);
+    }
+
+    .theme-product-page .text-neutral-700,
+    .theme-product-page .text-neutral-600,
+    .theme-product-page .text-neutral-500,
+    .theme-product-page .text-gray-500,
+    .theme-product-page .text-gray-400 {
+        color: var(--color-text-muted);
+    }
+
+    .theme-product-page .text-guacamole-a,
+    .theme-product-page .text-guacamole-b {
+        color: var(--color-accent);
+    }
+
+    .product-detail-panel,
+    .detail-glass-card {
+        border: 1px solid var(--color-border);
+        background: color-mix(in srgb, var(--color-surface) 96%, transparent);
+        box-shadow: 0 18px 36px var(--color-shadow-strong);
+        backdrop-filter: blur(18px);
+    }
+
+    .product-detail-media {
+        background:
+            radial-gradient(circle at top right, color-mix(in srgb, var(--color-accent) 18%, transparent) 0%, transparent 58%),
+            linear-gradient(160deg, color-mix(in srgb, var(--color-surface-soft) 82%, var(--color-accent) 18%) 0%, color-mix(in srgb, var(--color-surface-elevated) 96%, transparent) 100%);
+    }
+
+    .detail-link-pill,
+    .detail-context-chip,
+    .detail-fact-card,
+    .detail-soft-card {
+        border: 1px solid var(--color-border);
+        background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+    }
+
+    .detail-link-pill {
+        color: var(--color-text-muted);
+    }
+
+    .detail-link-pill:hover {
+        border-color: var(--color-border-strong);
+        background: color-mix(in srgb, var(--color-surface-soft) 84%, var(--color-accent) 16%);
+        color: var(--color-accent);
+    }
+
+    .detail-context-chip {
+        color: var(--color-text-muted);
+    }
+
+    .detail-fact-card {
+        box-shadow: 0 10px 24px var(--color-shadow-soft);
+    }
+
+    .detail-note-card {
+        border: 1px solid color-mix(in srgb, var(--color-accent) 20%, var(--color-border) 80%);
+        background: color-mix(in srgb, var(--color-surface-soft) 78%, var(--color-accent) 22%);
+    }
+
+    .detail-divider {
+        border-color: var(--color-border);
     }
 </style>
 
@@ -401,7 +518,7 @@ const productBreadcrumbs = [
             if (!cartFeedbackNote) return;
 
             cartFeedbackNote.textContent = message;
-            cartFeedbackNote.classList.remove('text-neutral-500', 'text-red-500', 'text-guacamole-b');
+            cartFeedbackNote.classList.remove('theme-text-muted', 'text-red-500', 'text-guacamole-b');
 
             if (tone === 'error') {
                 cartFeedbackNote.classList.add('text-red-500');
@@ -413,7 +530,7 @@ const productBreadcrumbs = [
                 return;
             }
 
-            cartFeedbackNote.classList.add('text-neutral-500');
+            cartFeedbackNote.classList.add('theme-text-muted');
         };
 
         if(!incrementButton || !quantityInput || !addToCardButton || !decrementButton || !addToCartLabel) return;
