@@ -1,0 +1,99 @@
+---
+// TrustBanner.astro
+// Barra de confianza rápida para la Home — iconos + claims creíbles
+// Sprint 3 micro-batch B
+---
+
+<section class="trust-banner" aria-label="Por qué elegirnos">
+  <ul class="trust-banner__list" role="list">
+    <li class="trust-banner__item">
+      <span class="trust-banner__icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        </svg>
+      </span>
+      <span class="trust-banner__text">Pago seguro SSL</span>
+    </li>
+    <li class="trust-banner__item">
+      <span class="trust-banner__icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="1" y="3" width="15" height="13" rx="2" />
+          <path d="M16 8h4l3 5v4h-7V8z" />
+          <circle cx="5.5" cy="18.5" r="2.5" />
+          <circle cx="18.5" cy="18.5" r="2.5" />
+        </svg>
+      </span>
+      <span class="trust-banner__text">Envío a todo el país</span>
+    </li>
+    <li class="trust-banner__item">
+      <span class="trust-banner__icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+        </svg>
+      </span>
+      <span class="trust-banner__text">Hecho con amor artesanal</span>
+    </li>
+    <li class="trust-banner__item">
+      <span class="trust-banner__icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+          <polyline points="17 6 23 6 23 12" />
+        </svg>
+      </span>
+      <span class="trust-banner__text">Ingredientes 100% frescos</span>
+    </li>
+  </ul>
+</section>
+
+<style>
+  .trust-banner {
+    width: 100%;
+    background: linear-gradient(135deg, #3E6102 0%, #568203 100%);
+    border-radius: 0.75rem;
+    margin: 1.5rem 0 2rem;
+    padding: 1rem 1.5rem;
+  }
+
+  .trust-banner__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.5rem 2.5rem;
+  }
+
+  .trust-banner__item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+
+  .trust-banner__icon {
+    display: flex;
+    align-items: center;
+    color: #CDB902;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 640px) {
+    .trust-banner__list {
+      gap: 1rem 1.5rem;
+    }
+
+    .trust-banner__item {
+      font-size: 0.8rem;
+    }
+  }
+</style>

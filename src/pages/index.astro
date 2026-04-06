@@ -2,6 +2,9 @@
 import Layout from "@layouts/Layout.astro";
 import CardProducts from "@components/products/CardProducts.astro";
 import SliderImageAutomatic from "@components/SliderImageAutomatic.astro";
+import TrustBanner from "@components/TrustBanner.astro";
+import ValueProposition from "@components/ValueProposition.astro";
+import HowItWorks from "@components/HowItWorks.astro";
 import { actions } from "astro:actions";
 
 export const prerender = false;
@@ -39,12 +42,82 @@ if (error) {
 }
 ---
 
-<Layout>  
-    <h1 class="text-4xl font-bold text-center mt-10">Bienvenido a Guacamole Shop</h1>
-    <p class="text-center mt-4 text-lg">Tu tienda online de guacamole y productos relacionados.</p>  
-    
+<Layout
+    description="Guacamole artesanal hecho con aguacates seleccionados, sin conservantes y preparado el mismo día. Pedí online y recibilo fresco en casa."
+>
+    <!-- ═══════════════════════════════════════════════
+         HERO SECTION — Editorial, premium, above the fold
+         ═══════════════════════════════════════════════ -->
+    <section class="hero" aria-label="Sección principal">
+        <!-- Fondo decorativo: blob orgánico verde sutil -->
+        <div class="hero__bg-blob" aria-hidden="true"></div>
+
+        <div class="hero__inner">
+            <!-- Eyebrow: label pequeño que ancla la marca -->
+            <div class="hero__eyebrow">
+                <span class="hero__eyebrow-dot" aria-hidden="true"></span>
+                <span class="font-unique text-xs tracking-[0.2em] uppercase text-guacamole-b">Hecho a mano · 100% natural</span>
+            </div>
+
+            <!-- Headline principal — editorial y directo -->
+            <h1 class="hero__headline">
+                El guacamole<br/>
+                <em class="hero__headline-accent">que se nota</em><br/>
+                en cada bocado.
+            </h1>
+
+            <!-- Sub-headline: propuesta de valor concreta -->
+            <p class="hero__sub">
+                Ingredientes frescos, recetas artesanales y sabor auténtico.<br class="hero__sub-br" />
+                Pedí hoy y recibilo en el día.
+            </p>
+
+            <!-- Trust badges: rápidos, sin ruido visual -->
+            <ul class="hero__badges" aria-label="Por qué elegirnos">
+                <li class="hero__badge">
+                    <svg class="hero__badge-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                        <path d="M10 2C6.13 2 3 5.13 3 9c0 2.72 1.52 5.08 3.75 6.35L10 18l3.25-2.65C15.48 14.08 17 11.72 17 9c0-3.87-3.13-7-7-7z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                        <path d="M7 9l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Sin conservantes
+                </li>
+                <li class="hero__badge">
+                    <svg class="hero__badge-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                        <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M10 6v4l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    Entrega en el día
+                </li>
+                <li class="hero__badge">
+                    <svg class="hero__badge-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                        <path d="M10 3l1.8 3.6 4 .6-2.9 2.8.7 4L10 12l-3.6 1.9.7-4L4.2 7.2l4-.6L10 3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                    </svg>
+                    +500 clientes felices
+                </li>
+            </ul>
+
+            <!-- CTAs -->
+            <div class="hero__ctas">
+                <a href="/tienda" class="hero__cta-primary">
+                    Explorar tienda
+                    <svg class="hero__cta-arrow" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                        <path d="M4 10h12M11 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </a>
+                <a href="/guacamole" class="hero__cta-secondary">
+                    Nuestro guacamole
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slider inmediatamente después del hero — prueba visual del producto -->
     <SliderImageAutomatic />
-    
+
+    <!-- Barra de señales de confianza — debajo del slider, antes del catálogo -->
+    <TrustBanner />
+
+    <!-- Catálogo de productos por categoría -->
     {productsByCategory.length > 0 ? (
         productsByCategory.map((category) => (
             <CardProducts 
@@ -57,4 +130,260 @@ if (error) {
             <p class="text-xl text-gray-600">No hay productos disponibles en este momento.</p>
         </div>
     )}
+
+    <!-- Propuesta de valor + storytelling de marca -->
+    <ValueProposition />
+
+    <!-- Proceso de compra / conversión -->
+    <HowItWorks />
 </Layout>
+
+<style>
+/* ─── Hero container ─────────────────────────────────── */
+.hero {
+    position: relative;
+    /* Romper el max-width del main con márgenes negativos para el fondo */
+    margin-left: -1rem;
+    margin-right: -1rem;
+    padding: 4rem 1rem 3.5rem;
+    overflow: hidden;
+    /* Fondo oscuro editorial — coherente con la navbar */
+    background: linear-gradient(
+        135deg,
+        #111213 0%,
+        #1a1e12 45%,
+        #0f1a08 100%
+    );
+    border-bottom: 1px solid rgba(86, 130, 3, 0.25);
+}
+
+/* Blob decorativo orgánico — da vida al fondo sin ser ruidoso */
+.hero__bg-blob {
+    position: absolute;
+    top: -60px;
+    right: -80px;
+    width: 420px;
+    height: 420px;
+    border-radius: 60% 40% 70% 30% / 50% 60% 40% 50%;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(86, 130, 3, 0.18) 0%,
+        rgba(62, 97, 2, 0.08) 55%,
+        transparent 75%
+    );
+    pointer-events: none;
+}
+
+/* ─── Inner layout ───────────────────────────────────── */
+.hero__inner {
+    max-width: 680px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* ─── Eyebrow ────────────────────────────────────────── */
+.hero__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.hero__eyebrow-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #568203;
+    box-shadow: 0 0 8px rgba(86, 130, 3, 0.6);
+    animation: hero-dot-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes hero-dot-pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 8px rgba(86, 130, 3, 0.6); }
+    50% { opacity: 0.6; box-shadow: 0 0 14px rgba(86, 130, 3, 0.3); }
+}
+
+/* ─── Headline ───────────────────────────────────────── */
+.hero__headline {
+    font-size: clamp(2.25rem, 5.5vw, 3.75rem);
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    color: #f1f3f9;
+    margin-bottom: 1.25rem;
+}
+
+.hero__headline-accent {
+    font-style: normal;
+    color: #84A903; /* guacamole-e — verde vivo sobre dark */
+    position: relative;
+    /* Subrayado decorativo sutil */
+}
+
+.hero__headline-accent::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 2px;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, #568203, #CDB902);
+    border-radius: 2px;
+    opacity: 0.7;
+}
+
+/* ─── Sub-headline ───────────────────────────────────── */
+.hero__sub {
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    color: rgba(241, 243, 249, 0.65);
+    margin-bottom: 1.75rem;
+    max-width: 520px;
+}
+
+/* ─── Trust badges ───────────────────────────────────── */
+.hero__badges {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.625rem;
+}
+
+.hero__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.875rem;
+    background: rgba(86, 130, 3, 0.12);
+    border: 1px solid rgba(86, 130, 3, 0.3);
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: rgba(241, 243, 249, 0.8);
+    letter-spacing: 0.01em;
+}
+
+.hero__badge-icon {
+    width: 14px;
+    height: 14px;
+    color: #568203;
+    flex-shrink: 0;
+}
+
+/* ─── CTAs ───────────────────────────────────────────── */
+.hero__ctas {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* CTA primario: dominante, sólido, con micro-animación */
+.hero__cta-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8125rem 1.75rem;
+    background: #568203;
+    color: #fff;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    letter-spacing: 0.015em;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+    box-shadow: 0 4px 20px rgba(86, 130, 3, 0.35);
+}
+
+.hero__cta-primary:hover {
+    background: #3E6102;
+    box-shadow: 0 6px 28px rgba(86, 130, 3, 0.5);
+    transform: translateY(-1px);
+}
+
+.hero__cta-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(86, 130, 3, 0.3);
+}
+
+.hero__cta-arrow {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.2s ease;
+}
+
+.hero__cta-primary:hover .hero__cta-arrow {
+    transform: translateX(3px);
+}
+
+/* CTA secundario: ghost, discreto pero visible */
+.hero__cta-secondary {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.8125rem 1.5rem;
+    background: transparent;
+    color: rgba(241, 243, 249, 0.7);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    border-radius: 8px;
+    border: 1px solid rgba(241, 243, 249, 0.15);
+    text-decoration: none;
+    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+.hero__cta-secondary:hover {
+    border-color: rgba(86, 130, 3, 0.5);
+    color: #84A903;
+    background: rgba(86, 130, 3, 0.06);
+}
+
+/* ─── Responsive ─────────────────────────────────────── */
+@media (min-width: 768px) {
+    .hero {
+        padding: 5.5rem 2.5rem 4.5rem;
+        margin-left: -1rem;
+        margin-right: -1rem;
+    }
+
+    .hero__bg-blob {
+        width: 560px;
+        height: 560px;
+        top: -100px;
+        right: -60px;
+    }
+}
+
+@media (min-width: 1200px) {
+    /* A max-width el main ya tiene margen auto, ajustar el blob a la derecha */
+    .hero__bg-blob {
+        right: 5%;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero {
+        padding: 3rem 1rem 2.75rem;
+    }
+
+    .hero__sub-br {
+        display: none;
+    }
+
+    .hero__ctas {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .hero__cta-primary,
+    .hero__cta-secondary {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>

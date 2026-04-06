@@ -6,9 +6,7 @@ interface Props {
   description: string;
   image: string;
   slug?: string;
-  rating?: number;
   borderColor?: string;
-  tag?: string;
 }
 
 const {
@@ -18,11 +16,7 @@ const {
   description,
   image,
   slug = "#",
-  rating = 5,
-  tag = "ARTESANAL"
 } = Astro.props;
-
-const stars = "★".repeat(Math.min(rating, 5)) + "☆".repeat(Math.max(5 - rating, 0));
 ---
 
 <article 
@@ -38,22 +32,19 @@ const stars = "★".repeat(Math.min(rating, 5)) + "☆".repeat(Math.max(5 - rati
         loading="lazy"
       />
 
-      <!-- Tag -->
+      <!-- Tag artesanal — identidad de marca -->
       <span class="absolute top-3 left-3 bg-guacamole-b text-white text-[10px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-full shadow-sm">
-        {tag}
+        Artesanal
       </span>
     </div>
 
     <!-- Contenido -->
     <div class="px-5 pt-4 pb-5 flex flex-col gap-1">
-      <!-- Nombre y rating -->
-      <div class="flex items-start justify-between gap-2">
+      <!-- Nombre -->
+      <div class="flex items-start gap-2">
         <h3 class="text-base font-bold text-neutral-900 leading-snug line-clamp-2 group-hover:text-guacamole-b transition-colors duration-200">
           {name}
         </h3>
-        <span class="text-sm text-guacamole-f shrink-0 leading-tight mt-0.5" aria-label={`${rating} estrellas`}>
-          {stars}
-        </span>
       </div>
 
       <!-- Descripción -->
