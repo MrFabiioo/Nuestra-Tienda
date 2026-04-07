@@ -68,7 +68,7 @@ const catalogSkeletonCards = Array.from({ length: 4 });
                         Catálogo completo
                     </span>
                     <h1 class="store-heading mt-4 text-3xl font-bold leading-tight tracking-tight sm:text-4xl md:text-5xl">
-                        Tienda Guacamole: todo el catálogo en un solo lugar
+                        Nuestra Tienda: todo el catálogo en un solo lugar
                     </h1>
                     <p class="store-copy mt-3 max-w-2xl text-base leading-relaxed sm:mt-4 sm:text-lg">
                         Descubrí la selección disponible, filtrá por categoría o buscá directo lo que necesitás para comprar más rápido y con claridad.
@@ -214,7 +214,7 @@ const catalogSkeletonCards = Array.from({ length: 4 });
                 <div class="grid grid-cols-1 gap-4 transition-opacity duration-200 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4 xl:gap-6" id="catalog-grid-list">
                     {products.map((product) => (
                         <div 
-                            class="product-card-wrapper"
+                            class="product-card-wrapper h-full"
                             data-title={product.title?.toLowerCase() ?? ''}
                             data-description={product.description?.toLowerCase() ?? ''}
                             data-category={product.categorySlug ?? 'sin-categoria'}

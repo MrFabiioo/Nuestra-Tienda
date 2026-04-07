@@ -6,9 +6,20 @@ import SearchBar from "./SearchBar.astro";
 <header class="navbar">
     <div class="navbar__container">
         <!-- Izquierda: Logo -->
-        <a href="/" class="logo" aria-label="GuacaShop — Ir al inicio">
-            <span class="logo__text">Guaca</span>
-            <span class="logo__highlight">Shop</span>
+        <a href="/" class="logo" aria-label="Nuestra Tienda — Ir al inicio">
+            <!-- Logo full: isotipo N + wordmark (desktop) -->
+            <svg class="logo__svg logo__svg--full" viewBox="0 0 210 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                <circle cx="20" cy="20" r="15" stroke="currentColor" stroke-width="1.8" class="logo__circle"/>
+                <path d="M12.5 29.5 L12.5 10.5 L27.5 29.5 L27.5 10.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" class="logo__n"/>
+                <line x1="42" y1="7" x2="42" y2="33" stroke="currentColor" stroke-opacity="0.2" stroke-width="1"/>
+                <text x="50" y="17.5" font-family="Inter, system-ui, Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="2.5" fill="currentColor" class="logo__wordmark-top">NUESTRA</text>
+                <text x="51" y="35" font-family="Inter, system-ui, Arial, sans-serif" font-size="13" font-weight="300" letter-spacing="1.2" fill="currentColor" opacity="0.65" class="logo__wordmark-sub">Tienda</text>
+            </svg>
+            <!-- Logo compact: solo isotipo N (mobile) -->
+            <svg class="logo__svg logo__svg--compact" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                <circle cx="20" cy="20" r="15" stroke="currentColor" stroke-width="1.8" class="logo__circle"/>
+                <path d="M12.5 29.5 L12.5 10.5 L27.5 29.5 L27.5 10.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" class="logo__n"/>
+            </svg>
         </a>
 
         <!-- Centro: Barra de busqueda con sugerencias -->
@@ -99,18 +110,46 @@ import SearchBar from "./SearchBar.astro";
     /* Logo */
     .logo {
         text-decoration: none;
-        font-size: 22px;
-        font-weight: 600;
-        letter-spacing: -0.5px;
+        display: inline-flex;
+        align-items: center;
         flex-shrink: 0;
-    }
-
-    .logo__text {
         color: var(--color-text);
+        transition: opacity 0.2s ease;
     }
 
-    .logo__highlight {
+    .logo:hover {
+        opacity: 0.82;
+    }
+
+    .logo__svg {
+        height: 36px;
+        width: auto;
+    }
+
+    /* Full: isotipo + wordmark — visible en tablet/desktop */
+    .logo__svg--full {
+        display: none;
+    }
+
+    /* Compact: solo isotipo N — visible en mobile */
+    .logo__svg--compact {
+        display: block;
+    }
+
+    .logo__circle {
         color: var(--color-accent);
+    }
+
+    .logo__n {
+        color: var(--color-accent);
+    }
+
+    .logo__wordmark-top {
+        fill: var(--color-text);
+    }
+
+    .logo__wordmark-sub {
+        fill: var(--color-text);
     }
 
     /* Nav desktop */
@@ -312,6 +351,15 @@ import SearchBar from "./SearchBar.astro";
         .hamburger {
             display: none;
         }
+
+        /* Mostrar logo full en tablet/desktop */
+        .logo__svg--full {
+            display: block;
+        }
+
+        .logo__svg--compact {
+            display: none;
+        }
     }
 
     @media (max-width: 767px) {
@@ -319,8 +367,8 @@ import SearchBar from "./SearchBar.astro";
             padding: 0 1rem;
         }
 
-        .logo {
-            font-size: 19px;
+        .logo__svg {
+            height: 32px;
         }
 
         .cart-fallback {

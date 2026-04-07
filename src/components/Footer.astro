@@ -6,8 +6,15 @@ const currentYear = new Date().getFullYear();
     <div class="footer__container">
         <!-- Logo y descripcion -->
         <div class="footer__brand">
-            <a href="/" class="footer__logo">
-                <span class="footer__logo-text">Guaca</span><span class="footer__logo-highlight">Shop</span>
+            <a href="/" class="footer__logo" aria-label="Nuestra Tienda — inicio">
+                <!-- Logo full: isotipo N + wordmark -->
+                <svg class="footer__logo-svg footer__logo-svg--full" viewBox="0 0 210 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                    <circle cx="20" cy="20" r="15" stroke="currentColor" stroke-width="1.8" class="footer__logo-circle"/>
+                    <path d="M12.5 29.5 L12.5 10.5 L27.5 29.5 L27.5 10.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" class="footer__logo-n"/>
+                    <line x1="42" y1="7" x2="42" y2="33" stroke="currentColor" stroke-opacity="0.2" stroke-width="1"/>
+                    <text x="50" y="17.5" font-family="Inter, system-ui, Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="2.5" fill="currentColor" class="footer__logo-wordmark-top">NUESTRA</text>
+                    <text x="51" y="36" font-family="Inter, system-ui, Arial, sans-serif" font-size="13" font-weight="300" letter-spacing="1.2" fill="currentColor" opacity="0.65" class="footer__logo-wordmark-sub">Tienda</text>
+                </svg>
             </a>
             <p class="footer__description">
                 Tu tienda para pedir recetas frescas, combos y productos del catálogo sin salir de casa.
@@ -72,7 +79,7 @@ const currentYear = new Date().getFullYear();
 
     <!-- Copyright -->
     <div class="footer__bottom">
-        <p>&copy; {currentYear} GuacaShop. Todos los derechos reservados.</p>
+        <p>&copy; {currentYear} Nuestra Tienda. Todos los derechos reservados.</p>
     </div>
 </footer>
 
@@ -102,18 +109,40 @@ const currentYear = new Date().getFullYear();
     }
 
     .footer__logo {
-        font-size: 1.5rem;
-        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
         text-decoration: none;
-        letter-spacing: -0.5px;
-    }
-
-    .footer__logo-text {
         color: var(--color-text);
+        transition: opacity 0.2s ease;
     }
 
-    .footer__logo-highlight {
+    .footer__logo:hover {
+        opacity: 0.82;
+    }
+
+    .footer__logo-svg {
+        height: 38px;
+        width: auto;
+    }
+
+    .footer__logo-svg--full {
+        display: block;
+    }
+
+    .footer__logo-circle {
         color: var(--color-accent);
+    }
+
+    .footer__logo-n {
+        color: var(--color-accent);
+    }
+
+    .footer__logo-wordmark-top {
+        fill: var(--color-text);
+    }
+
+    .footer__logo-wordmark-sub {
+        fill: var(--color-text);
     }
 
     .footer__description {
