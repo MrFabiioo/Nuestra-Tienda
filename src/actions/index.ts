@@ -2,6 +2,7 @@ import { createUpdateCategory } from "./categories/create-update-category.action
 import { deleteCategory } from "./categories/delete-category.action";
 import { getCategories } from "./categories/get-categories";
 import { createUpdateProduct } from "./products/create-update-product.action";
+import { deleteProduct } from "./products/delete-product.action";
 import { deleteProductImage } from "./products/delete-product-image.action";
 import { getProductBySlug } from "./products/get-product-by-slug";
 import { getProductsByCategory } from "./products/get-products-by-category";
@@ -14,6 +15,7 @@ export const server ={
     getProductBySlug,
     loadProductsFromCart,
     createUpdateProduct,
+    deleteProduct,
     deleteProductImage,
     getCategories,
     createUpdateCategory,

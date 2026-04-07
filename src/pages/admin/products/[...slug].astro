@@ -17,187 +17,304 @@ if (error) {
 const {product,images} = data;
 const categories = categoriesData?.categories ?? [];
 const selectedCategoryId = 'categoryId' in product ? product.categoryId : null;
+const isNew = slug === 'new-product';
 ---
 
 <Layout title="Mantenimiento de producto">
-  <h1>{product.title}</h1>
-  <a href="javascript:history.back()" class="text-blue-500">← Volver</a>
+  <section class="admin-shell">
 
-  <form class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-    <!-- Datos generales -->
-     <input type="hidden" name="id" value={product.id}>
-    <div class="mt-2">
-      <h2 class="text-lg font-semibold">Datos del producto: </h2>
+    <!-- ── Header ─────────────────────────────────────────────── -->
+    <div class="admin-shell__header">
+      <div class="space-y-4">
+        <a href="/admin/dashboard" class="premium-action-ghost w-fit">
+          <span aria-hidden="true">←</span>
+          Volver a productos
+        </a>
 
-      <!-- Titulo -->
-      <div class="mb-4">
-        <label for="title" class="block">Título</label>
-        <input
-          type="text"
-          id="title"
-          name="title"
-          value={product.title}
-          class="w-full p-2 border border-gray-300 rounded"
-        />
-      </div>
-
-      <!-- Slug -->
-      <div class="mb-4">
-        <label for="slug" class="block">Slug</label>
-        <input
-          type="text"
-          id="slug"
-          name="slug"
-          value={product.slug}
-          class="w-full p-2 border border-gray-300 rounded"
-        />
-      </div>
-
-      <!-- Descripción -->
-      <div class="mb-4">
-        <label for="description" class="block">Descripción</label>
-        <textarea
-          id="description"
-          name="description"
-          class="w-full p-2 border border-gray-300 rounded"
-          rows="8">{product.description}</textarea
-        >
-      </div>
-
-      <!-- Categoría -->
-      <div class="mb-4">
-        <label for="categoryId" class="block">Categoría</label>
-        <select
-          id="categoryId"
-          name="categoryId"
-          class="w-full p-2 border border-gray-300 rounded"
-        >
-          <option value="">Sin categoría</option>
-          {categories.map((category: { id: string; name: string }) => (
-            <option 
-              value={category.id} 
-              selected={selectedCategoryId === category.id}
-            >
-              {category.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <!-- Precio -->
-        <div class="mb-4">
-          <label for="price" class="block">Precio</label>
-          <input
-            type="number"
-            id="price"
-            name="price"
-            value={product.price}
-            class="w-full p-2 border border-gray-300 rounded"
-          />
+        <div>
+          <p class="admin-shell__eyebrow">Dashboard admin · productos</p>
+          <h1 class="admin-shell__title">
+            {isNew ? 'Nuevo producto' : product.title}
+          </h1>
+          <p class="admin-shell__copy">
+            {isNew
+              ? 'Completá los datos del nuevo producto y subí las imágenes para publicarlo en el catálogo.'
+              : 'Editá los campos, actualizá las imágenes y guardá los cambios para reflejarlos en el storefront.'}
+          </p>
         </div>
 
-        <!-- Inventario -->
-        
-      </div>
-
-      <!-- Labels -->
-      <!-- <div class="mb-4">
-        <label for="tags" class="block"
-          >Etiquetas <small class="text-gray-500">(Separado por comas)</small
-          ></label
-        >
-        <input
-          type="text"
-          id="tags"
-          name="tags"
-          value={product.tags}
-          class="w-full p-2 border border-gray-300 rounded"
-        />
-      </div> -->
-      
-      
-      
-
-      <!-- Tamaños -->
-      <div class="mb-4">
-        <label for="sizes" class="block">Tamaños</label>
-        <div class="flex ">
-          {
-            ['Pequeño', 'Mediano', 'Grande', 'Exra-grande','Normal'].map((size) => (
-              <button class:list={product.sizes.split(',').includes(size) ? 'active': ''} type="button" onclick="this.classList.toggle('active')" class="btn-size w-full active">{size}</button>
-            ))
-          }
+        <div class="admin-chip-row">
+          {isNew ? (
+            <span class="admin-chip">Alta rápida</span>
+          ) : (
+            <span class="admin-chip"><strong>Slug</strong> /{product.slug}</span>
+          )}
+          <span class="premium-chip">{isNew ? 'Modo creación' : 'Modo edición'}</span>
+          {!isNew && (
+            <span class="admin-chip">
+              <strong>{images.length}</strong> {images.length === 1 ? 'imagen' : 'imágenes'}
+            </span>
+          )}
         </div>
       </div>
     </div>
 
-    <!-- Imagenes -->
-    <div>
-      <!-- File upload -->
-      <div class="mt-4">
-        
-         <!-- Guardar  -->
-        <div class="flex justify-end">
-          <button class="bg-blue-500 mb-5 p-2 rounded text-white"
-            >Guardar producto</button
-          >
-        </div>
-        
-        <!-- File input -->
-        <div class="flex items-center justify-center w-full">
-          <label
-            for="file-upload"
-            class="flex flex-col items-center justify-center w-full h-52 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100"
-            id="drop-zone"
-          >
-            <div class="flex flex-col items-center justify-center pt-5 pb-6">
-              <svg
-                class="w-8 h-8 mb-4 text-gray-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M7 16V4a2 2 0 012-2h6a2 2 0 012 2v12m-6 4l-4-4m0 0l4-4m-4 4h12"
-                ></path>
+    <!-- ── Formulario ──────────────────────────────────────────── -->
+    <form id="product-form" class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <input type="hidden" name="id" value={product.id}>
+
+      <!-- Columna izquierda: datos del producto -->
+      <div class="space-y-6">
+
+        <!-- Sección: Datos generales -->
+        <div class="premium-panel p-6 md:p-8">
+          <div class="mb-6 flex items-center gap-3 border-b pb-5" style="border-color: var(--color-border);">
+            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style="background: var(--color-surface-soft); color: var(--color-accent);">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
               </svg>
-              <p class="mb-2 text-sm text-gray-500" id="lbl-selected-files">
-                <span class="font-semibold">Click aquí </span> o arrastra los archivos
-              </p>
-              <p class="text-xs text-gray-500">
-                SVG, PNG, JPG or GIF (max. 800x400px)
-              </p>
+            </div>
+            <div>
+              <p class="admin-shell__eyebrow text-[0.68rem]">Información</p>
+              <h2 class="text-base font-bold" style="color: var(--color-text);">Datos generales</h2>
+            </div>
+          </div>
+
+          <div class="space-y-5">
+            <!-- Título -->
+            <div>
+              <label for="title" class="block text-sm font-semibold mb-2" style="color: var(--color-text);">
+                Título
+              </label>
+              <input
+                type="text"
+                id="title"
+                name="title"
+                value={product.title}
+                class="premium-field"
+                placeholder="Ej: Guacamole Clásico 250g"
+              />
+              <p class="field-help">Nombre visible en el catálogo y en las páginas de detalle.</p>
             </div>
 
-            <!-- class="hidden" -->
-            <!-- accept only images -->
+            <!-- Slug -->
+            <div>
+              <label for="slug" class="block text-sm font-semibold mb-2" style="color: var(--color-text);">
+                Slug
+              </label>
+              <input
+                type="text"
+                id="slug"
+                name="slug"
+                value={product.slug}
+                class="premium-field"
+                placeholder="Ej: guacamole-clasico-250g"
+              />
+              <p class="field-help">Usado en la URL: /productos/<span style="color: var(--color-accent);">{product.slug || 'slug'}</span></p>
+            </div>
+
+            <!-- Descripción -->
+            <div>
+              <label for="description" class="block text-sm font-semibold mb-2" style="color: var(--color-text);">
+                Descripción
+              </label>
+              <textarea
+                id="description"
+                name="description"
+                class="premium-field resize-none"
+                rows="6"
+                placeholder="Describí el producto: ingredientes, usos, características…"
+              >{product.description}</textarea>
+              <p class="field-help">Se muestra en la página de detalle del producto.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección: Precio y Categoría -->
+        <div class="premium-panel p-6 md:p-8">
+          <div class="mb-6 flex items-center gap-3 border-b pb-5" style="border-color: var(--color-border);">
+            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style="background: var(--color-surface-soft); color: var(--color-accent);">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+              </svg>
+            </div>
+            <div>
+              <p class="admin-shell__eyebrow text-[0.68rem]">Pricing &amp; taxonomía</p>
+              <h2 class="text-base font-bold" style="color: var(--color-text);">Precio y categoría</h2>
+            </div>
+          </div>
+
+          <div class="grid gap-5 sm:grid-cols-2">
+            <!-- Precio -->
+            <div>
+              <label for="price" class="block text-sm font-semibold mb-2" style="color: var(--color-text);">
+                Precio
+              </label>
+              <input
+                type="number"
+                id="price"
+                name="price"
+                value={product.price}
+                class="premium-field"
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+              />
+              <p class="field-help">Precio base visible en el storefront.</p>
+            </div>
+
+            <!-- Categoría -->
+            <div>
+              <label for="categoryId" class="block text-sm font-semibold mb-2" style="color: var(--color-text);">
+                Categoría
+              </label>
+              <select
+                id="categoryId"
+                name="categoryId"
+                class="premium-field"
+              >
+                <option value="">Sin categoría</option>
+                {categories.map((category: { id: string; name: string }) => (
+                  <option
+                    value={category.id}
+                    selected={selectedCategoryId === category.id}
+                  >
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+              <p class="field-help">Agrupá el producto dentro de una taxonomía del catálogo.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección: Tamaños -->
+        <div class="premium-panel p-6 md:p-8">
+          <div class="mb-6 flex items-center gap-3 border-b pb-5" style="border-color: var(--color-border);">
+            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style="background: var(--color-surface-soft); color: var(--color-accent);">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+              </svg>
+            </div>
+            <div>
+              <p class="admin-shell__eyebrow text-[0.68rem]">Variantes</p>
+              <h2 class="text-base font-bold" style="color: var(--color-text);">Tamaños disponibles</h2>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            {(['Pequeño', 'Mediano', 'Grande', 'Exra-grande', 'Normal'] as const).map((size) => (
+              <button
+                type="button"
+                class:list={['btn-size', { 'btn-size--active': product.sizes.split(',').includes(size) }]}
+                onclick="this.classList.toggle('btn-size--active')"
+              >
+                {size}
+              </button>
+            ))}
+          </div>
+          <p class="field-help mt-3">Seleccioná los tamaños habilitados para este producto. Se guardan al presionar "Guardar".</p>
+        </div>
+
+      </div>
+
+      <!-- Columna derecha: imágenes -->
+      <div class="space-y-6">
+
+        <!-- Sección: Guardar + Upload -->
+        <div class="premium-panel p-6 md:p-8">
+          <div class="mb-6 flex items-center justify-between gap-3 border-b pb-5" style="border-color: var(--color-border);">
+            <div class="flex items-center gap-3">
+              <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style="background: var(--color-surface-soft); color: var(--color-accent);">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                </svg>
+              </div>
+              <div>
+                <p class="admin-shell__eyebrow text-[0.68rem]">Media</p>
+                <h2 class="text-base font-bold" style="color: var(--color-text);">Subir imágenes</h2>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              class="premium-action-primary"
+              aria-label="Guardar producto"
+            >
+              Guardar producto
+            </button>
+          </div>
+
+          <!-- Drop zone -->
+          <label
+            for="file-upload"
+            id="drop-zone"
+            class="product-drop-zone"
+          >
+            <div class="flex flex-col items-center justify-center gap-3 py-8 px-4 text-center">
+              <div class="flex h-12 w-12 items-center justify-center rounded-full" style="background: var(--color-surface-soft); color: var(--color-accent);">
+                <svg
+                  class="h-6 w-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 16V4a2 2 0 012-2h6a2 2 0 012 2v12m-6 4l-4-4m0 0l4-4m-4 4h12"
+                  ></path>
+                </svg>
+              </div>
+
+              <div>
+                <p class="text-sm font-semibold" style="color: var(--color-text);" id="lbl-selected-files">
+                  <span>Click aquí</span> o arrastrá los archivos
+                </p>
+                <p class="mt-1 text-xs" style="color: var(--color-text-subtle);">
+                  PNG, JPG, GIF, SVG · máx. 800×400 px
+                </p>
+              </div>
+            </div>
+
             <input
               id="file-upload"
               name="imageFiles"
               type="file"
               accept="image/*"
               multiple
-              class="hidden"
+              class="sr-only"
             />
           </label>
         </div>
 
-        <!-- Slideshow -->
-        <ProductSliceShow images={images.map(i=>i.image)} />
+        <!-- Slideshow preview -->
+        {images.length > 0 && (
+          <div class="premium-panel overflow-hidden">
+            <div class="flex items-center gap-3 border-b px-6 py-4" style="border-color: var(--color-border);">
+              <p class="admin-shell__eyebrow text-[0.68rem]">Preview</p>
+              <span class="admin-table-badge admin-table-badge--accent">{images.length} {images.length === 1 ? 'imagen' : 'imágenes'}</span>
+            </div>
+            <div class="px-2 py-4">
+              <ProductSliceShow images={images.map(i=>i.image)} />
+            </div>
+          </div>
+        )}
 
-        <div class="admin-table-shell mt-6">
+        <!-- Galería actual -->
+        <div class="admin-table-shell">
           <div class="flex items-center justify-between border-b px-5 py-4 theme-soft-surface">
             <div>
               <p class="admin-table-subcopy text-[0.72rem] font-bold uppercase tracking-[0.18em]">Galería actual</p>
               <h3 class="admin-table-title mt-1 text-lg font-bold">Imágenes del producto</h3>
             </div>
-
-            <span class="admin-table-badge admin-table-badge--accent">{images.length} {images.length === 1 ? 'imagen' : 'imágenes'}</span>
+            <span class="admin-table-badge admin-table-badge--accent">
+              {images.length} {images.length === 1 ? 'imagen' : 'imágenes'}
+            </span>
           </div>
 
           <div class="admin-table-scroll">
@@ -215,6 +332,11 @@ const selectedCategoryId = 'categoryId' in product ? product.categoryId : null;
                   <tr>
                     <td colspan="3">
                       <div class="flex flex-col items-center justify-center px-4 py-10 text-center">
+                        <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full" style="background: var(--color-surface-soft); color: var(--color-accent);">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-6 w-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                          </svg>
+                        </div>
                         <p class="admin-table-title text-base font-semibold">No hay imágenes cargadas todavía</p>
                         <p class="admin-table-copy mt-2 max-w-md text-sm leading-relaxed">
                           Subí archivos desde el panel superior y la galería va a aparecer acá automáticamente.
@@ -243,7 +365,12 @@ const selectedCategoryId = 'categoryId' in product ? product.categoryId : null;
                       </td>
 
                       <td class="text-right">
-                        <button data-id={id} class="btn-delete-image admin-table-action admin-table-action--danger">
+                        <button
+                          data-id={id}
+                          class="btn-delete-image admin-table-action admin-table-action--danger"
+                          type="button"
+                          aria-label={`Eliminar imagen ${index + 1}`}
+                        >
                           Eliminar
                         </button>
                       </td>
@@ -254,18 +381,49 @@ const selectedCategoryId = 'categoryId' in product ? product.categoryId : null;
             </table>
           </div>
         </div>
+
       </div>
-    </div>
-  </form>
+    </form>
+  </section>
 
   <style>
-    .btn-size,
-    .btn-delete-image {
-      @apply cursor-pointer transition-all;
+    /* ── Botones de tamaño ──────────────────────────────────────── */
+    .btn-size {
+      @apply inline-flex min-h-10 cursor-pointer items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200;
+      border: 1px solid var(--color-border);
+      background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+      color: var(--color-text-muted);
     }
 
-    .active {
-      @apply bg-blue-500 text-white;
+    .btn-size:hover {
+      border-color: var(--color-border-strong);
+      background: color-mix(in srgb, var(--color-surface-elevated) 86%, var(--color-accent) 14%);
+      color: var(--color-accent);
+    }
+
+    .btn-size--active {
+      border-color: color-mix(in srgb, var(--color-accent) 36%, var(--color-border));
+      background: color-mix(in srgb, var(--color-accent) 14%, var(--color-surface));
+      color: var(--color-accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 14%, transparent);
+    }
+
+    /* ── Drop zone ──────────────────────────────────────────────── */
+    .product-drop-zone {
+      @apply block w-full cursor-pointer rounded-2xl transition-all duration-200;
+      border: 2px dashed var(--color-border-strong);
+      background: color-mix(in srgb, var(--color-surface-soft) 60%, transparent);
+    }
+
+    .product-drop-zone:hover {
+      border-color: var(--color-accent);
+      background: color-mix(in srgb, var(--color-accent) 06%, var(--color-surface-soft) 60%);
+    }
+
+    .product-drop-zone--highlight {
+      border-color: var(--color-accent) !important;
+      background: color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-soft)) !important;
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent) 14%, transparent);
     }
   </style>
 </Layout>
@@ -275,7 +433,7 @@ import { actions } from 'astro:actions';
   import { navigate } from 'astro:transitions/client';
 
   document.addEventListener('astro:page-load', () => {
-    const form = document.querySelector('form') as HTMLFormElement;
+    const form = document.querySelector('#product-form') as HTMLFormElement;
     const sizeButtons = document.querySelectorAll('.btn-size');
     const btnsDeleteImage = document.querySelectorAll('.btn-delete-image');
     const lblSelectedFiles = document.querySelector(
@@ -294,7 +452,7 @@ import { actions } from 'astro:actions';
       e.preventDefault();
 
       const selectedSizes = Array.from(sizeButtons)
-        .filter((btn) => btn.classList.contains('active'))
+        .filter((btn) => btn.classList.contains('btn-size--active'))
         .map((btn) => btn.textContent?.trim())
         .join(',');
 
@@ -339,11 +497,11 @@ import { actions } from 'astro:actions';
     };
 
     const highlight = (e: DragEvent) => {
-      dropZone.classList.add('border-blue-500', 'bg-blue-50');
+      dropZone.classList.add('product-drop-zone--highlight');
     };
 
     const unHighlight = (e: DragEvent) => {
-      dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+      dropZone.classList.remove('product-drop-zone--highlight');
     };
 
     const createFileList = (files: File[]): FileList => {
@@ -361,7 +519,7 @@ import { actions } from 'astro:actions';
         fileInput.files = createFileList(validFiles);
       }
 
-      lblSelectedFiles.innerHTML = `<strong>${validFiles.length} archivos seleccionados</strong>`;
+      lblSelectedFiles.innerHTML = `<span class="font-semibold" style="color: var(--color-accent);">${validFiles.length} ${validFiles.length === 1 ? 'archivo seleccionado' : 'archivos seleccionados'}</span>`;
     };
 
     (['dragenter', 'dragover', 'dragleave', 'drop'] as const).forEach(
