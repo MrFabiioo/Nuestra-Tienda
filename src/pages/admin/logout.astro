@@ -1,0 +1,23 @@
+---
+/**
+ * /admin/logout — Endpoint de cierre de sesión.
+ *
+ * Acepta GET y POST. Elimina la cookie de sesión y redirige al home.
+ * No hace revocación en Firebase (requeriría Admin SDK).
+ * La sesión expira naturalmente con el idToken (1 hora).
+ */
+import { SESSION_COOKIE_NAME } from "../../firebase/config";
+
+export const prerender = false;
+
+// Limpiar cookie — path='/' debe coincidir con el usado al crearla en login.action.ts
+Astro.cookies.delete(SESSION_COOKIE_NAME, {
+  path: "/",
+  httpOnly: true,
+  secure: import.meta.env.PROD,
+  sameSite: "strict",
+});
+
+// Redirigir al home — sin posibilidad de open redirect
+return Astro.redirect("/", 302);
+---

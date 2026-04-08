@@ -1,6 +1,9 @@
 ---
 import CartButton from "./CartButton.tsx";
 import SearchBar from "./SearchBar.astro";
+
+// Mostrar link Admin solo cuando hay sesión válida
+const user = Astro.locals.user;
 ---
 
 <header class="navbar">
@@ -32,6 +35,35 @@ import SearchBar from "./SearchBar.astro";
                     <li><a href="/" class="desktop-nav__link">Inicio</a></li>
                     <li><a href="/tienda" class="desktop-nav__link">Tienda</a></li>
                     <li><a href="/pagos" class="desktop-nav__link">Pagos</a></li>
+                    {user ? (
+                        <>
+                            <li>
+                                <a href="/admin/dashboard" class="desktop-nav__link desktop-nav__link--admin" aria-label="Ir al panel admin">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="desktop-nav__admin-icon" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                                    </svg>
+                                    Admin
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/admin/logout" class="desktop-nav__link desktop-nav__link--logout" aria-label="Cerrar sesión admin">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="desktop-nav__admin-icon" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                                    </svg>
+                                    Salir
+                                </a>
+                            </li>
+                        </>
+                    ) : (
+                        <li>
+                            <a href="/admin/login" class="desktop-nav__link desktop-nav__link--admin-login" aria-label="Acceso al panel admin">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="desktop-nav__admin-icon" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                                </svg>
+                                Admin
+                            </a>
+                        </li>
+                    )}
                 </ul>
             </nav>
             <button
@@ -79,6 +111,18 @@ import SearchBar from "./SearchBar.astro";
             <li><a href="/" class="mobile-menu__link">Inicio</a></li>
             <li><a href="/tienda" class="mobile-menu__link">Tienda</a></li>
             <li><a href="/pagos" class="mobile-menu__link">Pagos</a></li>
+            {user ? (
+                <>
+                    <li><a href="/admin/dashboard" class="mobile-menu__link mobile-menu__link--admin">Admin · Dashboard</a></li>
+                    <li>
+                        <a href="/admin/logout" class="mobile-menu__link mobile-menu__link--logout">
+                            Cerrar sesión
+                        </a>
+                    </li>
+                </>
+            ) : (
+                <li><a href="/admin/login" class="mobile-menu__link mobile-menu__link--admin">Admin</a></li>
+            )}
         </ul>
     </nav>
 </header>
@@ -340,6 +384,82 @@ import SearchBar from "./SearchBar.astro";
         background: var(--color-overlay-strong);
         color: var(--color-text);
         border-left-color: var(--color-accent);
+    }
+
+    /* Admin nav links */
+    .desktop-nav__link--admin {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        color: var(--color-accent);
+        font-weight: 600;
+        border: 1px solid var(--color-border);
+        background: color-mix(in srgb, var(--color-accent) 06%, var(--color-surface-elevated));
+    }
+
+    .desktop-nav__link--admin:hover {
+        background: color-mix(in srgb, var(--color-accent) 14%, var(--color-surface-elevated));
+        color: var(--color-accent-strong);
+        border-color: color-mix(in srgb, var(--color-accent) 36%, var(--color-border));
+    }
+
+    .desktop-nav__link--admin-login {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        border: 1px solid var(--color-border);
+        background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+    }
+
+    .desktop-nav__link--logout {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        background: none;
+        border: 1px solid transparent;
+        cursor: pointer;
+        font: inherit;
+        padding: 0.4rem 0.875rem;
+        color: var(--color-text-muted);
+        font-size: 14px;
+        font-weight: 500;
+        border-radius: 6px;
+        transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .desktop-nav__link--logout:hover {
+        color: var(--color-danger-text);
+        background: var(--color-danger-surface);
+        border-color: var(--color-danger-border);
+    }
+
+    .desktop-nav__admin-icon {
+        width: 0.9rem;
+        height: 0.9rem;
+    }
+
+    /* Mobile admin links */
+    .mobile-menu__link--admin {
+        color: var(--color-accent);
+        font-weight: 600;
+        border-left-color: var(--color-accent) !important;
+    }
+
+    .mobile-menu__link--logout {
+        width: 100%;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font: inherit;
+        text-align: left;
+        border-left: 3px solid var(--color-danger-border);
+        color: var(--color-danger-text);
+    }
+
+    .mobile-menu__link--logout:hover {
+        background: var(--color-danger-surface);
+        color: var(--color-danger);
+        border-left-color: var(--color-danger);
     }
 
     /* Responsive: en tablet/desktop mostramos nav y ocultamos hamburguesa */

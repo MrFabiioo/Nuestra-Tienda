@@ -5,14 +5,15 @@ import { defineAction } from "astro:actions";
 import { db, eq, Product, ProductImage } from "astro:db";
 import { z } from "astro:schema";
 import {v4 as UUID} from "uuid"
-//import {getSession} from "auth-astro/server"
+import { requireAuth } from "../../firebase/guards";
+
 const MAX_FILE_SIZE=5_000_000;// 5MB
 const ACEPTED_IMAGE_TYPES=[
-    'image/jpge',
+    'image/jpeg',
     'image/jpg',
     'image/png',
     'image/webp',
-    'image/xvg+xml',
+    'image/svg+xml',
 ];
 export const createUpdateProduct= defineAction({
         accept:'form',
@@ -25,20 +26,12 @@ export const createUpdateProduct= defineAction({
             slug: z.string(),
             categoryId: z.string().optional(),
 
-            //TODO: imagen
             imageFiles:z.array(
                 z.instanceof(File).refine((file) =>file.size<=MAX_FILE_SIZE,'Max image size 5MB').refine((file) =>{if (file.size===0) return true; return ACEPTED_IMAGE_TYPES.includes(file.type);},`, ${ACEPTED_IMAGE_TYPES.join(',')}`)
             ).optional(),
         }),
-        handler:async(form,{request})=>{
-            //TODO: agregar authetication 
-            // const session = await getSession(request);
-            // const user = session?.user;
-            // if (!user) {
-            //     throw new Error("Unauthorized");
-                
-            // }
-            // console.log('user',user)
+        handler:async(form, context)=>{
+            requireAuth(context);
             const {id =UUID(),imageFiles,...rest}= form
             rest.slug = rest.slug.toLowerCase().replace(' ','-').trim();
             const product = {

@@ -1,0 +1,290 @@
+---
+/**
+ * /admin/login — Página de acceso al panel admin.
+ *
+ * Security:
+ * - El middleware redirige a /admin/dashboard si ya hay sesión válida.
+ * - El formulario usa POST via Astro Actions (server action `login`).
+ * - Los errores son genéricos para prevenir enumeración de usuarios.
+ * - Se respeta el parámetro `redirect` para UX post-login (validado server-side).
+ */
+import Layout from "@layouts/Layout.astro";
+import { actions } from "astro:actions";
+
+export const prerender = false;
+
+// El middleware ya redirige si hay sesión válida — aquí llegamos solo sin auth.
+
+// Manejar resultado de action (POST-Redirect-GET pattern)
+const result = Astro.getActionResult(actions.login);
+
+const redirectParam = Astro.url.searchParams.get("redirect") ?? "";
+
+// Safe redirect: solo paths /admin/
+function safeRedirect(raw: string): string {
+  if (raw.startsWith("/admin/") && !raw.includes("..")) return raw;
+  return "/admin/dashboard";
+}
+
+// Si el login fue exitoso, redirigir
+if (result && !result.error) {
+  return Astro.redirect(safeRedirect(redirectParam));
+}
+
+const errorMessage = result?.error?.message ?? null;
+---
+
+<Layout title="Admin — Acceso">
+  <section class="login-section">
+    <div class="login-card">
+
+      <!-- Header de la card -->
+      <div class="login-card__header">
+        <div class="login-card__icon" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-7 w-7">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+          </svg>
+        </div>
+        <div>
+          <p class="admin-shell__eyebrow text-[0.68rem]">Panel admin</p>
+          <h1 class="login-card__title">Acceso restringido</h1>
+          <p class="login-card__subtitle">
+            Ingresá tus credenciales para administrar el catálogo.
+          </p>
+        </div>
+      </div>
+
+      <!-- Error de credenciales -->
+      {errorMessage && (
+        <div class="login-error" role="alert" aria-live="polite">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4 flex-shrink-0" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+          </svg>
+          <span>{errorMessage}</span>
+        </div>
+      )}
+
+      <!-- Formulario -->
+      <form
+        method="POST"
+        action={actions.login}
+        class="login-form"
+        novalidate
+      >
+        {/* Preservar el redirect param */}
+        {redirectParam && (
+          <input type="hidden" name="redirect" value={redirectParam} />
+        )}
+
+        <!-- Email -->
+        <div class="login-form__field">
+          <label for="email" class="login-form__label">
+            Email
+          </label>
+          <div class="login-form__input-wrapper">
+            <span class="login-form__input-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+              </svg>
+            </span>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              autocomplete="email"
+              required
+              placeholder="admin@ejemplo.com"
+              class="premium-field login-form__input"
+              aria-describedby={errorMessage ? "login-error" : undefined}
+            />
+          </div>
+        </div>
+
+        <!-- Contraseña -->
+        <div class="login-form__field">
+          <label for="password" class="login-form__label">
+            Contraseña
+          </label>
+          <div class="login-form__input-wrapper">
+            <span class="login-form__input-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+              </svg>
+            </span>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              autocomplete="current-password"
+              required
+              placeholder="••••••••"
+              class="premium-field login-form__input"
+            />
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button
+          type="submit"
+          class="premium-action-primary login-form__submit"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+          </svg>
+          Ingresar al panel
+        </button>
+      </form>
+
+      <!-- Footer de la card -->
+      <div class="login-card__footer">
+        <a href="/" class="login-card__back-link">
+          <span aria-hidden="true">←</span>
+          Volver al sitio
+        </a>
+        <span class="premium-chip">Área protegida</span>
+      </div>
+
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .login-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 160px);
+    padding: 2rem 1rem;
+  }
+
+  .login-card {
+    width: 100%;
+    max-width: 440px;
+    border-radius: 2rem;
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-surface) 96%, transparent);
+    box-shadow: 0 24px 64px var(--color-shadow-strong);
+    overflow: hidden;
+  }
+
+  .login-card__header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 2rem 2rem 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+    background:
+      radial-gradient(circle at top left, color-mix(in srgb, var(--color-accent) 12%, transparent) 0%, transparent 42%),
+      linear-gradient(135deg, color-mix(in srgb, var(--color-surface) 94%, transparent) 0%, color-mix(in srgb, var(--color-surface-elevated) 92%, var(--color-accent) 8%) 100%);
+  }
+
+  .login-card__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface-soft));
+    color: var(--color-accent);
+    border: 1px solid var(--color-border);
+    margin-top: 0.15rem;
+  }
+
+  .login-card__title {
+    margin: 0.25rem 0 0.25rem;
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--color-text);
+    line-height: 1.2;
+  }
+
+  .login-card__subtitle {
+    margin: 0.25rem 0 0;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+  }
+
+  .login-error {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    margin: 1.25rem 2rem 0;
+    padding: 0.75rem 1rem;
+    border-radius: 0.875rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-danger-text);
+    border: 1px solid var(--color-danger-border);
+    background: var(--color-danger-surface);
+  }
+
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 1.5rem 2rem 1.5rem;
+  }
+
+  .login-form__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .login-form__label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  .login-form__input-wrapper {
+    position: relative;
+  }
+
+  .login-form__input-icon {
+    position: absolute;
+    top: 50%;
+    left: 1rem;
+    transform: translateY(-50%);
+    color: var(--color-text-subtle);
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+  }
+
+  .login-form__input {
+    padding-left: 2.75rem !important;
+  }
+
+  .login-form__submit {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+
+  .login-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem 1.5rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .login-card__back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .login-card__back-link:hover {
+    color: var(--color-accent);
+  }
+</style>

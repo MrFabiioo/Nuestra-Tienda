@@ -4,11 +4,13 @@ import { ImageUpload } from "@utils/image-upload";
 import { defineAction } from "astro:actions";
 import { db, eq, ProductImage } from "astro:db";
 import { z } from "astro:schema";
+import { requireAuth } from "../../firebase/guards";
 
 export const deleteProductImage= defineAction({
         accept:'json',
         input:z.string(),
-        handler:async(imageId)=>{
+        handler:async(imageId, context)=>{
+            requireAuth(context);
             
             const [productImage] = await db.select().from(ProductImage).where(eq(ProductImage.id,imageId))
 
