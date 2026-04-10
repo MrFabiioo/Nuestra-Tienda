@@ -3,10 +3,13 @@ import ProductImage from '@components/products/ProductImage.astro';
 import Layout from '@layouts/Layout.astro';
 import { actions } from 'astro:actions';
 import ProductSliceShow from "src/components/products/ProductSliceShow.astro";
+import { MARGIN_PRESETS } from '@utils/recipe-calculator';
+import type { ProductRecipe } from '@interfaces/recipe.interface';
+
 export const prerender = false
 const {slug} = Astro.params;
 
-const {data,error} = await Astro.callAction(actions.getProductBySlug,slug ?? " "); 
+const {data,error} = await Astro.callAction(actions.getProductBySlug, slug ?? " ");
 
 // Get categories for dropdown
 const {data: categoriesData} = await Astro.callAction(actions.getCategories, {});
@@ -14,10 +17,17 @@ const {data: categoriesData} = await Astro.callAction(actions.getCategories, {})
 if (error) {
     return Astro.redirect('/')
 }
-const {product,images} = data;
+const {product, images} = data;
 const categories = categoriesData?.categories ?? [];
 const selectedCategoryId = 'categoryId' in product ? product.categoryId : null;
 const isNew = slug === 'new-product';
+
+// Receta: si el producto ya tiene una, la usamos; sino vacía
+const initialRecipe: ProductRecipe = (product as any).recipe ?? {
+    ingredients: [{ name: '', paidAmount: 0, purchasedQty: 1, purchasedUnit: 'gr', usedQty: 1, usedUnit: 'gr' }],
+    yieldUnits: 1,
+    marginPercent: 50,
+};
 ---
 
 <Layout title="Mantenimiento de producto">
@@ -60,8 +70,13 @@ const isNew = slug === 'new-product';
     </div>
 
     <!-- ── Formulario ──────────────────────────────────────────── -->
-    <form id="product-form" class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <form id="product-form" class="space-y-6">
       <input type="hidden" name="id" value={product.id}>
+      <!-- Campo oculto donde se serializa la receta antes del submit -->
+      <input type="hidden" name="recipe" id="recipe-hidden">
+
+      <!-- Grid superior: datos del producto + imágenes -->
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
 
       <!-- Columna izquierda: datos del producto -->
       <div class="space-y-6">
@@ -224,26 +239,16 @@ const isNew = slug === 'new-product';
 
         <!-- Sección: Guardar + Upload -->
         <div class="premium-panel p-6 md:p-8">
-          <div class="mb-6 flex items-center justify-between gap-3 border-b pb-5" style="border-color: var(--color-border);">
-            <div class="flex items-center gap-3">
-              <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style="background: var(--color-surface-soft); color: var(--color-accent);">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                </svg>
-              </div>
-              <div>
-                <p class="admin-shell__eyebrow text-[0.68rem]">Media</p>
-                <h2 class="text-base font-bold" style="color: var(--color-text);">Subir imágenes</h2>
-              </div>
+          <div class="mb-6 flex items-center gap-3 border-b pb-5" style="border-color: var(--color-border);">
+            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style="background: var(--color-surface-soft); color: var(--color-accent);">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+              </svg>
             </div>
-
-            <button
-              type="submit"
-              class="premium-action-primary"
-              aria-label="Guardar producto"
-            >
-              Guardar producto
-            </button>
+            <div>
+              <p class="admin-shell__eyebrow text-[0.68rem]">Media</p>
+              <h2 class="text-base font-bold" style="color: var(--color-text);">Subir imágenes</h2>
+            </div>
           </div>
 
           <!-- Drop zone -->
@@ -383,7 +388,178 @@ const isNew = slug === 'new-product';
         </div>
 
       </div>
+      <!-- /Columna derecha -->
+
+      </div>
+      <!-- /Grid superior -->
+
+      <!-- ── Calculadora de receta: sección full-width ─────────────── -->
+      <div class="premium-panel p-6 md:p-8" id="recipe-calculator">
+        <div class="recipe-calculator-shell">
+
+          <!-- Main: lista de ingredientes -->
+          <div class="recipe-calculator-main">
+            <div class="mb-5 flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-center sm:justify-between" style="border-color: var(--color-border);">
+              <div class="flex items-center gap-3">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style="background: var(--color-surface-soft); color: var(--color-accent);">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 15.75V18m-7.5-6.75h.008v.008H8.25v-.008zm0 2.25h.008v.008H8.25V13.5zm0 2.25h.008v.008H8.25v-.008zm0 2.25h.008v.008H8.25V18zm2.498-6.75h.007v.008h-.007v-.008zm0 2.25h.007v.008h-.007V13.5zm0 2.25h.007v.008h-.007v-.008zm0 2.25h.007v.008h-.007V18zm2.504-6.75h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V13.5zm0 2.25h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V18zm2.498-6.75h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V13.5zM8.25 6h7.5v2.25h-7.5V6zM12 2.25c-1.892 0-3.758.11-5.593.322C5.307 2.7 4.5 3.756 4.5 4.981V19.5a2.25 2.25 0 002.25 2.25h10.5a2.25 2.25 0 002.25-2.25V4.981c0-1.225-.807-2.281-1.907-2.409A41.146 41.146 0 0012 2.25z" />
+                  </svg>
+                </div>
+                <div>
+                  <p class="admin-shell__eyebrow text-[0.68rem]">Costos</p>
+                  <div class="flex items-center gap-2">
+                    <h2 class="text-base font-bold" style="color: var(--color-text);">Calculadora de receta</h2>
+                    <span id="ingredient-count-badge" class="recipe-count-badge" style="display:none;">0</span>
+                  </div>
+                  <p class="field-help mt-1">Agregá ingredientes y el resumen se actualiza en tiempo real.</p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                id="btn-add-ingredient"
+                class="premium-action-ghost justify-center border border-dashed sm:w-auto"
+                style="border-color: var(--color-border-strong);"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                Agregar ingrediente
+              </button>
+            </div>
+
+            <!-- Lista de ingredientes con scroll cuando hay muchos -->
+            <div id="ingredients-list" class="recipe-ingredients-scroll">
+              <!-- Los ingredientes se renderizan vía JS con la receta inicial -->
+            </div>
+          </div>
+          <!-- /Main -->
+
+          <!-- Sidebar: resumen de costos sticky -->
+          <aside class="recipe-calculator-sidebar">
+            <div class="recipe-summary-card rounded-2xl p-5 space-y-5">
+              <div class="space-y-4">
+                <div>
+                  <label for="recipe-yield" class="block text-sm font-semibold mb-2" style="color: var(--color-text);">
+                    Unidades producidas
+                  </label>
+                  <input
+                    type="number"
+                    id="recipe-yield"
+                    class="premium-field"
+                    min="1"
+                    step="1"
+                    placeholder="ej: 10"
+                  />
+                  <p class="field-help">Porciones/unidades que rinde la receta.</p>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-semibold mb-2" style="color: var(--color-text);">
+                    Margen de ganancia
+                  </label>
+                  <div class="flex flex-wrap gap-2 mb-2">
+                    {MARGIN_PRESETS.map(({ value, label }) => (
+                      <button
+                        type="button"
+                        class="btn-margin"
+                        data-margin={value}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  <input
+                    type="number"
+                    id="recipe-margin-custom"
+                    class="premium-field text-sm"
+                    min="0"
+                    step="1"
+                    placeholder="Margen personalizado %"
+                  />
+                  <p class="field-help">Margen sobre el costo por unidad.</p>
+                </div>
+              </div>
+
+              <!-- Resumen de costos -->
+              <div class="recipe-results-card">
+                <div class="recipe-results-card__header">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4 opacity-80">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                  </svg>
+                  <span>Resumen de costos</span>
+                </div>
+
+                <div class="recipe-results-card__body">
+                  <div class="grid grid-cols-2 gap-2.5">
+                    <div class="recipe-stat">
+                      <p class="recipe-stat__label">Costo total</p>
+                      <p class="recipe-stat__value" id="rc-total-cost">—</p>
+                    </div>
+                    <div class="recipe-stat">
+                      <p class="recipe-stat__label">Unidades</p>
+                      <p class="recipe-stat__value" id="rc-yield">—</p>
+                    </div>
+                    <div class="recipe-stat">
+                      <p class="recipe-stat__label">Costo / unidad</p>
+                      <p class="recipe-stat__value" id="rc-cost-per-unit">—</p>
+                    </div>
+                    <div class="recipe-stat recipe-stat--accent">
+                      <p class="recipe-stat__label">Precio sugerido</p>
+                      <p class="recipe-stat__value" id="rc-suggested-price">—</p>
+                    </div>
+                  </div>
+
+                  <div class="pt-3 border-t mt-1" style="border-color: var(--color-border);">
+                    <button
+                      type="button"
+                      id="btn-use-suggested-price"
+                      class="premium-action-secondary text-sm w-full justify-center"
+                      disabled
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                      </svg>
+                      Usar como precio del producto
+                    </button>
+                    <p class="field-help mt-2 text-center">Copia el precio sugerido al campo "Precio".</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </aside>
+          <!-- /Sidebar -->
+
+        </div>
+      </div>
+      <!-- /Calculadora de receta -->
+
     </form>
+
+    <!-- ── Sticky save bar ───────────────────────────────────────── -->
+    <div class="sticky-save-bar">
+      <div class="sticky-save-bar__inner">
+        <div class="sticky-save-bar__info">
+          <span class="sticky-save-bar__dot"></span>
+          <p class="text-sm font-semibold" style="color: var(--color-text);">
+            {isNew ? 'Nuevo producto' : product.title}
+          </p>
+          <span class="premium-chip text-xs">{isNew ? 'Sin guardar' : 'Editando'}</span>
+        </div>
+        <button
+          type="submit"
+          form="product-form"
+          class="premium-action-primary"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Guardar producto
+        </button>
+      </div>
+    </div>
+
   </section>
 
   <style>
@@ -425,127 +601,996 @@ const isNew = slug === 'new-product';
       background: color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-soft)) !important;
       box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent) 14%, transparent);
     }
+
+    /* ── Calculadora de receta ─────────────────────────────────── */
+    #recipe-calculator {
+      --recipe-ingredient-row-bg: linear-gradient(180deg, color-mix(in srgb, var(--color-surface-elevated) 98%, white 2%) 0%, color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-elevated) 10%) 100%);
+      --recipe-ingredient-row-shadow: 0 1px 3px color-mix(in srgb, var(--color-text) 6%, transparent), inset 0 1px 0 color-mix(in srgb, white 65%, transparent);
+      --recipe-ingredient-row-hover-shadow: 0 10px 24px color-mix(in srgb, var(--color-text) 9%, transparent), 0 0 0 1px color-mix(in srgb, var(--color-accent) 10%, transparent);
+      --recipe-ingredient-strip-bg: linear-gradient(180deg, color-mix(in srgb, var(--color-surface-soft) 78%, white 22%) 0%, color-mix(in srgb, var(--color-surface-soft) 62%, var(--color-surface-elevated) 38%) 100%);
+      --recipe-ingredient-strip-border: color-mix(in srgb, var(--color-border) 82%, white 18%);
+      --recipe-ingredient-accent-bar: linear-gradient(180deg, color-mix(in srgb, var(--color-accent) 65%, white 35%) 0%, color-mix(in srgb, var(--color-accent-strong) 82%, transparent) 100%);
+      --recipe-ingredient-number-bg: linear-gradient(180deg, color-mix(in srgb, var(--color-accent) 12%, white 88%) 0%, color-mix(in srgb, var(--color-accent) 8%, var(--color-surface) 92%) 100%);
+      --recipe-ingredient-number-border: color-mix(in srgb, var(--color-accent) 24%, var(--color-border));
+      --recipe-ingredient-number-color: var(--color-accent-strong);
+      --recipe-ingredient-number-label: color-mix(in srgb, var(--color-accent-strong) 72%, var(--color-text-subtle) 28%);
+      --recipe-ingredient-number-shadow: inset 0 1px 0 color-mix(in srgb, white 75%, transparent), 0 8px 18px color-mix(in srgb, var(--color-accent) 8%, transparent);
+      --recipe-ingredient-name-bg: color-mix(in srgb, var(--color-surface-elevated) 96%, white 4%);
+      --recipe-field-group-bg: color-mix(in srgb, var(--color-surface-soft) 54%, var(--color-surface-elevated) 46%);
+      --recipe-field-group-border: color-mix(in srgb, var(--color-border) 88%, white 12%);
+      --recipe-field-group-shadow: inset 0 1px 0 color-mix(in srgb, white 55%, transparent);
+      --recipe-count-badge-bg: color-mix(in srgb, var(--color-accent) 14%, var(--color-surface));
+      --recipe-count-badge-border: color-mix(in srgb, var(--color-accent) 24%, var(--color-border));
+      --recipe-cost-badge-bg: color-mix(in srgb, var(--color-surface-soft) 82%, white 18%);
+      --recipe-cost-badge-border: color-mix(in srgb, var(--color-accent) 18%, var(--color-border));
+      --recipe-summary-bg: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+      --recipe-summary-border: var(--color-border);
+      --recipe-results-border: var(--color-border);
+      --recipe-results-header-bg: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface-soft));
+      --recipe-results-header-border: color-mix(in srgb, var(--color-accent) 18%, var(--color-border));
+      --recipe-results-body-bg: color-mix(in srgb, var(--color-surface-soft) 60%, transparent);
+      --recipe-stat-bg: color-mix(in srgb, var(--color-surface) 88%, transparent);
+      --recipe-stat-border: var(--color-border);
+      --recipe-stat-accent-bg: color-mix(in srgb, var(--color-accent) 10%, var(--color-surface));
+      --recipe-stat-accent-border: color-mix(in srgb, var(--color-accent) 28%, var(--color-border));
+      --recipe-add-button-bg: transparent;
+    }
+
+    :global(:root[data-theme='dark']) #recipe-calculator {
+      --recipe-ingredient-row-bg: linear-gradient(180deg, color-mix(in srgb, var(--color-surface-elevated) 88%, var(--color-bg-alt) 12%) 0%, color-mix(in srgb, var(--color-surface) 84%, var(--color-surface-soft) 16%) 100%);
+      --recipe-ingredient-row-shadow: 0 18px 34px color-mix(in srgb, black 30%, transparent), inset 0 1px 0 color-mix(in srgb, white 6%, transparent);
+      --recipe-ingredient-row-hover-shadow: 0 22px 40px color-mix(in srgb, black 38%, transparent), 0 0 0 1px color-mix(in srgb, var(--color-accent) 12%, transparent);
+      --recipe-ingredient-strip-bg: linear-gradient(180deg, color-mix(in srgb, var(--color-surface-soft) 56%, var(--color-surface-elevated) 44%) 0%, color-mix(in srgb, var(--color-surface-muted) 72%, var(--color-surface) 28%) 100%);
+      --recipe-ingredient-strip-border: color-mix(in srgb, var(--color-border-strong) 74%, var(--color-border) 26%);
+      --recipe-ingredient-accent-bar: linear-gradient(180deg, color-mix(in srgb, var(--color-accent) 76%, white 24%) 0%, color-mix(in srgb, var(--color-accent-strong) 70%, var(--color-surface) 30%) 100%);
+      --recipe-ingredient-number-bg: linear-gradient(180deg, color-mix(in srgb, var(--color-accent) 18%, var(--color-surface-elevated) 82%) 0%, color-mix(in srgb, var(--color-accent-strong) 14%, var(--color-surface) 86%) 100%);
+      --recipe-ingredient-number-border: color-mix(in srgb, var(--color-accent) 30%, var(--color-border-strong));
+      --recipe-ingredient-number-color: color-mix(in srgb, var(--color-text) 88%, var(--color-accent) 12%);
+      --recipe-ingredient-number-label: color-mix(in srgb, var(--color-accent-soft) 58%, var(--color-text-subtle) 42%);
+      --recipe-ingredient-number-shadow: inset 0 1px 0 color-mix(in srgb, white 10%, transparent), 0 14px 28px color-mix(in srgb, black 24%, transparent);
+      --recipe-ingredient-name-bg: color-mix(in srgb, var(--color-surface-elevated) 90%, var(--color-surface-soft) 10%);
+      --recipe-field-group-bg: linear-gradient(180deg, color-mix(in srgb, var(--color-surface-muted) 72%, var(--color-surface-elevated) 28%) 0%, color-mix(in srgb, var(--color-surface-soft) 16%, var(--color-surface) 84%) 100%);
+      --recipe-field-group-border: color-mix(in srgb, var(--color-border-strong) 72%, var(--color-border) 28%);
+      --recipe-field-group-shadow: inset 0 1px 0 color-mix(in srgb, white 5%, transparent);
+      --recipe-count-badge-bg: color-mix(in srgb, var(--color-accent) 14%, var(--color-surface-muted) 86%);
+      --recipe-count-badge-border: color-mix(in srgb, var(--color-accent) 28%, var(--color-border-strong));
+      --recipe-cost-badge-bg: color-mix(in srgb, var(--color-surface-soft) 42%, var(--color-surface-elevated) 58%);
+      --recipe-cost-badge-border: color-mix(in srgb, var(--color-accent) 22%, var(--color-border-strong));
+      --recipe-summary-bg: linear-gradient(180deg, color-mix(in srgb, var(--color-surface-elevated) 88%, var(--color-bg-alt) 12%) 0%, color-mix(in srgb, var(--color-surface) 92%, var(--color-surface-soft) 8%) 100%);
+      --recipe-summary-border: color-mix(in srgb, var(--color-border-strong) 82%, var(--color-border) 18%);
+      --recipe-results-border: color-mix(in srgb, var(--color-border-strong) 84%, var(--color-border) 16%);
+      --recipe-results-header-bg: linear-gradient(135deg, color-mix(in srgb, var(--color-surface-soft) 58%, var(--color-surface-elevated) 42%) 0%, color-mix(in srgb, var(--color-accent) 14%, var(--color-surface-muted) 86%) 100%);
+      --recipe-results-header-border: color-mix(in srgb, var(--color-accent) 24%, var(--color-border-strong));
+      --recipe-results-body-bg: linear-gradient(180deg, color-mix(in srgb, var(--color-surface-muted) 76%, var(--color-surface) 24%) 0%, color-mix(in srgb, var(--color-surface-soft) 14%, var(--color-surface) 86%) 100%);
+      --recipe-stat-bg: linear-gradient(180deg, color-mix(in srgb, var(--color-surface-elevated) 84%, var(--color-surface-soft) 16%) 0%, color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-muted) 10%) 100%);
+      --recipe-stat-border: color-mix(in srgb, var(--color-border-strong) 76%, var(--color-border) 24%);
+      --recipe-stat-accent-bg: linear-gradient(180deg, color-mix(in srgb, var(--color-accent) 14%, var(--color-surface-muted) 86%) 0%, color-mix(in srgb, var(--color-accent) 10%, var(--color-surface) 90%) 100%);
+      --recipe-stat-accent-border: color-mix(in srgb, var(--color-accent) 30%, var(--color-border-strong));
+      --recipe-add-button-bg: color-mix(in srgb, var(--color-surface-soft) 34%, var(--color-surface-elevated) 66%);
+    }
+
+    .btn-margin {
+      @apply inline-flex min-h-9 cursor-pointer items-center justify-center rounded-full px-3 py-1.5 text-sm font-semibold transition-all duration-200;
+      border: 1px solid var(--color-border);
+      background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+      color: var(--color-text-muted);
+    }
+
+    .btn-margin:hover {
+      border-color: var(--color-border-strong);
+      color: var(--color-accent);
+    }
+
+    .btn-margin--active {
+      border-color: color-mix(in srgb, var(--color-accent) 36%, var(--color-border));
+      background: color-mix(in srgb, var(--color-accent) 14%, var(--color-surface));
+      color: var(--color-accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 14%, transparent);
+    }
+
+    /* ── Ingredient card ───────────────────────────────────────── */
+    :global(.ingredient-row) {
+      position: relative;
+      border: 1px solid var(--color-border);
+      border-radius: 1.35rem;
+      overflow: hidden;
+      background: var(--recipe-ingredient-row-bg);
+      box-shadow: var(--recipe-ingredient-row-shadow);
+      transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
+    }
+
+    :global(.ingredient-row)::before {
+      content: '';
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 3px;
+      background: var(--recipe-ingredient-accent-bar);
+      opacity: 0.7;
+    }
+
+    :global(.ingredient-row:hover) {
+      border-color: color-mix(in srgb, var(--color-accent) 18%, var(--color-border-strong));
+      box-shadow: var(--recipe-ingredient-row-hover-shadow);
+      transform: translateY(-1px);
+    }
+
+    /* Strip superior de la card */
+    :global(.ingredient-row__strip) {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: start;
+      gap: 0.875rem;
+      padding: 0.9rem 1rem 0.8rem 1rem;
+      background: var(--recipe-ingredient-strip-bg);
+      border-bottom: 1px solid var(--recipe-ingredient-strip-border);
+    }
+
+    /* Cuerpo de la card con los campos */
+    :global(.ingredient-row__body) {
+      padding: 0.95rem 1rem 1rem;
+    }
+
+    /* Número — badge premium */
+    :global(.ingredient-row__num) {
+      flex-shrink: 0;
+      min-width: 3.2rem;
+      min-height: 3rem;
+      padding: 0.4rem 0.55rem;
+      border-radius: 1rem;
+      border: 1px solid var(--recipe-ingredient-number-border);
+      background: var(--recipe-ingredient-number-bg);
+      color: var(--recipe-ingredient-number-color);
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.15rem;
+      box-shadow: var(--recipe-ingredient-number-shadow);
+      font-variant-numeric: tabular-nums;
+    }
+
+    :global(.ingredient-row__num strong) {
+      font-size: 0.95rem;
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+
+    :global(.ingredient-row__num-label) {
+      font-size: 0.52rem;
+      line-height: 1;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--recipe-ingredient-number-label);
+    }
+
+    :global(.ingredient-row__name) {
+      width: 100%;
+      min-width: 0;
+      min-height: 3rem;
+      font-weight: 600;
+      background: var(--recipe-ingredient-name-bg);
+    }
+
+    :global(.ingredient-row__actions) {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.625rem;
+      width: 100%;
+      min-width: 0;
+    }
+
+    :global(.ingredient-row__del) {
+      @apply inline-flex cursor-pointer items-center justify-center transition-all duration-200;
+      width: 1.875rem;
+      height: 1.875rem;
+      border-radius: 0.5rem;
+      border: 1px solid var(--color-border);
+      background: transparent;
+      color: var(--color-text-muted);
+      flex-shrink: 0;
+    }
+
+    :global(.ingredient-row__del svg) {
+      width: 0.8rem;
+      height: 0.8rem;
+    }
+
+    :global(.ingredient-row__del:hover) {
+      background: color-mix(in srgb, var(--color-danger-text, #dc2626) 10%, transparent);
+      border-color: var(--color-danger-text, #dc2626);
+      color: var(--color-danger-text, #dc2626);
+    }
+
+    /* ── Empty state ────────────────────────────────────────────── */
+    :global(.ingredient-empty-state) {
+      @apply flex flex-col items-center justify-center text-center py-12 px-4;
+      border: 2px dashed var(--color-border);
+      border-radius: 1rem;
+      background: color-mix(in srgb, var(--color-surface-soft) 50%, transparent);
+    }
+
+    :global(.ingredient-empty-state__icon) {
+      @apply flex items-center justify-center mb-4;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 9999px;
+      background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+      color: var(--color-text-muted);
+    }
+
+    :global(.ingredient-empty-state__icon svg) {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+
+    :global(.ingredient-empty-state__title) {
+      @apply text-sm font-semibold mb-1;
+      color: var(--color-text);
+    }
+
+    :global(.ingredient-empty-state__copy) {
+      @apply text-xs leading-relaxed max-w-xs;
+      color: var(--color-text-subtle);
+    }
+
+    /* ── Ingredient count badge ─────────────────────────────────── */
+    .recipe-count-badge {
+      @apply text-xs font-bold tabular-nums px-2 py-0.5 rounded-full;
+      background: var(--recipe-count-badge-bg);
+      color: var(--color-accent);
+      border: 1px solid var(--recipe-count-badge-border);
+    }
+
+    /* ── Recipe results card ────────────────────────────────────── */
+    .recipe-results-card {
+      border: 1px solid var(--recipe-results-border);
+      border-radius: 1rem;
+      overflow: hidden;
+    }
+
+    .recipe-results-card__header {
+      @apply flex items-center gap-2 text-xs font-bold uppercase tracking-widest px-4 py-3;
+      background: var(--recipe-results-header-bg);
+      color: var(--color-accent);
+      border-bottom: 1px solid var(--recipe-results-header-border);
+    }
+
+    .recipe-results-card__body {
+      @apply p-4 space-y-3;
+      background: var(--recipe-results-body-bg);
+    }
+
+    /* ── Sticky save bar ────────────────────────────────────────── */
+    .sticky-save-bar {
+      position: sticky;
+      bottom: 1rem;
+      z-index: 40;
+      pointer-events: none;
+    }
+
+    .sticky-save-bar__inner {
+      @apply flex items-center justify-between gap-4 mx-auto px-5 py-3 rounded-2xl;
+      pointer-events: auto;
+      max-width: 64rem;
+      background: color-mix(in srgb, var(--color-surface-elevated) 96%, transparent);
+      border: 1px solid var(--color-border-strong);
+      box-shadow: 0 8px 32px color-mix(in srgb, var(--color-text) 12%, transparent),
+                  0 2px 8px color-mix(in srgb, var(--color-text) 6%, transparent);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .sticky-save-bar__info {
+      @apply flex items-center gap-3 min-w-0;
+    }
+
+    .sticky-save-bar__dot {
+      @apply flex-shrink-0;
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 9999px;
+      background: var(--color-accent);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.8); }
+    }
+
+    /* ── Calculadora: shell full-width con scroll en ingredientes ── */
+    .recipe-calculator-shell {
+      display: grid;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    .recipe-calculator-main {
+      min-width: 0;
+    }
+
+    .recipe-ingredients-scroll {
+      max-height: none;
+      overflow-y: visible;
+      padding-right: 0;
+      padding-bottom: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      scrollbar-width: thin;
+      scrollbar-color: var(--color-border-strong) transparent;
+    }
+
+    .recipe-ingredients-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .recipe-ingredients-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .recipe-ingredients-scroll::-webkit-scrollbar-thumb {
+      background-color: var(--color-border-strong);
+      border-radius: 9999px;
+    }
+
+    .recipe-calculator-sidebar {
+      align-self: start;
+      width: 100%;
+    }
+
+    .recipe-summary-card {
+      border: 1px solid var(--recipe-summary-border);
+      background: var(--recipe-summary-bg);
+    }
+
+    .ingredient-row__header {
+      display: grid;
+      gap: 0.75rem;
+      align-items: center;
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ingredient-row__meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    :global(.recipe-ingredient-grid) {
+      display: grid;
+      gap: 0.75rem;
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+
+    :global(.recipe-field-group) {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      padding: 0.8rem;
+      border: 1px solid var(--recipe-field-group-border);
+      border-radius: 1rem;
+      background: var(--recipe-field-group-bg);
+      box-shadow: var(--recipe-field-group-shadow);
+    }
+
+    :global(.recipe-price-field) {
+      min-width: 0;
+    }
+
+    :global(.recipe-field-group .field-help) {
+      margin-top: 0;
+      letter-spacing: 0.02em;
+    }
+
+    :global(.recipe-field-group--price),
+    :global(.recipe-field-group--quantity) {
+      max-width: 100%;
+    }
+
+    :global(.recipe-quantity-combo) {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(5.35rem, auto);
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    :global(.recipe-quantity-input) {
+      width: 100%;
+      min-width: 0;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    :global(.recipe-unit-select) {
+      width: 100% !important;
+      min-width: 0 !important;
+      padding-left: 0.85rem;
+      padding-right: 2rem;
+      text-align: center;
+      text-align-last: center;
+    }
+
+    :global(.recipe-price-field) {
+      width: min(100%, 9.5rem);
+      font-variant-numeric: tabular-nums;
+    }
+
+    :global(.ingredient-row__cost) {
+      @apply text-xs font-semibold px-2.5 py-1 rounded-full;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      max-width: 100%;
+      background: var(--recipe-cost-badge-bg);
+      color: var(--color-accent);
+      border: 1px solid var(--recipe-cost-badge-border);
+      white-space: normal;
+      line-height: 1.2;
+      text-align: center;
+    }
+
+    :global(.ingredient-row__cost--incompatible) {
+      background: var(--color-danger-surface);
+      color: var(--color-danger-text);
+    }
+
+    .recipe-stat {
+      @apply rounded-xl p-3 text-center;
+      background: var(--recipe-stat-bg);
+      border: 1px solid var(--recipe-stat-border);
+    }
+
+    .recipe-stat--accent {
+      background: var(--recipe-stat-accent-bg);
+      border-color: var(--recipe-stat-accent-border);
+    }
+
+    .recipe-stat__label {
+      @apply text-xs font-medium mb-1;
+      color: var(--color-text-subtle);
+    }
+
+    .recipe-stat__value {
+      @apply text-base font-bold;
+      color: var(--color-text);
+    }
+
+    .recipe-stat--accent .recipe-stat__value {
+      color: var(--color-accent);
+    }
+
+    #recipe-calculator #btn-add-ingredient {
+      background: var(--recipe-add-button-bg);
+    }
+
+    @media (min-width: 900px) {
+      :global(.recipe-ingredient-grid) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 1100px) {
+      .recipe-calculator-shell {
+        grid-template-columns: minmax(0, 1fr) minmax(19.5rem, 21rem);
+      }
+
+      .recipe-calculator-sidebar {
+        position: sticky;
+        top: 1.5rem;
+      }
+
+      .ingredient-row__header {
+        grid-template-columns: minmax(0, 1fr) auto;
+      }
+
+      :global(.recipe-field-group--price) {
+        max-width: 10.5rem;
+      }
+    }
+
+    @media (min-width: 1280px) {
+      :global(.recipe-ingredient-grid) {
+        grid-template-columns: minmax(9rem, 0.72fr) minmax(11.5rem, 1fr) minmax(11.5rem, 1fr);
+      }
+
+      .ingredient-row__header {
+        grid-template-columns: minmax(0, 1fr) auto;
+      }
+    }
+
+    @media (min-width: 1360px) {
+      .recipe-calculator-shell {
+        grid-template-columns: minmax(0, 1fr) 24rem;
+      }
+    }
   </style>
 </Layout>
 
+<!-- Datos de receta inicial pasados del servidor al cliente -->
+<script
+  id="recipe-initial-data"
+  type="application/json"
+  set:html={JSON.stringify(initialRecipe)}
+></script>
+
 <script>
 import { actions } from 'astro:actions';
-  import { navigate } from 'astro:transitions/client';
+import { navigate } from 'astro:transitions/client';
 
-  document.addEventListener('astro:page-load', () => {
-    const form = document.querySelector('#product-form') as HTMLFormElement;
-    const sizeButtons = document.querySelectorAll('.btn-size');
-    const btnsDeleteImage = document.querySelectorAll('.btn-delete-image');
-    const lblSelectedFiles = document.querySelector(
-      '#lbl-selected-files'
-    ) as HTMLParagraphElement;
-    const dropZone = document.querySelector('#drop-zone') as HTMLLabelElement;
-    const fileInput = document.querySelector(
-      '#file-upload'
-    ) as HTMLInputElement;
+// ── Tipos inline (no podemos importar .ts en script Astro directamente) ────
+type RecipeUnit = 'gr' | 'kg' | 'ml' | 'cc' | 'l' | 'unidad';
 
-    if (!form) {
-      return;
+interface RecipeIngredient {
+  name: string;
+  paidAmount: number;
+  purchasedQty: number;
+  purchasedUnit: RecipeUnit;
+  usedQty: number;
+  usedUnit: RecipeUnit;
+}
+
+interface ProductRecipe {
+  ingredients: RecipeIngredient[];
+  yieldUnits: number;
+  marginPercent: number | null;
+}
+
+// ── Helpers de cálculo (duplicados de recipe-calculator.ts para el cliente) ─
+const CONVERSION_TO_BASE: Record<RecipeUnit, number | null> = {
+  gr: 1, kg: 1000, ml: 1, cc: 1, l: 1000, unidad: null,
+};
+
+const DIMENSION: Record<RecipeUnit, string> = {
+  gr: 'mass', kg: 'mass', ml: 'volume', cc: 'volume', l: 'volume', unidad: 'unit',
+};
+
+function convertUnit(qty: number, from: RecipeUnit, to: RecipeUnit): number | null {
+  if (from === to) return qty;
+  if (DIMENSION[from] !== DIMENSION[to]) return null;
+  const bF = CONVERSION_TO_BASE[from];
+  const bT = CONVERSION_TO_BASE[to];
+  if (bF === null || bT === null) return null;
+  return (qty * bF) / bT;
+}
+
+function calcIngredientCost(ing: RecipeIngredient): { cost: number; incompatible: boolean } {
+  const { paidAmount, purchasedQty, purchasedUnit, usedQty, usedUnit } = ing;
+  if (purchasedQty <= 0 || paidAmount < 0) return { cost: 0, incompatible: false };
+  const usedConverted = convertUnit(usedQty, usedUnit, purchasedUnit);
+  if (usedConverted === null) return { cost: 0, incompatible: true };
+  return { cost: (paidAmount / purchasedQty) * usedConverted, incompatible: false };
+}
+
+// ── Formateo de moneda ────────────────────────────────────────────────────
+function fmtCurrency(value: number): string {
+  return new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+// ── Estado reactivo ───────────────────────────────────────────────────────
+let recipe: ProductRecipe = {
+  ingredients: [],
+  yieldUnits: 1,
+  marginPercent: 50,
+};
+
+const UNIT_OPTIONS: RecipeUnit[] = ['gr', 'kg', 'ml', 'cc', 'l', 'unidad'];
+
+// ── Renderizado de ingredientes ───────────────────────────────────────────
+function unitOptionsHtml(selected: RecipeUnit): string {
+  return UNIT_OPTIONS.map(
+    (u) => `<option value="${u}"${u === selected ? ' selected' : ''}>${u}</option>`,
+  ).join('');
+}
+
+function renderIngredients(): void {
+  const container = document.getElementById('ingredients-list');
+  if (!container) return;
+
+  if (recipe.ingredients.length === 0) {
+    container.innerHTML = `
+      <div class="ingredient-empty-state">
+        <div class="ingredient-empty-state__icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+          </svg>
+        </div>
+        <p class="ingredient-empty-state__title">Sin ingredientes</p>
+        <p class="ingredient-empty-state__copy">Agregá el primer ingrediente para comenzar a calcular el costo de la receta.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const rows = recipe.ingredients.map((ing, idx) => {
+    const ic = calcIngredientCost(ing);
+    const num = String(idx + 1).padStart(2, '0');
+    const costBadge = ic.incompatible
+      ? `<span class="ingredient-row__cost ingredient-row__cost--incompatible">⚠ unidades incompatibles</span>`
+      : `<span class="ingredient-row__cost">Costo: ${fmtCurrency(ic.cost)}</span>`;
+
+    return `
+      <div class="ingredient-row" data-index="${idx}">
+
+        <!-- Strip: número + header flexible con nombre + meta -->
+        <div class="ingredient-row__strip">
+          <span class="ingredient-row__num" aria-hidden="true">
+            <span class="ingredient-row__num-label">Ing.</span>
+            <strong>${num}</strong>
+          </span>
+          <div class="ingredient-row__header">
+            <input
+              type="text"
+              class="premium-field text-sm ingredient-row__name"
+              placeholder="Nombre del ingrediente (ej: Palta)"
+              value="${ing.name.replace(/"/g, '&quot;')}"
+              data-field="name"
+              data-index="${idx}"
+            />
+            <div class="ingredient-row__actions">
+              ${costBadge}
+              <button
+                type="button"
+                class="btn-delete-ingredient ingredient-row__del"
+                data-index="${idx}"
+                aria-label="Eliminar ingrediente"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Body: campos de costo y cantidades -->
+        <div class="ingredient-row__body">
+          <div class="recipe-ingredient-grid text-sm">
+            <div class="recipe-field-group recipe-field-group--price">
+              <label class="field-help mb-1 block">Precio pagado</label>
+              <input
+                type="number"
+                class="premium-field text-sm recipe-price-field"
+                min="0"
+                step="0.01"
+                placeholder="0"
+                value="${ing.paidAmount}"
+                data-field="paidAmount"
+                data-index="${idx}"
+              />
+            </div>
+            <div class="recipe-field-group recipe-field-group--quantity">
+              <label class="field-help mb-1 block">Cant. comprada</label>
+              <div class="recipe-quantity-combo">
+                <input
+                  type="number"
+                  class="premium-field text-sm recipe-quantity-input"
+                  min="0.001"
+                  step="any"
+                  placeholder="1"
+                  value="${ing.purchasedQty}"
+                  data-field="purchasedQty"
+                  data-index="${idx}"
+                />
+                <select
+                  class="premium-field text-sm recipe-unit-select"
+                  data-field="purchasedUnit"
+                  data-index="${idx}"
+                >${unitOptionsHtml(ing.purchasedUnit)}</select>
+              </div>
+            </div>
+            <div class="recipe-field-group recipe-field-group--quantity">
+              <label class="field-help mb-1 block">Cant. usada</label>
+              <div class="recipe-quantity-combo">
+                <input
+                  type="number"
+                  class="premium-field text-sm recipe-quantity-input"
+                  min="0.001"
+                  step="any"
+                  placeholder="1"
+                  value="${ing.usedQty}"
+                  data-field="usedQty"
+                  data-index="${idx}"
+                />
+                <select
+                  class="premium-field text-sm recipe-unit-select"
+                  data-field="usedUnit"
+                  data-index="${idx}"
+                >${unitOptionsHtml(ing.usedUnit)}</select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    `;
+  });
+
+  container.innerHTML = rows.join('');
+
+  bindIngredientEvents();
+  updateIngredientCountBadge();
+}
+
+function updateIngredientCountBadge(): void {
+  const badge = document.getElementById('ingredient-count-badge');
+  if (!badge) return;
+  const count = recipe.ingredients.length;
+  badge.textContent = String(count);
+  badge.style.display = count > 0 ? '' : 'none';
+}
+
+function bindIngredientEvents(): void {
+  const container = document.getElementById('ingredients-list');
+  if (!container) return;
+
+  // Campos de texto/número de ingredientes
+  container.querySelectorAll<HTMLInputElement | HTMLSelectElement>('[data-field][data-index]').forEach((el) => {
+    el.addEventListener('input', (e) => {
+      const target = e.currentTarget as HTMLInputElement | HTMLSelectElement;
+      const idx = Number(target.dataset.index);
+      const field = target.dataset.field as keyof RecipeIngredient;
+      if (!recipe.ingredients[idx]) return;
+
+      const numFields: (keyof RecipeIngredient)[] = ['paidAmount', 'purchasedQty', 'usedQty'];
+      const value = numFields.includes(field)
+        ? parseFloat(target.value) || 0
+        : target.value;
+
+      (recipe.ingredients[idx] as any)[field] = value;
+      updateResults();
+      // Re-renderiza sólo la badge de costo sin borrar los campos (evita pérdida de focus)
+      updateIngredientCostBadge(idx);
+    });
+  });
+
+  // Botones eliminar ingrediente
+  container.querySelectorAll<HTMLButtonElement>('.btn-delete-ingredient').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const idx = Number(btn.dataset.index);
+      recipe.ingredients.splice(idx, 1);
+      if (recipe.ingredients.length === 0) {
+        recipe.ingredients.push(emptyIngredient());
+      }
+      renderIngredients();
+      updateResults();
+    });
+  });
+}
+
+function updateIngredientCostBadge(idx: number): void {
+  const row = document.querySelector<HTMLElement>(`.ingredient-row[data-index="${idx}"]`);
+  if (!row) return;
+  const badge = row.querySelector<HTMLElement>('.ingredient-row__cost');
+  if (!badge) return;
+  const ic = calcIngredientCost(recipe.ingredients[idx]);
+  if (ic.incompatible) {
+    badge.className = 'ingredient-row__cost ingredient-row__cost--incompatible';
+    badge.textContent = '⚠ unidades incompatibles';
+  } else {
+    badge.className = 'ingredient-row__cost';
+    badge.textContent = `Costo: ${fmtCurrency(ic.cost)}`;
+  }
+}
+
+// ── Actualizar resultados ─────────────────────────────────────────────────
+function updateResults(): void {
+  const costs = recipe.ingredients.map(calcIngredientCost);
+  const totalCost = costs.reduce((acc, ic) => acc + ic.cost, 0);
+  const safeYield = (recipe.yieldUnits > 0 ? recipe.yieldUnits : 1);
+  const costPerUnit = totalCost / safeYield;
+  const margin = recipe.marginPercent ?? 0;
+  const suggestedPrice = costPerUnit * (1 + margin / 100);
+
+  setEl('rc-total-cost', fmtCurrency(totalCost));
+  setEl('rc-yield', String(safeYield));
+  setEl('rc-cost-per-unit', fmtCurrency(costPerUnit));
+  setEl('rc-suggested-price', fmtCurrency(suggestedPrice));
+
+  const btnUse = document.getElementById('btn-use-suggested-price') as HTMLButtonElement | null;
+  if (btnUse) {
+    btnUse.disabled = suggestedPrice <= 0;
+    (btnUse as any)._suggestedPrice = suggestedPrice;
+  }
+
+  // Actualizar campo oculto de receta
+  const hiddenInput = document.getElementById('recipe-hidden') as HTMLInputElement | null;
+  if (hiddenInput) hiddenInput.value = JSON.stringify(recipe);
+}
+
+function setEl(id: string, text: string): void {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+
+function emptyIngredient(): RecipeIngredient {
+  return { name: '', paidAmount: 0, purchasedQty: 1, purchasedUnit: 'gr', usedQty: 1, usedUnit: 'gr' };
+}
+
+// ── Inicialización y eventos globales ─────────────────────────────────────
+document.addEventListener('astro:page-load', () => {
+  // Leer datos de receta inicial inyectados por el servidor
+  const dataEl = document.getElementById('recipe-initial-data');
+  if (dataEl) {
+    try {
+      recipe = JSON.parse(dataEl.textContent ?? '{}');
+    } catch {
+      recipe = { ingredients: [emptyIngredient()], yieldUnits: 1, marginPercent: 50 };
+    }
+  }
+
+  // ── Render inicial ────────────────────────────────────────────────────
+  renderIngredients();
+
+  // Poblar yield
+  const yieldInput = document.getElementById('recipe-yield') as HTMLInputElement | null;
+  if (yieldInput) yieldInput.value = String(recipe.yieldUnits ?? 1);
+
+  // Margen inicial — activar botón o cargar en custom
+  const presets = [25, 50, 100, 200];
+  if (recipe.marginPercent !== null && presets.includes(recipe.marginPercent)) {
+    document.querySelector<HTMLButtonElement>(`.btn-margin[data-margin="${recipe.marginPercent}"]`)
+      ?.classList.add('btn-margin--active');
+  } else if (recipe.marginPercent !== null) {
+    const customInput = document.getElementById('recipe-margin-custom') as HTMLInputElement | null;
+    if (customInput) customInput.value = String(recipe.marginPercent);
+  }
+
+  updateResults();
+
+  // ── Agregar ingrediente ───────────────────────────────────────────────
+  document.getElementById('btn-add-ingredient')?.addEventListener('click', () => {
+    recipe.ingredients.push(emptyIngredient());
+    renderIngredients();
+    updateResults();
+  });
+
+  // ── Rendimiento ───────────────────────────────────────────────────────
+  yieldInput?.addEventListener('input', () => {
+    recipe.yieldUnits = parseFloat(yieldInput.value) || 1;
+    updateResults();
+  });
+
+  // ── Márgenes preset ───────────────────────────────────────────────────
+  document.querySelectorAll<HTMLButtonElement>('.btn-margin').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.btn-margin').forEach((b) => b.classList.remove('btn-margin--active'));
+      btn.classList.add('btn-margin--active');
+      recipe.marginPercent = Number(btn.dataset.margin);
+      // Limpiar input custom
+      const customInput = document.getElementById('recipe-margin-custom') as HTMLInputElement | null;
+      if (customInput) customInput.value = '';
+      updateResults();
+    });
+  });
+
+  // ── Margen personalizado ──────────────────────────────────────────────
+  const customMarginInput = document.getElementById('recipe-margin-custom') as HTMLInputElement | null;
+  customMarginInput?.addEventListener('input', () => {
+    const val = parseFloat(customMarginInput.value);
+    if (!isNaN(val) && val >= 0) {
+      document.querySelectorAll('.btn-margin').forEach((b) => b.classList.remove('btn-margin--active'));
+      recipe.marginPercent = val;
+      updateResults();
+    }
+  });
+
+  // ── Usar precio sugerido ──────────────────────────────────────────────
+  document.getElementById('btn-use-suggested-price')?.addEventListener('click', (e) => {
+    const btn = e.currentTarget as any;
+    const suggested: number = btn._suggestedPrice ?? 0;
+    const priceInput = document.querySelector<HTMLInputElement>('#price');
+    if (priceInput && suggested > 0) {
+      priceInput.value = String(Math.round(suggested));
+      priceInput.dispatchEvent(new Event('input'));
+      // Feedback visual breve
+      btn.textContent = '✓ Precio aplicado';
+      setTimeout(() => {
+        btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:1rem;height:1rem;"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg> Usar como precio del producto`;
+      }, 1800);
+    }
+  });
+
+  // ── Form submit ───────────────────────────────────────────────────────
+  const form = document.querySelector('#product-form') as HTMLFormElement;
+  const sizeButtons = document.querySelectorAll('.btn-size');
+  const btnsDeleteImage = document.querySelectorAll('.btn-delete-image');
+  const lblSelectedFiles = document.querySelector('#lbl-selected-files') as HTMLParagraphElement;
+  const dropZone = document.querySelector('#drop-zone') as HTMLLabelElement;
+  const fileInput = document.querySelector('#file-upload') as HTMLInputElement;
+
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    // Serializar receta al hidden antes de enviar
+    const recipeHidden = document.getElementById('recipe-hidden') as HTMLInputElement | null;
+    if (recipeHidden) recipeHidden.value = JSON.stringify(recipe);
+
+    const selectedSizes = Array.from(sizeButtons)
+      .filter((btn) => btn.classList.contains('btn-size--active'))
+      .map((btn) => btn.textContent?.trim())
+      .join(',');
+
+    const formData = new FormData(form);
+    formData.set('sizes', selectedSizes);
+
+    const { data, error } = await actions.createUpdateProduct(formData);
+
+    if (error) {
+      return alert(error.message);
     }
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const selectedSizes = Array.from(sizeButtons)
-        .filter((btn) => btn.classList.contains('btn-size--active'))
-        .map((btn) => btn.textContent?.trim())
-        .join(',');
-
-      const formData = new FormData(form);
-      formData.set('sizes', selectedSizes);
-
-      const { data, error } = await actions.createUpdateProduct(formData);
-
-      if (error) {
-        return alert(error.message);
-      }
-
-      navigate(`/admin/products/${data.slug}`);
-    });
-
-    // Eliminar imagenes
-
-    btnsDeleteImage.forEach((btn) => {
-      btn.addEventListener('click', async (e) => {
-        const id = btn.getAttribute('data-id');
-        if (!id) return;
-
-        const { error } = await actions.deleteProductImage(id);
-        if (error) {
-          console.log(error);
-          alert(error);
-          return;
-        }
-
-        const trId = `#${id}`;
-        document.querySelector(trId)?.remove();
-
-        // navigate()
-      });
-    });
-
-    // Drag & Drop
-
-    const preventDefaults = (e: DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-    };
-
-    const highlight = (e: DragEvent) => {
-      dropZone.classList.add('product-drop-zone--highlight');
-    };
-
-    const unHighlight = (e: DragEvent) => {
-      dropZone.classList.remove('product-drop-zone--highlight');
-    };
-
-    const createFileList = (files: File[]): FileList => {
-      const dataTrasfer = new DataTransfer();
-      files.forEach((file) => dataTrasfer.items.add(file));
-      return dataTrasfer.files;
-    };
-
-    const handleFiles = (files: FileList) => {
-      const validFiles = Array.from(files).filter((file) =>
-        file.type.startsWith('image/')
-      );
-
-      if (fileInput && validFiles.length > 0) {
-        fileInput.files = createFileList(validFiles);
-      }
-
-      lblSelectedFiles.innerHTML = `<span class="font-semibold" style="color: var(--color-accent);">${validFiles.length} ${validFiles.length === 1 ? 'archivo seleccionado' : 'archivos seleccionados'}</span>`;
-    };
-
-    (['dragenter', 'dragover', 'dragleave', 'drop'] as const).forEach(
-      (eventName) => {
-        dropZone.addEventListener(eventName, preventDefaults);
-        document.body.addEventListener(eventName, preventDefaults);
-      }
-    );
-
-    (['dragenter', 'dragover'] as const).forEach((eventName) => {
-      dropZone.addEventListener(eventName, highlight);
-    });
-
-    (['dragleave', 'drop'] as const).forEach((eventName) => {
-      dropZone.addEventListener(eventName, unHighlight);
-    });
-
-    // Sólo imágenes
-    dropZone.addEventListener('drop', (e) => {
-      const files = e.dataTransfer?.files;
-
-      if (files) {
-        handleFiles(files);
-      }
-    });
-
-    // fin del astro:load
+    navigate(`/admin/products/${data.slug}`);
   });
+
+  // ── Eliminar imágenes ─────────────────────────────────────────────────
+  btnsDeleteImage.forEach((btn) => {
+    btn.addEventListener('click', async (e) => {
+      const id = btn.getAttribute('data-id');
+      if (!id) return;
+
+      const { error } = await actions.deleteProductImage(id);
+      if (error) {
+        console.log(error);
+        alert(error);
+        return;
+      }
+
+      document.querySelector(`#${id}`)?.remove();
+    });
+  });
+
+  // ── Drag & Drop ───────────────────────────────────────────────────────
+  const preventDefaults = (e: DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const highlight = () => dropZone?.classList.add('product-drop-zone--highlight');
+  const unHighlight = () => dropZone?.classList.remove('product-drop-zone--highlight');
+
+  const createFileList = (files: File[]): FileList => {
+    const dt = new DataTransfer();
+    files.forEach((f) => dt.items.add(f));
+    return dt.files;
+  };
+
+  const handleFiles = (files: FileList) => {
+    const validFiles = Array.from(files).filter((f) => f.type.startsWith('image/'));
+    if (fileInput && validFiles.length > 0) fileInput.files = createFileList(validFiles);
+    if (lblSelectedFiles) {
+      lblSelectedFiles.innerHTML = `<span class="font-semibold" style="color: var(--color-accent);">${validFiles.length} ${validFiles.length === 1 ? 'archivo seleccionado' : 'archivos seleccionados'}</span>`;
+    }
+  };
+
+  (['dragenter', 'dragover', 'dragleave', 'drop'] as const).forEach((eventName) => {
+    dropZone?.addEventListener(eventName, preventDefaults);
+    document.body.addEventListener(eventName, preventDefaults);
+  });
+
+  (['dragenter', 'dragover'] as const).forEach((eventName) => {
+    dropZone?.addEventListener(eventName, highlight);
+  });
+
+  (['dragleave', 'drop'] as const).forEach((eventName) => {
+    dropZone?.addEventListener(eventName, unHighlight);
+  });
+
+  dropZone?.addEventListener('drop', (e) => {
+    const files = e.dataTransfer?.files;
+    if (files) handleFiles(files);
+  });
+});
 </script>

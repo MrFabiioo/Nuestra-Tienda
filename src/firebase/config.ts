@@ -57,7 +57,7 @@ export const SESSION_COOKIE_NAME = '__session';
  * Duración de la sesión en segundos.
  * El idToken de Firebase dura 1 hora. Cookie y token expiran al mismo tiempo.
  */
-export const SESSION_COOKIE_MAX_AGE_SECONDS = 10; // 1 hora
+export const SESSION_COOKIE_MAX_AGE_SECONDS = 3600; // 1 hora
 
 // ── URL de public keys ──────────────────────────────────────────────────────────
 

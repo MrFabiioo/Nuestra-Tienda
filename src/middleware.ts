@@ -34,6 +34,16 @@ const ADMIN_DEFAULT_PATH = '/admin/dashboard';
 /** Rutas bajo /admin/* que no requieren autenticación */
 const PUBLIC_ADMIN_PATHS = new Set([ADMIN_LOGIN_PATH, ADMIN_LOGOUT_PATH]);
 
+/** Actions del admin que requieren sesión válida */
+const PROTECTED_ADMIN_ACTIONS = new Set([
+  'createUpdateProduct',
+  'deleteProduct',
+  'deleteProductImage',
+  'getCategories',
+  'createUpdateCategory',
+  'deleteCategory',
+]);
+
 /**
  * Valida un redirect target para prevenir open redirect attacks.
  * Solo paths que empiezan con /admin/ son permitidos.
@@ -56,8 +66,17 @@ function safeAdminRedirect(raw: string | null): string {
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
 
-  // Solo procesar rutas /admin/*
-  if (!pathname.startsWith('/admin')) {
+  const isAdminPageRequest = pathname.startsWith('/admin');
+
+  // Extraer nombre de action desde la URL — es confiable siempre.
+  // getActionContext puede devolver undefined con FormData multipart.
+  const actionNameFromUrl = pathname.startsWith('/_actions/')
+    ? decodeURIComponent(pathname.slice('/_actions/'.length)).split('/')[0]
+    : null;
+  const isProtectedAdminAction = !!actionNameFromUrl && PROTECTED_ADMIN_ACTIONS.has(actionNameFromUrl);
+
+  // Solo procesar páginas admin y actions protegidas del admin
+  if (!isAdminPageRequest && !isProtectedAdminAction) {
     return next();
   }
 
@@ -78,7 +97,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const sessionCookie = context.cookies.get(SESSION_COOKIE_NAME)?.value;
 
   // ── Paths públicos de admin (login, logout) ──────────────────────────────────
-  if (PUBLIC_ADMIN_PATHS.has(pathname)) {
+  if (isAdminPageRequest && PUBLIC_ADMIN_PATHS.has(pathname)) {
     if (pathname === ADMIN_LOGOUT_PATH) {
       return next();
     }
@@ -98,6 +117,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   // ── Ruta admin protegida ─────────────────────────────────────────────────────
   if (!sessionCookie) {
+    if (isProtectedAdminAction) {
+      return next();
+    }
     const encodedRedirect = encodeURIComponent(pathname);
     return context.redirect(`${ADMIN_LOGIN_PATH}?redirect=${encodedRedirect}`);
   }
@@ -107,6 +129,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
   if (!user) {
     // Token inválido o expirado → limpiar cookie y redirigir al login
     context.cookies.delete(SESSION_COOKIE_NAME, { path: '/' });
+    if (isProtectedAdminAction) {
+      return next();
+    }
     const encodedRedirect = encodeURIComponent(pathname);
     return context.redirect(`${ADMIN_LOGIN_PATH}?redirect=${encodedRedirect}`);
   }
@@ -117,10 +142,12 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const response = await next();
 
   // Prevenir caché de páginas admin en proxies/browsers
-  response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-  response.headers.set('Pragma', 'no-cache');
-  response.headers.set('Expires', '0');
-  response.headers.set('Vary', 'Cookie');
+  if (isAdminPageRequest) {
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+    response.headers.set('Vary', 'Cookie');
+  }
 
   return response;
 });

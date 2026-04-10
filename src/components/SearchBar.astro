@@ -42,7 +42,7 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
 </button>
 
 <!-- Wrapper de búsqueda: visible en desktop, overlay en mobile -->
-<div class="search-wrapper" id="searchWrapper" role="search" aria-label="Buscar productos">
+<div class="search-wrapper" id="searchWrapper" role="search" aria-label="Buscar productos" data-products={productsJson}>
     <div class="search-box">
         <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="11" cy="11" r="8"></circle>
@@ -462,10 +462,10 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
     }
 </style>
 
-<script define:vars={{ productsJson }}>
-    const products = JSON.parse(productsJson);
-    
+<script>
     const searchWrapper = document.getElementById('searchWrapper');
+    const products = JSON.parse(searchWrapper?.dataset.products ?? '[]');
+
     const searchInput = document.getElementById('searchInput');
     const searchDropdown = document.getElementById('searchDropdown');
     const dropdownResults = document.getElementById('dropdownResults');
@@ -474,8 +474,12 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
     const dropdownEmptyCopy = document.getElementById('dropdownEmptyCopy');
     const searchTrigger = document.getElementById('searchTrigger');
     const searchClose = document.getElementById('searchClose');
-    let searchTimer: number | null = null;
+    let searchTimer = null;
     let searchRequestId = 0;
+
+    function getSearchInputValue(target) {
+        return target instanceof HTMLInputElement ? target.value : '';
+    }
 
     function showDropdown() {
         searchDropdown.classList.add('active');
@@ -626,7 +630,7 @@ const productsJson = JSON.stringify(error ? fallbackProducts : catalogProducts);
 
     // Input events
     searchInput?.addEventListener('input', (e) => {
-        const query = (e.target as HTMLInputElement).value;
+        const query = getSearchInputValue(e.currentTarget);
         searchProducts(query);
         
         if (query.length > 0) {

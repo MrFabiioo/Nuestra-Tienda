@@ -17,6 +17,8 @@ export const Product = defineTable({
         sizes: column.text(),
         slug: column.text({ unique: true }),
         categoryId: column.text({ optional: true }),
+        // Receta de costo almacenada como JSON serializado
+        recipe: column.text({ optional: true }),
     }
 })
 
