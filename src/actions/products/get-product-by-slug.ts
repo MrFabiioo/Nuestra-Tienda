@@ -1,11 +1,23 @@
 
 
 import { emptyRecipe } from "@utils/recipe-calculator";
-import { isMissingRecipeColumnError, productBaseSelection } from "@utils/product-db";
+import { ensureFeaturedColumnExists, isMissingRecipeColumnError } from "@utils/product-db";
 import { defineAction } from "astro:actions";
-import { Category, db, eq, Product, ProductImage } from "astro:db";
+import { Category, db, eq, Product, ProductImage, sql } from "astro:db";
 import { z } from "astro:schema";
 import type { ProductRecipe } from "@interfaces/recipe.interface";
+
+type ProductBySlugRow = {
+    id: string;
+    title: string;
+    description: string;
+    price: number;
+    sizes: string;
+    slug: string;
+    categoryId: string | null;
+    recipe: ProductRecipe;
+    featured: boolean;
+};
 
 const newProduct = {
       id: '',
@@ -28,28 +40,38 @@ function parseRecipe(raw: string | null | undefined): ProductRecipe {
 }
 
 async function findProductBySlug(slug: string) {
+    await ensureFeaturedColumnExists();
+
     try {
-        const [productRow] = await db.select().from(Product).where(eq(Product.slug, slug));
+        const { rows } = await db.run(sql`
+            SELECT id, title, description, price, sizes, slug, categoryId, recipe, featured
+            FROM ${Product}
+            WHERE slug = ${slug}
+            LIMIT 1
+        `);
+        const productRow = rows[0] as Record<string, unknown> | undefined;
 
         if (!productRow) {
             return null;
         }
 
-        const productAny = productRow as typeof productRow & { recipe?: string | null };
-
         return {
             ...productRow,
-            recipe: parseRecipe(productAny.recipe),
-        };
+            recipe: parseRecipe(productRow.recipe as string | null | undefined),
+            featured: Boolean(productRow.featured),
+        } as ProductBySlugRow;
     } catch (error) {
         if (!isMissingRecipeColumnError(error)) {
             throw error;
         }
 
-        const [productRow] = await db
-            .select(productBaseSelection)
-            .from(Product)
-            .where(eq(Product.slug, slug));
+        const { rows } = await db.run(sql`
+            SELECT id, title, description, price, sizes, slug, categoryId, featured
+            FROM ${Product}
+            WHERE slug = ${slug}
+            LIMIT 1
+        `);
+        const productRow = rows[0] as Record<string, unknown> | undefined;
 
         if (!productRow) {
             return null;
@@ -58,7 +80,8 @@ async function findProductBySlug(slug: string) {
         return {
             ...productRow,
             recipe: emptyRecipe(),
-        };
+            featured: Boolean(productRow.featured),
+        } as ProductBySlugRow;
     }
 }
 

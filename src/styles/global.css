@@ -272,6 +272,18 @@ select {
         color: var(--color-danger);
     }
 
+    .btn-featured--active {
+        border-color: color-mix(in srgb, #eab308 40%, transparent);
+        background: color-mix(in srgb, #eab308 14%, var(--color-surface-elevated) 86%);
+        color: #eab308;
+    }
+
+    .btn-featured--active:hover {
+        border-color: color-mix(in srgb, #eab308 60%, transparent);
+        background: color-mix(in srgb, #eab308 22%, var(--color-surface-elevated) 78%);
+        color: #ca8a04;
+    }
+
     .admin-shell {
         @apply space-y-6 pb-8 pt-10;
     }

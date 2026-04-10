@@ -4,10 +4,12 @@ import { getCategories } from "./categories/get-categories";
 import { createUpdateProduct } from "./products/create-update-product.action";
 import { deleteProduct } from "./products/delete-product.action";
 import { deleteProductImage } from "./products/delete-product-image.action";
+import { getFeaturedProducts } from "./products/get-featured-products";
 import { getProductBySlug } from "./products/get-product-by-slug";
 import { getProductsByCategory } from "./products/get-products-by-category";
 import { getProductsByPage } from "./products/getProducts";
 import { loadProductsFromCart } from "./products/load-products-from-cart.action";
+import { toggleFeatured } from "./products/toggle-featured.action";
 import { login } from "./auth/login.action";
 import { logout } from "./auth/logout.action";
 
@@ -16,6 +18,7 @@ export const server = {
     getProductsByPage,
     getProductsByCategory,
     getProductBySlug,
+    getFeaturedProducts,
     loadProductsFromCart,
 
     // ── Auth actions ─────────────────────────────────────────────────
@@ -26,6 +29,7 @@ export const server = {
     createUpdateProduct,
     deleteProduct,
     deleteProductImage,
+    toggleFeatured,
     getCategories,
     createUpdateCategory,
     deleteCategory,

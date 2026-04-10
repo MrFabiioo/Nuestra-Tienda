@@ -19,6 +19,8 @@ export const Product = defineTable({
         categoryId: column.text({ optional: true }),
         // Receta de costo almacenada como JSON serializado
         recipe: column.text({ optional: true }),
+        // Marca el producto para aparecer en el banner del home
+        featured: column.boolean({ optional: true }),
     }
 })
 

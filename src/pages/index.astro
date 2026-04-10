@@ -9,6 +9,9 @@ import { actions } from "astro:actions";
 
 export const prerender = false;
 
+const { data: featuredData } = await Astro.callAction(actions.getFeaturedProducts, {});
+const featuredProducts = featuredData?.products ?? [];
+
 const { data, error } = await Astro.callAction(actions.getProductsByCategory, {});
 
 let productsByCategory: Array<{
@@ -112,7 +115,7 @@ if (error) {
     </section>
 
     <!-- Slider inmediatamente después del hero — prueba visual del producto -->
-    <SliderImageAutomatic />
+    <SliderImageAutomatic featuredProducts={featuredProducts} />
 
     <!-- Barra de señales de confianza — debajo del slider, antes del catálogo -->
     <div class="hero-echo hero-echo--trust">
