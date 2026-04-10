@@ -31,7 +31,24 @@ if (result && !result.error) {
   return Astro.redirect(safeRedirect(redirectParam));
 }
 
-const errorMessage = result?.error?.message ?? null;
+function parseErrorMessage(raw: string | undefined): string | null {
+  if (!raw) return null;
+
+  // Zod validation errors vienen como "Failed to validate: [{...}, ...]"
+  const zodPrefix = 'Failed to validate: ';
+  if (raw.startsWith(zodPrefix)) {
+    try {
+      const issues = JSON.parse(raw.slice(zodPrefix.length)) as { message: string; path?: string[] }[];
+      if (issues.length > 0) return issues[0].message;
+    } catch {
+      // si falla el parse, caer al fallback
+    }
+  }
+
+  return raw;
+}
+
+const errorMessage = parseErrorMessage(result?.error?.message);
 ---
 
 <Layout title="Admin — Acceso">

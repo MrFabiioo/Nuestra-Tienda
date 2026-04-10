@@ -2,24 +2,21 @@
 import Layout from "../layouts/Layout.astro";
 import Card from "../components/Card.astro";
 import { actions } from "astro:actions";
-import Pagination from "../components/shared/Pagination.astro";
 import BreadcrumbTrail from "../components/shared/BreadcrumbTrail.astro";
 
 export const prerender = false
 
-const url = Astro.url;
-const pageParam = Number(url.searchParams.get('page') ?? 1);
-
 // Fetch products
 const {data: productsData, error: productsError} = await Astro.callAction(actions.getProductsByPage,{
-    page: pageParam
+    page: 1,
+    limit: 9999,
 })
 
 if (productsError || !productsData) {
     return Astro.redirect('/');
 }
 
-const {products, totalPages} = productsData;
+const {products} = productsData;
 
 // Fetch categories
 const {data: categoriesData, error: categoriesError} = await Astro.callAction(actions.getCategories, {})
@@ -58,7 +55,7 @@ const catalogSkeletonCards = Array.from({ length: 4 });
                 <BreadcrumbTrail
                     items={storeBreadcrumbs}
                     eyebrow="Ubicación"
-                    summary={`Estás en el catálogo general${pageParam > 1 ? `, página ${pageParam}` : ''}. Desde acá podés descubrir productos, entrar al detalle o volver al inicio sin perder el recorrido.`}
+                    summary="Estás en el catálogo completo. Desde acá podés descubrir productos, entrar al detalle o volver al inicio sin perder el recorrido."
                 />
             </div>
 
@@ -82,7 +79,7 @@ const catalogSkeletonCards = Array.from({ length: 4 });
                     </span>
                     <span class="store-stat-pill inline-flex items-center gap-2 rounded-full px-4 py-2">
                         <span class="h-2 w-2 rounded-full bg-guacamole-a"></span>
-                        {products.length} productos visibles en esta página
+                        {products.length} productos en el catálogo
                     </span>
                     <span class="store-stat-pill inline-flex items-center gap-2 rounded-full px-4 py-2">
                         <span class="store-stat-dot h-2 w-2 rounded-full"></span>
@@ -182,7 +179,7 @@ const catalogSkeletonCards = Array.from({ length: 4 });
                     </p>
                 </div>
                 <p id="results-hint">
-                    Si todavía no aparece lo que buscás, cambiá de categoría o seguí explorando con la paginación.
+                    Si todavía no aparece lo que buscás, cambiá de categoría o ajustá el filtro.
                 </p>
             </div>
         </section>
@@ -284,10 +281,6 @@ const catalogSkeletonCards = Array.from({ length: 4 });
             </div>
         </section>
 
-        <!-- Pagination -->
-        <section class="mx-auto max-w-6xl px-4 pb-12">
-            <Pagination pageParam={pageParam} totalPages={totalPages} />
-        </section>
     </main>
 </Layout>
 
@@ -341,8 +334,8 @@ const catalogSkeletonCards = Array.from({ length: 4 });
             const categoryLabel = getCategoryLabel(activeCategory);
 
             if (!hasSearch && !hasCategory) {
-                resultsCount.textContent = `Estás viendo ${visibleCount} productos en esta página de la tienda`;
-                resultsHint.textContent = 'Si todavía no aparece lo que buscás, cambiá de categoría o seguí explorando con la paginación.';
+                resultsCount.textContent = `Estás viendo ${visibleCount} productos en el catálogo`;
+                resultsHint.textContent = 'Si todavía no aparece lo que buscás, cambiá de categoría o ajustá el filtro.';
                 return;
             }
 
@@ -355,7 +348,7 @@ const catalogSkeletonCards = Array.from({ length: 4 });
             resultsCount.textContent = `Mostrando ${visibleCount} ${resultLabel} ${context.join(' ')}`.trim();
 
             if (visibleCount === 0) {
-                resultsHint.textContent = 'Probá reiniciar la búsqueda, volver a “Todos” o pasar de página para abrir más opciones.';
+                resultsHint.textContent = 'Probá reiniciar la búsqueda o volver a “Todos” para abrir más opciones.';
                 return;
             }
 
@@ -382,7 +375,7 @@ const catalogSkeletonCards = Array.from({ length: 4 });
                 emptyStateDescription.textContent = 'Probá buscar por nombre corto, ingrediente o categoría. También podés reiniciar la búsqueda para volver al catálogo completo de esta página.';
             } else if (hasCategory) {
                 emptyStateTitle.textContent = `No hay productos visibles en ${categoryLabel}`;
-                emptyStateDescription.textContent = 'En esta página no hay productos para esa categoría. Probá volver a “Todos” o avanzar con la paginación para seguir explorando la tienda.';
+                emptyStateDescription.textContent = 'No hay productos para esa categoría. Probá volver a “Todos” o ajustá los filtros.';
             } else {
                 emptyStateTitle.textContent = 'No vimos productos para esa búsqueda';
                 emptyStateDescription.textContent = 'En esta página no encontramos coincidencias. Probá con otra palabra o reiniciá los filtros.';

@@ -130,6 +130,71 @@ const checkoutBreadcrumbs = [
               </span>
             </div>
 
+            <!-- Products Card -->
+            <div class="premium-panel overflow-hidden rounded-3xl">
+              <div class="bg-guacamole-a px-6 py-4">
+                <h2 class="text-xl font-black text-white uppercase tracking-wide">
+                  Tu selección ({products.length})
+                </h2>
+              </div>
+
+              <div class="divide-y divide-gray-100">
+                {products.map((product) => (
+                  <div class="flex gap-4 p-4 transition-colors hover:bg-gray-50 md:gap-6 md:p-6">
+                    <!-- Product Image -->
+                    <div class="shrink-0">
+                      <img
+                        src={product.image}
+                        alt={product.title}
+                         class="h-20 w-20 rounded-xl border-2 border-guacamole-b/20 object-cover shadow-sm md:h-24 md:w-24"
+                      />
+                    </div>
+
+                    <!-- Product Details -->
+                    <div class="flex-1 min-w-0">
+                      <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-2">
+                        <div>
+                          <a
+                            href={`/products/${product.slug}`}
+                            class="text-lg font-bold text-guacamole-icons hover:text-guacamole-b hover:underline transition-colors line-clamp-1"
+                          >
+                            {product.title}
+                          </a>
+                          <div class="flex items-center gap-3 mt-1 text-sm text-gray-500">
+                            <span class="rounded-full border border-guacamole-fondo/30 bg-guacamole-fondo/20 px-3 py-1 font-semibold text-guacamole-icons">
+                              {product.sizes}
+                            </span>
+                            <span>Cantidad: <strong>{product.quantity}</strong></span>
+                          </div>
+                        </div>
+
+                        <div class="text-right">
+                          <p class="text-xl font-black text-guacamole-a">
+                            {Formatter.currency(product.price * product.quantity)}
+                          </p>
+                          <p class="text-xs text-gray-400">
+                            {Formatter.currency(product.price)} c/u
+                          </p>
+                        </div>
+                      </div>
+
+                      <!-- Remove Button -->
+                       <button
+                         data-id={product.productId}
+                         data-size={product.sizes}
+                         class="btn-delete mt-3 inline-flex items-center gap-1 rounded-full border border-guacamole-b/15 bg-guacamole-fondo/10 px-3 py-1.5 text-sm font-semibold text-guacamole-a transition-colors hover:border-guacamole-b/25 hover:bg-guacamole-fondo/15 hover:text-guacamole-b disabled:cursor-wait disabled:border-guacamole-b/10 disabled:bg-guacamole-fondo/10 disabled:text-guacamole-b/40"
+                        >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Quitar
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <!-- Customer Form -->
             <div class="premium-panel overflow-hidden">
               <div class="bg-guacamole-b px-6 py-4">
@@ -137,7 +202,7 @@ const checkoutBreadcrumbs = [
                   Tus datos
                 </h2>
               </div>
-              
+
               <form id="customer-form" class="p-6 space-y-6">
                 <div id="form-feedback" class="hidden rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert"></div>
 
@@ -152,17 +217,17 @@ const checkoutBreadcrumbs = [
                     <h3 class="text-lg font-bold text-guacamole-icons">Información de contacto</h3>
                     <p class="text-sm text-gray-500">Así te confirmamos el pedido y cualquier detalle importante de entrega.</p>
                   </div>
-                  
+
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Nombre completo -->
                     <div data-field-wrapper>
                       <label for="fullName" class="block text-sm font-semibold text-guacamole-icons mb-2">
                         Nombre completo <span class="text-red-500">*</span>
                       </label>
-                      <input 
-                        type="text" 
-                        id="fullName" 
-                        name="fullName" 
+                      <input
+                        type="text"
+                        id="fullName"
+                        name="fullName"
                         required
                         autocomplete="name"
                         class="premium-field"
@@ -171,16 +236,16 @@ const checkoutBreadcrumbs = [
                       <p class="field-help">Usá nombre y apellido para identificar tu pedido más rápido.</p>
                       <p class="field-error hidden" data-field-error></p>
                     </div>
-                    
+
                     <!-- Teléfono -->
                     <div data-field-wrapper>
                       <label for="phone" class="block text-sm font-semibold text-guacamole-icons mb-2">
                         Teléfono <span class="text-red-500">*</span>
                       </label>
-                      <input 
-                        type="tel" 
-                        id="phone" 
-                        name="phone" 
+                      <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
                         required
                         autocomplete="tel"
                         inputmode="tel"
@@ -191,16 +256,16 @@ const checkoutBreadcrumbs = [
                       <p class="field-error hidden" data-field-error></p>
                     </div>
                   </div>
-                  
+
                   <!-- Correo electrónico -->
                   <div data-field-wrapper>
                     <label for="email" class="block text-sm font-semibold text-guacamole-icons mb-2">
                       Correo electrónico <span class="text-red-500">*</span>
                     </label>
-                    <input 
-                      type="email" 
-                      id="email" 
-                      name="email" 
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
                       required
                       autocomplete="email"
                       class="premium-field"
@@ -210,14 +275,14 @@ const checkoutBreadcrumbs = [
                     <p class="field-error hidden" data-field-error></p>
                   </div>
                 </div>
-                
+
                 <!-- Section: Delivery Information -->
                 <div class="space-y-4 pt-4">
                   <div class="border-b border-gray-100 pb-2">
                     <h3 class="text-lg font-bold text-guacamole-icons">Entrega y referencias</h3>
                     <p class="text-sm text-gray-500">Dejanos el contexto justo para que la coordinación salga prolija desde el primer mensaje.</p>
                   </div>
-                  
+
                   <!-- Método de entrega -->
                   <div data-field-wrapper>
                     <label class="block text-sm font-semibold text-guacamole-icons mb-3">
@@ -225,10 +290,10 @@ const checkoutBreadcrumbs = [
                     </label>
                     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <label class="checkout-delivery-option flex cursor-pointer items-start gap-3 rounded-2xl px-4 py-4 transition-all">
-                        <input 
-                          type="radio" 
-                          name="deliveryMethod" 
-                          value="domicilio" 
+                        <input
+                          type="radio"
+                          name="deliveryMethod"
+                          value="domicilio"
                           checked
                           class="mt-1 h-5 w-5 text-guacamole-b focus:ring-guacamole-b"
                         />
@@ -238,9 +303,9 @@ const checkoutBreadcrumbs = [
                         </span>
                       </label>
                       <label class="checkout-delivery-option flex cursor-pointer items-start gap-3 rounded-2xl px-4 py-4 transition-all">
-                        <input 
-                          type="radio" 
-                          name="deliveryMethod" 
+                        <input
+                          type="radio"
+                          name="deliveryMethod"
                           value="recoger"
                           class="mt-1 h-5 w-5 text-guacamole-b focus:ring-guacamole-b"
                         />
@@ -253,16 +318,16 @@ const checkoutBreadcrumbs = [
                     <p class="field-help">Elegí la opción que mejor te quede y después dejá las referencias necesarias para evitar idas y vueltas.</p>
                     <p class="field-error hidden" data-field-error></p>
                   </div>
-                  
+
                   <!-- Dirección -->
                   <div data-field-wrapper>
                     <label for="address" class="block text-sm font-semibold text-guacamole-icons mb-2">
                       Dirección de entrega <span class="text-red-500">*</span>
                     </label>
-                    <input 
-                      type="text" 
-                      id="address" 
-                      name="address" 
+                    <input
+                      type="text"
+                      id="address"
+                      name="address"
                       required
                       autocomplete="street-address"
                       class="premium-field"
@@ -271,17 +336,17 @@ const checkoutBreadcrumbs = [
                     <p class="field-help">Si elegiste retiro acordado, podés usar este espacio para la referencia principal o el punto de encuentro.</p>
                     <p class="field-error hidden" data-field-error></p>
                   </div>
-                  
+
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Ciudad / Sector -->
                     <div data-field-wrapper>
                       <label for="city" class="block text-sm font-semibold text-guacamole-icons mb-2">
                         Ciudad / Sector <span class="text-red-500">*</span>
                       </label>
-                      <input 
-                        type="text" 
-                        id="city" 
-                        name="city" 
+                      <input
+                        type="text"
+                        id="city"
+                        name="city"
                         required
                         autocomplete="address-level2"
                         class="premium-field"
@@ -290,7 +355,7 @@ const checkoutBreadcrumbs = [
                       <p class="field-help">Sumá la ciudad y el sector para hacer la coordinación más precisa.</p>
                       <p class="field-error hidden" data-field-error></p>
                     </div>
-                    
+
                     <!-- Referencias / Notas -->
                     <div data-field-wrapper>
                       <label for="notes" class="block text-sm font-semibold text-guacamole-icons mb-2">
@@ -314,71 +379,6 @@ const checkoutBreadcrumbs = [
                   <p class="mt-1">Chequeá que el teléfono y la dirección estén bien escritos. Ese detalle hace que la confirmación sea mucho más ágil.</p>
                 </div>
               </form>
-            </div>
-
-            <!-- Products Card -->
-            <div class="premium-panel overflow-hidden rounded-3xl">
-              <div class="bg-guacamole-a px-6 py-4">
-                <h2 class="text-xl font-black text-white uppercase tracking-wide">
-                  Tu selección ({products.length})
-                </h2>
-              </div>
-              
-              <div class="divide-y divide-gray-100">
-                {products.map((product) => (
-                  <div class="flex gap-4 p-4 transition-colors hover:bg-gray-50 md:gap-6 md:p-6">
-                    <!-- Product Image -->
-                    <div class="shrink-0">
-                      <img 
-                        src={product.image} 
-                        alt={product.title} 
-                         class="h-20 w-20 rounded-xl border-2 border-guacamole-b/20 object-cover shadow-sm md:h-24 md:w-24"
-                      />
-                    </div>
-                    
-                    <!-- Product Details -->
-                    <div class="flex-1 min-w-0">
-                      <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-2">
-                        <div>
-                          <a 
-                            href={`/products/${product.slug}`} 
-                            class="text-lg font-bold text-guacamole-icons hover:text-guacamole-b hover:underline transition-colors line-clamp-1"
-                          >
-                            {product.title}
-                          </a>
-                          <div class="flex items-center gap-3 mt-1 text-sm text-gray-500">
-                            <span class="rounded-full border border-guacamole-fondo/30 bg-guacamole-fondo/20 px-3 py-1 font-semibold text-guacamole-icons">
-                              {product.sizes}
-                            </span>
-                            <span>Cantidad: <strong>{product.quantity}</strong></span>
-                          </div>
-                        </div>
-                        
-                        <div class="text-right">
-                          <p class="text-xl font-black text-guacamole-a">
-                            {Formatter.currency(product.price * product.quantity)}
-                          </p>
-                          <p class="text-xs text-gray-400">
-                            {Formatter.currency(product.price)} c/u
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <!-- Remove Button -->
-                       <button
-                         data-id={product.productId}
-                         data-size={product.sizes}
-                         class="btn-delete mt-3 inline-flex items-center gap-1 rounded-full border border-guacamole-b/15 bg-guacamole-fondo/10 px-3 py-1.5 text-sm font-semibold text-guacamole-a transition-colors hover:border-guacamole-b/25 hover:bg-guacamole-fondo/15 hover:text-guacamole-b disabled:cursor-wait disabled:border-guacamole-b/10 disabled:bg-guacamole-fondo/10 disabled:text-guacamole-b/40"
-                        >
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        Quitar
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
 
