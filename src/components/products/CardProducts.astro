@@ -146,6 +146,7 @@ const sliderId = `slider-${title.replace(/\s+/g, '-').toLowerCase()}`;
         display: flex;
         gap: 0;
         width: max-content;
+        align-items: stretch;
     }
 
     .carousel-slide {
@@ -155,6 +156,12 @@ const sliderId = `slider-${title.replace(/\s+/g, '-').toLowerCase()}`;
         max-width: 300px;
         padding: 0 0.5rem;
         box-sizing: border-box;
+        display: flex;
+    }
+
+    .carousel-slide > :global(.product-card) {
+        width: 100%;
+        height: 100%;
     }
 
     /* Botones de navegación */

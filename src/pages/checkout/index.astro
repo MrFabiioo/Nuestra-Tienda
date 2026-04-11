@@ -23,6 +23,13 @@ const total = products.reduce(
 );
 
 const isEmpty = products.length === 0;
+const lockedDeliveryData = {
+  method: 'wemi',
+  address: 'CR 48 14 49',
+  city: 'Medellin - Poblado',
+  notes: 'Grupo Emi Falk - Sala de Rdio'
+};
+
 const checkoutBreadcrumbs = [
   { label: 'Inicio', href: '/' },
   { label: 'Tienda', href: '/tienda' },
@@ -207,7 +214,7 @@ const checkoutBreadcrumbs = [
                 <div id="form-feedback" class="hidden rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert"></div>
 
                 <div class="rounded-2xl border border-guacamole-fondo/40 bg-guacamole-fondo/10 px-4 py-4 text-sm text-guacamole-icons">
-                  <p class="font-bold">Tus datos se usan solo para confirmar el pedido y coordinar la entrega o el retiro.</p>
+                  <p class="font-bold">Tus datos se usan solo para confirmar el pedido y coordinar la entrega en la WEMI.</p>
                   <p class="mt-1 text-gray-600">Los campos con <span class="font-bold text-red-500">*</span> son los mínimos para avanzar a pago sin perder contexto.</p>
                 </div>
 
@@ -252,7 +259,7 @@ const checkoutBreadcrumbs = [
                         class="premium-field"
                         placeholder="+58 412 123 4567"
                       />
-                      <p class="field-help">Te contactamos por acá si surge algo con la entrega o el retiro.</p>
+                      <p class="field-help">Te contactamos por acá si surge algo con la entrega en la WEMI.</p>
                       <p class="field-error hidden" data-field-error></p>
                     </div>
                   </div>
@@ -293,29 +300,30 @@ const checkoutBreadcrumbs = [
                         <input
                           type="radio"
                           name="deliveryMethod"
-                          value="domicilio"
+                          value={lockedDeliveryData.method}
                           checked
                           class="mt-1 h-5 w-5 text-guacamole-b focus:ring-guacamole-b"
                         />
                         <span>
-                          <span class="block font-semibold text-guacamole-icons">Domicilio</span>
-                          <span class="mt-1 block text-sm text-gray-500">Ideal si querés recibir tu pedido en una dirección específica.</span>
+                          <span class="block font-semibold text-guacamole-icons">En la WEMI</span>
+                          <span class="mt-1 block text-sm text-gray-500">Retirás o recibís tu pedido en el punto fijo habilitado por ahora.</span>
                         </span>
                       </label>
-                      <label class="checkout-delivery-option flex cursor-pointer items-start gap-3 rounded-2xl px-4 py-4 transition-all">
+                      <label class="checkout-delivery-option checkout-delivery-option-disabled flex items-start gap-3 rounded-2xl px-4 py-4 transition-all" aria-disabled="true">
                         <input
                           type="radio"
                           name="deliveryMethod"
-                          value="recoger"
+                          value="domicilio"
+                          disabled
                           class="mt-1 h-5 w-5 text-guacamole-b focus:ring-guacamole-b"
                         />
                         <span>
-                          <span class="block font-semibold text-guacamole-icons">Retiro acordado</span>
-                          <span class="mt-1 block text-sm text-gray-500">Perfecto si preferís coordinar un punto de encuentro o retiro pautado.</span>
+                          <span class="block font-semibold text-guacamole-icons">Domicilio</span>
+                          <span class="mt-1 block text-sm text-gray-500">La opción sigue visible, pero por ahora no está disponible para nuevos pedidos.</span>
                         </span>
                       </label>
                     </div>
-                    <p class="field-help">Elegí la opción que mejor te quede y después dejá las referencias necesarias para evitar idas y vueltas.</p>
+                    <p class="field-help">Por ahora todos los pedidos se entregan únicamente en la WEMI.</p>
                     <p class="field-error hidden" data-field-error></p>
                   </div>
 
@@ -330,10 +338,11 @@ const checkoutBreadcrumbs = [
                       name="address"
                       required
                       autocomplete="street-address"
+                      readonly
                       class="premium-field"
-                      placeholder="Av. Principal, Calle 5, Edif. Miramar, Piso 3, Apto. 3B"
+                      value={lockedDeliveryData.address}
                     />
-                    <p class="field-help">Si elegiste retiro acordado, podés usar este espacio para la referencia principal o el punto de encuentro.</p>
+                    <p class="field-help">Dirección fija habilitada para las entregas actuales.</p>
                     <p class="field-error hidden" data-field-error></p>
                   </div>
 
@@ -349,26 +358,27 @@ const checkoutBreadcrumbs = [
                         name="city"
                         required
                         autocomplete="address-level2"
+                        readonly
                         class="premium-field"
-                        placeholder="Caracas, El Hatillo"
+                        value={lockedDeliveryData.city}
                       />
-                      <p class="field-help">Sumá la ciudad y el sector para hacer la coordinación más precisa.</p>
+                      <p class="field-help">Ciudad y sector definidos para este punto de entrega.</p>
                       <p class="field-error hidden" data-field-error></p>
                     </div>
 
                     <!-- Referencias / Notas -->
                     <div data-field-wrapper>
                       <label for="notes" class="block text-sm font-semibold text-guacamole-icons mb-2">
-                        Referencias / Notas <span class="text-gray-400">(opcional)</span>
+                        Referencia del punto de entrega
                       </label>
                       <textarea
                         id="notes"
                         name="notes"
                         rows="4"
+                        readonly
                         class="premium-field min-h-[112px] resize-y"
-                        placeholder="Ej. Portón verde, tocar timbre o llamar al llegar"
-                      ></textarea>
-                      <p class="field-help">Acá entran los detalles finos: torre, piso, horario, timbre o datos de acceso.</p>
+                      >{lockedDeliveryData.notes}</textarea>
+                      <p class="field-help">Referencia hardcodeada para identificar el punto exacto dentro de la WEMI.</p>
                       <p class="field-error hidden" data-field-error></p>
                     </div>
                   </div>
@@ -376,7 +386,7 @@ const checkoutBreadcrumbs = [
 
                 <div class="checkout-review-note rounded-2xl px-4 py-4 text-sm text-gray-600">
                   <p class="font-semibold text-guacamole-icons">Antes de pasar a pago</p>
-                  <p class="mt-1">Chequeá que el teléfono y la dirección estén bien escritos. Ese detalle hace que la confirmación sea mucho más ágil.</p>
+                  <p class="mt-1">Chequeá que el teléfono esté bien escrito. El punto de entrega ya queda fijado automáticamente en la WEMI.</p>
                 </div>
               </form>
             </div>
@@ -602,6 +612,16 @@ const checkoutBreadcrumbs = [
     background: color-mix(in srgb, var(--color-surface-soft) 82%, var(--color-accent) 18%);
   }
 
+  .theme-checkout-page .checkout-delivery-option-disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+  }
+
+  .theme-checkout-page .checkout-delivery-option-disabled:hover {
+    border-color: var(--color-border);
+    background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+  }
+
   .theme-checkout-page .checkout-delivery-option:has(input:checked) {
     border-color: color-mix(in srgb, var(--color-accent) 42%, var(--color-border) 58%);
     background: color-mix(in srgb, var(--color-surface-soft) 74%, var(--color-accent) 26%);
@@ -625,14 +645,40 @@ document.addEventListener('astro:page-load',()=>{
   const form = document.getElementById('customer-form') as HTMLFormElement | null;
   const checkoutFeedback = document.getElementById('checkout-feedback') as HTMLParagraphElement | null;
   const feedbackBox = document.getElementById('form-feedback') as HTMLDivElement | null;
+  const lockedDeliveryData = {
+    method: 'wemi',
+    address: 'CR 48 14 49',
+    city: 'Medellin - Poblado',
+    notes: 'Grupo Emi Falk - Sala de Rdio'
+  };
 
   const validationMessages: Record<string, string> = {
     fullName: 'Decinos tu nombre completo para identificar el pedido.',
     phone: 'Necesitamos un teléfono válido para coordinar cualquier detalle.',
     email: 'Ingresá un correo válido para enviarte la confirmación.',
-    address: 'Sumá una dirección o punto de referencia para la entrega o el retiro.',
-    city: 'Indicá la ciudad o el sector para cerrar bien la coordinación.',
-    deliveryMethod: 'Elegí cómo preferís recibir tu pedido.'
+    address: 'La dirección de entrega en la WEMI debe quedar cargada.',
+    city: 'La ciudad del punto de entrega en la WEMI debe quedar cargada.',
+    deliveryMethod: 'La entrega se realiza únicamente en la WEMI.'
+  };
+
+  const applyLockedDeliveryData = () => {
+    if (!form) return;
+
+    const addressField = form.elements.namedItem('address') as HTMLInputElement | null;
+    const cityField = form.elements.namedItem('city') as HTMLInputElement | null;
+    const notesField = form.elements.namedItem('notes') as HTMLTextAreaElement | null;
+    const deliveryMethods = form.elements.namedItem('deliveryMethod') as RadioNodeList | null;
+
+    if (addressField) addressField.value = lockedDeliveryData.address;
+    if (cityField) cityField.value = lockedDeliveryData.city;
+    if (notesField) notesField.value = lockedDeliveryData.notes;
+
+    if (deliveryMethods) {
+      for (let i = 0; i < deliveryMethods.length; i++) {
+        const radio = deliveryMethods[i] as HTMLInputElement;
+        radio.checked = radio.value === lockedDeliveryData.method;
+      }
+    }
   };
 
   const setCheckoutFeedback = (message: string, tone: 'default' | 'error' | 'success' = 'default') => {
@@ -743,6 +789,8 @@ document.addEventListener('astro:page-load',()=>{
   };
 
   if (form) {
+    applyLockedDeliveryData();
+
     form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input, textarea').forEach((field) => {
       if (field.type === 'radio') {
         field.addEventListener('change', () => {
@@ -778,19 +826,7 @@ document.addEventListener('astro:page-load',()=>{
         (form.elements.namedItem('fullName') as HTMLInputElement).value = data.fullName || '';
         (form.elements.namedItem('phone') as HTMLInputElement).value = data.phone || '';
         (form.elements.namedItem('email') as HTMLInputElement).value = data.email || '';
-        (form.elements.namedItem('address') as HTMLInputElement).value = data.address || '';
-        (form.elements.namedItem('city') as HTMLInputElement).value = data.city || '';
-        (form.elements.namedItem('notes') as HTMLTextAreaElement).value = data.notes || '';
-        const deliveryMethods = form.elements.namedItem('deliveryMethod') as RadioNodeList;
-        if (deliveryMethods) {
-          for (let i = 0; i < deliveryMethods.length; i++) {
-            const radio = deliveryMethods[i] as HTMLInputElement;
-            if (radio.value === data.deliveryMethod) {
-              radio.checked = true;
-              break;
-            }
-          }
-        }
+        applyLockedDeliveryData();
       }
     } catch (e) {
       // Ignore parse errors
