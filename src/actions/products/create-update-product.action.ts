@@ -3,7 +3,7 @@
 import { ImageUpload } from "@utils/image-upload";
 import { isMissingRecipeColumnError } from "@utils/product-db";
 import { defineAction } from "astro:actions";
-import { db, eq, Product, ProductImage } from "astro:db";
+import { db, eq, Product, ProductImage, sql } from "astro:db";
 import { z } from "astro:schema";
 import { v4 as UUID } from "uuid";
 import { requireAuth } from "../../firebase/guards";
@@ -88,45 +88,52 @@ export const createUpdateProduct = defineAction({
             secureUrls.push(...urls);
         }
 
-        const buildQueries = (includeRecipe: boolean) => {
-            const queries: any[] = [];
-            const productForDb = includeRecipe
-                ? (product as typeof product & { recipe: string | null })
-                : rest;
-
+        const persistProduct = async (includeRecipe: boolean) => {
             if (!form.id) {
-                queries.push(db.insert(Product).values(includeRecipe ? productForDb : { id, ...rest }));
+                if (includeRecipe) {
+                    await db.run(sql`
+                        insert into ${Product} (id, title, description, price, sizes, slug, categoryId, recipe)
+                        values (${id}, ${rest.title}, ${rest.description}, ${rest.price}, ${rest.sizes}, ${rest.slug}, ${rest.categoryId ?? null}, ${recipeJson})
+                    `);
+                } else {
+                    await db.run(sql`
+                        insert into ${Product} (id, title, description, price, sizes, slug, categoryId)
+                        values (${id}, ${rest.title}, ${rest.description}, ${rest.price}, ${rest.sizes}, ${rest.slug}, ${rest.categoryId ?? null})
+                    `);
+                }
+            } else if (includeRecipe) {
+                await db.run(sql`
+                    update ${Product}
+                    set title = ${rest.title}, description = ${rest.description}, price = ${rest.price}, sizes = ${rest.sizes}, slug = ${rest.slug}, categoryId = ${rest.categoryId ?? null}, recipe = ${recipeJson}
+                    where id = ${id}
+                `);
             } else {
-                queries.push(
-                    db.update(Product)
-                        .set(includeRecipe ? productForDb : rest)
-                        .where(eq(Product.id, id)),
-                );
+                await db.run(sql`
+                    update ${Product}
+                    set title = ${rest.title}, description = ${rest.description}, price = ${rest.price}, sizes = ${rest.sizes}, slug = ${rest.slug}, categoryId = ${rest.categoryId ?? null}
+                    where id = ${id}
+                `);
             }
 
-            secureUrls.forEach((imageUrl) => {
-                const imageObject = {
-                    id: UUID(),
-                    image: imageUrl,
-                    productId: product.id,
-                };
-                queries.push(db.insert(ProductImage).values(imageObject));
-            });
-
-            return queries;
+            for (const imageUrl of secureUrls) {
+                await db.run(sql`
+                    insert into ${ProductImage} (id, image, productId)
+                    values (${UUID()}, ${imageUrl}, ${product.id})
+                `);
+            }
         };
 
         let recipeWasPersisted = true;
 
         try {
-            await db.batch(buildQueries(true));
+            await persistProduct(true);
         } catch (error) {
             if (!isMissingRecipeColumnError(error)) {
                 throw error;
             }
 
             recipeWasPersisted = false;
-            await db.batch(buildQueries(false));
+            await persistProduct(false);
         }
 
         return {

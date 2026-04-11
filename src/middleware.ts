@@ -43,6 +43,8 @@ const PROTECTED_ADMIN_ACTIONS = new Set([
   'getCategories',
   'createUpdateCategory',
   'deleteCategory',
+  'getOrders',
+  'reviewPayment',
 ]);
 
 /**

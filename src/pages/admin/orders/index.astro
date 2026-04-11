@@ -1,0 +1,106 @@
+---
+import Layout from '@layouts/Layout.astro';
+import { actions } from 'astro:actions';
+import { Formatter } from '@utils/formatter';
+import { formatOrderStatus } from '../../../services/orders/constants';
+
+export const prerender = false;
+
+const adminUser = Astro.locals.user!;
+const status = Astro.url.searchParams.get('status') ?? undefined;
+const { data, error } = await Astro.callAction(actions.getOrders, { status });
+
+if (error || !data) {
+  return Astro.redirect('/admin/dashboard');
+}
+
+const statuses = [
+  { label: 'Todos', value: '' },
+  { label: 'Pendiente pago', value: 'pending_payment' },
+  { label: 'En revisión', value: 'under_review' },
+  { label: 'Aprobado', value: 'approved' },
+  { label: 'Rechazado', value: 'rejected' },
+];
+---
+
+<Layout title="Admin · pedidos">
+  <section class="px-2 py-8 sm:px-4 lg:px-6">
+    <div class="premium-subtle-panel px-5 py-6 sm:px-7">
+      <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <span class="premium-chip">Admin · pedidos</span>
+          <h1 class="mt-4 text-3xl font-black tracking-tight theme-text-primary sm:text-4xl">Revisión de pagos</h1>
+          <p class="theme-text-muted mt-3 max-w-3xl text-sm leading-relaxed sm:text-base">
+            Acá tenés la cola manual de pagos persistidos. Nada de flujo fantasma: cada fila sale de la DB y cada decisión mueve estados reales.
+          </p>
+          <p class="mt-3 text-xs text-gray-500">Sesión activa: {adminUser.email}</p>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+          <a href="/admin/dashboard" class="premium-action-secondary">Volver al dashboard</a>
+        </div>
+      </div>
+
+      <div class="mt-5 flex flex-wrap gap-2">
+        {statuses.map((item) => (
+          <a href={item.value ? `/admin/orders?status=${item.value}` : '/admin/orders'} class:list={['rounded-full border px-4 py-2 text-sm font-semibold', status === item.value || (!status && !item.value) ? 'bg-guacamole-b text-white border-guacamole-b' : 'bg-white text-guacamole-icons border-gray-200']}>
+            {item.label}
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="admin-table-shell mt-6">
+      <div class="admin-table-scroll">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Pedido</th>
+              <th>Cliente</th>
+              <th>Total</th>
+              <th>Estado</th>
+              <th>Pago</th>
+              <th>Comprobante</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.orders.length === 0 ? (
+              <tr>
+                <td colspan="7">
+                  <div class="py-8 text-center text-sm text-gray-500">No hay pedidos para este filtro.</div>
+                </td>
+              </tr>
+            ) : data.orders.map((order) => (
+              <tr>
+                <td>
+                  <div class="min-w-[12rem]">
+                    <p class="font-bold text-guacamole-icons">{order.id.slice(0, 8)}</p>
+                    <p class="text-xs text-gray-500">{new Date(order.createdAt).toLocaleString('es-CO')}</p>
+                  </div>
+                </td>
+                <td>
+                  <p class="font-semibold text-guacamole-icons">{order.customerName}</p>
+                  <p class="text-xs text-gray-500">{order.customerEmail}</p>
+                  <p class="text-xs text-gray-500">{order.customerPhone}</p>
+                </td>
+                <td class="font-bold text-guacamole-a">{Formatter.currency(order.total)}</td>
+                <td>
+                  <span class="admin-table-badge">{formatOrderStatus(order.status)}</span>
+                </td>
+                <td>
+                  <p class="font-semibold text-guacamole-icons">{order.paymentMethod}</p>
+                  <p class="text-xs text-gray-500">{order.paymentStatus}</p>
+                </td>
+                <td class="text-sm text-gray-500">{order.proofUploadedAt ? new Date(order.proofUploadedAt).toLocaleString('es-CO') : 'Sin carga'}</td>
+                <td>
+                  <a href={`/admin/orders/${order.id}`} class="premium-action-secondary">Abrir</a>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</Layout>

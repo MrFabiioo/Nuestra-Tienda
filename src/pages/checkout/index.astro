@@ -460,8 +460,8 @@ const checkoutBreadcrumbs = [
                 </div>
                 
                 <!-- Pay Button -->
-                <a
-                  href="/pagos"
+                <button
+                  type="button"
                   id="proceed-to-payment"
                   class="group block w-full rounded-full bg-guacamole-b px-8 py-4 text-center text-sm font-bold uppercase tracking-wider text-white shadow-[0_4px_12px_rgba(86,130,3,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-guacamole-a hover:shadow-[0_6px_20px_rgba(62,97,2,0.35)]"
                 >
@@ -471,7 +471,7 @@ const checkoutBreadcrumbs = [
                     </svg>
                     Continuar a medios de pago
                   </span>
-                </a>
+                </button>
                 <p id="checkout-feedback" class="min-h-[1.25rem] text-center text-xs font-medium text-gray-500" aria-live="polite">
                   Completá tus datos y, cuando esté todo listo, seguimos al pago sin perder tu pedido.
                 </p>
@@ -639,6 +639,7 @@ const checkoutBreadcrumbs = [
 
 <script>
 import { CartCookiesClient } from "@utils/cart-cookies";
+import { actions } from "astro:actions";
 import { navigate } from "astro:transitions/client";
 
 document.addEventListener('astro:page-load',()=>{
@@ -817,22 +818,6 @@ document.addEventListener('astro:page-load',()=>{
     });
   }
 
-  // Restore customer data from sessionStorage on page load
-  const savedCustomerData = sessionStorage.getItem('guacamole-customer-data');
-  if (savedCustomerData) {
-    try {
-      const data = JSON.parse(savedCustomerData);
-      if (form) {
-        (form.elements.namedItem('fullName') as HTMLInputElement).value = data.fullName || '';
-        (form.elements.namedItem('phone') as HTMLInputElement).value = data.phone || '';
-        (form.elements.namedItem('email') as HTMLInputElement).value = data.email || '';
-        applyLockedDeliveryData();
-      }
-    } catch (e) {
-      // Ignore parse errors
-    }
-  }
-
   // Handle delete buttons
   const deleteButtons = document.querySelectorAll('.btn-delete');
   deleteButtons.forEach(button => {
@@ -853,7 +838,7 @@ document.addEventListener('astro:page-load',()=>{
     })
   })
 
-  // Handle proceed to payment button with customer data persistence
+  // Handle proceed to payment button with real order creation
   const proceedButton = document.getElementById('proceed-to-payment');
   const proceedButtonLabel = document.getElementById('proceed-to-payment-label');
   if (proceedButton) {
@@ -870,8 +855,7 @@ document.addEventListener('astro:page-load',()=>{
       }
     };
 
-    proceedButton.addEventListener('click', (e) => {
-      // Prevent default <a> navigation — we control it via navigate()
+    proceedButton.addEventListener('click', async (e) => {
       e.preventDefault();
       if (!form) return;
 
@@ -883,37 +867,23 @@ document.addEventListener('astro:page-load',()=>{
         return;
       }
 
-      setProceedPending(true, 'Abriendo medios de pago...');
-      setCheckoutFeedback('Guardamos tus datos y te llevamos al pago.', 'success');
-      
-      // Save customer data to sessionStorage before navigating
-      const formData = new FormData(form);
-      const customerData = {
-        fullName: formData.get('fullName'),
-        phone: formData.get('phone'),
-        email: formData.get('email'),
-        address: formData.get('address'),
-        city: formData.get('city'),
-        notes: formData.get('notes'),
-        deliveryMethod: formData.get('deliveryMethod')
-      };
-      sessionStorage.setItem('guacamole-customer-data', JSON.stringify(customerData));
+      setProceedPending(true, 'Creando pedido...');
+      setCheckoutFeedback('Estamos guardando tu pedido para que el pago quede trazable.', 'success');
 
-      // Save order totals so pagos.astro can display the summary
-      const totalEl = document.querySelector('[data-checkout-total]') as HTMLElement | null;
-      if (totalEl) {
-        const subtotalRaw = totalEl.dataset.subtotal ?? '0';
-        const taxRaw = totalEl.dataset.tax ?? '0';
-        const totalRaw = totalEl.dataset.total ?? '0';
-        sessionStorage.setItem('guacamole-order-total', JSON.stringify({
-          subtotal: parseFloat(subtotalRaw),
-          tax: parseFloat(taxRaw),
-          total: parseFloat(totalRaw)
-        }));
+      const formData = new FormData(form);
+
+      const { data, error } = await actions.createOrder(formData);
+
+      if (error || !data) {
+        console.error(error);
+        showFormFeedback(error?.message ?? 'No pudimos crear tu pedido. Revisá los datos e intentá otra vez.');
+        setCheckoutFeedback('Hubo un problema al persistir el pedido. No seguimos hasta dejarlo bien guardado.', 'error');
+        setProceedPending(false, 'Continuar a medios de pago');
+        return;
       }
-      
-      // Navigate to payment page
-      navigate('/pagos');
+
+      setCheckoutFeedback('Pedido creado. Te llevamos a la referencia pública de pago.', 'success');
+      navigate(data.redirectUrl);
     });
   }
 });

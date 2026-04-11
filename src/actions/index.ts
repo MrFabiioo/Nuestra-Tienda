@@ -12,6 +12,11 @@ import { loadProductsFromCart } from "./products/load-products-from-cart.action"
 import { toggleFeatured } from "./products/toggle-featured.action";
 import { login } from "./auth/login.action";
 import { logout } from "./auth/logout.action";
+import { createOrder } from "./orders/create-order.action";
+import { getOrderByToken } from "./orders/get-order-by-token";
+import { getOrders } from "./orders/get-orders";
+import { reviewPayment } from "./orders/review-payment.action";
+import { uploadPaymentProof } from "./orders/upload-payment-proof.action";
 
 export const server = {
     // ── Public actions (storefront) ──────────────────────────────────
@@ -20,6 +25,9 @@ export const server = {
     getProductBySlug,
     getFeaturedProducts,
     loadProductsFromCart,
+    createOrder,
+    getOrderByToken,
+    uploadPaymentProof,
 
     // ── Auth actions ─────────────────────────────────────────────────
     login,
@@ -33,4 +41,6 @@ export const server = {
     getCategories,
     createUpdateCategory,
     deleteCategory,
+    getOrders,
+    reviewPayment,
 };

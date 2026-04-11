@@ -1,0 +1,189 @@
+---
+import Layout from '@layouts/Layout.astro';
+import { actions } from 'astro:actions';
+import { Formatter } from '@utils/formatter';
+import { formatOrderStatus, ORDER_STATUS } from '../../../services/orders/constants';
+
+export const prerender = false;
+
+const id = Astro.params.id ?? '';
+const { data, error } = await Astro.callAction(actions.getOrders, { orderId: id });
+
+if (error || !data) {
+  return Astro.redirect('/admin/orders');
+}
+
+const statusLabel = formatOrderStatus(data.order.status);
+const canReview = data.order.status === ORDER_STATUS.underReview;
+const proofIsImage = data.latestProof?.mimeType?.startsWith('image/');
+const reviewMessage = Astro.url.searchParams.get('review');
+---
+
+<Layout title={`Admin · pedido ${id.slice(0, 8)}`}>
+  <section class="admin-shell">
+    <div class="admin-shell__header">
+      <div class="space-y-4">
+        <a href="/admin/orders" class="premium-action-ghost w-fit">← Volver a pedidos</a>
+        <div>
+          <p class="admin-shell__eyebrow">Dashboard admin · pagos</p>
+          <h1 class="admin-shell__title">Pedido {id.slice(0, 8)}</h1>
+          <p class="admin-shell__copy">Revisá el comprobante, confirmá el estado y dejá trazabilidad de quién aprobó o rechazó.</p>
+        </div>
+        <div class="admin-chip-row">
+          <span class="admin-chip">Estado: {statusLabel}</span>
+          <span class="premium-chip">Pago: {data.payment.status}</span>
+          <span class="admin-chip">Cliente: {data.order.customerName}</span>
+        </div>
+      </div>
+    </div>
+
+    {reviewMessage && (
+      <div class="rounded-3xl border border-green-200 bg-green-50 px-5 py-4 text-sm text-green-800">
+        Decisión registrada: <strong>{reviewMessage}</strong>.
+      </div>
+    )}
+
+    <div class="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+      <div class="space-y-6">
+        <article class="premium-panel p-6 md:p-8">
+          <h2 class="text-lg font-bold text-guacamole-icons">Detalle del pedido</h2>
+          <div class="mt-5 grid gap-4 md:grid-cols-2 text-sm text-gray-600">
+            <div class="rounded-2xl border border-gray-100 bg-white p-4">
+              <p><strong>Cliente:</strong> {data.order.customerName}</p>
+              <p>{data.order.customerEmail}</p>
+              <p>{data.order.customerPhone}</p>
+            </div>
+            <div class="rounded-2xl border border-gray-100 bg-white p-4">
+              <p><strong>Entrega:</strong> {data.order.deliveryMethod}</p>
+              <p>{data.order.address}</p>
+              <p>{data.order.city}</p>
+              {data.order.notes && <p class="mt-2">Notas: {data.order.notes}</p>}
+            </div>
+          </div>
+
+          <div class="mt-5 space-y-3">
+            {data.items.map((item) => (
+              <div class="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 text-sm text-gray-600">
+                <div>
+                  <p class="font-bold text-guacamole-icons">{item.title}</p>
+                  <p>{item.size} · x{item.quantity}</p>
+                </div>
+                <strong class="text-guacamole-a">{Formatter.currency(item.lineTotal)}</strong>
+              </div>
+            ))}
+          </div>
+        </article>
+
+        <article class="premium-panel p-6 md:p-8">
+          <h2 class="text-lg font-bold text-guacamole-icons">Comprobante cargado</h2>
+          {data.latestProof ? (
+            <div class="mt-5 space-y-4">
+              <div class="rounded-2xl border border-gray-100 bg-white p-4 text-sm text-gray-600">
+                <p><strong>Archivo:</strong> {data.latestProof.originalFilename}</p>
+                <p><strong>Tipo:</strong> {data.latestProof.mimeType}</p>
+                <p><strong>Subido:</strong> {new Date(data.latestProof.uploadedAt).toLocaleString('es-CO')}</p>
+                <a href={data.latestProof.assetUrl} target="_blank" rel="noreferrer" class="mt-2 inline-block font-semibold text-guacamole-b hover:underline">Abrir en pestaña nueva</a>
+              </div>
+              {proofIsImage ? (
+                <img src={data.latestProof.assetUrl} alt="Comprobante" class="max-h-[32rem] w-full rounded-3xl border border-gray-100 object-contain" />
+              ) : (
+                <iframe src={data.latestProof.assetUrl} class="h-[32rem] w-full rounded-3xl border border-gray-100" title="Comprobante PDF" />
+              )}
+            </div>
+          ) : (
+            <div class="mt-5 rounded-2xl border border-dashed border-gray-200 bg-white p-5 text-sm text-gray-500">
+              Este pedido todavía no tiene comprobante adjunto.
+            </div>
+          )}
+        </article>
+      </div>
+
+      <aside class="space-y-6">
+        <article class="premium-panel p-6 md:p-8">
+          <h2 class="text-lg font-bold text-guacamole-icons">Resumen financiero</h2>
+          <div class="mt-5 space-y-3 text-sm text-gray-600">
+            <div class="flex justify-between"><span>Subtotal</span><strong>{Formatter.currency(data.order.subtotal)}</strong></div>
+            <div class="flex justify-between"><span>Impuesto</span><strong>{Formatter.currency(data.order.tax)}</strong></div>
+            <div class="flex justify-between text-base text-guacamole-icons"><span>Total</span><strong>{Formatter.currency(data.order.total)}</strong></div>
+          </div>
+          <div class="mt-5 rounded-2xl border border-gray-100 bg-white p-4 text-sm text-gray-600">
+            <p><strong>Método:</strong> {data.payment.method}</p>
+            <p><strong>Estado pago:</strong> {data.payment.status}</p>
+            {data.payment.reviewerUid && <p><strong>Reviewer:</strong> {data.payment.reviewerUid}</p>}
+            {data.payment.rejectionReason && <p class="mt-2 text-red-600"><strong>Motivo rechazo:</strong> {data.payment.rejectionReason}</p>}
+          </div>
+        </article>
+
+        <article class="premium-panel p-6 md:p-8">
+          <h2 class="text-lg font-bold text-guacamole-icons">Decisión manual</h2>
+          {canReview ? (
+            <form id="review-payment-form" class="mt-5 space-y-4">
+              <input type="hidden" name="orderId" value={id} />
+              <input type="hidden" name="decision" id="review-decision" value="approved" />
+              <div>
+                <label for="rejectionReason" class="mb-2 block text-sm font-semibold text-guacamole-icons">Motivo de rechazo</label>
+                <textarea id="rejectionReason" name="rejectionReason" rows="4" class="premium-field resize-none" placeholder="Si rechazás el comprobante, explicá por qué."></textarea>
+              </div>
+              <p id="review-feedback" class="min-h-[1.25rem] text-sm text-gray-500" aria-live="polite"></p>
+              <div class="grid gap-3 sm:grid-cols-2">
+                <button type="submit" data-decision="approved" class="premium-action-primary justify-center">Aprobar pago</button>
+                <button type="submit" data-decision="rejected" class="premium-action-secondary justify-center">Rechazar pago</button>
+              </div>
+            </form>
+          ) : (
+            <div class="mt-5 rounded-2xl border border-gray-100 bg-white p-4 text-sm text-gray-600">
+              Este pedido no está en estado <strong>under_review</strong>, así que no corresponde emitir otra decisión desde acá.
+            </div>
+          )}
+        </article>
+      </aside>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  import { actions } from 'astro:actions';
+
+  document.addEventListener('astro:page-load', () => {
+    const form = document.getElementById('review-payment-form') as HTMLFormElement | null;
+    const feedback = document.getElementById('review-feedback') as HTMLParagraphElement | null;
+    const decisionInput = document.getElementById('review-decision') as HTMLInputElement | null;
+
+    if (!form || !feedback || !decisionInput) return;
+
+    let currentDecision: 'approved' | 'rejected' = 'approved';
+
+    form.querySelectorAll<HTMLButtonElement>('button[type="submit"]').forEach((button) => {
+      button.addEventListener('click', () => {
+        currentDecision = (button.dataset.decision as 'approved' | 'rejected') ?? 'approved';
+        decisionInput.value = currentDecision;
+      });
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(form);
+      formData.set('decision', currentDecision);
+
+      if (currentDecision === 'rejected' && !(formData.get('rejectionReason')?.toString().trim())) {
+        feedback.textContent = 'Si vas a rechazar, dejá un motivo claro para el cliente.';
+        feedback.className = 'min-h-[1.25rem] text-sm text-red-600';
+        return;
+      }
+
+      feedback.textContent = 'Guardando decisión y disparando notificaciones...';
+      feedback.className = 'min-h-[1.25rem] text-sm text-gray-500';
+
+      const { error } = await actions.reviewPayment(formData);
+
+      if (error) {
+        feedback.textContent = error.message;
+        feedback.className = 'min-h-[1.25rem] text-sm text-red-600';
+        return;
+      }
+
+      window.location.href = `${window.location.pathname}?review=${currentDecision}`;
+    });
+  });
+</script>
