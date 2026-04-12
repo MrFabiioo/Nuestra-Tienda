@@ -68,7 +68,7 @@ const checkoutBreadcrumbs = [
             </svg>
           </div>
           
-          <h1 class="mb-4 text-3xl font-black uppercase tracking-wide text-guacamole-icons md:text-4xl">
+          <h1 class="mb-4 text-3xl font-black uppercase tracking-wide text-[var(--color-heading)] md:text-4xl">
             Tu pedido todavía está vacío
           </h1>
           
@@ -85,13 +85,13 @@ const checkoutBreadcrumbs = [
           
           <!-- Trust badges -->
           <div class="mt-10 grid grid-cols-1 gap-4 border-t border-gray-200 pt-8 md:grid-cols-2">
-            <div class="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-guacamole-icons">
+            <div class="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-[var(--color-heading-sub)]">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-guacamole-b" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
               </svg>
               <span class="text-sm font-semibold">Envío gratis +$50</span>
             </div>
-            <div class="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-guacamole-icons">
+            <div class="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-[var(--color-heading-sub)]">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-guacamole-b" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -108,7 +108,7 @@ const checkoutBreadcrumbs = [
             <span class="premium-chip">
               Paso 1 de 2 · Datos y entrega
             </span>
-            <h1 class="text-3xl md:text-4xl font-black text-guacamole-icons uppercase tracking-wide">
+            <h1 class="text-3xl md:text-4xl font-black text-[var(--color-heading)] uppercase tracking-wide">
               Revisar pedido
             </h1>
             <p class="text-gray-600 mt-2">
@@ -171,12 +171,12 @@ const checkoutBreadcrumbs = [
                         <div>
                           <a
                             href={`/products/${product.slug}`}
-                            class="text-lg font-bold text-guacamole-icons hover:text-guacamole-b hover:underline transition-colors line-clamp-1"
+                            class="text-lg font-bold text-[var(--color-heading)] hover:text-guacamole-b hover:underline transition-colors line-clamp-1"
                           >
                             {product.title}
                           </a>
                           <div class="flex items-center gap-3 mt-1 text-sm text-gray-500">
-                            <span class="rounded-full border border-guacamole-fondo/30 bg-guacamole-fondo/20 px-3 py-1 font-semibold text-guacamole-icons">
+                            <span class="rounded-full border border-guacamole-fondo/30 bg-guacamole-fondo/20 px-3 py-1 font-semibold text-[var(--color-heading-sub)]">
                               {product.sizes}
                             </span>
                             <span>Cantidad: <strong>{product.quantity}</strong></span>
@@ -221,7 +221,7 @@ const checkoutBreadcrumbs = [
               <form id="customer-form" class="p-6 space-y-6">
                 <div id="form-feedback" class="hidden rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert"></div>
 
-                <div class="rounded-2xl border border-guacamole-fondo/40 bg-guacamole-fondo/10 px-4 py-4 text-sm text-guacamole-icons">
+                <div class="rounded-2xl border border-guacamole-fondo/40 bg-guacamole-fondo/10 px-4 py-4 text-sm text-[var(--color-heading-sub)]">
                   <p class="font-bold">Tus datos se usan solo para confirmar el pedido y coordinar la entrega en la WEMI.</p>
                   <p class="mt-1 text-gray-600">Los campos con <span class="font-bold text-red-500">*</span> son los mínimos para avanzar a pago sin perder contexto.</p>
                 </div>
@@ -229,14 +229,14 @@ const checkoutBreadcrumbs = [
                 <!-- Section: Contact Information -->
                 <div class="space-y-4">
                   <div class="border-b border-gray-100 pb-2">
-                    <h3 class="text-lg font-bold text-guacamole-icons">Información de contacto</h3>
+                    <h3 class="text-lg font-bold text-[var(--color-heading)]">Información de contacto</h3>
                     <p class="text-sm text-gray-500">Así te confirmamos el pedido y cualquier detalle importante de entrega.</p>
                   </div>
 
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Nombre completo -->
                     <div data-field-wrapper>
-                      <label for="fullName" class="block text-sm font-semibold text-guacamole-icons mb-2">
+                      <label for="fullName" class="block text-sm font-semibold text-[var(--color-heading-sub)] mb-2">
                         Nombre completo <span class="text-red-500">*</span>
                       </label>
                       <input
@@ -254,7 +254,7 @@ const checkoutBreadcrumbs = [
 
                     <!-- Teléfono -->
                     <div data-field-wrapper>
-                      <label for="phone" class="block text-sm font-semibold text-guacamole-icons mb-2">
+                      <label for="phone" class="block text-sm font-semibold text-[var(--color-heading-sub)] mb-2">
                         Teléfono <span class="text-red-500">*</span>
                       </label>
                       <input
@@ -274,7 +274,7 @@ const checkoutBreadcrumbs = [
 
                   <!-- Correo electrónico -->
                   <div data-field-wrapper>
-                    <label for="email" class="block text-sm font-semibold text-guacamole-icons mb-2">
+                    <label for="email" class="block text-sm font-semibold text-[var(--color-heading-sub)] mb-2">
                       Correo electrónico <span class="text-red-500">*</span>
                     </label>
                     <input
@@ -294,13 +294,13 @@ const checkoutBreadcrumbs = [
                 <!-- Section: Delivery Information -->
                 <div class="space-y-4 pt-4">
                   <div class="border-b border-gray-100 pb-2">
-                    <h3 class="text-lg font-bold text-guacamole-icons">Entrega y referencias</h3>
+                    <h3 class="text-lg font-bold text-[var(--color-heading)]">Entrega y referencias</h3>
                     <p class="text-sm text-gray-500">Dejanos el contexto justo para que la coordinación salga prolija desde el primer mensaje.</p>
                   </div>
 
                   <!-- Método de entrega -->
                   <div data-field-wrapper>
-                    <label class="block text-sm font-semibold text-guacamole-icons mb-3">
+                    <label class="block text-sm font-semibold text-[var(--color-heading-sub)] mb-3">
                       Método de entrega <span class="text-red-500">*</span>
                     </label>
                     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -313,7 +313,7 @@ const checkoutBreadcrumbs = [
                           class="mt-1 h-5 w-5 text-guacamole-b focus:ring-guacamole-b"
                         />
                         <span>
-                          <span class="block font-semibold text-guacamole-icons">En la WEMI</span>
+                          <span class="block font-semibold text-[var(--color-heading-sub)]">En la WEMI</span>
                           <span class="mt-1 block text-sm text-gray-500">Retirás o recibís tu pedido en el punto fijo habilitado por ahora.</span>
                         </span>
                       </label>
@@ -326,7 +326,7 @@ const checkoutBreadcrumbs = [
                           class="mt-1 h-5 w-5 text-guacamole-b focus:ring-guacamole-b"
                         />
                         <span>
-                          <span class="block font-semibold text-guacamole-icons">Domicilio</span>
+                          <span class="block font-semibold text-[var(--color-heading-sub)]">Domicilio</span>
                           <span class="mt-1 block text-sm text-gray-500">La opción sigue visible, pero por ahora no está disponible para nuevos pedidos.</span>
                         </span>
                       </label>
@@ -337,7 +337,7 @@ const checkoutBreadcrumbs = [
 
                   <!-- Dirección -->
                   <div data-field-wrapper>
-                    <label for="address" class="block text-sm font-semibold text-guacamole-icons mb-2">
+                    <label for="address" class="block text-sm font-semibold text-[var(--color-heading-sub)] mb-2">
                       Dirección de entrega <span class="text-red-500">*</span>
                     </label>
                     <input
@@ -357,7 +357,7 @@ const checkoutBreadcrumbs = [
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Ciudad / Sector -->
                     <div data-field-wrapper>
-                      <label for="city" class="block text-sm font-semibold text-guacamole-icons mb-2">
+                      <label for="city" class="block text-sm font-semibold text-[var(--color-heading-sub)] mb-2">
                         Ciudad / Sector <span class="text-red-500">*</span>
                       </label>
                       <input
@@ -376,7 +376,7 @@ const checkoutBreadcrumbs = [
 
                     <!-- Referencias / Notas -->
                     <div data-field-wrapper>
-                      <label for="notes" class="block text-sm font-semibold text-guacamole-icons mb-2">
+                      <label for="notes" class="block text-sm font-semibold text-[var(--color-heading-sub)] mb-2">
                         Referencia del punto de entrega
                       </label>
                       <textarea
@@ -393,7 +393,7 @@ const checkoutBreadcrumbs = [
                 </div>
 
                 <div class="checkout-review-note rounded-2xl px-4 py-4 text-sm text-gray-600">
-                  <p class="font-semibold text-guacamole-icons">Antes de pasar a pago</p>
+                  <p class="font-semibold text-[var(--color-heading-sub)]">Antes de pasar a pago</p>
                   <p class="mt-1">Chequeá que el teléfono esté bien escrito. El punto de entrega ya queda fijado automáticamente en la WEMI.</p>
                 </div>
               </form>
@@ -414,7 +414,7 @@ const checkoutBreadcrumbs = [
                 <div class="space-y-3 text-gray-600">
                   <div class="flex justify-between items-center">
                     <span class="font-semibold">Subtotal</span>
-                    <span class="font-bold text-guacamole-icons">{Formatter.currency(total)}</span>
+                    <span class="font-bold text-[var(--color-heading-sub)]">{Formatter.currency(total)}</span>
                   </div>
                   
                   <div class="flex justify-between items-center">
@@ -424,7 +424,7 @@ const checkoutBreadcrumbs = [
                   
                   <div class="flex justify-between items-center">
                     <span class="font-semibold">Impuesto (15%)</span>
-                    <span class="font-bold text-guacamole-icons">{Formatter.currency(total * 0.15)}</span>
+                    <span class="font-bold text-[var(--color-heading-sub)]">{Formatter.currency(total * 0.15)}</span>
                   </div>
                 </div>
                 
@@ -437,7 +437,7 @@ const checkoutBreadcrumbs = [
                   data-total={total * 1.15}
                 >
                   <div class="flex justify-between items-center">
-                    <span class="text-xl font-black text-guacamole-icons uppercase">Total</span>
+                    <span class="text-xl font-black text-[var(--color-heading)] uppercase">Total</span>
                     <span class="text-2xl font-black text-guacamole-a">
                       {Formatter.currency(total * 1.15)}
                     </span>
@@ -447,19 +447,19 @@ const checkoutBreadcrumbs = [
                 <!-- Trust Badges -->
                 <div class="rounded-2xl border border-guacamole-fondo/25 bg-guacamole-fondo/10 p-4 space-y-2">
                   <p class="text-xs font-bold uppercase tracking-[0.22em] text-guacamole-b">Checklist premium</p>
-                  <div class="flex items-center gap-2 text-sm text-guacamole-icons">
+                  <div class="flex items-center gap-2 text-sm text-[var(--color-heading-sub)]">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-guacamole-b" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                     </svg>
                     <span class="font-semibold">Envío gratis en pedidos +$50</span>
                   </div>
-                  <div class="flex items-center gap-2 text-sm text-guacamole-icons">
+                  <div class="flex items-center gap-2 text-sm text-[var(--color-heading-sub)]">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-guacamole-b" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <span class="font-semibold">Garantía de devolución de 30 días</span>
                   </div>
-                  <div class="flex items-center gap-2 text-sm text-guacamole-icons">
+                  <div class="flex items-center gap-2 text-sm text-[var(--color-heading-sub)]">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-guacamole-b" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10m-11 8h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
@@ -572,7 +572,6 @@ const checkoutBreadcrumbs = [
     background: color-mix(in srgb, var(--color-danger-surface) 90%, var(--color-surface) 10%);
   }
 
-  .theme-checkout-page .text-guacamole-icons,
   .theme-checkout-page .text-black-dark {
     color: var(--color-text);
   }
@@ -646,7 +645,6 @@ const checkoutBreadcrumbs = [
 </style>
 
 <script>
-  // Show pending order banner if cart is empty but user has a pending order
   document.addEventListener('astro:page-load', () => {
     const banner = document.getElementById('pending-order-banner');
     const link = document.getElementById('pending-order-link');

@@ -31,15 +31,25 @@ export default function CartButton() {
   // Close cart on route change and page refresh
   useEffect(() => {
     const closeCart = () => setIsOpen(false);
+    const syncPendingOrderToken = () => setPendingOrderToken(localStorage.getItem('pendingOrderToken'));
+    const handlePageLoad = () => {
+      closeCart();
+      syncPendingOrderToken();
+    };
     
     // Close on initial page load (component mounts)
     closeCart();
+    syncPendingOrderToken();
     
     // Listen for Astro's navigation events
-    document.addEventListener('astro:page-load', closeCart);
+    document.addEventListener('astro:page-load', handlePageLoad);
+    window.addEventListener('storage', syncPendingOrderToken);
+    window.addEventListener('focus', syncPendingOrderToken);
     
     return () => {
-      document.removeEventListener('astro:page-load', closeCart);
+      document.removeEventListener('astro:page-load', handlePageLoad);
+      window.removeEventListener('storage', syncPendingOrderToken);
+      window.removeEventListener('focus', syncPendingOrderToken);
     };
   }, []);
 
@@ -47,7 +57,6 @@ export default function CartButton() {
   useEffect(() => {
     const initialCart = CartCookiesClient.getCart();
     cartItems.set(initialCart);
-    setPendingOrderToken(localStorage.getItem('pendingOrderToken'));
   }, []);
 
   useEffect(() => {
@@ -182,6 +191,10 @@ export default function CartButton() {
   const formatPrice = (price: number) =>
     `$${price.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+  const cartAriaLabel = pendingOrderToken
+    ? 'Abrir carrito. Tenés un pago pendiente para retomar.'
+    : 'Abrir carrito';
+
   const tax = $totalPriceValue * 0.15;
   const grandTotal = $totalPriceValue + tax;
 
@@ -190,10 +203,24 @@ export default function CartButton() {
       {/* Trigger Button */}
       <button
         onClick={toggleCart}
+        aria-label={cartAriaLabel}
         aria-expanded={isOpen}
-        class="relative flex h-10 w-10 touch-manipulation items-center justify-center rounded-full text-sm transition-all active:translate-y-1 md:text-xl sm:h-11 sm:w-11"
+        title={pendingOrderToken ? 'Tenés un pago pendiente' : undefined}
+        class={`relative flex h-10 w-10 touch-manipulation items-center justify-center rounded-full text-sm transition-all active:translate-y-1 md:text-xl sm:h-11 sm:w-11 ${pendingOrderToken ? 'ring-2 ring-guacamole-b/30' : ''}`}
       >
         <Cart />
+        {pendingOrderToken && (
+          <>
+            <span
+              aria-hidden="true"
+              class="absolute -left-0.5 -top-0.5 h-3.5 w-3.5 rounded-full border-2 border-white bg-guacamole-b shadow-sm"
+            />
+            <span class="pointer-events-none absolute left-1/2 top-full mt-1 hidden -translate-x-1/2 whitespace-nowrap rounded-full bg-guacamole-b px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-sm sm:inline-flex">
+              Pago pendiente
+            </span>
+            <span class="sr-only">Tenés un pago pendiente. Abrí el carrito para retomar el pedido.</span>
+          </>
+        )}
         {$cartItems.length > 0 && (
           <span
             aria-hidden="true"
