@@ -211,6 +211,7 @@ const proofIsImage = order.latestProof?.mimeType?.startsWith('image/');
         return;
       }
 
+      localStorage.removeItem('pendingOrderToken');
       window.location.href = `${window.location.pathname}?uploaded=1`;
     });
   });
