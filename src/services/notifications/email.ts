@@ -7,12 +7,21 @@ type EmailPayload = {
 
 export async function sendEmail(payload: EmailPayload) {
   const apiKey = import.meta.env.RESEND_API_KEY as string | undefined;
-  const from = import.meta.env.RESEND_FROM_EMAIL as string | undefined;
+  const fromEmail = import.meta.env.RESEND_FROM_EMAIL as string | undefined;
+  const fromName = import.meta.env.RESEND_FROM_NAME as string | undefined;
+  const devOverride = import.meta.env.RESEND_DEV_TO_OVERRIDE as string | undefined;
+
+  const from = fromName ? `${fromName} <${fromEmail}>` : fromEmail;
 
   if (!apiKey || !from) {
     const reason = 'Resend no configurado. Definí RESEND_API_KEY y RESEND_FROM_EMAIL.';
     console.warn(`[notifications/email] ${reason}`);
     return { ok: false as const, provider: 'resend', error: reason };
+  }
+
+  const to = devOverride ?? payload.to;
+  if (devOverride) {
+    console.info(`[notifications/email] DEV override: redirigiendo ${payload.to} → ${devOverride}`);
   }
 
   try {
@@ -24,7 +33,7 @@ export async function sendEmail(payload: EmailPayload) {
       },
       body: JSON.stringify({
         from,
-        to: [payload.to],
+        to: [to],
         subject: payload.subject,
         html: payload.html,
         text: payload.text,

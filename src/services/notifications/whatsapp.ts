@@ -3,8 +3,11 @@ type WhatsAppPayload = {
   body: string;
 };
 
-function normalizePhone(value: string) {
-  return value.replace(/[^\d]/g, '');
+function normalizePhone(value: string, defaultCountryCode = '57') {
+  const digits = value.replace(/[^\d]/g, '');
+  if (digits.length === 12 && digits.startsWith('57')) return digits;
+  if (digits.length >= 11) return digits;
+  return `${defaultCountryCode}${digits}`;
 }
 
 export async function sendWhatsApp(payload: WhatsAppPayload) {
