@@ -15,6 +15,7 @@ import { logout } from "./auth/logout.action";
 import { createOrder } from "./orders/create-order.action";
 import { getOrderByToken } from "./orders/get-order-by-token";
 import { getOrders } from "./orders/get-orders";
+import { deleteOrder } from "./orders/delete-order.action";
 import { reviewPayment } from "./orders/review-payment.action";
 import { uploadPaymentProof } from "./orders/upload-payment-proof.action";
 
@@ -43,4 +44,5 @@ export const server = {
     deleteCategory,
     getOrders,
     reviewPayment,
+    deleteOrder,
 };

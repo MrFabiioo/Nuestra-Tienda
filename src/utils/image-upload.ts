@@ -96,4 +96,17 @@ export class ImageUpload {
       return false;
     }
   }
+
+  static async deleteAsset(publicId: string, resourceType: 'image' | 'raw' = 'image') {
+    try {
+      if (!hasCloudinaryCredentials() || !publicId || publicId.startsWith('inline')) {
+        return true;
+      }
+      await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
+      return true;
+    } catch (error) {
+      console.error('[ImageUpload.deleteAsset]', error);
+      return false;
+    }
+  }
 }
