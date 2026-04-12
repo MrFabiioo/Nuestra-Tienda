@@ -21,198 +21,297 @@ if (error || !order) {
   return Astro.redirect('/checkout');
 }
 
-const canUploadProof = [ORDER_STATUS.pendingPayment, ORDER_STATUS.rejected].includes(order.status as typeof ORDER_STATUS[keyof typeof ORDER_STATUS]);
+const canUploadProof = order.status === ORDER_STATUS.pendingPayment || order.status === ORDER_STATUS.rejected;
 const uploadSuccess = Astro.url.searchParams.get('uploaded') === '1';
 const statusLabel = formatOrderStatus(order.status);
-const proofIsImage = order.latestProof?.mimeType?.startsWith('image/');
+const proofIsImage = order.latestProof?.mimeType?.startsWith('image/') ?? false;
 ---
 
 <Layout title={`Pago pedido ${order.id.slice(0, 8)} | Guacamole Shop`} description="Revisá el pedido persistido y cargá tu comprobante.">
-  <main class="min-h-screen bg-guacamole-fondo/10 px-4 py-8 md:px-8">
+  <main class="min-h-screen px-4 py-8 md:px-8">
     <div class="mx-auto max-w-6xl space-y-6">
-      <BreadcrumbTrail
-        items={paymentBreadcrumbs}
-        eyebrow="Paso 2 de 2"
-        summary="Este link ya está ligado a un pedido real. Pagás, subís el comprobante y después seguimos todo desde estado persistido, como corresponde."
-      />
+        <BreadcrumbTrail
+          items={paymentBreadcrumbs}
+          eyebrow="Paso 2 de 2"
+          summary="Este link ya está ligado a un pedido real. Pagás, subís el comprobante y después seguimos todo desde estado persistido, como corresponde."
+        />
 
-      {uploadSuccess && (
-        <div class="rounded-3xl border border-green-200 bg-green-50 px-5 py-4 text-sm text-green-800">
-          Recibimos tu comprobante y el pedido quedó <strong>en revisión</strong>. También dejamos disparadas las notificaciones configuradas.
-        </div>
-      )}
-
-      <section class="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-        <div class="space-y-6">
-          <article class="premium-panel rounded-3xl p-6">
-            <div class="flex flex-col gap-4 border-b border-gray-100 pb-5 md:flex-row md:items-start md:justify-between">
-              <div>
-                <p class="text-xs font-bold uppercase tracking-[0.22em] text-guacamole-b">Referencia pública</p>
-                <h1 class="mt-2 text-3xl font-black uppercase tracking-wide text-guacamole-icons">Pedido {order.id.slice(0, 8)}</h1>
-                <p class="mt-2 text-sm text-gray-600">Cliente: <strong>{order.customerName}</strong> · {order.customerEmail} · {order.customerPhone}</p>
-              </div>
-              <span class="inline-flex items-center rounded-full border border-guacamole-b/20 bg-guacamole-fondo/10 px-4 py-2 text-sm font-semibold text-guacamole-a">
-                Estado: {statusLabel}
-              </span>
-            </div>
-
-            <div class="mt-5 grid gap-4 md:grid-cols-2">
-              <div class="rounded-2xl border border-gray-100 bg-white p-4 text-sm text-gray-600">
-                <p class="font-bold text-guacamole-icons">Entrega</p>
-                <p class="mt-2">{order.deliveryMethod}</p>
-                <p>{order.address}</p>
-                <p>{order.city}</p>
-                {order.notes && <p class="mt-2">Notas: {order.notes}</p>}
-              </div>
-
-              <div class="rounded-2xl border border-gray-100 bg-white p-4 text-sm text-gray-600">
-                <p class="font-bold text-guacamole-icons">Pago actual</p>
-                <p class="mt-2">Método: <strong>{order.payment.method}</strong></p>
-                <p>Estado del pago: <strong>{order.payment.status}</strong></p>
-                {order.payment.rejectionReason && <p class="mt-2 text-red-600">Motivo rechazo: {order.payment.rejectionReason}</p>}
-              </div>
-            </div>
-          </article>
-
-          <article class="premium-panel rounded-3xl p-6">
-            <h2 class="text-xl font-black uppercase tracking-wide text-guacamole-icons">Medios para transferir</h2>
-            <div class="mt-5 grid gap-4 md:grid-cols-3">
-              <div class="rounded-2xl border border-guacamole-b/15 bg-white p-4">
-                <p class="font-bold text-guacamole-a">Bancolombia</p>
-                <p class="mt-2 text-sm text-gray-600">Cuenta de Ahorros · 331-85984-045</p>
-                <p class="text-sm text-gray-600">Titular: Guacamole Shop</p>
-              </div>
-              <div class="rounded-2xl border border-guacamole-b/15 bg-white p-4">
-                <p class="font-bold text-guacamole-a">Nequi</p>
-                <p class="mt-2 text-sm text-gray-600">Celular · 350 201 8487</p>
-                <p class="text-sm text-gray-600">Ideal para pago rápido desde la app.</p>
-              </div>
-              <div class="rounded-2xl border border-guacamole-b/15 bg-white p-4">
-                <p class="font-bold text-guacamole-a">Transferencia</p>
-                <p class="mt-2 text-sm text-gray-600">Usá el monto exacto y guardá el comprobante.</p>
-                <p class="text-sm text-gray-600">Después lo cargás en este mismo link.</p>
-              </div>
-            </div>
-          </article>
-
-          <article class="premium-panel rounded-3xl p-6">
-            <div class="flex items-start justify-between gap-4">
-              <div>
-                <h2 class="text-xl font-black uppercase tracking-wide text-guacamole-icons">Comprobante</h2>
-                <p class="mt-2 text-sm text-gray-600">Aceptamos JPG, PNG, WEBP o PDF hasta 8MB. Nada de confiar en sessionStorage: acá queda todo trazado contra tu pedido real.</p>
-              </div>
-            </div>
-
-            {order.latestProof ? (
-              <div class="mt-5 space-y-4 rounded-2xl border border-gray-100 bg-white p-4">
-                <div class="flex flex-wrap items-center justify-between gap-3 text-sm text-gray-600">
-                  <p><strong>Último archivo:</strong> {order.latestProof.originalFilename}</p>
-                  <a href={order.latestProof.assetUrl} target="_blank" rel="noreferrer" class="font-semibold text-guacamole-b hover:underline">Abrir archivo</a>
-                </div>
-                {proofIsImage ? (
-                  <img src={order.latestProof.assetUrl} alt="Comprobante de pago" class="max-h-[26rem] w-full rounded-2xl object-contain" />
-                ) : (
-                  <iframe src={order.latestProof.assetUrl} class="h-[26rem] w-full rounded-2xl border border-gray-100" title="Comprobante PDF" />
-                )}
-              </div>
-            ) : (
-              <div class="mt-5 rounded-2xl border border-dashed border-gray-200 bg-white p-5 text-sm text-gray-500">
-                Todavía no subiste comprobante. Cuando hagas la transferencia, cargalo abajo y el pedido pasa a revisión.
-              </div>
-            )}
-
-            {canUploadProof ? (
-              <form id="payment-proof-form" class="mt-5 space-y-4" enctype="multipart/form-data">
-                <input type="hidden" name="token" value={token} />
-                <div>
-                  <label for="paymentMethod" class="mb-2 block text-sm font-semibold text-guacamole-icons">Medio usado</label>
-                  <select id="paymentMethod" name="paymentMethod" class="premium-field">
-                    <option value={PAYMENT_METHODS.bancolombia} selected={order.payment.method === PAYMENT_METHODS.bancolombia}>Bancolombia</option>
-                    <option value={PAYMENT_METHODS.nequi} selected={order.payment.method === PAYMENT_METHODS.nequi}>Nequi</option>
-                    <option value={PAYMENT_METHODS.transferencia} selected={order.payment.method === PAYMENT_METHODS.transferencia}>Transferencia</option>
-                  </select>
-                </div>
-                <div>
-                  <label for="proofFile" class="mb-2 block text-sm font-semibold text-guacamole-icons">Archivo</label>
-                  <input id="proofFile" name="proofFile" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" class="premium-field file:mr-4 file:rounded-full file:border-0 file:bg-guacamole-b file:px-4 file:py-2 file:font-semibold file:text-white" required />
-                </div>
-                <p id="payment-proof-feedback" class="min-h-[1.25rem] text-sm text-gray-500" aria-live="polite"></p>
-                <button id="payment-proof-submit" type="submit" class="premium-action-primary w-full justify-center">Subir comprobante y pasar a revisión</button>
-              </form>
-            ) : (
-              <div class="mt-5 rounded-2xl border border-gray-100 bg-white p-5 text-sm text-gray-600">
-                Este pedido ya no necesita una nueva carga desde el link público. Si ves algo raro, revisalo con el comercio desde el backoffice.
-              </div>
-            )}
-          </article>
+        <!-- Page header -->
+        <div class="space-y-3">
+          <span class="premium-chip">Paso 2 de 2 · Pago del pedido</span>
+          <h1 class="text-3xl font-black uppercase tracking-wide text-[var(--color-heading)] md:text-4xl">
+            Completá tu pago
+          </h1>
+          <p class="text-[var(--color-text-muted)]">
+            Realizá la transferencia con los datos de abajo, subí el comprobante y el pedido pasa a revisión automáticamente.
+          </p>
+          <div class="flex flex-wrap gap-3 pt-1 text-sm">
+            <span class="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2 text-[var(--color-text-muted)] shadow-sm">
+              <span class="h-2 w-2 rounded-full bg-guacamole-b"></span>
+              Paso actual: transferencia y comprobante
+            </span>
+            <span class="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2 text-[var(--color-text-subtle)] shadow-sm">
+              <span class="h-2 w-2 rounded-full bg-[var(--color-border-strong)]"></span>
+              Siguiente: confirmación del comercio
+            </span>
+          </div>
         </div>
 
-        <aside class="space-y-6">
-          <article class="premium-panel sticky top-24 rounded-3xl p-6">
-            <h2 class="text-xl font-black uppercase tracking-wide text-guacamole-icons">Resumen persistido</h2>
-            <div class="mt-5 space-y-4">
-              {order.items.map((item) => (
-                <div class="flex gap-3 rounded-2xl border border-gray-100 bg-white p-3">
-                  <img src={item.image} alt={item.title} class="h-16 w-16 rounded-xl object-cover" />
-                  <div class="min-w-0 flex-1">
-                    <p class="line-clamp-1 font-bold text-guacamole-icons">{item.title}</p>
-                    <p class="text-sm text-gray-500">{item.size} · x{item.quantity}</p>
-                    <p class="text-sm font-semibold text-guacamole-a">{Formatter.currency(item.lineTotal)}</p>
+        {uploadSuccess && (
+          <div class="rounded-3xl border border-guacamole-b/30 bg-guacamole-fondo/5 px-5 py-4 text-sm text-guacamole-a">
+            <div class="flex items-center gap-3">
+              <svg class="h-5 w-5 flex-shrink-0 text-guacamole-b" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M7 10l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <p>Recibimos tu comprobante y el pedido quedó <strong>en revisión</strong>. También dejamos disparadas las notificaciones configuradas.</p>
+            </div>
+          </div>
+        )}
+
+        <section class="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
+          <div class="space-y-6">
+
+            <!-- Order reference card -->
+            <article class="premium-panel rounded-3xl p-6">
+              <div class="flex flex-col gap-4 border-b border-[var(--color-border)] pb-5 md:flex-row md:items-start md:justify-between">
+                <div>
+                  <p class="text-xs font-bold uppercase tracking-[0.22em] text-guacamole-b">Referencia pública</p>
+                  <h2 class="mt-2 text-2xl font-black uppercase tracking-wide text-[var(--color-heading)]">Pedido {order.id.slice(0, 8)}</h2>
+                  <p class="mt-2 text-sm text-[var(--color-text-muted)]">Cliente: <strong class="text-[var(--color-heading-sub)]">{order.customerName}</strong> · {order.customerEmail} · {order.customerPhone}</p>
+                </div>
+                <span class="premium-chip self-start">{statusLabel}</span>
+              </div>
+
+              <div class="mt-5 grid gap-4 md:grid-cols-2">
+                <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 text-sm text-[var(--color-text-muted)]">
+                  <p class="font-bold text-[var(--color-heading-sub)]">Entrega</p>
+                  <p class="mt-2">{order.deliveryMethod}</p>
+                  <p>{order.address}</p>
+                  <p>{order.city}</p>
+                  {order.notes && <p class="mt-2">Notas: {order.notes}</p>}
+                </div>
+                <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 text-sm text-[var(--color-text-muted)]">
+                  <p class="font-bold text-[var(--color-heading-sub)]">Pago actual</p>
+                  <p class="mt-2">Método: <strong class="text-[var(--color-heading-sub)]">{order.payment.method}</strong></p>
+                  <p>Estado: <strong class="text-[var(--color-heading-sub)]">{order.payment.status}</strong></p>
+                  {order.payment.rejectionReason && (
+                    <p class="mt-2 font-semibold text-[var(--color-danger-text)]">Motivo rechazo: {order.payment.rejectionReason}</p>
+                  )}
+                </div>
+              </div>
+            </article>
+
+            <!-- Payment methods -->
+            <article class="premium-panel rounded-3xl p-6">
+              <div class="flex items-center gap-3 border-b border-[var(--color-border)] pb-5">
+                <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--color-surface-soft)]">
+                  <svg class="h-5 w-5 text-guacamole-b" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                    <rect x="2" y="5" width="16" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M2 9h16" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M6 13h2M10 13h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-xl font-black uppercase tracking-wide text-[var(--color-heading)]">Medios para transferir</h2>
+                  <p class="mt-0.5 text-xs text-[var(--color-text-subtle)]">Usá el monto exacto del pedido</p>
+                </div>
+              </div>
+
+              <div class="mt-5 grid gap-4 md:grid-cols-3">
+                <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 transition-colors hover:border-[var(--color-border-strong)]">
+                  <div class="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-surface-soft)]">
+                    <svg class="h-4 w-4 text-guacamole-b" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <path d="M3 5h14M3 10h14M3 15h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
                   </div>
+                  <p class="font-bold text-guacamole-a">Bancolombia</p>
+                  <p class="mt-2 text-sm text-[var(--color-text-muted)]">Cuenta de Ahorros</p>
+                  <p class="text-sm font-semibold text-[var(--color-heading-sub)]">331-85984-045</p>
+                  <p class="mt-1 text-xs text-[var(--color-text-subtle)]">Titular: Guacamole Shop</p>
                 </div>
-              ))}
-            </div>
-            <div class="mt-5 space-y-3 border-t border-gray-100 pt-4 text-sm text-gray-600">
-              <div class="flex justify-between"><span>Subtotal</span><strong>{Formatter.currency(order.subtotal)}</strong></div>
-              <div class="flex justify-between"><span>Impuesto</span><strong>{Formatter.currency(order.tax)}</strong></div>
-              <div class="flex justify-between text-base text-guacamole-icons"><span>Total</span><strong>{Formatter.currency(order.total)}</strong></div>
-            </div>
-          </article>
-        </aside>
-      </section>
+                <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 transition-colors hover:border-[var(--color-border-strong)]">
+                  <div class="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-surface-soft)]">
+                    <svg class="h-4 w-4 text-guacamole-b" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <rect x="5" y="2" width="10" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                      <path d="M8 15h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+                  <p class="font-bold text-guacamole-a">Nequi</p>
+                  <p class="mt-2 text-sm text-[var(--color-text-muted)]">Celular</p>
+                  <p class="text-sm font-semibold text-[var(--color-heading-sub)]">350 201 8487</p>
+                  <p class="mt-1 text-xs text-[var(--color-text-subtle)]">Ideal para pago rápido desde la app.</p>
+                </div>
+                <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 transition-colors hover:border-[var(--color-border-strong)]">
+                  <div class="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-surface-soft)]">
+                    <svg class="h-4 w-4 text-guacamole-b" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <path d="M10 3v14M4 9l6-6 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                  <p class="font-bold text-guacamole-a">Transferencia</p>
+                  <p class="mt-2 text-sm text-[var(--color-text-muted)]">Usá el monto exacto y guardá el comprobante.</p>
+                  <p class="mt-1 text-xs text-[var(--color-text-subtle)]">Después lo cargás en este mismo link.</p>
+                </div>
+              </div>
+            </article>
+
+            <!-- Proof upload -->
+            <article class="premium-panel rounded-3xl p-6">
+              <div class="flex items-center gap-3 border-b border-[var(--color-border)] pb-5">
+                <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--color-surface-soft)]">
+                  <svg class="h-5 w-5 text-guacamole-b" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                    <path d="M4 14v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M10 3v9M7 6l3-3 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-xl font-black uppercase tracking-wide text-[var(--color-heading)]">Comprobante</h2>
+                  <p class="mt-0.5 text-xs text-[var(--color-text-subtle)]">JPG, PNG, WEBP o PDF · máx. 8 MB</p>
+                </div>
+              </div>
+
+              {order.latestProof ? (
+                <div class="mt-5 space-y-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4">
+                  <div class="flex flex-wrap items-center justify-between gap-3 text-sm text-[var(--color-text-muted)]">
+                    <p><strong class="text-[var(--color-heading-sub)]">Último archivo:</strong> {order.latestProof.originalFilename}</p>
+                    <a href={order.latestProof.assetUrl} target="_blank" rel="noreferrer" class="font-semibold text-guacamole-b hover:underline">Abrir archivo</a>
+                  </div>
+                  {proofIsImage ? (
+                    <img src={order.latestProof.assetUrl} alt="Comprobante de pago" class="max-h-[26rem] w-full rounded-2xl object-contain" />
+                  ) : (
+                    <iframe src={order.latestProof.assetUrl} class="h-[26rem] w-full rounded-2xl border border-[var(--color-border)]" title="Comprobante PDF" />
+                  )}
+                </div>
+              ) : (
+                <div class="mt-5 rounded-2xl border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface-soft)] p-5 text-center text-sm text-[var(--color-text-subtle)]">
+                  <svg class="mx-auto mb-3 h-8 w-8 text-[var(--color-border-strong)]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  Todavía no subiste comprobante. Cuando hagas la transferencia, cargalo abajo y el pedido pasa a revisión.
+                </div>
+              )}
+
+              {canUploadProof ? (
+                <form id="payment-proof-form" class="mt-5 space-y-4" enctype="multipart/form-data">
+                  <input type="hidden" name="token" value={token} />
+                  <div>
+                    <label for="paymentMethod" class="mb-2 block text-sm font-semibold text-[var(--color-heading-sub)]">Medio usado</label>
+                    <select id="paymentMethod" name="paymentMethod" class="premium-field">
+                      <option value={PAYMENT_METHODS.bancolombia} selected={order.payment.method === PAYMENT_METHODS.bancolombia}>Bancolombia</option>
+                      <option value={PAYMENT_METHODS.nequi} selected={order.payment.method === PAYMENT_METHODS.nequi}>Nequi</option>
+                      <option value={PAYMENT_METHODS.transferencia} selected={order.payment.method === PAYMENT_METHODS.transferencia}>Transferencia</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="proofFile" class="mb-2 block text-sm font-semibold text-[var(--color-heading-sub)]">Archivo</label>
+                    <input id="proofFile" name="proofFile" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" class="premium-field file:mr-4 file:rounded-full file:border-0 file:bg-guacamole-b file:px-4 file:py-2 file:font-semibold file:text-white" required />
+                  </div>
+                  <p id="payment-proof-feedback" class="min-h-[1.25rem] text-sm text-[var(--color-text-muted)]" aria-live="polite"></p>
+                  <button id="payment-proof-submit" type="submit" class="premium-action-primary w-full justify-center">
+                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <path d="M4 14v2a1 1 0 001 1h10a1 1 0 001-1v-2M10 3v9M7 6l3-3 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Subir comprobante y pasar a revisión
+                  </button>
+                </form>
+              ) : (
+                <div class="mt-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-5 text-sm text-[var(--color-text-muted)]">
+                  Este pedido ya no necesita una nueva carga desde el link público. Si ves algo raro, revisalo con el comercio desde el backoffice.
+                </div>
+              )}
+            </article>
+          </div>
+
+          <!-- Sidebar: order summary -->
+          <aside class="space-y-6">
+            <article class="premium-panel sticky top-24 rounded-3xl p-6">
+              <div class="flex items-center gap-3 border-b border-[var(--color-border)] pb-5">
+                <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--color-surface-soft)]">
+                  <svg class="h-5 w-5 text-guacamole-b" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                    <path d="M4 4h12l-1.5 9H5.5L4 4zM4 4H2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="7.5" cy="16.5" r="1" fill="currentColor"/>
+                    <circle cx="13.5" cy="16.5" r="1" fill="currentColor"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-xl font-black uppercase tracking-wide text-[var(--color-heading)]">Resumen</h2>
+                  <p class="mt-0.5 text-xs text-[var(--color-text-subtle)]">{order.items.length} {order.items.length === 1 ? 'producto' : 'productos'}</p>
+                </div>
+              </div>
+
+              <div class="mt-5 space-y-3">
+                {order.items.map((item) => (
+                  <div class="flex gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-3">
+                    <img src={item.image} alt={item.title} class="h-16 w-16 rounded-xl object-cover" />
+                    <div class="min-w-0 flex-1">
+                      <p class="line-clamp-1 font-bold text-[var(--color-heading)]">{item.title}</p>
+                      <p class="text-sm text-[var(--color-text-subtle)]">{item.size} · x{item.quantity}</p>
+                      <p class="text-sm font-semibold text-guacamole-a">{Formatter.currency(item.lineTotal)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div class="mt-5 space-y-3 border-t border-[var(--color-border)] pt-4 text-sm text-[var(--color-text-muted)]">
+                <div class="flex justify-between">
+                  <span>Subtotal</span>
+                  <strong class="text-[var(--color-heading-sub)]">{Formatter.currency(order.subtotal)}</strong>
+                </div>
+                <div class="flex justify-between">
+                  <span>Impuesto</span>
+                  <strong class="text-[var(--color-heading-sub)]">{Formatter.currency(order.tax)}</strong>
+                </div>
+                <div class="flex justify-between rounded-xl bg-[var(--color-surface-soft)] px-3 py-2 text-base font-black text-[var(--color-heading)]">
+                  <span>Total</span>
+                  <strong>{Formatter.currency(order.total)}</strong>
+                </div>
+              </div>
+            </article>
+          </aside>
+        </section>
     </div>
   </main>
+
+  <script>
+      import { actions } from 'astro:actions';
+
+      document.addEventListener('astro:page-load', () => {
+        const form = document.getElementById('payment-proof-form') as HTMLFormElement | null;
+        const submit = document.getElementById('payment-proof-submit') as HTMLButtonElement | null;
+        const feedback = document.getElementById('payment-proof-feedback') as HTMLParagraphElement | null;
+
+        if (!form || !submit || !feedback) return;
+
+        form.addEventListener('submit', async (event) => {
+          event.preventDefault();
+
+          const formData = new FormData(form);
+          const file = formData.get('proofFile');
+
+          if (!(file instanceof File) || file.size === 0) {
+            feedback.textContent = 'Elegí un comprobante antes de enviarlo.';
+            feedback.className = 'min-h-[1.25rem] text-sm text-[var(--color-danger)]';
+            return;
+          }
+
+          submit.disabled = true;
+          submit.textContent = 'Subiendo comprobante...';
+          feedback.textContent = 'Estamos subiendo el archivo y moviendo el pedido a revisión.';
+          feedback.className = 'min-h-[1.25rem] text-sm text-[var(--color-text-muted)]';
+
+          const { error } = await actions.uploadPaymentProof(formData);
+
+          if (error) {
+            feedback.textContent = error.message;
+            feedback.className = 'min-h-[1.25rem] text-sm text-[var(--color-danger)]';
+            submit.disabled = false;
+            submit.textContent = 'Subir comprobante y pasar a revisión';
+            return;
+          }
+
+          localStorage.removeItem('pendingOrderToken');
+          window.location.href = `${window.location.pathname}?uploaded=1`;
+        });
+      });
+  </script>
 </Layout>
-
-<script>
-  import { actions } from 'astro:actions';
-
-  document.addEventListener('astro:page-load', () => {
-    const form = document.getElementById('payment-proof-form') as HTMLFormElement | null;
-    const submit = document.getElementById('payment-proof-submit') as HTMLButtonElement | null;
-    const feedback = document.getElementById('payment-proof-feedback') as HTMLParagraphElement | null;
-
-    if (!form || !submit || !feedback) return;
-
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-
-      const formData = new FormData(form);
-      const file = formData.get('proofFile');
-
-      if (!(file instanceof File) || file.size === 0) {
-        feedback.textContent = 'Elegí un comprobante antes de enviarlo.';
-        feedback.className = 'min-h-[1.25rem] text-sm text-red-600';
-        return;
-      }
-
-      submit.disabled = true;
-      submit.textContent = 'Subiendo comprobante...';
-      feedback.textContent = 'Estamos subiendo el archivo y moviendo el pedido a revisión.';
-      feedback.className = 'min-h-[1.25rem] text-sm text-gray-500';
-
-      const { error } = await actions.uploadPaymentProof(formData);
-
-      if (error) {
-        feedback.textContent = error.message;
-        feedback.className = 'min-h-[1.25rem] text-sm text-red-600';
-        submit.disabled = false;
-        submit.textContent = 'Subir comprobante y pasar a revisión';
-        return;
-      }
-
-      localStorage.removeItem('pendingOrderToken');
-      window.location.href = `${window.location.pathname}?uploaded=1`;
-    });
-  });
-</script>
