@@ -43,7 +43,7 @@ const statuses = [
 
       <div class="mt-5 flex flex-wrap gap-2">
         {statuses.map((item) => (
-          <a href={item.value ? `/admin/orders?status=${item.value}` : '/admin/orders'} class:list={['rounded-full border px-4 py-2 text-sm font-semibold', status === item.value || (!status && !item.value) ? 'bg-guacamole-b text-white border-guacamole-b' : 'bg-white text-guacamole-icons border-gray-200']}>
+          <a href={item.value ? `/admin/orders?status=${item.value}` : '/admin/orders'} class:list={['rounded-full border px-4 py-2 text-sm font-semibold', status === item.value || (!status && !item.value) ? 'bg-guacamole-b text-white border-guacamole-b' : 'bg-white text-[var(--color-heading-sub)] border-gray-200']}>
             {item.label}
           </a>
         ))}
@@ -75,12 +75,12 @@ const statuses = [
               <tr>
                 <td>
                   <div class="min-w-[12rem]">
-                    <p class="font-bold text-guacamole-icons">{order.id.slice(0, 8)}</p>
+                    <p class="font-bold text-[var(--color-heading-sub)]">{order.id.slice(0, 8)}</p>
                     <p class="text-xs text-gray-500">{new Date(order.createdAt).toLocaleString('es-CO')}</p>
                   </div>
                 </td>
                 <td>
-                  <p class="font-semibold text-guacamole-icons">{order.customerName}</p>
+                  <p class="font-semibold text-[var(--color-heading-sub)]">{order.customerName}</p>
                   <p class="text-xs text-gray-500">{order.customerEmail}</p>
                   <p class="text-xs text-gray-500">{order.customerPhone}</p>
                 </td>
@@ -89,7 +89,7 @@ const statuses = [
                   <span class="admin-table-badge">{formatOrderStatus(order.status)}</span>
                 </td>
                 <td>
-                  <p class="font-semibold text-guacamole-icons">{order.paymentMethod}</p>
+                  <p class="font-semibold text-[var(--color-heading-sub)]">{order.paymentMethod}</p>
                   <p class="text-xs text-gray-500">{order.paymentStatus}</p>
                 </td>
                 <td class="text-sm text-gray-500">{order.proofUploadedAt ? new Date(order.proofUploadedAt).toLocaleString('es-CO') : 'Sin carga'}</td>
