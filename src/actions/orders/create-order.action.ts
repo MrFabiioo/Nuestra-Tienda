@@ -1,6 +1,7 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'astro:schema';
 import { clearCartCookie, createPersistentOrder, getCartOrderLinesFromContext } from '../../services/orders/repository';
+import { setPendingOrderPointer } from '../../services/orders/pending-order';
 
 export const createOrder = defineAction({
   accept: 'form',
@@ -27,6 +28,7 @@ export const createOrder = defineAction({
     });
 
     clearCartCookie(context);
+    setPendingOrderPointer(context.cookies, order.publicToken);
 
     return {
       ok: true,

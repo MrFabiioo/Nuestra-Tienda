@@ -3,10 +3,11 @@ import Layout from '@layouts/Layout.astro'
 import { actions } from 'astro:actions';
 import {Formatter} from '@utils/formatter'
 import BreadcrumbTrail from '../../components/shared/BreadcrumbTrail.astro';
-
-const cart = Astro.cookies.get('cart');
+import { getPendingOrderFromCookies } from '../../services/orders/pending-order';
 
 export const prerender = false
+
+const pendingOrder = await getPendingOrderFromCookies(Astro.cookies);
 
 const {data:products,error}= await Astro.callAction(actions.loadProductsFromCart,{});
 
@@ -52,14 +53,15 @@ const checkoutBreadcrumbs = [
     {isEmpty ? (
       <!-- Empty Cart State -->
       <div class="mx-auto max-w-2xl py-16 text-center">
-        <!-- Pending order banner: filled by JS if localStorage has a token -->
-        <div id="pending-order-banner" class="hidden mb-8 rounded-3xl border border-guacamole-b/30 bg-guacamole-fondo/20 px-6 py-5 text-left">
-          <p class="text-xs font-bold uppercase tracking-[0.2em] text-guacamole-b">Pedido pendiente de pago</p>
-          <p class="mt-1 text-sm text-gray-600">Tenés un pedido que todavía espera el comprobante. Podés volver a tu página de pago en cualquier momento.</p>
-          <a id="pending-order-link" href="#" class="mt-3 inline-flex items-center gap-1.5 rounded-full bg-guacamole-b px-5 py-2.5 text-sm font-bold text-white hover:bg-guacamole-a">
-            Ver mi pedido pendiente →
-          </a>
-        </div>
+        {pendingOrder && (
+          <div class="mb-8 rounded-3xl border border-guacamole-b/30 bg-guacamole-fondo/20 px-6 py-5 text-left">
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-guacamole-b">Pedido pendiente de pago</p>
+            <p class="mt-1 text-sm text-gray-600">Tenés un pedido real esperando tu acción. Podés volver a la página de pago y seguir desde donde lo dejaste.</p>
+            <a href={`/pagos/${pendingOrder.token}`} class="mt-3 inline-flex items-center gap-1.5 rounded-full bg-guacamole-b px-5 py-2.5 text-sm font-bold text-white hover:bg-guacamole-a">
+              Ver mi pedido pendiente →
+            </a>
+          </div>
+        )}
         <div class="premium-subtle-panel p-8 md:p-12">
           <!-- Icon -->
           <div class="w-24 h-24 mx-auto mb-6 bg-guacamole-fondo/20 rounded-full flex items-center justify-center">
@@ -645,18 +647,6 @@ const checkoutBreadcrumbs = [
 </style>
 
 <script>
-  document.addEventListener('astro:page-load', () => {
-    const banner = document.getElementById('pending-order-banner');
-    const link = document.getElementById('pending-order-link');
-    if (!banner || !link) return;
-    const token = localStorage.getItem('pendingOrderToken');
-    if (!token) return;
-    (link as HTMLAnchorElement).href = `/pagos/${token}`;
-    banner.classList.remove('hidden');
-  });
-</script>
-
-<script>
 import { CartCookiesClient } from "@utils/cart-cookies";
 import { actions } from "astro:actions";
 import { navigate } from "astro:transitions/client";
@@ -902,7 +892,6 @@ document.addEventListener('astro:page-load',()=>{
       }
 
       setCheckoutFeedback('Pedido creado. Te llevamos a la referencia pública de pago.', 'success');
-      localStorage.setItem('pendingOrderToken', data.publicToken);
       window.location.href = data.redirectUrl;
     });
   }

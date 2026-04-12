@@ -1,9 +1,11 @@
 ---
 import CartButton from "./CartButton.tsx";
 import SearchBar from "./SearchBar.astro";
+import { getPendingOrderFromCookies } from '../services/orders/pending-order';
 
 // Mostrar link Admin solo cuando hay sesión válida
 const user = Astro.locals.user;
+const pendingOrder = await getPendingOrderFromCookies(Astro.cookies);
 ---
 
 <header class="navbar">
@@ -77,7 +79,7 @@ const user = Astro.locals.user;
                 <span class="theme-toggle__label" data-theme-label>Modo claro</span>
             </button>
             <div class="cart-icon">
-                <CartButton client:only="preact" transition:persist>
+                <CartButton client:only="preact" pendingOrderUrl={pendingOrder ? `/pagos/${pendingOrder.token}` : null}>
                     <button
                         slot="fallback"
                         type="button"

@@ -18,38 +18,35 @@ type InlineFeedback = {
   message: string;
 };
 
-export default function CartButton() {
+type CartButtonProps = {
+  pendingOrderUrl?: string | null;
+};
+
+export default function CartButton({ pendingOrderUrl = null }: CartButtonProps) {
   const $cartItems = useStore(cartItems);
   const $totalQty = useStore(totalQuantity);
   const $totalPriceValue = useStore(totalPrice);
   const [isOpen, setIsOpen] = useState(false);
   const [feedback, setFeedback] = useState<InlineFeedback | null>(null);
-  const [pendingOrderToken, setPendingOrderToken] = useState<string | null>(null);
   const cartRef = useRef<HTMLDivElement>(null);
   const feedbackTimeoutRef = useRef<number | null>(null);
+  const hasPendingOrder = Boolean(pendingOrderUrl);
 
   // Close cart on route change and page refresh
   useEffect(() => {
     const closeCart = () => setIsOpen(false);
-    const syncPendingOrderToken = () => setPendingOrderToken(localStorage.getItem('pendingOrderToken'));
     const handlePageLoad = () => {
       closeCart();
-      syncPendingOrderToken();
     };
     
     // Close on initial page load (component mounts)
     closeCart();
-    syncPendingOrderToken();
     
     // Listen for Astro's navigation events
     document.addEventListener('astro:page-load', handlePageLoad);
-    window.addEventListener('storage', syncPendingOrderToken);
-    window.addEventListener('focus', syncPendingOrderToken);
     
     return () => {
       document.removeEventListener('astro:page-load', handlePageLoad);
-      window.removeEventListener('storage', syncPendingOrderToken);
-      window.removeEventListener('focus', syncPendingOrderToken);
     };
   }, []);
 
@@ -183,15 +180,10 @@ export default function CartButton() {
     });
   };
 
-  const handleDismissPendingOrder = () => {
-    localStorage.removeItem('pendingOrderToken');
-    setPendingOrderToken(null);
-  };
-
   const formatPrice = (price: number) =>
     `$${price.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-  const cartAriaLabel = pendingOrderToken
+  const cartAriaLabel = hasPendingOrder
     ? 'Abrir carrito. Tenés un pago pendiente para retomar.'
     : 'Abrir carrito';
 
@@ -205,11 +197,11 @@ export default function CartButton() {
         onClick={toggleCart}
         aria-label={cartAriaLabel}
         aria-expanded={isOpen}
-        title={pendingOrderToken ? 'Tenés un pago pendiente' : undefined}
-        class={`relative flex h-10 w-10 touch-manipulation items-center justify-center rounded-full text-sm transition-all active:translate-y-1 md:text-xl sm:h-11 sm:w-11 ${pendingOrderToken ? 'ring-2 ring-guacamole-b/30' : ''}`}
+        title={hasPendingOrder ? 'Tenés un pago pendiente' : undefined}
+        class={`relative flex h-10 w-10 touch-manipulation items-center justify-center rounded-full text-sm transition-all active:translate-y-1 md:text-xl sm:h-11 sm:w-11 ${hasPendingOrder ? 'ring-2 ring-guacamole-b/30' : ''}`}
       >
         <Cart />
-        {pendingOrderToken && (
+        {hasPendingOrder && (
           <>
             <span
               aria-hidden="true"
@@ -272,26 +264,17 @@ export default function CartButton() {
           </div>
 
           {/* Pending order banner */}
-          {pendingOrderToken && (
+          {pendingOrderUrl && (
             <div class="shrink-0 border-b px-3.5 py-3 sm:px-5" style={{ borderColor: 'var(--color-border)', background: 'color-mix(in srgb, var(--color-accent) 8%, var(--color-surface))' }}>
-              <div class="flex items-start justify-between gap-2">
-                <div class="min-w-0 flex-1">
-                  <p class="text-xs font-black uppercase tracking-[0.15em]" style={{ color: 'var(--color-accent)' }}>Pedido pendiente de pago</p>
-                  <p class="theme-text-muted mt-0.5 text-xs leading-snug">Todavía tenés un pedido esperando el comprobante.</p>
-                  <a
-                    href={`/pagos/${pendingOrderToken}`}
-                    class="mt-1.5 inline-flex items-center gap-1 text-xs font-bold text-guacamole-b hover:text-guacamole-a hover:underline"
-                  >
-                    Ver mi pedido →
-                  </a>
-                </div>
-                <button
-                  onClick={handleDismissPendingOrder}
-                  aria-label="Descartar aviso de pedido pendiente"
-                  class="theme-text-subtle flex h-6 w-6 shrink-0 items-center justify-center rounded text-base leading-none hover:text-guacamole-b"
+              <div class="min-w-0">
+                <p class="text-xs font-black uppercase tracking-[0.15em]" style={{ color: 'var(--color-accent)' }}>Pedido pendiente de pago</p>
+                <p class="theme-text-muted mt-0.5 text-xs leading-snug">Todavía tenés un pedido esperando el comprobante.</p>
+                <a
+                  href={pendingOrderUrl}
+                  class="mt-1.5 inline-flex items-center gap-1 text-xs font-bold text-guacamole-b hover:text-guacamole-a hover:underline"
                 >
-                  ×
-                </button>
+                  Ver mi pedido →
+                </a>
               </div>
             </div>
           )}

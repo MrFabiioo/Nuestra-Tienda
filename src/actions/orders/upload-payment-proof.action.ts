@@ -5,6 +5,7 @@ import { z } from 'astro:schema';
 import { ImageUpload } from '@utils/image-upload';
 import { dispatchOrderNotifications } from '../../services/notifications/dispatcher';
 import { ORDER_STATUS, PAYMENT_METHODS, PAYMENT_PROOF_MAX_BYTES, PAYMENT_PROOF_MIME_TYPES, PAYMENT_STATUS } from '../../services/orders/constants';
+import { clearPendingOrderPointerForToken } from '../../services/orders/pending-order';
 import { getPublicOrderByToken } from '../../services/orders/repository';
 
 const paymentProofFile = z.instanceof(File)
@@ -19,7 +20,7 @@ export const uploadPaymentProof = defineAction({
     paymentMethod: z.enum([PAYMENT_METHODS.bancolombia, PAYMENT_METHODS.nequi, PAYMENT_METHODS.transferencia]).default(PAYMENT_METHODS.transferencia),
     proofFile: paymentProofFile,
   }),
-  handler: async ({ token, paymentMethod, proofFile }) => {
+  handler: async ({ token, paymentMethod, proofFile }, context) => {
     const publicOrder = await getPublicOrderByToken(token);
     if (!publicOrder) {
       throw new ActionError({
@@ -68,6 +69,8 @@ export const uploadPaymentProof = defineAction({
     if (updatedOrder) {
       await dispatchOrderNotifications('payment_proof_uploaded', updatedOrder);
     }
+
+    clearPendingOrderPointerForToken(context.cookies, token);
 
     return {
       ok: true,

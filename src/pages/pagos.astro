@@ -1,8 +1,17 @@
 ---
+import { getPendingOrderFromCookies } from '../services/orders/pending-order';
+
+export const prerender = false;
+
 const token = Astro.url.searchParams.get('token');
+const pendingOrder = await getPendingOrderFromCookies(Astro.cookies);
 
 if (token) {
   return Astro.redirect(`/pagos/${token}`);
+}
+
+if (pendingOrder) {
+  return Astro.redirect(`/pagos/${pendingOrder.token}`);
 }
 
 return Astro.redirect('/checkout');
