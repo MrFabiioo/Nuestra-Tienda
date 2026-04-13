@@ -1,7 +1,15 @@
 import { db, Order, OrderItem, Payment, Product, sql } from 'astro:db';
-import { BUSINESS_TIMEZONE_SQL_MODIFIER, getLast30BusinessDayWindow } from './business-timezone';
+import { getLast30BusinessDayWindow } from './business-timezone';
+import {
+  buildBusinessDateExpression,
+  buildBusinessDayOfWeekExpression,
+  buildBusinessHourExpression,
+} from './sqlite-business-time';
 
 const DAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+const BUSINESS_DAY_OF_WEEK_SQL = sql.raw(buildBusinessDayOfWeekExpression('createdAt'));
+const BUSINESS_HOUR_SQL = sql.raw(buildBusinessHourExpression('createdAt'));
+const BUSINESS_DATE_SQL = sql.raw(buildBusinessDateExpression('createdAt'));
 
 export async function getAnalyticsData() {
   const analyticsReferenceDate = new Date();
@@ -77,7 +85,7 @@ export async function getAnalyticsData() {
     // Orders grouped by day of week (0=Sunday … 6=Saturday)
     db.run(sql`
       SELECT
-        CAST(strftime('%w', datetime(createdAt, ${BUSINESS_TIMEZONE_SQL_MODIFIER})) AS INTEGER) as day,
+        ${BUSINESS_DAY_OF_WEEK_SQL} as day,
         COUNT(*) as count,
         ROUND(COALESCE(SUM(total), 0), 2) as revenue
       FROM ${Order}
@@ -88,7 +96,7 @@ export async function getAnalyticsData() {
     // Orders grouped by business hour
     db.run(sql`
       SELECT
-        CAST(strftime('%H', datetime(createdAt, ${BUSINESS_TIMEZONE_SQL_MODIFIER})) AS INTEGER) as hour,
+        ${BUSINESS_HOUR_SQL} as hour,
         COUNT(*) as count
       FROM ${Order}
       GROUP BY hour
@@ -98,11 +106,11 @@ export async function getAnalyticsData() {
     // Daily trend — last 30 days (all statuses)
     db.run(sql`
       SELECT
-        date(datetime(createdAt, ${BUSINESS_TIMEZONE_SQL_MODIFIER})) as orderDate,
+        ${BUSINESS_DATE_SQL} as orderDate,
         COUNT(*) as orders,
         ROUND(COALESCE(SUM(total), 0), 2) as revenue
       FROM ${Order}
-      WHERE date(datetime(createdAt, ${BUSINESS_TIMEZONE_SQL_MODIFIER})) >= date(${last30BusinessDayWindow.anchorDate}, '-29 days')
+      WHERE ${BUSINESS_DATE_SQL} >= date(${last30BusinessDayWindow.anchorDate}, '-29 days')
       GROUP BY orderDate
       ORDER BY orderDate
     `),
