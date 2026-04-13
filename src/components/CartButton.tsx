@@ -312,13 +312,13 @@ export default function CartButton({ pendingOrderUrl = null }: CartButtonProps) 
             ) : (
               <div class="divide-y" style={{ borderColor: 'var(--color-border)' }}>
                 {$cartItems.map((product: CartItem) => (
-                  <div class="group flex gap-2.5 p-3 transition-colors sm:gap-3 sm:p-4" style={{ borderColor: 'var(--color-border)' }}>
+                  <div class="group flex gap-2 px-3 py-2.5 transition-colors sm:gap-3 sm:p-4" style={{ borderColor: 'var(--color-border)' }}>
                     {/* Image */}
                     <div class="shrink-0">
                       <img
                         src={product.image}
                         alt={product.name}
-                        class="h-14 w-14 rounded-lg border-2 border-guacamole-b/20 object-cover shadow-sm sm:h-16 sm:w-16 sm:rounded-xl"
+                        class="h-12 w-12 rounded-lg border-2 border-guacamole-b/20 object-cover shadow-sm sm:h-16 sm:w-16 sm:rounded-xl"
                       />
                     </div>
 
@@ -369,7 +369,7 @@ export default function CartButton({ pendingOrderUrl = null }: CartButtonProps) 
           {$cartItems.length > 0 && (
             <div class="shrink-0 border-t" style={{ borderColor: 'var(--color-border)', background: 'color-mix(in srgb, var(--color-surface) 96%, transparent)' }}>
               {/* Price Breakdown */}
-              <div class="space-y-2 px-3.5 pb-2 pt-3.5 sm:px-5 sm:pt-4">
+              <div class="space-y-1.5 px-3.5 pb-2 pt-3 sm:px-5 sm:pt-4 sm:space-y-2">
                 <div class="theme-text-muted flex justify-between items-center text-sm">
                   <span class="font-medium">Subtotal</span>
                   <span class="theme-text-primary font-semibold">{formatPrice($totalPriceValue)}</span>
@@ -384,8 +384,8 @@ export default function CartButton({ pendingOrderUrl = null }: CartButtonProps) 
                 </div>
               </div>
 
-              {/* Trust Badges */}
-              <div class="theme-soft-surface mx-3.5 mb-3 space-y-1.5 rounded-xl p-3 sm:mx-5">
+              {/* Trust Badges — hidden on mobile to preserve item list space */}
+              <div class="hidden sm:block theme-soft-surface mx-3.5 mb-3 space-y-1.5 rounded-xl p-3 sm:mx-5">
                 <div class="theme-text-muted flex items-start gap-2 text-xs">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-guacamole-b shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
@@ -401,7 +401,7 @@ export default function CartButton({ pendingOrderUrl = null }: CartButtonProps) 
               </div>
 
               {/* CTA Primary */}
-                <div class="space-y-2 px-3.5 pb-3.5 sm:px-5 sm:pb-3">
+                <div class="space-y-2 px-3.5 pb-3 sm:px-5 sm:pb-3">
                   <a
                     href="/checkout"
                   class="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-guacamole-b px-4 py-3 text-center text-sm font-black uppercase tracking-wider text-white shadow-[0_4px_12px_rgba(86,130,3,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-guacamole-a hover:shadow-[0_6px_20px_rgba(62,97,2,0.35)] sm:px-6"
@@ -421,7 +421,7 @@ export default function CartButton({ pendingOrderUrl = null }: CartButtonProps) 
               </div>
 
               {/* Secure Badge */}
-              <div class="px-3.5 pb-4 sm:px-5">
+              <div class="px-3.5 pb-3 sm:px-5 sm:pb-4">
                 <p class="theme-text-subtle flex items-center justify-center gap-1 text-center text-[11px] sm:text-xs">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
