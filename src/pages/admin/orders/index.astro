@@ -41,18 +41,52 @@ const statuses = [
         </div>
       </div>
 
-      <div class="mt-5 flex flex-wrap gap-2">
-        {statuses.map((item) => (
-          <a href={item.value ? `/admin/orders?status=${item.value}` : '/admin/orders'} class:list={['rounded-full border px-4 py-2 text-sm font-semibold', status === item.value || (!status && !item.value) ? 'bg-guacamole-b text-white border-guacamole-b' : 'bg-white text-[var(--color-heading-sub)] border-gray-200']}>
-            {item.label}
-          </a>
-        ))}
+      <!-- ── Filtros: estado + búsqueda ─────────────────────────── -->
+      <div class="orders-filter-row">
+        <!-- Chips de estado -->
+        <div class="orders-filter-row__chips">
+          {statuses.map((item) => (
+            <a href={item.value ? `/admin/orders?status=${item.value}` : '/admin/orders'} class:list={['rounded-full border px-4 py-2 text-sm font-semibold transition-colors', status === item.value || (!status && !item.value) ? 'bg-guacamole-b text-white border-guacamole-b' : 'bg-white text-[var(--color-heading-sub)] border-gray-200 hover:border-gray-400']}>
+              {item.label}
+            </a>
+          ))}
+        </div>
+
+        <!-- Barra de búsqueda -->
+        <div class="orders-search">
+          <div class="orders-search__box">
+            <svg class="orders-search__icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input
+              type="search"
+              id="orders-search-input"
+              class="orders-search__input"
+              placeholder="Código de pedido o cliente…"
+              autocomplete="off"
+              aria-label="Buscar pedidos por código o nombre de cliente"
+            />
+            <button
+              class="orders-search__clear"
+              id="orders-search-clear"
+              aria-label="Limpiar búsqueda"
+              hidden
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          <p id="orders-search-count" class="orders-search__count" hidden></p>
+        </div>
       </div>
     </div>
 
     <div class="admin-table-shell mt-6">
       <div class="admin-table-scroll">
-        <table class="admin-table">
+        <table class="admin-table" id="orders-table">
           <thead>
             <tr>
               <th>Pedido</th>
@@ -64,7 +98,7 @@ const statuses = [
               <th>Acción</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="orders-tbody">
             {data.orders.length === 0 ? (
               <tr>
                 <td colspan="7">
@@ -72,7 +106,10 @@ const statuses = [
                 </td>
               </tr>
             ) : data.orders.map((order) => (
-              <tr>
+              <tr
+                data-order-id={order.id.toLowerCase()}
+                data-customer={order.customerName.toLowerCase()}
+              >
                 <td>
                   <div class="min-w-[12rem]">
                     <p class="font-bold text-[var(--color-heading-sub)]">{order.id.slice(0, 8)}</p>
@@ -98,9 +135,228 @@ const statuses = [
                 </td>
               </tr>
             ))}
+            <!-- Fila vacía: se muestra cuando la búsqueda no tiene resultados -->
+            <tr id="orders-empty-row" hidden>
+              <td colspan="7">
+                <div class="flex flex-col items-center justify-center gap-2 py-10 text-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-8 w-8 opacity-30" style="color: var(--color-text);">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803 7.5 7.5 0 0015.803 15.803z" />
+                  </svg>
+                  <p class="text-sm font-semibold" style="color: var(--color-text);" id="orders-empty-title">Sin resultados</p>
+                  <p class="text-xs" style="color: var(--color-text-subtle);" id="orders-empty-copy">No hay pedidos que coincidan con la búsqueda.</p>
+                </div>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
     </div>
   </section>
 </Layout>
+
+<style>
+  /* ── Fila de filtros: chips + barra ─────────────────────────── */
+  .orders-filter-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .orders-filter-row__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  /* ── Search box ──────────────────────────────────────────────── */
+  .orders-search {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    width: 100%;
+  }
+
+  .orders-search__box {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 40px;
+    padding: 0 0.875rem;
+    border-radius: 0.625rem;
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-surface-elevated) 82%, transparent);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  }
+
+  .orders-search__box:focus-within {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 14%, transparent);
+    background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+  }
+
+  .orders-search__icon {
+    flex-shrink: 0;
+    color: var(--color-text-subtle);
+    transition: color 0.2s ease;
+  }
+
+  .orders-search__box:focus-within .orders-search__icon {
+    color: var(--color-accent);
+  }
+
+  .orders-search__input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    font-size: 0.8125rem;
+    color: var(--color-text);
+    outline: none;
+  }
+
+  .orders-search__input::placeholder {
+    color: var(--color-text-subtle);
+  }
+
+  .orders-search__input::-webkit-search-cancel-button {
+    display: none;
+  }
+
+  .orders-search__clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--color-text) 8%, transparent);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .orders-search__clear:hover {
+    background: color-mix(in srgb, var(--color-text) 15%, transparent);
+    color: var(--color-text);
+  }
+
+  .orders-search__count {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--color-text-subtle);
+    padding-left: 0.125rem;
+  }
+
+  /* ── Responsive ──────────────────────────────────────────────── */
+  /* sm+: chips y search en la misma fila */
+  @media (min-width: 640px) {
+    .orders-filter-row {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .orders-filter-row__chips {
+      /* que los chips no aplasten la search box */
+      flex: 1;
+      min-width: 0;
+    }
+
+    .orders-search {
+      flex-shrink: 0;
+      width: 220px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .orders-search {
+      width: 260px;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const input = document.getElementById('orders-search-input') as HTMLInputElement | null;
+    const clearBtn = document.getElementById('orders-search-clear') as HTMLButtonElement | null;
+    const countEl = document.getElementById('orders-search-count');
+    const emptyRow = document.getElementById('orders-empty-row') as HTMLTableRowElement | null;
+    const emptyTitle = document.getElementById('orders-empty-title');
+    const emptyCopy = document.getElementById('orders-empty-copy');
+    const tbody = document.getElementById('orders-tbody');
+
+    if (!input || !tbody) return;
+
+    // Todas las filas de datos (excluye la fila vacía y la de "no hay pedidos")
+    const rows = Array.from(
+      tbody.querySelectorAll<HTMLTableRowElement>('tr[data-order-id]')
+    );
+
+    let debounceTimer: number | null = null;
+
+    function runFilter() {
+      const query = input!.value.trim().toLowerCase();
+
+      // Mostrar / ocultar botón de limpiar
+      if (clearBtn) clearBtn.hidden = query.length === 0;
+
+      if (query.length === 0) {
+        // Sin búsqueda: mostrar todo
+        rows.forEach(row => { row.hidden = false; });
+        if (emptyRow) emptyRow.hidden = true;
+        if (countEl) countEl.hidden = true;
+        return;
+      }
+
+      let visible = 0;
+      rows.forEach(row => {
+        const matchesId = row.dataset.orderId?.includes(query) ?? false;
+        const matchesCustomer = row.dataset.customer?.includes(query) ?? false;
+        const match = matchesId || matchesCustomer;
+        row.hidden = !match;
+        if (match) visible++;
+      });
+
+      // Estado vacío
+      if (emptyRow) emptyRow.hidden = visible > 0;
+      if (visible === 0 && emptyTitle && emptyCopy) {
+        emptyTitle.textContent = `Sin resultados para "${input!.value.trim()}"`;
+        emptyCopy.textContent = 'Probá con el código completo o parte del nombre del cliente.';
+      }
+
+      // Contador
+      if (countEl) {
+        const label = visible === 1 ? 'pedido encontrado' : 'pedidos encontrados';
+        countEl.textContent = `${visible} ${label}`;
+        countEl.hidden = false;
+      }
+    }
+
+    input.addEventListener('input', () => {
+      if (debounceTimer !== null) window.clearTimeout(debounceTimer);
+      debounceTimer = window.setTimeout(runFilter, 160);
+    });
+
+    clearBtn?.addEventListener('click', () => {
+      input.value = '';
+      runFilter();
+      input.focus();
+    });
+
+    // ESC limpia la búsqueda
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        input.value = '';
+        runFilter();
+        input.blur();
+      }
+    });
+  });
+</script>
