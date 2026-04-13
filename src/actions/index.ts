@@ -1,3 +1,4 @@
+import { getAnalytics } from "./analytics/get-analytics";
 import { createUpdateCategory } from "./categories/create-update-category.action";
 import { deleteCategory } from "./categories/delete-category.action";
 import { getCategories } from "./categories/get-categories";
@@ -45,4 +46,5 @@ export const server = {
     getOrders,
     reviewPayment,
     deleteOrder,
+    getAnalytics,
 };
