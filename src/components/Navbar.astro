@@ -32,7 +32,6 @@ const pendingOrder = await getPendingOrderFromCookies(Astro.cookies);
                 <ul class="desktop-nav__list">
                     <li><a href="/" class="desktop-nav__link">Inicio</a></li>
                     <li><a href="/tienda" class="desktop-nav__link">Tienda</a></li>
-                    <li><a href="/pagos" class="desktop-nav__link">Pagos</a></li>
                     {user ? (
                         <>
                             <li>
@@ -108,7 +107,6 @@ const pendingOrder = await getPendingOrderFromCookies(Astro.cookies);
         <ul class="mobile-menu__list">
             <li><a href="/" class="mobile-menu__link">Inicio</a></li>
             <li><a href="/tienda" class="mobile-menu__link">Tienda</a></li>
-            <li><a href="/pagos" class="mobile-menu__link">Pagos</a></li>
             {user ? (
                 <>
                     <li><a href="/admin/dashboard" class="mobile-menu__link mobile-menu__link--admin">Admin · Dashboard</a></li>

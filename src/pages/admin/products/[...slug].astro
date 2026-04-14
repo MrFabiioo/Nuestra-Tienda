@@ -453,7 +453,7 @@ const initialRecipe: ProductRecipe = (product as any).recipe ?? {
 
           <!-- Main: lista de ingredientes -->
           <div class="recipe-calculator-main">
-            <div class="mb-5 flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-center sm:justify-between" style="border-color: var(--color-border);">
+            <div class="mb-5 border-b pb-5" style="border-color: var(--color-border);">
               <div class="flex items-center gap-3">
                 <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style="background: var(--color-surface-soft); color: var(--color-accent);">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
@@ -470,23 +470,24 @@ const initialRecipe: ProductRecipe = (product as any).recipe ?? {
                 </div>
               </div>
 
-              <button
-                type="button"
-                id="btn-add-ingredient"
-                class="premium-action-ghost justify-center border border-dashed sm:w-auto"
-                style="border-color: var(--color-border-strong);"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
-                Agregar ingrediente
-              </button>
             </div>
 
             <!-- Lista de ingredientes con scroll cuando hay muchos -->
             <div id="ingredients-list" class="recipe-ingredients-scroll">
               <!-- Los ingredientes se renderizan vía JS con la receta inicial -->
             </div>
+
+            <button
+              type="button"
+              id="btn-add-ingredient"
+              class="premium-action-ghost mt-4 w-full justify-center border border-dashed"
+              style="border-color: var(--color-border-strong);"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              Agregar ingrediente
+            </button>
           </div>
           <!-- /Main -->
 

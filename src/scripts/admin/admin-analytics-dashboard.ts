@@ -3,17 +3,23 @@ import { Chart, registerables } from 'chart.js';
 type AnalyticsSeriesItem = { label: string; count: number };
 type AnalyticsByDayItem = { date: string; orders: number; revenue: number };
 type AnalyticsTopItem = { title: string; qty: number; revenue: number };
+type AnalyticsEstimatedProfitItem = AnalyticsTopItem & {
+  estimatedCost: number;
+  estimatedProfit: number;
+  estimatedUnitCost: number;
+  estimatedRevenue: number;
+};
 type AnalyticsByHourItem = { hour: number; count: number };
 
 type AdminAnalyticsDashboardData = {
   byDay: AnalyticsByDayItem[];
   topByQty: AnalyticsTopItem[];
   topByRevenue: AnalyticsTopItem[];
+  topByEstimatedProfit: AnalyticsEstimatedProfitItem[];
   byDayOfWeek: Array<{ dayName: string; count: number }>;
   byHour: AnalyticsByHourItem[];
   byStatus: AnalyticsSeriesItem[];
   byPaymentMethod: AnalyticsSeriesItem[];
-  byDeliveryMethod: AnalyticsSeriesItem[];
 };
 
 type AnalyticsPalette = ReturnType<typeof buildPalette>;
@@ -25,7 +31,7 @@ type HorizontalBarChartOptions = {
   datasetLabel: string;
   primary: string;
   soft: string;
-  tooltipLabel: (value: number, label: string) => string;
+  tooltipLabel: (value: number, label: string, index: number) => string | string[];
   valueFormatter?: (value: number) => string;
 };
 
@@ -48,8 +54,8 @@ const KNOWN_CHART_IDS = [
   'chart-status',
   'chart-top-qty',
   'chart-top-rev',
+  'chart-top-profit',
   'chart-payment',
-  'chart-delivery',
   'chart-dow',
   'chart-hour',
 ] as const;
@@ -82,9 +88,9 @@ function buildPalette(isDark: boolean) {
     redSoft: 'rgba(204,51,17,0.24)',
     magenta: '#EE3377',
     magentaSoft: 'rgba(238,51,119,0.24)',
-    grid: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)',
-    text: isDark ? 'rgba(241,243,249,0.74)' : 'rgba(0,0,0,0.56)',
-    textStrong: isDark ? 'rgba(241,243,249,0.94)' : 'rgba(0,0,0,0.76)',
+    grid: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(24,50,11,0.14)',
+    text: isDark ? 'rgba(241,243,249,0.74)' : 'rgba(24,50,11,0.72)',
+    textStrong: isDark ? 'rgba(241,243,249,0.94)' : 'rgba(24,50,11,0.90)',
   };
 }
 
@@ -197,7 +203,11 @@ function createHorizontalBarChart(root: Document, palette: AnalyticsPalette, opt
           ...tooltip,
           callbacks: {
             title: items => options.labels[items[0]?.dataIndex ?? 0] ?? '',
-            label: context => options.tooltipLabel(Number(context.parsed.x ?? 0), options.labels[context.dataIndex] ?? ''),
+             label: context => options.tooltipLabel(
+               Number(context.parsed.x ?? 0),
+               options.labels[context.dataIndex] ?? '',
+               context.dataIndex,
+             ),
           },
         },
       },
@@ -427,22 +437,35 @@ export function initAdminAnalyticsDashboard(root: Document = document) {
   });
 
   createHorizontalBarChart(root, palette, {
+    id: 'chart-top-profit',
+    labels: data.topByEstimatedProfit.map(item => item.title),
+    values: data.topByEstimatedProfit.map(item => item.estimatedProfit),
+    datasetLabel: 'Ganancia estimada',
+    primary: palette.teal,
+    soft: palette.tealSoft,
+    tooltipLabel: (value, _label, index) => {
+      const item = data.topByEstimatedProfit[index];
+
+      if (!item) {
+        return ` Ganancia estimada: ${currency(value)}`;
+      }
+
+      return [
+        ` Ingreso aprobado: ${currency(item.estimatedRevenue)}`,
+        ` Costo estimado: ${currency(item.estimatedCost)}`,
+        ` Ganancia estimada: ${currency(item.estimatedProfit)}`,
+      ];
+    },
+    valueFormatter: value => currency(value),
+  });
+
+  createHorizontalBarChart(root, palette, {
     id: 'chart-payment',
     labels: data.byPaymentMethod.map(item => item.label),
     values: data.byPaymentMethod.map(item => item.count),
     datasetLabel: 'Pedidos',
     primary: palette.blue,
     soft: palette.blueSoft,
-    tooltipLabel: (value, label) => ` ${label}: ${value} pedido${value === 1 ? '' : 's'}`,
-  });
-
-  createHorizontalBarChart(root, palette, {
-    id: 'chart-delivery',
-    labels: data.byDeliveryMethod.map(item => item.label),
-    values: data.byDeliveryMethod.map(item => item.count),
-    datasetLabel: 'Pedidos',
-    primary: palette.magenta,
-    soft: palette.magentaSoft,
     tooltipLabel: (value, label) => ` ${label}: ${value} pedido${value === 1 ? '' : 's'}`,
   });
 

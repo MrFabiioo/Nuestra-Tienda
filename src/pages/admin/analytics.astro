@@ -4,8 +4,10 @@ import { actions } from 'astro:actions';
 import AnalyticsPanel from '@components/admin/analytics/AnalyticsPanel.astro';
 import AnalyticsMetricCard from '@components/admin/analytics/AnalyticsMetricCard.astro';
 
-import { BUSINESS_TIMEZONE_LABEL } from '../../services/analytics/business-timezone';
+import { buildAdminAnalyticsStaticCopy } from '../../services/analytics/admin-analytics-copy';
+import { buildAdminAnalyticsSectionsLayout } from '../../services/analytics/admin-analytics-sections';
 import { buildAdminAnalyticsDashboardModel } from '../../services/analytics/admin-analytics-view-model';
+import { Formatter } from '@utils/formatter';
 
 export const prerender = false;
 
@@ -39,10 +41,17 @@ function withShare(items: Array<{ label: string; count: number }>) {
 
 const labeledStatus = data.byStatus.map(item => ({ ...item, label: labelStatus(item.label) }));
 const dashboardModel = buildAdminAnalyticsDashboardModel({ ...data, byStatus: labeledStatus });
+const staticCopy = buildAdminAnalyticsStaticCopy();
+const sectionsLayout = buildAdminAnalyticsSectionsLayout();
 
 const statusMix = withShare(labeledStatus);
 const paymentMix = withShare(data.byPaymentMethod);
-const deliveryMix = withShare(data.byDeliveryMethod);
+
+const profitTotal = data.topByEstimatedProfit.reduce((sum, item) => sum + item.estimatedProfit, 0);
+const profitMix = data.topByEstimatedProfit.map(item => ({
+  ...item,
+  share: profitTotal > 0 ? Math.round((item.estimatedProfit / profitTotal) * 100) : 0,
+}));
 
 const approvedShare = data.summary.totalOrders > 0
   ? Math.round((data.summary.approvedOrders / data.summary.totalOrders) * 100)
@@ -74,11 +83,7 @@ const executiveHighlights = [
   },
 ];
 
-const temporalWarnings = [
-  `Las vistas por día, hora y evolución diaria siguen afectadas por el bug pendiente de timezone (${BUSINESS_TIMEZONE_LABEL}).`,
-  'Tomalas como señal exploratoria; no sirven todavía para decisiones finas de staffing, cortes horarios o calendarización exacta.',
-  'Las métricas de monto bruto e histórico NO equivalen a caja confirmada salvo que el pedido esté aprobado.',
-];
+const temporalWarnings = staticCopy.temporalWarnings;
 ---
 
 <Layout title="Admin · Analytics">
@@ -88,16 +93,15 @@ const temporalWarnings = [
         <div class="max-w-3xl">
           <div class="flex flex-wrap items-center gap-3">
             <span class="premium-chip">Admin · analytics</span>
-            <span class="admin-chip text-xs">Resumen ejecutivo + pipeline + mix operativo</span>
-            <span class="admin-chip admin-chip--warning text-xs">Patrones temporales referenciales</span>
+            <span class="admin-chip text-xs">{staticCopy.hero.badges.context}</span>
           </div>
 
           <h1 class="mt-4 text-3xl font-black tracking-tight theme-text-primary sm:text-4xl">
-            Analytics con lectura honesta del negocio
+            {staticCopy.hero.title}
           </h1>
 
           <p class="theme-text-muted mt-3 max-w-2xl text-sm leading-relaxed sm:text-base">
-            Primero separá demanda bruta, facturación confirmada y carga operativa. Después mirá productos, mix y recién al final los patrones temporales provisorios.
+            {staticCopy.hero.description}
           </p>
 
           <p class="mt-2 text-xs text-gray-500">Sesión activa: {adminUser.email}</p>
@@ -134,8 +138,8 @@ const temporalWarnings = [
         tone="warning"
       >
         <div class="analytics-alert analytics-alert--warning" role="alert">
-          <strong>Advertencia temporal:</strong>
-          la serie diaria sigue siendo referencial por el bug pendiente de timezone. Úsala para contexto, no para cierre fino de operación.
+          <strong>{staticCopy.trendAlert.title}:</strong>
+          {staticCopy.trendAlert.description}
         </div>
 
         <div class="mt-4 grid gap-3 md:grid-cols-3">
@@ -154,109 +158,133 @@ const temporalWarnings = [
       </AnalyticsPanel>
     </div>
 
-    <div class="mt-6 grid gap-6 xl:grid-cols-3">
-      <AnalyticsPanel
-        eyebrow="Pipeline comercial"
-        title={dashboardModel.mix.operationalCharts.status.title}
-        description={dashboardModel.mix.operationalCharts.status.description}
-        icon="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-      >
-        {statusMix.length === 0 ? (
-          <p class="analytics-empty">Todavía no hay pedidos para construir el pipeline.</p>
-        ) : (
-          <>
-            <ul class="analytics-breakdown-list">
-              {statusMix.map(item => (
-                <li class="analytics-breakdown-item">
-                  <div>
-                    <p class="analytics-breakdown-item__label">{item.label}</p>
-                    <p class="analytics-breakdown-item__sub">{item.count} pedidos · {item.share}% del total</p>
-                  </div>
-                  <span class="analytics-breakdown-item__value">{item.share}%</span>
-                </li>
-              ))}
-            </ul>
+    <div class:list={['mt-6', 'grid', 'gap-6', sectionsLayout.productGridClass]}>
+      {sectionsLayout.productPanels.includes('status') && (
+        <AnalyticsPanel
+          eyebrow="Pipeline comercial"
+          title={dashboardModel.mix.operationalCharts.status.title}
+          description={dashboardModel.mix.operationalCharts.status.description}
+          icon="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        >
+          {statusMix.length === 0 ? (
+            <p class="analytics-empty">Todavía no hay pedidos para construir el pipeline.</p>
+          ) : (
+            <>
+              <ul class="analytics-breakdown-list">
+                {statusMix.map(item => (
+                  <li class="analytics-breakdown-item">
+                    <div>
+                      <p class="analytics-breakdown-item__label">{item.label}</p>
+                      <p class="analytics-breakdown-item__sub">{item.count} pedidos · {item.share}% del total</p>
+                    </div>
+                    <span class="analytics-breakdown-item__value">{item.share}%</span>
+                  </li>
+                ))}
+              </ul>
 
-            <div class="chart-wrap chart-wrap--medium mt-5">
-              <canvas id="chart-status" aria-label="Pipeline por estado del pedido"></canvas>
+              <div class="chart-wrap chart-wrap--medium mt-5">
+                <canvas id="chart-status" aria-label="Pipeline por estado del pedido"></canvas>
+              </div>
+            </>
+          )}
+        </AnalyticsPanel>
+      )}
+
+      {sectionsLayout.productPanels.includes('topByQty') && (
+        <AnalyticsPanel
+          eyebrow="Productos · demanda"
+          title={dashboardModel.productHighlights.byQty.title}
+          description={dashboardModel.productHighlights.byQty.description}
+          icon="M3 7h18M3 12h18M3 17h18"
+        >
+          {data.topByQty.length === 0 ? (
+            <p class="analytics-empty">Sin historial suficiente para rankear productos todavía.</p>
+          ) : (
+            <div class="chart-wrap chart-wrap--medium">
+              <canvas id="chart-top-qty" aria-label="Top productos por unidades demandadas"></canvas>
             </div>
-          </>
-        )}
-      </AnalyticsPanel>
+          )}
+        </AnalyticsPanel>
+      )}
 
-      <AnalyticsPanel
-        eyebrow="Productos · demanda"
-        title={dashboardModel.productHighlights.byQty.title}
-        description={dashboardModel.productHighlights.byQty.description}
-        icon="M3 7h18M3 12h18M3 17h18"
-      >
-        {data.topByQty.length === 0 ? (
-          <p class="analytics-empty">Sin historial suficiente para rankear productos todavía.</p>
-        ) : (
-          <div class="chart-wrap chart-wrap--medium">
-            <canvas id="chart-top-qty" aria-label="Top productos por unidades demandadas"></canvas>
-          </div>
-        )}
-      </AnalyticsPanel>
-
-      <AnalyticsPanel
-        eyebrow="Productos · valor histórico"
-        title={dashboardModel.productHighlights.byRevenue.title}
-        description={dashboardModel.productHighlights.byRevenue.description}
-        icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-      >
-        {data.topByRevenue.length === 0 ? (
-          <p class="analytics-empty">Sin historial suficiente para medir valor histórico por producto.</p>
-        ) : (
-          <div class="chart-wrap chart-wrap--medium">
-            <canvas id="chart-top-rev" aria-label="Top productos por monto bruto histórico"></canvas>
-          </div>
-        )}
-      </AnalyticsPanel>
+      {sectionsLayout.productPanels.includes('topByRevenue') && (
+        <AnalyticsPanel
+          eyebrow="Productos · valor histórico"
+          title={dashboardModel.productHighlights.byRevenue.title}
+          description={dashboardModel.productHighlights.byRevenue.description}
+          icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        >
+          {data.topByRevenue.length === 0 ? (
+            <p class="analytics-empty">Sin historial suficiente para medir valor histórico por producto.</p>
+          ) : (
+            <div class="chart-wrap chart-wrap--medium">
+              <canvas id="chart-top-rev" aria-label="Top productos por monto bruto histórico"></canvas>
+            </div>
+          )}
+        </AnalyticsPanel>
+      )}
     </div>
 
-    <div class="mt-6 grid gap-6 lg:grid-cols-2">
-      <AnalyticsPanel
-        eyebrow="Mix operativo"
-        title={dashboardModel.mix.operationalCharts.payment.title}
-        description={dashboardModel.mix.operationalCharts.payment.description}
-        icon="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"
-      >
-        {paymentMix.length === 0 ? (
-          <p class="analytics-empty">Todavía no hay pagos registrados para comparar métodos.</p>
-        ) : (
-          <>
-            <ul class="analytics-inline-list">
-              {paymentMix.map(item => <li>{item.label}: {item.share}%</li>)}
-            </ul>
+    <div class:list={['mt-6', 'grid', 'gap-6', sectionsLayout.mixGridClass]}>
+      {sectionsLayout.mixPanels.includes('payment') && (
+        <AnalyticsPanel
+          eyebrow="Mix operativo"
+          title={dashboardModel.mix.operationalCharts.payment.title}
+          description={dashboardModel.mix.operationalCharts.payment.description}
+          icon="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"
+        >
+          {paymentMix.length === 0 ? (
+            <p class="analytics-empty">Todavía no hay pagos registrados para comparar métodos.</p>
+          ) : (
+            <>
+              <ul class="analytics-inline-list">
+                {paymentMix.map(item => <li>{item.label}: {item.share}%</li>)}
+              </ul>
 
-            <div class="chart-wrap chart-wrap--medium mt-4">
-              <canvas id="chart-payment" aria-label="Comparación por método de pago"></canvas>
-            </div>
-          </>
-        )}
-      </AnalyticsPanel>
+              <div class="chart-wrap chart-wrap--medium mt-4">
+                <canvas id="chart-payment" aria-label="Comparación por método de pago"></canvas>
+              </div>
+            </>
+          )}
+        </AnalyticsPanel>
+      )}
 
-      <AnalyticsPanel
-        eyebrow="Mix operativo"
-        title={dashboardModel.mix.operationalCharts.delivery.title}
-        description={dashboardModel.mix.operationalCharts.delivery.description}
-        icon="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"
-      >
-        {deliveryMix.length === 0 ? (
-          <p class="analytics-empty">Todavía no hay entregas registradas para comparar logística.</p>
-        ) : (
-          <>
-            <ul class="analytics-inline-list">
-              {deliveryMix.map(item => <li>{item.label}: {item.share}%</li>)}
-            </ul>
+      {sectionsLayout.mixPanels.includes('estimatedProfit') && (
+        <AnalyticsPanel
+          eyebrow="Productos · rentabilidad estimada"
+          title={dashboardModel.productHighlights.byEstimatedProfit.title}
+          icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        >
+          {data.topByEstimatedProfit.length === 0 ? (
+            <p class="analytics-empty">Todavía no hay productos con costo estimable y pedidos aprobados para rankear rentabilidad.</p>
+          ) : (
+            <>
+              <ul class="analytics-breakdown-list analytics-breakdown-list--compact">
+                {profitMix.map(item => (
+                  <li class="analytics-breakdown-item analytics-breakdown-item--sm">
+                    <div>
+                      <p class="analytics-breakdown-item__label">{item.title}</p>
+                      <p class="analytics-breakdown-item__sub">{item.qty} unid. · {item.share}% del total</p>
+                    </div>
+                    <span class="analytics-breakdown-item__value">{Formatter.currency(item.estimatedProfit, 0)}</span>
+                  </li>
+                ))}
+                <li class="analytics-breakdown-item analytics-breakdown-item--sm analytics-breakdown-item--total">
+                  <div>
+                    <p class="analytics-breakdown-item__label">Ganancia total estimada</p>
+                    <p class="analytics-breakdown-item__sub">{profitMix.length} producto{profitMix.length === 1 ? '' : 's'} rankeados</p>
+                  </div>
+                  <span class="analytics-breakdown-item__value">{Formatter.currency(profitTotal, 0)}</span>
+                </li>
+              </ul>
 
-            <div class="chart-wrap chart-wrap--medium mt-4">
-              <canvas id="chart-delivery" aria-label="Comparación por método de entrega"></canvas>
-            </div>
-          </>
-        )}
-      </AnalyticsPanel>
+              <div class="chart-wrap chart-wrap--medium">
+                <canvas id="chart-top-profit" aria-label="Top productos por ganancia estimada"></canvas>
+              </div>
+            </>
+          )}
+        </AnalyticsPanel>
+      )}
     </div>
 
     {data.neverOrdered.length > 0 && (
@@ -302,7 +330,7 @@ const temporalWarnings = [
 
     <div class="mt-6">
       <AnalyticsPanel
-        eyebrow="Patrones temporales · lectura provisoria"
+        eyebrow={staticCopy.temporalSectionEyebrow}
         title={dashboardModel.temporal.notice.title}
         description={dashboardModel.temporal.notice.description}
         icon="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5"
@@ -314,7 +342,7 @@ const temporalWarnings = [
 
         <div class="mt-5 grid gap-6 lg:grid-cols-2">
           <div class="analytics-temporal-card">
-            <p class="analytics-temporal-card__eyebrow">Provisorio · día de semana</p>
+            <p class="analytics-temporal-card__eyebrow">{staticCopy.temporalCards.byDayOfWeekEyebrow}</p>
             <h3 class="analytics-temporal-card__title">{dashboardModel.temporal.byDayOfWeek.title}</h3>
             <p class="analytics-temporal-card__description">{dashboardModel.temporal.byDayOfWeek.description}</p>
             <div class="chart-wrap chart-wrap--small mt-4">
@@ -323,7 +351,7 @@ const temporalWarnings = [
           </div>
 
           <div class="analytics-temporal-card">
-            <p class="analytics-temporal-card__eyebrow">Provisorio · hora</p>
+            <p class="analytics-temporal-card__eyebrow">{staticCopy.temporalCards.byHourEyebrow}</p>
             <h3 class="analytics-temporal-card__title">{dashboardModel.temporal.byHour.title}</h3>
             <p class="analytics-temporal-card__description">{dashboardModel.temporal.byHour.description}</p>
             <div class="chart-wrap chart-wrap--small mt-4">
@@ -343,11 +371,11 @@ const temporalWarnings = [
     byDay: data.byDay,
     topByQty: data.topByQty,
     topByRevenue: data.topByRevenue,
+    topByEstimatedProfit: data.topByEstimatedProfit,
     byDayOfWeek: data.byDayOfWeek,
     byHour: data.byHour,
     byStatus: labeledStatus,
     byPaymentMethod: data.byPaymentMethod,
-    byDeliveryMethod: data.byDeliveryMethod,
   })}
 />
 
@@ -602,6 +630,39 @@ const temporalWarnings = [
     color: var(--color-accent);
   }
 
+  .analytics-breakdown-list--compact {
+    max-height: 18rem;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+  }
+
+  .analytics-breakdown-item--sm {
+    padding: 0.55rem 0.75rem;
+  }
+
+  .analytics-breakdown-item--sm .analytics-breakdown-item__label {
+    font-size: 0.78rem;
+  }
+
+  .analytics-breakdown-item--sm .analytics-breakdown-item__sub {
+    font-size: 0.68rem;
+  }
+
+  .analytics-breakdown-item--sm .analytics-breakdown-item__value {
+    font-size: 0.8rem;
+  }
+
+  .analytics-breakdown-item--total {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface));
+  }
+
+  .analytics-breakdown-item--total .analytics-breakdown-item__value {
+    color: var(--color-accent);
+    font-size: 0.88rem;
+  }
+
   .analytics-inline-list {
     display: flex;
     flex-wrap: wrap;
@@ -703,6 +764,18 @@ const temporalWarnings = [
     text-align: center;
     font-size: 0.9rem;
     color: var(--color-text-subtle);
+  }
+
+  /* ── Light mode contrast fixes ─────────────────────────────────
+     --color-text-subtle (52% opacity) fails WCAG AA on the light
+     cream background (~3:1). Override only the analytics elements
+     that use it to bump contrast to ≥4.5:1.                       */
+  :root:not([data-theme='dark']) .analytics-metric-card__label,
+  :root:not([data-theme='dark']) .analytics-metric-card__sub,
+  :root:not([data-theme='dark']) .analytics-story-card__title,
+  :root:not([data-theme='dark']) .analytics-mini-stat__label,
+  :root:not([data-theme='dark']) .analytics-empty {
+    color: rgba(24, 50, 11, 0.72);
   }
 
   :root[data-theme='dark'] .admin-chip--warning,

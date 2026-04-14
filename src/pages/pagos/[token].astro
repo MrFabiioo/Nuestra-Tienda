@@ -27,6 +27,7 @@ reconcilePendingOrderPointer(Astro.cookies, order);
 
 const canUploadProof = order.status === ORDER_STATUS.pendingPayment || order.status === ORDER_STATUS.rejected;
 const uploadSuccess = Astro.url.searchParams.get('uploaded') === '1';
+const isProofSubmitted = uploadSuccess || order.status === ORDER_STATUS.underReview || order.status === ORDER_STATUS.approved;
 const statusLabel = formatOrderStatus(order.status);
 const proofIsImage = order.latestProof?.mimeType?.startsWith('image/') ?? false;
 ---
@@ -43,17 +44,39 @@ const proofIsImage = order.latestProof?.mimeType?.startsWith('image/') ?? false;
         <!-- Page header -->
         <div class="space-y-3">
           <span class="premium-chip">Paso 2 de 2 · Pago del pedido</span>
-          <h1 class="text-3xl font-black uppercase tracking-wide text-[var(--color-heading)] md:text-4xl">
-            Completá tu pago
-          </h1>
-          <p class="text-[var(--color-text-muted)]">
-            Realizá la transferencia con los datos de abajo, subí el comprobante y el pedido pasa a revisión automáticamente.
-          </p>
+          {isProofSubmitted ? (
+            <h1 class="text-3xl font-black uppercase tracking-wide text-[var(--color-heading)] md:text-4xl">
+              Pago en revisión
+            </h1>
+          ) : (
+            <h1 class="text-3xl font-black uppercase tracking-wide text-[var(--color-heading)] md:text-4xl">
+              Completá tu pago
+            </h1>
+          )}
+          {isProofSubmitted ? (
+            <p class="text-[var(--color-text-muted)]">
+              Tu comprobante fue recibido. Estamos verificando la transferencia y te avisamos cuando el pedido sea confirmado.
+            </p>
+          ) : (
+            <p class="text-[var(--color-text-muted)]">
+              Realizá la transferencia con los datos de abajo, subí el comprobante y el pedido pasa a revisión automáticamente.
+            </p>
+          )}
           <div class="flex flex-wrap gap-3 pt-1 text-sm">
-            <span class="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2 text-[var(--color-text-muted)] shadow-sm">
-              <span class="h-2 w-2 rounded-full bg-guacamole-b"></span>
-              Paso actual: transferencia y comprobante
-            </span>
+            {isProofSubmitted ? (
+              <span class="inline-flex items-center gap-2 rounded-full border border-guacamole-b/40 bg-guacamole-b/10 px-4 py-2 font-semibold text-guacamole-b shadow-sm">
+                <svg class="h-3.5 w-3.5 flex-shrink-0" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M5.5 8l2 2 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Comprobante enviado
+              </span>
+            ) : (
+              <span class="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2 text-[var(--color-text-muted)] shadow-sm">
+                <span class="h-2 w-2 rounded-full bg-guacamole-b"></span>
+                Paso actual: transferencia y comprobante
+              </span>
+            )}
             <span class="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2 text-[var(--color-text-subtle)] shadow-sm">
               <span class="h-2 w-2 rounded-full bg-[var(--color-border-strong)]"></span>
               Siguiente: confirmación del comercio
@@ -62,13 +85,20 @@ const proofIsImage = order.latestProof?.mimeType?.startsWith('image/') ?? false;
         </div>
 
         {uploadSuccess && (
-          <div class="rounded-3xl border border-guacamole-b/30 bg-guacamole-fondo/5 px-5 py-4 text-sm text-guacamole-a">
-            <div class="flex items-center gap-3">
-              <svg class="h-5 w-5 flex-shrink-0 text-guacamole-b" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/>
-                <path d="M7 10l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <p>Recibimos tu comprobante y el pedido quedó <strong>en revisión</strong>. También dejamos disparadas las notificaciones configuradas.</p>
+          <div class="rounded-3xl border border-guacamole-b/30 bg-[var(--color-surface-elevated)] p-6">
+            <div class="flex gap-4">
+              <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-guacamole-b/15">
+                <svg class="h-6 w-6 text-guacamole-b" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M8 12l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div>
+                <p class="font-black uppercase tracking-wide text-[var(--color-heading)]">¡Comprobante recibido!</p>
+                <p class="mt-1 text-sm text-[var(--color-text-muted)]">
+                  Tu pedido quedó <strong class="text-guacamole-b">en revisión</strong>. El comercio va a verificar tu transferencia y te va a avisar cuando todo esté confirmado. Si tenés dudas, guardá el número de pedido como referencia.
+                </p>
+              </div>
             </div>
           </div>
         )}

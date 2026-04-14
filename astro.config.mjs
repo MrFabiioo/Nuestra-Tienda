@@ -8,6 +8,9 @@ import db from '@astrojs/db';
 export default defineConfig({
   integrations: [tailwind(), preact(), db()],
   vite: {
+    optimizeDeps: {
+      include: ['chart.js'],
+    },
     resolve: {
       alias: {
         '@data': '/src/data',

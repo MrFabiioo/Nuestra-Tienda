@@ -1,0 +1,259 @@
+---
+import Layout from "@layouts/Layout.astro";
+
+export const prerender = true;
+---
+
+<Layout
+    title="Página no encontrada"
+    description="La página que buscás no existe. Explorá el catálogo o volvé al inicio."
+>
+    <section class="notfound" aria-label="Página no encontrada">
+        <div class="notfound__bg-blob" aria-hidden="true"></div>
+
+        <div class="notfound__inner">
+            <div class="notfound__eyebrow">
+                <span class="notfound__eyebrow-dot" aria-hidden="true"></span>
+                <span>Ruta no encontrada</span>
+            </div>
+
+            <p class="notfound__code" aria-hidden="true">404</p>
+
+            <h1 class="notfound__headline">
+                Esta página<br/>
+                <em class="notfound__headline-accent">no existe</em>
+            </h1>
+
+            <p class="notfound__sub">
+                La URL que ingresaste no coincide con ninguna página del sitio.<br class="notfound__sub-br" />
+                Puede que haya sido movida, eliminada o simplemente nunca existió.
+            </p>
+
+            <div class="notfound__ctas">
+                <a href="/" class="notfound__cta-primary">
+                    Volver al inicio
+                    <svg class="notfound__cta-arrow" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                        <path d="M4 10h12M11 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </a>
+                <a href="/tienda" class="notfound__cta-secondary">
+                    Explorar tienda
+                </a>
+            </div>
+        </div>
+    </section>
+</Layout>
+
+<style>
+.notfound {
+    position: relative;
+    margin-left: -1rem;
+    margin-right: -1rem;
+    padding: 5rem 1rem 4.5rem;
+    overflow: hidden;
+    background: var(--color-hero-bg);
+    border-bottom: 1px solid var(--color-border-strong);
+    border-radius: 0.75rem;
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+}
+
+.notfound__bg-blob {
+    position: absolute;
+    top: -60px;
+    right: -80px;
+    width: 420px;
+    height: 420px;
+    border-radius: 60% 40% 70% 30% / 50% 60% 40% 50%;
+    background: radial-gradient(
+        ellipse at center,
+        color-mix(in srgb, var(--color-accent) 22%, transparent) 0%,
+        color-mix(in srgb, var(--color-accent-strong) 10%, transparent) 55%,
+        transparent 75%
+    );
+    pointer-events: none;
+}
+
+.notfound__inner {
+    max-width: 580px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.notfound__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    font-family: var(--font-unique, sans-serif);
+}
+
+.notfound__eyebrow-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--color-accent) 60%, transparent);
+    flex-shrink: 0;
+}
+
+.notfound__code {
+    font-size: clamp(6rem, 18vw, 11rem);
+    font-weight: 900;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    color: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    margin: 0 0 0.25rem -0.05em;
+    pointer-events: none;
+    user-select: none;
+}
+
+.notfound__headline {
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    color: var(--color-heading);
+    margin-bottom: 1.25rem;
+    margin-top: -0.5rem;
+}
+
+.notfound__headline-accent {
+    font-style: normal;
+    color: var(--color-accent);
+    position: relative;
+}
+
+.notfound__headline-accent::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 2px;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-accent), color-mix(in srgb, var(--color-accent) 74%, #cdb902 26%));
+    border-radius: 2px;
+    opacity: 0.7;
+}
+
+.notfound__sub {
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--color-text-muted);
+    margin-bottom: 2rem;
+    max-width: 460px;
+}
+
+.notfound__ctas {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.notfound__cta-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8125rem 1.75rem;
+    background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-strong) 100%);
+    color: var(--color-text-on-accent);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    letter-spacing: 0.015em;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--color-accent) 28%, transparent);
+}
+
+.notfound__cta-primary:hover {
+    background: linear-gradient(135deg, var(--color-accent-strong) 0%, var(--color-accent) 100%);
+    box-shadow: 0 12px 28px color-mix(in srgb, var(--color-accent-strong) 34%, transparent);
+    transform: translateY(-1px);
+}
+
+.notfound__cta-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--color-accent-strong) 24%, transparent);
+}
+
+.notfound__cta-arrow {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.2s ease;
+}
+
+.notfound__cta-primary:hover .notfound__cta-arrow {
+    transform: translateX(3px);
+}
+
+.notfound__cta-secondary {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.8125rem 1.5rem;
+    background: transparent;
+    color: var(--color-text-muted);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    text-decoration: none;
+    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+.notfound__cta-secondary:hover {
+    border-color: var(--color-border-strong);
+    color: var(--color-accent);
+    background: var(--color-surface-soft);
+}
+
+@media (min-width: 768px) {
+    .notfound {
+        padding: 6rem 2.5rem 5rem;
+        margin-left: -1rem;
+        margin-right: -1rem;
+    }
+
+    .notfound__bg-blob {
+        width: 560px;
+        height: 560px;
+        top: -100px;
+        right: -60px;
+    }
+}
+
+@media (max-width: 480px) {
+    .notfound {
+        padding: 3.5rem 1rem 3rem;
+        min-height: 55vh;
+    }
+
+    .notfound__sub-br {
+        display: none;
+    }
+
+    .notfound__ctas {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .notfound__cta-primary,
+    .notfound__cta-secondary {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
