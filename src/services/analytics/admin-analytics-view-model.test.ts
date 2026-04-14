@@ -24,6 +24,28 @@ function createAnalyticsData(overrides: Partial<AnalyticsData> = {}): AnalyticsD
       { productId: '1', title: 'Combo Guacamole', qty: 18, revenue: 900 },
       { productId: '3', title: 'Bandeja Premium', qty: 4, revenue: 720 },
     ],
+    topByEstimatedProfit: [
+      {
+        productId: '1',
+        title: 'Combo Guacamole',
+        qty: 18,
+        revenue: 900,
+        estimatedRevenue: 900,
+        estimatedCost: 420,
+        estimatedProfit: 480,
+        estimatedUnitCost: 23.33,
+      },
+      {
+        productId: '3',
+        title: 'Bandeja Premium',
+        qty: 4,
+        revenue: 720,
+        estimatedRevenue: 720,
+        estimatedCost: 280,
+        estimatedProfit: 440,
+        estimatedUnitCost: 70,
+      },
+    ],
     neverOrdered: [
       { id: 'prod-1', title: 'Salsa ahumada', price: 12 },
       { id: 'prod-2', title: 'Dip picante', price: 16 },
@@ -54,15 +76,15 @@ function createAnalyticsData(overrides: Partial<AnalyticsData> = {}): AnalyticsD
       { label: 'Pago móvil', count: 6 },
       { label: 'Efectivo', count: 4 },
     ],
-    byDeliveryMethod: [
-      { label: 'Delivery', count: 11 },
-      { label: 'Retiro', count: 9 },
-    ],
+    profitabilityCoverage: {
+      rankedProducts: 2,
+      productsWithoutEstimatedCost: 1,
+    },
     ...overrides,
   };
 }
 
-test('corrige semántica engañosa y prioriza el resumen ejecutivo del dashboard', () => {
+test('reorienta el dashboard hacia rentabilidad estimada por producto', () => {
   const model = buildAdminAnalyticsDashboardModel(createAnalyticsData());
 
   assert.deepEqual(
@@ -76,13 +98,24 @@ test('corrige semántica engañosa y prioriza el resumen ejecutivo del dashboard
     ],
   );
 
-  assert.equal(model.productHighlights.byRevenue.title, 'Top 10 por monto bruto histórico');
-  assert.match(model.productHighlights.byRevenue.description, /incluye pedidos no aprobados/i);
+  assert.equal(model.productHighlights.byEstimatedProfit.title, 'Top productos por ganancia estimada');
+  assert.match(model.productHighlights.byEstimatedProfit.description, /solo pedidos aprobados/i);
+  assert.match(model.productHighlights.byEstimatedProfit.description, /receta actual/i);
   assert.equal(model.mix.operationalCharts.status.chartType, 'bar');
   assert.equal(model.mix.operationalCharts.payment.chartType, 'bar');
-  assert.equal(model.mix.operationalCharts.delivery.chartType, 'bar');
-  assert.match(model.temporal.notice.title, /referenciales/i);
-  assert.match(model.temporal.notice.description, /timezone/i);
+  assert.equal(model.productHighlights.byRevenue.title, 'Top 10 por monto bruto histórico');
+  assert.match(model.productHighlights.byRevenue.description, /incluye pedidos no aprobados/i);
+  assert.equal(model.trend.eyebrow, 'Tendencia ejecutiva');
+  assert.equal(
+    model.trend.description,
+    'Serie diaria histórica sin filtrar por aprobación para seguir ritmo comercial y volumen de pedidos.',
+  );
+  assert.equal(model.temporal.notice.title, 'Patrones temporales');
+  assert.equal(
+    model.temporal.notice.description,
+    'Leé día de semana, hora y evolución diaria para detectar concentración de demanda y momentos de mayor actividad.',
+  );
+  assert.equal(model.productHighlights.byEstimatedProfit.chartType, 'bar');
 });
 
 test('ajusta insights y copy cuando no hay backlog ni productos inmóviles', () => {
@@ -110,4 +143,7 @@ test('ajusta insights y copy cuando no hay backlog ni productos inmóviles', () 
   assert.equal(catalogMetric?.sub, 'Todo el catálogo ya registró pedidos');
   assert.match(model.executiveNarrative[1].description, /sin pedidos pendientes/i);
   assert.match(model.executiveNarrative[2].description, /todo el catálogo/i);
+  assert.equal(model.temporal.byHour.description, 'Te muestra en qué franjas horarias se concentra la demanda.');
+  assert.match(model.executiveNarrative[2].description, /todo el catálogo/i);
+  assert.match(model.productHighlights.byEstimatedProfit.description, /1 producto.*sin costo estimable/i);
 });

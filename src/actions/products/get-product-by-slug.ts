@@ -25,7 +25,7 @@ const newProduct = {
       description: 'descripcion',
       price: 0,
       sizes: 'Pequeño',
-      slug: ' nuevo-producto',
+      slug: '',
       recipe: null as string | null,
 };
 

@@ -17,8 +17,14 @@ export const PAYMENT_STATUS = {
 export const PAYMENT_METHODS = {
   bancolombia: 'bancolombia',
   nequi: 'nequi',
+  qr: 'qr',
+  // Deprecado: solo para órdenes históricas, no aparece en nuevos pagos
   transferencia: 'transferencia',
 } as const;
+
+/** Métodos disponibles para nuevos pagos (excluye deprecados) */
+export const ACTIVE_PAYMENT_METHODS = ['bancolombia', 'nequi', 'qr'] as const;
+export type ActivePaymentMethod = typeof ACTIVE_PAYMENT_METHODS[number];
 
 export const NOTIFICATION_CHANNEL = {
   email: 'email',

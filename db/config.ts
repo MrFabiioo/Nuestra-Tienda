@@ -1,5 +1,13 @@
 import { column, defineDb, defineTable } from 'astro:db';
 
+export const SiteSettings = defineTable({
+  columns: {
+    key:       column.text({ primaryKey: true, unique: true }),
+    value:     column.text(),
+    updatedAt: column.date(),
+  },
+});
+
 export const Category = defineTable({
   columns: {
     id: column.text({ primaryKey: true, unique: true }),
@@ -123,5 +131,6 @@ export default defineDb({
     Payment,
     PaymentProof,
     NotificationLog,
+    SiteSettings,
   },
 });

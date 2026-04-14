@@ -3,7 +3,7 @@ import Layout from '@layouts/Layout.astro';
 import BreadcrumbTrail from '../../components/shared/BreadcrumbTrail.astro';
 import { actions } from 'astro:actions';
 import { Formatter } from '@utils/formatter';
-import { formatOrderStatus, ORDER_STATUS, PAYMENT_METHODS } from '../../services/orders/constants';
+import { formatOrderStatus, ORDER_STATUS, PAYMENT_METHODS, ACTIVE_PAYMENT_METHODS } from '../../services/orders/constants';
 import { clearPendingOrderPointerForToken, reconcilePendingOrderPointer } from '../../services/orders/pending-order';
 
 export const prerender = false;
@@ -30,6 +30,16 @@ const uploadSuccess = Astro.url.searchParams.get('uploaded') === '1';
 const isProofSubmitted = uploadSuccess || order.status === ORDER_STATUS.underReview || order.status === ORDER_STATUS.approved;
 const statusLabel = formatOrderStatus(order.status);
 const proofIsImage = order.latestProof?.mimeType?.startsWith('image/') ?? false;
+
+const { data: qrData } = await Astro.callAction(actions.getPaymentQr, undefined);
+const paymentQr = qrData?.qr ?? null;
+
+const paymentMethodLabels: Record<string, string> = {
+  [PAYMENT_METHODS.bancolombia]: 'Bancolombia',
+  [PAYMENT_METHODS.nequi]: 'Nequi',
+  [PAYMENT_METHODS.qr]: 'QR',
+  [PAYMENT_METHODS.transferencia]: 'Transferencia',
+};
 ---
 
 <Layout title={`Pago pedido ${order.id.slice(0, 8)} | Guacamole Shop`} description="Revisá el pedido persistido y cargá tu comprobante.">
@@ -179,12 +189,21 @@ const proofIsImage = order.latestProof?.mimeType?.startsWith('image/') ?? false;
                 <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 transition-colors hover:border-[var(--color-border-strong)]">
                   <div class="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-surface-soft)]">
                     <svg class="h-4 w-4 text-guacamole-b" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                      <path d="M10 3v14M4 9l6-6 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      <rect x="3" y="3" width="5" height="5" rx="0.5" stroke="currentColor" stroke-width="1.5"/>
+                      <rect x="12" y="3" width="5" height="5" rx="0.5" stroke="currentColor" stroke-width="1.5"/>
+                      <rect x="3" y="12" width="5" height="5" rx="0.5" stroke="currentColor" stroke-width="1.5"/>
+                      <path d="M12 12h2v2h-2zM14 14h3v3h-3zM12 17h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                     </svg>
                   </div>
-                  <p class="font-bold text-guacamole-a">Transferencia</p>
-                  <p class="mt-2 text-sm text-[var(--color-text-muted)]">Usá el monto exacto y guardá el comprobante.</p>
-                  <p class="mt-1 text-xs text-[var(--color-text-subtle)]">Después lo cargás en este mismo link.</p>
+                  <p class="font-bold text-guacamole-a">QR</p>
+                  {paymentQr ? (
+                    <>
+                      <p class="mt-2 text-sm text-[var(--color-text-muted)]">Escaneá el código con tu app bancaria.</p>
+                      <img src={paymentQr.url} alt="QR de pago" class="mt-3 h-28 w-28 rounded-xl object-contain" />
+                    </>
+                  ) : (
+                    <p class="mt-2 text-sm text-[var(--color-text-subtle)]">QR no configurado aún. Usá otra opción.</p>
+                  )}
                 </div>
               </div>
             </article>
@@ -231,9 +250,17 @@ const proofIsImage = order.latestProof?.mimeType?.startsWith('image/') ?? false;
                   <div>
                     <label for="paymentMethod" class="mb-2 block text-sm font-semibold text-[var(--color-heading-sub)]">Medio usado</label>
                     <select id="paymentMethod" name="paymentMethod" class="premium-field">
-                      <option value={PAYMENT_METHODS.bancolombia} selected={order.payment.method === PAYMENT_METHODS.bancolombia}>Bancolombia</option>
-                      <option value={PAYMENT_METHODS.nequi} selected={order.payment.method === PAYMENT_METHODS.nequi}>Nequi</option>
-                      <option value={PAYMENT_METHODS.transferencia} selected={order.payment.method === PAYMENT_METHODS.transferencia}>Transferencia</option>
+                      {ACTIVE_PAYMENT_METHODS.map((method) => (
+                        <option value={method} selected={order.payment.method === method}>
+                          {paymentMethodLabels[method] ?? method}
+                        </option>
+                      ))}
+                      {/* Historical: show transferencia read-only if that's what was used */}
+                      {order.payment.method === PAYMENT_METHODS.transferencia && (
+                        <option value={PAYMENT_METHODS.transferencia} selected>
+                          {paymentMethodLabels[PAYMENT_METHODS.transferencia]}
+                        </option>
+                      )}
                     </select>
                   </div>
                   <div>

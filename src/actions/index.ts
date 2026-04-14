@@ -1,4 +1,7 @@
 import { getAnalytics } from "./analytics/get-analytics";
+import { getPaymentQr } from "./settings/get-payment-qr.action";
+import { uploadPaymentQr } from "./settings/upload-payment-qr.action";
+import { deletePaymentQr } from "./settings/delete-payment-qr.action";
 import { createUpdateCategory } from "./categories/create-update-category.action";
 import { deleteCategory } from "./categories/delete-category.action";
 import { getCategories } from "./categories/get-categories";
@@ -47,4 +50,9 @@ export const server = {
     reviewPayment,
     deleteOrder,
     getAnalytics,
+    uploadPaymentQr,
+    deletePaymentQr,
+
+    // ── Public settings ──────────────────────────────────────────────
+    getPaymentQr,
 };

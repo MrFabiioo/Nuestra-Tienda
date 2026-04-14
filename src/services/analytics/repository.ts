@@ -5,6 +5,7 @@ import {
   buildBusinessDayOfWeekExpression,
   buildBusinessHourExpression,
 } from './sqlite-business-time';
+import { buildEstimatedProfitabilityRanking } from './estimated-profitability';
 
 const DAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 const BUSINESS_DAY_OF_WEEK_SQL = sql.raw(buildBusinessDayOfWeekExpression('createdAt'));
@@ -20,13 +21,13 @@ export async function getAnalyticsData() {
     itemsSoldResult,
     topByQtyResult,
     topByRevenueResult,
+    topByEstimatedProfitResult,
     neverOrderedResult,
     byDayOfWeekResult,
     byHourResult,
     byDayResult,
     byStatusResult,
     byPaymentMethodResult,
-    byDeliveryMethodResult,
   ] = await Promise.all([
 
     // KPI summary
@@ -60,7 +61,7 @@ export async function getAnalyticsData() {
       LIMIT 10
     `),
 
-    // Top 10 products by revenue
+    // Top 10 products by gross historical revenue
     db.run(sql`
       SELECT
         oi.productId,
@@ -71,6 +72,21 @@ export async function getAnalyticsData() {
       GROUP BY oi.productId, oi.title
       ORDER BY revenue DESC
       LIMIT 10
+    `),
+
+    // Top approved products by estimated profitability
+    db.run(sql`
+      SELECT
+        oi.productId,
+        oi.title,
+        ROUND(SUM(oi.lineTotal), 2) as approvedRevenue,
+        SUM(oi.quantity) as approvedQty,
+        p.recipe as recipeRaw
+      FROM ${OrderItem} oi
+      INNER JOIN ${Order} o ON o.id = oi.orderId
+      LEFT JOIN ${Product} p ON p.id = oi.productId
+      WHERE o.status = 'approved'
+      GROUP BY oi.productId, oi.title, p.recipe
     `),
 
     // Products with zero orders
@@ -130,14 +146,6 @@ export async function getAnalyticsData() {
       GROUP BY method
       ORDER BY count DESC
     `),
-
-    // Delivery method distribution
-    db.run(sql`
-      SELECT deliveryMethod as label, COUNT(*) as count
-      FROM ${Order}
-      GROUP BY deliveryMethod
-      ORDER BY count DESC
-    `),
   ]);
 
   // ── Summary ────────────────────────────────────────────────────────
@@ -164,8 +172,17 @@ export async function getAnalyticsData() {
       revenue:   Number(r.revenue),
     }));
 
-  const topByQty     = toProduct(topByQtyResult.rows);
+  const topByQty = toProduct(topByQtyResult.rows);
   const topByRevenue = toProduct(topByRevenueResult.rows);
+  const profitabilityRanking = buildEstimatedProfitabilityRanking(
+    (topByEstimatedProfitResult.rows as Record<string, unknown>[]).map(row => ({
+      productId: String(row.productId),
+      title: String(row.title),
+      approvedQty: Number(row.approvedQty),
+      approvedRevenue: Number(row.approvedRevenue),
+      recipeRaw: typeof row.recipeRaw === 'string' ? row.recipeRaw : null,
+    })),
+  );
 
   // ── Never ordered ──────────────────────────────────────────────────
   const neverOrdered = (neverOrderedResult.rows as Record<string, unknown>[]).map(r => ({
@@ -216,19 +233,22 @@ export async function getAnalyticsData() {
 
   const byStatus         = toDist(byStatusResult.rows);
   const byPaymentMethod  = toDist(byPaymentMethodResult.rows);
-  const byDeliveryMethod = toDist(byDeliveryMethodResult.rows);
 
   return {
     summary,
     topByQty,
     topByRevenue,
+    topByEstimatedProfit: profitabilityRanking.items,
+    profitabilityCoverage: {
+      rankedProducts: profitabilityRanking.items.length,
+      productsWithoutEstimatedCost: profitabilityRanking.productsWithoutEstimatedCost,
+    },
     neverOrdered,
     byDayOfWeek,
     byHour,
     byDay,
     byStatus,
     byPaymentMethod,
-    byDeliveryMethod,
   };
 }
 

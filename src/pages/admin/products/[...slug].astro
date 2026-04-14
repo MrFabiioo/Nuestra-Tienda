@@ -1462,6 +1462,30 @@ function emptyIngredient(): RecipeIngredient {
 
 // ── Inicialización y eventos globales ─────────────────────────────────────
 document.addEventListener('astro:page-load', () => {
+  // ── Auto-slug desde título ─────────────────────────────────────────────
+  const titleInput = document.getElementById('title') as HTMLInputElement | null;
+  const slugInput  = document.getElementById('slug')  as HTMLInputElement | null;
+
+  if (titleInput && slugInput) {
+    // Si el slug ya tiene valor (edición), no lo sobreescribimos
+    if (slugInput.value) slugInput.dataset.userModified = 'true';
+
+    titleInput.addEventListener('input', () => {
+      if (slugInput.dataset.userModified) return;
+      slugInput.value = titleInput.value
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // quita tildes
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '')
+        .replace(/-+/g, '-')
+        .trim();
+    });
+
+    slugInput.addEventListener('input', () => {
+      slugInput.dataset.userModified = 'true';
+    });
+  }
+
   // Leer datos de receta inicial inyectados por el servidor
   const dataEl = document.getElementById('recipe-initial-data');
   if (dataEl) {

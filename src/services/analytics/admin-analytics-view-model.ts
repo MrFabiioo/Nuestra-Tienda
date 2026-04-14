@@ -1,5 +1,4 @@
 import type { AnalyticsData } from './repository';
-import { BUSINESS_TIMEZONE_LABEL } from './business-timezone';
 import { Formatter } from '@utils/formatter';
 
 type DashboardMetricTone = 'default' | 'accent' | 'warning';
@@ -33,12 +32,12 @@ export interface AdminAnalyticsDashboardModel {
   productHighlights: {
     byQty: DashboardChartMeta;
     byRevenue: DashboardChartMeta;
+    byEstimatedProfit: DashboardChartMeta;
   };
   mix: {
     operationalCharts: {
       status: DashboardChartMeta;
       payment: DashboardChartMeta;
-      delivery: DashboardChartMeta;
     };
   };
   temporal: {
@@ -61,10 +60,13 @@ function formatPercent(value: number, total: number) {
 }
 
 export function buildAdminAnalyticsDashboardModel(data: AnalyticsData): AdminAnalyticsDashboardModel {
-  const { summary, neverOrdered } = data;
+  const { summary, neverOrdered, profitabilityCoverage } = data;
   const approvedShare = formatPercent(summary.approvedOrders, summary.totalOrders);
   const pendingShare = formatPercent(summary.pendingOrders, summary.totalOrders);
   const confirmedVsGrossShare = formatPercent(summary.approvedRevenue, summary.totalRevenue);
+  const profitabilityCoverageCopy = profitabilityCoverage.productsWithoutEstimatedCost > 0
+    ? ` Se excluyeron ${profitabilityCoverage.productsWithoutEstimatedCost} producto${profitabilityCoverage.productsWithoutEstimatedCost === 1 ? '' : 's'} sin costo estimable.`
+    : '';
 
   return {
     executiveMetrics: [
@@ -132,9 +134,9 @@ export function buildAdminAnalyticsDashboardModel(data: AnalyticsData): AdminAna
       },
     ],
     trend: {
-      eyebrow: 'Tendencia ejecutiva · lectura referencial',
+      eyebrow: 'Tendencia ejecutiva',
       title: 'Demanda diaria bruta y volumen de pedidos',
-      description: `Serie diaria histórica sin filtrar por aprobación; sirve para contexto, pero sigue siendo referencial mientras esté pendiente el bug de timezone (${BUSINESS_TIMEZONE_LABEL}).`,
+      description: 'Serie diaria histórica sin filtrar por aprobación para seguir ritmo comercial y volumen de pedidos.',
       chartType: 'line',
     },
     productHighlights: {
@@ -146,6 +148,11 @@ export function buildAdminAnalyticsDashboardModel(data: AnalyticsData): AdminAna
       byRevenue: {
         title: 'Top 10 por monto bruto histórico',
         description: 'Valor acumulado por producto; incluye pedidos no aprobados mientras no filtremos por estado.',
+        chartType: 'bar',
+      },
+      byEstimatedProfit: {
+        title: 'Top productos por ganancia estimada',
+        description: `Ranking comparativo con solo pedidos aprobados; ingreso aprobado menos costo estimado con receta actual.${profitabilityCoverageCopy}`,
         chartType: 'bar',
       },
     },
@@ -161,26 +168,21 @@ export function buildAdminAnalyticsDashboardModel(data: AnalyticsData): AdminAna
           description: 'Comparación directa para detectar dependencia operativa por método.',
           chartType: 'bar',
         },
-        delivery: {
-          title: 'Mix por método de entrega',
-          description: 'Útil para decidir capacidad entre delivery y retiro.',
-          chartType: 'bar',
-        },
       },
     },
     temporal: {
       notice: {
-        title: 'Patrones temporales referenciales',
-        description: `Día de semana, hora y lecturas diarias todavía pueden correrse por el bug pendiente de timezone. Mostralos como orientación, NO como verdad operativa final (${BUSINESS_TIMEZONE_LABEL}).`,
+        title: 'Patrones temporales',
+        description: 'Leé día de semana, hora y evolución diaria para detectar concentración de demanda y momentos de mayor actividad.',
       },
       byDayOfWeek: {
         title: 'Pedidos por día de la semana',
-        description: 'Úsalo solo para detectar señales amplias, no para programar operación fina.',
+        description: 'Te ayuda a ver qué días concentran más pedidos y demanda histórica.',
         chartType: 'bar',
       },
       byHour: {
         title: 'Pedidos por hora del día',
-        description: 'Vista provisoria hasta corregir el bug temporal pendiente.',
+        description: 'Te muestra en qué franjas horarias se concentra la demanda.',
         chartType: 'bar',
       },
     },
