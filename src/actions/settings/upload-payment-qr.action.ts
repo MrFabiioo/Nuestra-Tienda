@@ -50,7 +50,7 @@ export const uploadPaymentQr = defineAction({
       .insert(SiteSettings)
       .values({ key: PAYMENT_QR_KEY, value: JSON.stringify(value), updatedAt: new Date() })
       .onConflictDoUpdate({
-        target: SiteSettings.columns.key,
+        target: SiteSettings.key,
         set: { value: JSON.stringify(value), updatedAt: new Date() },
       });
 
