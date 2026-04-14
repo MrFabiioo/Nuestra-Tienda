@@ -137,7 +137,7 @@ const paymentMethodLabels: Record<string, string> = {
                 </div>
                 <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 text-sm text-[var(--color-text-muted)]">
                   <p class="font-bold text-[var(--color-heading-sub)]">Pago actual</p>
-                  <p class="mt-2">Método: <strong class="text-[var(--color-heading-sub)]">{order.payment.method}</strong></p>
+                  <p class="mt-2">Método: <strong id="current-payment-method" class="text-[var(--color-heading-sub)]">{order.payment.method}</strong></p>
                   <p>Estado: <strong class="text-[var(--color-heading-sub)]">{order.payment.status}</strong></p>
                   {order.payment.rejectionReason && (
                     <p class="mt-2 font-semibold text-[var(--color-danger-text)]">Motivo rechazo: {order.payment.rejectionReason}</p>
@@ -170,9 +170,6 @@ const paymentMethodLabels: Record<string, string> = {
                     </svg>
                   </div>
                   <p class="font-bold text-guacamole-a">Bancolombia</p>
-                  <p class="mt-2 text-sm text-[var(--color-text-muted)]">Cuenta de Ahorros</p>
-                  <p class="text-sm font-semibold text-[var(--color-heading-sub)]">331-85984-045</p>
-                  <p class="mt-1 text-xs text-[var(--color-text-subtle)]">Titular: Guacamole Shop</p>
                 </div>
                 <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 transition-colors hover:border-[var(--color-border-strong)]">
                   <div class="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-surface-soft)]">
@@ -182,9 +179,6 @@ const paymentMethodLabels: Record<string, string> = {
                     </svg>
                   </div>
                   <p class="font-bold text-guacamole-a">Nequi</p>
-                  <p class="mt-2 text-sm text-[var(--color-text-muted)]">Celular</p>
-                  <p class="text-sm font-semibold text-[var(--color-heading-sub)]">350 201 8487</p>
-                  <p class="mt-1 text-xs text-[var(--color-text-subtle)]">Ideal para pago rápido desde la app.</p>
                 </div>
                 <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 transition-colors hover:border-[var(--color-border-strong)]">
                   <div class="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-surface-soft)]">
@@ -196,13 +190,8 @@ const paymentMethodLabels: Record<string, string> = {
                     </svg>
                   </div>
                   <p class="font-bold text-guacamole-a">QR</p>
-                  {paymentQr ? (
-                    <>
-                      <p class="mt-2 text-sm text-[var(--color-text-muted)]">Escaneá el código con tu app bancaria.</p>
-                      <img src={paymentQr.url} alt="QR de pago" class="mt-3 h-28 w-28 rounded-xl object-contain" />
-                    </>
-                  ) : (
-                    <p class="mt-2 text-sm text-[var(--color-text-subtle)]">QR no configurado aún. Usá otra opción.</p>
+                  {!paymentQr && (
+                    <p class="mt-1 text-xs text-[var(--color-text-subtle)]">No configurado aún.</p>
                   )}
                 </div>
               </div>
@@ -255,14 +244,56 @@ const paymentMethodLabels: Record<string, string> = {
                           {paymentMethodLabels[method] ?? method}
                         </option>
                       ))}
-                      {/* Historical: show transferencia read-only if that's what was used */}
-                      {order.payment.method === PAYMENT_METHODS.transferencia && (
-                        <option value={PAYMENT_METHODS.transferencia} selected>
-                          {paymentMethodLabels[PAYMENT_METHODS.transferencia]}
-                        </option>
-                      )}
                     </select>
                   </div>
+
+                  {/* Bancolombia banner */}
+                  <div id="banner-bancolombia" class="hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-6">
+                    <p class="mb-4 text-center text-sm font-semibold text-[var(--color-heading-sub)]">Datos para transferir por Bancolombia</p>
+                    <dl class="space-y-2 text-center">
+                      <div>
+                        <dt class="text-xs text-[var(--color-text-subtle)]">Tipo de cuenta</dt>
+                        <dd class="text-sm font-semibold text-[var(--color-heading-sub)]">Cuenta de Ahorros</dd>
+                      </div>
+                      <div>
+                        <dt class="text-xs text-[var(--color-text-subtle)]">Número</dt>
+                        <dd class="text-lg font-black tracking-widest text-[var(--color-heading)]">331-85984-045</dd>
+                      </div>
+                      <div>
+                        <dt class="text-xs text-[var(--color-text-subtle)]">Titular</dt>
+                        <dd class="text-sm font-semibold text-[var(--color-heading-sub)]">Guacamole Shop</dd>
+                      </div>
+                    </dl>
+                    <p class="mt-4 text-center text-xs text-[var(--color-text-subtle)]">Usá el monto exacto del pedido · Guardá el comprobante</p>
+                  </div>
+
+                  {/* Nequi banner */}
+                  <div id="banner-nequi" class="hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-6">
+                    <p class="mb-4 text-center text-sm font-semibold text-[var(--color-heading-sub)]">Datos para transferir por Nequi</p>
+                    <dl class="space-y-2 text-center">
+                      <div>
+                        <dt class="text-xs text-[var(--color-text-subtle)]">Celular</dt>
+                        <dd class="text-lg font-black tracking-widest text-[var(--color-heading)]">350 201 8487</dd>
+                      </div>
+                      <div>
+                        <dt class="text-xs text-[var(--color-text-subtle)]">Titular</dt>
+                        <dd class="text-sm font-semibold text-[var(--color-heading-sub)]">Guacamole Shop</dd>
+                      </div>
+                    </dl>
+                    <p class="mt-4 text-center text-xs text-[var(--color-text-subtle)]">Ideal para pago rápido desde la app · Guardá el comprobante</p>
+                  </div>
+
+                  {/* QR banner — visible only when paymentQr exists */}
+                  {paymentQr && (
+                    <div id="banner-qr" class="hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-6">
+                      <p class="mb-4 text-center text-sm font-semibold text-[var(--color-heading-sub)]">Escaneá este código con tu app bancaria</p>
+                      <div class="flex justify-center">
+                        <img src={paymentQr.url} alt="QR de pago" class="h-64 w-64 rounded-2xl object-contain shadow-lg" />
+                      </div>
+                      <p class="mt-4 text-center text-xs text-[var(--color-text-subtle)]">Usá el monto exacto del pedido · Guardá el comprobante</p>
+                    </div>
+                  )}
+
                   <div>
                     <label for="proofFile" class="mb-2 block text-sm font-semibold text-[var(--color-heading-sub)]">Archivo</label>
                     <input id="proofFile" name="proofFile" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" class="premium-field file:mr-4 file:rounded-full file:border-0 file:bg-guacamole-b file:px-4 file:py-2 file:font-semibold file:text-white" required />
@@ -340,6 +371,33 @@ const paymentMethodLabels: Record<string, string> = {
         const form = document.getElementById('payment-proof-form') as HTMLFormElement | null;
         const submit = document.getElementById('payment-proof-submit') as HTMLButtonElement | null;
         const feedback = document.getElementById('payment-proof-feedback') as HTMLParagraphElement | null;
+        const select = document.getElementById('paymentMethod') as HTMLSelectElement | null;
+        const currentMethodEl = document.getElementById('current-payment-method') as HTMLElement | null;
+        const banners: Record<string, HTMLElement | null> = {
+          bancolombia: document.getElementById('banner-bancolombia'),
+          nequi:       document.getElementById('banner-nequi'),
+          qr:          document.getElementById('banner-qr'),
+        };
+        const methodLabels: Record<string, string> = {
+          bancolombia: 'Bancolombia',
+          nequi: 'Nequi',
+          qr: 'QR',
+          transferencia: 'Transferencia',
+        };
+
+        if (select) {
+          const syncBanners = () => {
+            const active = select.value;
+            for (const [key, el] of Object.entries(banners)) {
+              el?.classList.toggle('hidden', key !== active);
+            }
+            if (currentMethodEl) {
+              currentMethodEl.textContent = methodLabels[active] ?? active;
+            }
+          };
+          select.addEventListener('change', syncBanners);
+          syncBanners(); // estado inicial
+        }
 
         if (!form || !submit || !feedback) return;
 
