@@ -1,7 +1,7 @@
 import { ActionError, defineAction } from 'astro:actions';
 import { db, eq, Order, OrderItem, Payment, PaymentProof, NotificationLog } from 'astro:db';
 import { z } from 'astro:schema';
-import { requireAuth } from '../../firebase/guards';
+import { requireSensitiveAdminAccess } from '../../firebase/guards';
 import { ImageUpload } from '@utils/image-upload';
 
 export const deleteOrder = defineAction({
@@ -10,7 +10,7 @@ export const deleteOrder = defineAction({
     id: z.string().min(1, 'ID de pedido inválido.'),
   }),
   handler: async ({ id }, context) => {
-    requireAuth(context);
+    requireSensitiveAdminAccess(context, 'eliminar pedidos');
 
     const [order] = await db.select().from(Order).where(eq(Order.id, id));
     if (!order) {

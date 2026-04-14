@@ -1,7 +1,7 @@
 import { ActionError, defineAction } from 'astro:actions';
 import { db, Order, Payment, sql } from 'astro:db';
 import { z } from 'astro:schema';
-import { requireAuth } from '../../firebase/guards';
+import { requireSensitiveAdminAccess } from '../../firebase/guards';
 import { dispatchOrderNotifications } from '../../services/notifications/dispatcher';
 import { ORDER_STATUS, PAYMENT_STATUS } from '../../services/orders/constants';
 import { getOrderById, getOrderSnapshotById } from '../../services/orders/repository';
@@ -14,7 +14,7 @@ export const reviewPayment = defineAction({
     rejectionReason: z.string().optional(),
   }),
   handler: async ({ orderId, decision, rejectionReason }, context) => {
-    const user = requireAuth(context);
+    const user = requireSensitiveAdminAccess(context, 'revisar pagos');
     const detail = await getOrderById(orderId);
 
     if (!detail) {

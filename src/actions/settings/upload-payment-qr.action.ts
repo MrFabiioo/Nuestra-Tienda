@@ -1,9 +1,8 @@
 import { defineAction } from 'astro:actions';
-import { db, eq, SiteSettings } from 'astro:db';
 import { z } from 'astro:schema';
-import { requireAuth } from '../../firebase/guards';
+import { requireSensitiveAdminAccess } from '../../firebase/guards';
 import { ImageUpload } from '@utils/image-upload';
-import { PAYMENT_QR_KEY, type PaymentQrValue } from './get-payment-qr.action';
+import { PAYMENT_QR_KEY, readPaymentQrSetting, upsertSiteSetting, type PaymentQrValue } from './payment-settings.shared';
 
 export const uploadPaymentQr = defineAction({
   accept: 'form',
@@ -18,21 +17,13 @@ export const uploadPaymentQr = defineAction({
       ),
   }),
   handler: async (input, context) => {
-    requireAuth(context);
+    requireSensitiveAdminAccess(context, 'subir QR de pago');
 
     // Si ya hay un QR, eliminar el anterior de Cloudinary
-    const [existing] = await db
-      .select()
-      .from(SiteSettings)
-      .where(eq(SiteSettings.key, PAYMENT_QR_KEY));
+    const existing = await readPaymentQrSetting();
 
     if (existing) {
-      try {
-        const prev = JSON.parse(existing.value) as PaymentQrValue;
-        if (prev.publicId) {
-          await ImageUpload.deleteAsset(prev.publicId, 'image');
-        }
-      } catch { /* si el JSON está roto, ignorar */ }
+      await ImageUpload.deleteAsset(existing.publicId, 'image');
     }
 
     const asset = await ImageUpload.uploadDetailed(input.qrFile, {
@@ -46,13 +37,7 @@ export const uploadPaymentQr = defineAction({
       uploadedAt: new Date().toISOString(),
     };
 
-    await db
-      .insert(SiteSettings)
-      .values({ key: PAYMENT_QR_KEY, value: JSON.stringify(value), updatedAt: new Date() })
-      .onConflictDoUpdate({
-        target: SiteSettings.key,
-        set: { value: JSON.stringify(value), updatedAt: new Date() },
-      });
+    await upsertSiteSetting(PAYMENT_QR_KEY, value);
 
     return { qr: value };
   },

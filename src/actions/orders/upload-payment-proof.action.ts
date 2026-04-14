@@ -17,7 +17,7 @@ export const uploadPaymentProof = defineAction({
   accept: 'form',
   input: z.object({
     token: z.string().min(10, 'Referencia inválida.'),
-    paymentMethod: z.enum([PAYMENT_METHODS.bancolombia, PAYMENT_METHODS.nequi, PAYMENT_METHODS.transferencia]).default(PAYMENT_METHODS.transferencia),
+    paymentMethod: z.enum([PAYMENT_METHODS.bancolombia, PAYMENT_METHODS.nequi, PAYMENT_METHODS.qr, PAYMENT_METHODS.transferencia]).default(PAYMENT_METHODS.transferencia),
     proofFile: paymentProofFile,
   }),
   handler: async ({ token, paymentMethod, proofFile }, context) => {

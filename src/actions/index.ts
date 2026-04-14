@@ -1,7 +1,10 @@
 import { getAnalytics } from "./analytics/get-analytics";
 import { getPaymentQr } from "./settings/get-payment-qr.action";
+import { getPaymentSettings } from "./settings/get-payment-settings.action";
 import { uploadPaymentQr } from "./settings/upload-payment-qr.action";
 import { deletePaymentQr } from "./settings/delete-payment-qr.action";
+import { savePaymentMethodConfig } from "./settings/save-payment-method-config.action";
+import { deletePaymentMethodConfig } from "./settings/delete-payment-method-config.action";
 import { createUpdateCategory } from "./categories/create-update-category.action";
 import { deleteCategory } from "./categories/delete-category.action";
 import { getCategories } from "./categories/get-categories";
@@ -52,7 +55,10 @@ export const server = {
     getAnalytics,
     uploadPaymentQr,
     deletePaymentQr,
+    savePaymentMethodConfig,
+    deletePaymentMethodConfig,
 
     // ── Public settings ──────────────────────────────────────────────
     getPaymentQr,
+    getPaymentSettings,
 };

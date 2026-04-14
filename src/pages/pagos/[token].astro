@@ -3,7 +3,8 @@ import Layout from '@layouts/Layout.astro';
 import BreadcrumbTrail from '../../components/shared/BreadcrumbTrail.astro';
 import { actions } from 'astro:actions';
 import { Formatter } from '@utils/formatter';
-import { formatOrderStatus, ORDER_STATUS, PAYMENT_METHODS, ACTIVE_PAYMENT_METHODS } from '../../services/orders/constants';
+import { getPaymentSettings } from '../../actions/settings/get-payment-settings.action';
+import { formatOrderStatus, ORDER_STATUS, PAYMENT_METHODS } from '../../services/orders/constants';
 import { clearPendingOrderPointerForToken, reconcilePendingOrderPointer } from '../../services/orders/pending-order';
 
 export const prerender = false;
@@ -31,8 +32,23 @@ const isProofSubmitted = uploadSuccess || order.status === ORDER_STATUS.underRev
 const statusLabel = formatOrderStatus(order.status);
 const proofIsImage = order.latestProof?.mimeType?.startsWith('image/') ?? false;
 
-const { data: qrData } = await Astro.callAction(actions.getPaymentQr, undefined);
-const paymentQr = qrData?.qr ?? null;
+const { data: paymentSettingsData } = await Astro.callAction(getPaymentSettings, undefined);
+const normalizedAvailableMethods: string[] = [];
+
+for (const method of paymentSettingsData?.availableMethods ?? []) {
+  if (typeof method === 'string') {
+    normalizedAvailableMethods.push(method as string);
+  }
+}
+
+const paymentSettings = {
+  bancolombia: paymentSettingsData?.bancolombia ?? null,
+  nequi: paymentSettingsData?.nequi ?? null,
+  qr: paymentSettingsData?.qr ?? null,
+  availableMethods: normalizedAvailableMethods,
+};
+
+const paymentQr = paymentSettings.qr;
 
 const paymentMethodLabels: Record<string, string> = {
   [PAYMENT_METHODS.bancolombia]: 'Bancolombia',
@@ -40,6 +56,48 @@ const paymentMethodLabels: Record<string, string> = {
   [PAYMENT_METHODS.qr]: 'QR',
   [PAYMENT_METHODS.transferencia]: 'Transferencia',
 };
+
+const paymentCards: Array<{ key: string; title: string; subtitle: string }> = [];
+
+if (paymentSettings.bancolombia) {
+  paymentCards.push({
+    key: PAYMENT_METHODS.bancolombia,
+    title: 'Bancolombia',
+    subtitle: `${paymentSettings.bancolombia.accountType} · ${paymentSettings.bancolombia.accountNumber}`,
+  });
+}
+
+if (paymentSettings.nequi) {
+  paymentCards.push({
+    key: PAYMENT_METHODS.nequi,
+    title: 'Nequi',
+    subtitle: paymentSettings.nequi.phoneNumber,
+  });
+}
+
+if (paymentQr) {
+  paymentCards.push({
+    key: PAYMENT_METHODS.qr,
+    title: 'QR',
+    subtitle: 'Escaneá con tu app bancaria',
+  });
+}
+
+const paymentMethodOptionsSet = new Set<string>();
+
+for (const method of paymentSettings.availableMethods) {
+  if (paymentMethodLabels[method]) {
+    paymentMethodOptionsSet.add(method);
+  }
+}
+
+if (order.payment.method && paymentMethodLabels[order.payment.method]) {
+  paymentMethodOptionsSet.add(order.payment.method);
+}
+
+const paymentMethodOptions = Array.from(paymentMethodOptionsSet);
+
+const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
 ---
 
 <Layout title={`Pago pedido ${order.id.slice(0, 8)} | Guacamole Shop`} description="Revisá el pedido persistido y cargá tu comprobante.">
@@ -162,39 +220,41 @@ const paymentMethodLabels: Record<string, string> = {
                 </div>
               </div>
 
-              <div class="mt-5 grid gap-4 md:grid-cols-3">
-                <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 transition-colors hover:border-[var(--color-border-strong)]">
-                  <div class="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-surface-soft)]">
-                    <svg class="h-4 w-4 text-guacamole-b" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                      <path d="M3 5h14M3 10h14M3 15h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                    </svg>
-                  </div>
-                  <p class="font-bold text-guacamole-a">Bancolombia</p>
+              {paymentCards.length > 0 ? (
+                <div class="mt-5 grid gap-4 md:grid-cols-3">
+                  {paymentCards.map((method) => (
+                    <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 transition-colors hover:border-[var(--color-border-strong)]">
+                      <div class="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-surface-soft)]">
+                        {method.key === PAYMENT_METHODS.bancolombia && (
+                          <svg class="h-4 w-4 text-guacamole-b" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                            <path d="M3 5h14M3 10h14M3 15h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                          </svg>
+                        )}
+                        {method.key === PAYMENT_METHODS.nequi && (
+                          <svg class="h-4 w-4 text-guacamole-b" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                            <rect x="5" y="2" width="10" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M8 15h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                          </svg>
+                        )}
+                        {method.key === PAYMENT_METHODS.qr && (
+                          <svg class="h-4 w-4 text-guacamole-b" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                            <rect x="3" y="3" width="5" height="5" rx="0.5" stroke="currentColor" stroke-width="1.5"/>
+                            <rect x="12" y="3" width="5" height="5" rx="0.5" stroke="currentColor" stroke-width="1.5"/>
+                            <rect x="3" y="12" width="5" height="5" rx="0.5" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M12 12h2v2h-2zM14 14h3v3h-3zM12 17h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                          </svg>
+                        )}
+                      </div>
+                      <p class="font-bold text-guacamole-a">{method.title}</p>
+                      <p class="mt-1 text-xs text-[var(--color-text-subtle)]">{method.subtitle}</p>
+                    </div>
+                  ))}
                 </div>
-                <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 transition-colors hover:border-[var(--color-border-strong)]">
-                  <div class="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-surface-soft)]">
-                    <svg class="h-4 w-4 text-guacamole-b" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                      <rect x="5" y="2" width="10" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/>
-                      <path d="M8 15h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                    </svg>
-                  </div>
-                  <p class="font-bold text-guacamole-a">Nequi</p>
+              ) : (
+                <div class="mt-5 rounded-2xl border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface-soft)] p-5 text-sm text-[var(--color-text-subtle)]">
+                  Todavía no hay medios de pago configurados desde el admin. Antes de transferir, pedile al comercio que cargue Bancolombia, Nequi o QR.
                 </div>
-                <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 transition-colors hover:border-[var(--color-border-strong)]">
-                  <div class="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-surface-soft)]">
-                    <svg class="h-4 w-4 text-guacamole-b" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                      <rect x="3" y="3" width="5" height="5" rx="0.5" stroke="currentColor" stroke-width="1.5"/>
-                      <rect x="12" y="3" width="5" height="5" rx="0.5" stroke="currentColor" stroke-width="1.5"/>
-                      <rect x="3" y="12" width="5" height="5" rx="0.5" stroke="currentColor" stroke-width="1.5"/>
-                      <path d="M12 12h2v2h-2zM14 14h3v3h-3zM12 17h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                    </svg>
-                  </div>
-                  <p class="font-bold text-guacamole-a">QR</p>
-                  {!paymentQr && (
-                    <p class="mt-1 text-xs text-[var(--color-text-subtle)]">No configurado aún.</p>
-                  )}
-                </div>
-              </div>
+              )}
             </article>
 
             <!-- Proof upload -->
@@ -233,13 +293,13 @@ const paymentMethodLabels: Record<string, string> = {
                 </div>
               )}
 
-              {canUploadProof ? (
+              {canUploadProof && hasSelectablePaymentMethods ? (
                 <form id="payment-proof-form" class="mt-5 space-y-4" enctype="multipart/form-data">
                   <input type="hidden" name="token" value={token} />
                   <div>
                     <label for="paymentMethod" class="mb-2 block text-sm font-semibold text-[var(--color-heading-sub)]">Medio usado</label>
                     <select id="paymentMethod" name="paymentMethod" class="premium-field">
-                      {ACTIVE_PAYMENT_METHODS.map((method) => (
+                      {paymentMethodOptions.map((method) => (
                         <option value={method} selected={order.payment.method === method}>
                           {paymentMethodLabels[method] ?? method}
                         </option>
@@ -248,40 +308,44 @@ const paymentMethodLabels: Record<string, string> = {
                   </div>
 
                   {/* Bancolombia banner */}
-                  <div id="banner-bancolombia" class="hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-6">
-                    <p class="mb-4 text-center text-sm font-semibold text-[var(--color-heading-sub)]">Datos para transferir por Bancolombia</p>
-                    <dl class="space-y-2 text-center">
-                      <div>
-                        <dt class="text-xs text-[var(--color-text-subtle)]">Tipo de cuenta</dt>
-                        <dd class="text-sm font-semibold text-[var(--color-heading-sub)]">Cuenta de Ahorros</dd>
-                      </div>
-                      <div>
-                        <dt class="text-xs text-[var(--color-text-subtle)]">Número</dt>
-                        <dd class="text-lg font-black tracking-widest text-[var(--color-heading)]">331-85984-045</dd>
-                      </div>
-                      <div>
-                        <dt class="text-xs text-[var(--color-text-subtle)]">Titular</dt>
-                        <dd class="text-sm font-semibold text-[var(--color-heading-sub)]">Guacamole Shop</dd>
-                      </div>
-                    </dl>
-                    <p class="mt-4 text-center text-xs text-[var(--color-text-subtle)]">Usá el monto exacto del pedido · Guardá el comprobante</p>
-                  </div>
+                  {paymentSettings.bancolombia && (
+                    <div id="banner-bancolombia" class="hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-6">
+                      <p class="mb-4 text-center text-sm font-semibold text-[var(--color-heading-sub)]">Datos para transferir por Bancolombia</p>
+                      <dl class="space-y-2 text-center">
+                        <div>
+                          <dt class="text-xs text-[var(--color-text-subtle)]">Tipo de cuenta</dt>
+                          <dd class="text-sm font-semibold text-[var(--color-heading-sub)]">{paymentSettings.bancolombia.accountType}</dd>
+                        </div>
+                        <div>
+                          <dt class="text-xs text-[var(--color-text-subtle)]">Número</dt>
+                          <dd class="text-lg font-black tracking-widest text-[var(--color-heading)]">{paymentSettings.bancolombia.accountNumber}</dd>
+                        </div>
+                        <div>
+                          <dt class="text-xs text-[var(--color-text-subtle)]">Titular</dt>
+                          <dd class="text-sm font-semibold text-[var(--color-heading-sub)]">{paymentSettings.bancolombia.holderName}</dd>
+                        </div>
+                      </dl>
+                      <p class="mt-4 text-center text-xs text-[var(--color-text-subtle)]">{paymentSettings.bancolombia.note ?? 'Usá el monto exacto del pedido · Guardá el comprobante'}</p>
+                    </div>
+                  )}
 
                   {/* Nequi banner */}
-                  <div id="banner-nequi" class="hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-6">
-                    <p class="mb-4 text-center text-sm font-semibold text-[var(--color-heading-sub)]">Datos para transferir por Nequi</p>
-                    <dl class="space-y-2 text-center">
-                      <div>
-                        <dt class="text-xs text-[var(--color-text-subtle)]">Celular</dt>
-                        <dd class="text-lg font-black tracking-widest text-[var(--color-heading)]">350 201 8487</dd>
-                      </div>
-                      <div>
-                        <dt class="text-xs text-[var(--color-text-subtle)]">Titular</dt>
-                        <dd class="text-sm font-semibold text-[var(--color-heading-sub)]">Guacamole Shop</dd>
-                      </div>
-                    </dl>
-                    <p class="mt-4 text-center text-xs text-[var(--color-text-subtle)]">Ideal para pago rápido desde la app · Guardá el comprobante</p>
-                  </div>
+                  {paymentSettings.nequi && (
+                    <div id="banner-nequi" class="hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-6">
+                      <p class="mb-4 text-center text-sm font-semibold text-[var(--color-heading-sub)]">Datos para transferir por Nequi</p>
+                      <dl class="space-y-2 text-center">
+                        <div>
+                          <dt class="text-xs text-[var(--color-text-subtle)]">Celular</dt>
+                          <dd class="text-lg font-black tracking-widest text-[var(--color-heading)]">{paymentSettings.nequi.phoneNumber}</dd>
+                        </div>
+                        <div>
+                          <dt class="text-xs text-[var(--color-text-subtle)]">Titular</dt>
+                          <dd class="text-sm font-semibold text-[var(--color-heading-sub)]">{paymentSettings.nequi.holderName}</dd>
+                        </div>
+                      </dl>
+                      <p class="mt-4 text-center text-xs text-[var(--color-text-subtle)]">{paymentSettings.nequi.note ?? 'Ideal para pago rápido desde la app · Guardá el comprobante'}</p>
+                    </div>
+                  )}
 
                   {/* QR banner — visible only when paymentQr exists */}
                   {paymentQr && (
@@ -306,6 +370,10 @@ const paymentMethodLabels: Record<string, string> = {
                     Subir comprobante y pasar a revisión
                   </button>
                 </form>
+              ) : canUploadProof ? (
+                <div class="mt-5 rounded-2xl border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface-soft)] p-5 text-sm text-[var(--color-text-subtle)]">
+                  No hay medios de pago configurados para este pedido. Antes de subir un comprobante, el comercio tiene que cargar Bancolombia, Nequi o QR desde el panel admin.
+                </div>
               ) : (
                 <div class="mt-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-5 text-sm text-[var(--color-text-muted)]">
                   Este pedido ya no necesita una nueva carga desde el link público. Si ves algo raro, revisalo con el comercio desde el backoffice.
@@ -365,25 +433,31 @@ const paymentMethodLabels: Record<string, string> = {
   </main>
 
   <script>
+      // @ts-nocheck
       import { actions } from 'astro:actions';
 
       document.addEventListener('astro:page-load', () => {
-        const form = document.getElementById('payment-proof-form') as HTMLFormElement | null;
-        const submit = document.getElementById('payment-proof-submit') as HTMLButtonElement | null;
-        const feedback = document.getElementById('payment-proof-feedback') as HTMLParagraphElement | null;
-        const select = document.getElementById('paymentMethod') as HTMLSelectElement | null;
-        const currentMethodEl = document.getElementById('current-payment-method') as HTMLElement | null;
-        const banners: Record<string, HTMLElement | null> = {
+        const formNode = document.getElementById('payment-proof-form');
+        const submitNode = document.getElementById('payment-proof-submit');
+        const feedbackNode = document.getElementById('payment-proof-feedback');
+        const selectNode = document.getElementById('paymentMethod');
+        const currentMethodEl = document.getElementById('current-payment-method');
+        const banners = {
           bancolombia: document.getElementById('banner-bancolombia'),
           nequi:       document.getElementById('banner-nequi'),
           qr:          document.getElementById('banner-qr'),
         };
-        const methodLabels: Record<string, string> = {
+        const methodLabels = /** @type {Record<string, string>} */ ({
           bancolombia: 'Bancolombia',
           nequi: 'Nequi',
           qr: 'QR',
           transferencia: 'Transferencia',
-        };
+        });
+
+        const form = formNode instanceof HTMLFormElement ? formNode : null;
+        const submit = submitNode instanceof HTMLButtonElement ? submitNode : null;
+        const feedback = feedbackNode instanceof HTMLParagraphElement ? feedbackNode : null;
+        const select = selectNode instanceof HTMLSelectElement ? selectNode : null;
 
         if (select) {
           const syncBanners = () => {

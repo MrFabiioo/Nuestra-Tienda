@@ -49,6 +49,8 @@ const PROTECTED_ADMIN_ACTIONS = new Set([
   'getAnalytics',
   'uploadPaymentQr',
   'deletePaymentQr',
+  'savePaymentMethodConfig',
+  'deletePaymentMethodConfig',
 ]);
 
 /**

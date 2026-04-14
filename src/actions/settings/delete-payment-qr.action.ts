@@ -1,29 +1,20 @@
 import { defineAction } from 'astro:actions';
-import { db, eq, SiteSettings } from 'astro:db';
-import { requireAuth } from '../../firebase/guards';
+import { requireSensitiveAdminAccess } from '../../firebase/guards';
 import { ImageUpload } from '@utils/image-upload';
-import { PAYMENT_QR_KEY, type PaymentQrValue } from './get-payment-qr.action';
+import { deleteSiteSetting, PAYMENT_QR_KEY, readPaymentQrSetting } from './payment-settings.shared';
 
 export const deletePaymentQr = defineAction({
   accept: 'json',
   handler: async (_input, context) => {
-    requireAuth(context);
+    requireSensitiveAdminAccess(context, 'eliminar QR de pago');
 
-    const [row] = await db
-      .select()
-      .from(SiteSettings)
-      .where(eq(SiteSettings.key, PAYMENT_QR_KEY));
+    const qr = await readPaymentQrSetting();
 
-    if (!row) return { ok: true };
+    if (!qr) return { ok: true };
 
-    try {
-      const qr = JSON.parse(row.value) as PaymentQrValue;
-      if (qr.publicId) {
-        await ImageUpload.deleteAsset(qr.publicId, 'image');
-      }
-    } catch { /* ignorar si el JSON está roto */ }
+    await ImageUpload.deleteAsset(qr.publicId, 'image');
 
-    await db.delete(SiteSettings).where(eq(SiteSettings.key, PAYMENT_QR_KEY));
+    await deleteSiteSetting(PAYMENT_QR_KEY);
 
     return { ok: true };
   },
