@@ -54,8 +54,11 @@ const paymentMethodLabels: Record<string, string> = {
   [PAYMENT_METHODS.bancolombia]: 'Bancolombia',
   [PAYMENT_METHODS.nequi]: 'Nequi',
   [PAYMENT_METHODS.qr]: 'QR',
-  [PAYMENT_METHODS.transferencia]: 'Transferencia',
 };
+
+function labelPaymentMethod(method: string) {
+  return paymentMethodLabels[method] ?? method;
+}
 
 const paymentCards: Array<{ key: string; title: string; subtitle: string }> = [];
 
@@ -122,13 +125,13 @@ const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
             </h1>
           )}
           {isProofSubmitted ? (
-            <p class="text-[var(--color-text-muted)]">
-              Tu comprobante fue recibido. Estamos verificando la transferencia y te avisamos cuando el pedido sea confirmado.
-            </p>
+              <p class="text-[var(--color-text-muted)]">
+                Tu comprobante fue recibido. Estamos verificando el pago y te avisamos cuando el pedido sea confirmado.
+              </p>
           ) : (
-            <p class="text-[var(--color-text-muted)]">
-              Realizá la transferencia con los datos de abajo, subí el comprobante y el pedido pasa a revisión automáticamente.
-            </p>
+              <p class="text-[var(--color-text-muted)]">
+                Realizá el pago con los datos de abajo, subí el comprobante y el pedido pasa a revisión automáticamente.
+              </p>
           )}
           <div class="flex flex-wrap gap-3 pt-1 text-sm">
             {isProofSubmitted ? (
@@ -142,7 +145,7 @@ const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
             ) : (
               <span class="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2 text-[var(--color-text-muted)] shadow-sm">
                 <span class="h-2 w-2 rounded-full bg-guacamole-b"></span>
-                Paso actual: transferencia y comprobante
+                Paso actual: pago y comprobante
               </span>
             )}
             <span class="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2 text-[var(--color-text-subtle)] shadow-sm">
@@ -164,7 +167,7 @@ const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
               <div>
                 <p class="font-black uppercase tracking-wide text-[var(--color-heading)]">¡Comprobante recibido!</p>
                 <p class="mt-1 text-sm text-[var(--color-text-muted)]">
-                  Tu pedido quedó <strong class="text-guacamole-b">en revisión</strong>. El comercio va a verificar tu transferencia y te va a avisar cuando todo esté confirmado. Si tenés dudas, guardá el número de pedido como referencia.
+                  Tu pedido quedó <strong class="text-guacamole-b">en revisión</strong>. El comercio va a verificar tu pago y te va a avisar cuando todo esté confirmado. Si tenés dudas, guardá el número de pedido como referencia.
                 </p>
               </div>
             </div>
@@ -195,7 +198,7 @@ const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
                 </div>
                 <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 text-sm text-[var(--color-text-muted)]">
                   <p class="font-bold text-[var(--color-heading-sub)]">Pago actual</p>
-                  <p class="mt-2">Método: <strong id="current-payment-method" class="text-[var(--color-heading-sub)]">{order.payment.method}</strong></p>
+                  <p class="mt-2">Método: <strong id="current-payment-method" class="text-[var(--color-heading-sub)]">{labelPaymentMethod(order.payment.method)}</strong></p>
                   <p>Estado: <strong class="text-[var(--color-heading-sub)]">{order.payment.status}</strong></p>
                   {order.payment.rejectionReason && (
                     <p class="mt-2 font-semibold text-[var(--color-danger-text)]">Motivo rechazo: {order.payment.rejectionReason}</p>
@@ -215,7 +218,7 @@ const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
                   </svg>
                 </div>
                 <div>
-                  <h2 class="text-xl font-black uppercase tracking-wide text-[var(--color-heading)]">Medios para transferir</h2>
+                  <h2 class="text-xl font-black uppercase tracking-wide text-[var(--color-heading)]">Medios de pago</h2>
                   <p class="mt-0.5 text-xs text-[var(--color-text-subtle)]">Usá el monto exacto del pedido</p>
                 </div>
               </div>
@@ -252,7 +255,7 @@ const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
                 </div>
               ) : (
                 <div class="mt-5 rounded-2xl border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface-soft)] p-5 text-sm text-[var(--color-text-subtle)]">
-                  Todavía no hay medios de pago configurados desde el admin. Antes de transferir, pedile al comercio que cargue Bancolombia, Nequi o QR.
+                  Todavía no hay medios de pago configurados desde el admin. Antes de pagar, pedile al comercio que cargue Bancolombia, Nequi o QR.
                 </div>
               )}
             </article>
@@ -289,7 +292,7 @@ const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
                   <svg class="mx-auto mb-3 h-8 w-8 text-[var(--color-border-strong)]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
-                  Todavía no subiste comprobante. Cuando hagas la transferencia, cargalo abajo y el pedido pasa a revisión.
+                  Todavía no subiste comprobante. Cuando hagas el pago, cargalo abajo y el pedido pasa a revisión.
                 </div>
               )}
 
@@ -451,7 +454,6 @@ const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
           bancolombia: 'Bancolombia',
           nequi: 'Nequi',
           qr: 'QR',
-          transferencia: 'Transferencia',
         });
 
         const form = formNode instanceof HTMLFormElement ? formNode : null;

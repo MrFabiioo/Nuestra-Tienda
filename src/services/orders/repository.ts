@@ -293,7 +293,7 @@ export async function createPersistentOrder(input: {
     insert into ${Payment} (
       id, orderId, method, amount, status, createdAt, updatedAt
     ) values (
-      ${paymentId}, ${orderId}, ${PAYMENT_METHODS.transferencia}, ${totals.total}, ${PAYMENT_STATUS.pending}, ${now}, ${now}
+      ${paymentId}, ${orderId}, ${PAYMENT_METHODS.bancolombia}, ${totals.total}, ${PAYMENT_STATUS.pending}, ${now}, ${now}
     )
   `);
 

@@ -2,6 +2,7 @@
 import Layout from '@layouts/Layout.astro';
 import { actions } from 'astro:actions';
 import { Formatter } from '@utils/formatter';
+import { getOrderById } from '../../../services/orders/repository';
 import { formatOrderStatus, ORDER_STATUS } from '../../../services/orders/constants';
 
 export const prerender = false;
@@ -13,17 +14,34 @@ if (error || !data) {
   return Astro.redirect('/admin/orders');
 }
 
-const statusLabel = formatOrderStatus(data.order.status);
-const canReview = data.order.status === ORDER_STATUS.underReview;
-const proofIsImage = data.latestProof?.mimeType?.startsWith('image/');
+type OrderDetail = NonNullable<Awaited<ReturnType<typeof getOrderById>>>;
+
+const orderDetail: OrderDetail = data as unknown as OrderDetail;
+
+function labelPaymentMethod(method: string) {
+  switch (method) {
+    case 'bancolombia':
+      return 'Bancolombia';
+    case 'nequi':
+      return 'Nequi';
+    case 'qr':
+      return 'QR';
+    default:
+      return method;
+  }
+}
+
+const statusLabel = formatOrderStatus(orderDetail.order.status);
+const canReview = orderDetail.order.status === ORDER_STATUS.underReview;
+const proofIsImage = orderDetail.latestProof?.mimeType?.startsWith('image/');
 const reviewMessage = Astro.url.searchParams.get('review');
 
 const statusChipClass =
-  data.order.status === ORDER_STATUS.approved
+  orderDetail.order.status === ORDER_STATUS.approved
     ? 'admin-chip admin-chip--success'
-    : data.order.status === ORDER_STATUS.rejected
+    : orderDetail.order.status === ORDER_STATUS.rejected
       ? 'admin-chip admin-chip--danger'
-      : data.order.status === ORDER_STATUS.underReview
+      : orderDetail.order.status === ORDER_STATUS.underReview
         ? 'admin-chip admin-chip--warning'
         : 'admin-chip';
 ---
@@ -50,8 +68,8 @@ const statusChipClass =
             <span class="chip-dot" aria-hidden="true"></span>
             Estado: {statusLabel}
           </span>
-          <span class="admin-chip">Pago: <strong>{data.payment.status}</strong></span>
-          <span class="admin-chip">Cliente: <strong>{data.order.customerName}</strong></span>
+          <span class="admin-chip">Pago: <strong>{orderDetail.payment.status}</strong></span>
+          <span class="admin-chip">Cliente: <strong>{orderDetail.order.customerName}</strong></span>
         </div>
       </div>
 
@@ -115,22 +133,22 @@ const statusChipClass =
           <div class="mt-5 grid gap-4 md:grid-cols-2">
             <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 text-sm text-[var(--color-text-muted)]">
               <p class="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-guacamole-b">Contacto</p>
-              <p class="font-semibold text-[var(--color-heading-sub)]">{data.order.customerName}</p>
-              <p class="mt-1">{data.order.customerEmail}</p>
-              <p>{data.order.customerPhone}</p>
+              <p class="font-semibold text-[var(--color-heading-sub)]">{orderDetail.order.customerName}</p>
+              <p class="mt-1">{orderDetail.order.customerEmail}</p>
+              <p>{orderDetail.order.customerPhone}</p>
             </div>
             <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 text-sm text-[var(--color-text-muted)]">
               <p class="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-guacamole-b">Entrega</p>
-              <p class="font-semibold text-[var(--color-heading-sub)]">{data.order.deliveryMethod}</p>
-              <p class="mt-1">{data.order.address}</p>
-              <p>{data.order.city}</p>
-              {data.order.notes && <p class="mt-2 italic text-[var(--color-text-subtle)]">"{data.order.notes}"</p>}
+              <p class="font-semibold text-[var(--color-heading-sub)]">{orderDetail.order.deliveryMethod}</p>
+              <p class="mt-1">{orderDetail.order.address}</p>
+              <p>{orderDetail.order.city}</p>
+              {orderDetail.order.notes && <p class="mt-2 italic text-[var(--color-text-subtle)]">"{orderDetail.order.notes}"</p>}
             </div>
           </div>
 
           <div class="mt-5 space-y-2">
             <p class="text-xs font-bold uppercase tracking-[0.18em] text-guacamole-b">Productos</p>
-            {data.items.map((item) => (
+            {orderDetail.items.map((item) => (
               <div class="flex items-center justify-between rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-3 text-sm">
                 <div class="min-w-0">
                   <p class="font-bold text-[var(--color-heading)]">{item.title}</p>
@@ -154,19 +172,19 @@ const statusChipClass =
             <div>
               <h2 class="text-lg font-bold text-[var(--color-heading)]">Comprobante cargado</h2>
               <p class="mt-0.5 text-xs text-[var(--color-text-subtle)]">
-                {data.latestProof ? `Subido el ${new Date(data.latestProof.uploadedAt).toLocaleDateString('es-CO')}` : 'Sin comprobante adjunto'}
+                {orderDetail.latestProof ? `Subido el ${new Date(orderDetail.latestProof.uploadedAt).toLocaleDateString('es-CO')}` : 'Sin comprobante adjunto'}
               </p>
             </div>
           </div>
 
-          {data.latestProof ? (
+          {orderDetail.latestProof ? (
             <div class="mt-5 space-y-4">
               <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-3 text-sm">
                 <div class="space-y-0.5 text-[var(--color-text-muted)]">
-                  <p><span class="font-semibold text-[var(--color-heading-sub)]">Archivo:</span> {data.latestProof.originalFilename}</p>
-                  <p><span class="font-semibold text-[var(--color-heading-sub)]">Tipo:</span> {data.latestProof.mimeType}</p>
+                  <p><span class="font-semibold text-[var(--color-heading-sub)]">Archivo:</span> {orderDetail.latestProof.originalFilename}</p>
+                  <p><span class="font-semibold text-[var(--color-heading-sub)]">Tipo:</span> {orderDetail.latestProof.mimeType}</p>
                 </div>
-                <a href={data.latestProof.assetUrl} target="_blank" rel="noreferrer" class="premium-action-secondary text-xs">
+                <a href={orderDetail.latestProof.assetUrl} target="_blank" rel="noreferrer" class="premium-action-secondary text-xs">
                   <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                     <path d="M10 3v9m0 0l-3-3m3 3l3-3M4 17h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
@@ -174,9 +192,9 @@ const statusChipClass =
                 </a>
               </div>
               {proofIsImage ? (
-                <img src={data.latestProof.assetUrl} alt="Comprobante de pago" class="max-h-[32rem] w-full rounded-2xl border border-[var(--color-border)] object-contain" />
+                <img src={orderDetail.latestProof.assetUrl} alt="Comprobante de pago" class="max-h-[32rem] w-full rounded-2xl border border-[var(--color-border)] object-contain" />
               ) : (
-                <iframe src={data.latestProof.assetUrl} class="h-[32rem] w-full rounded-2xl border border-[var(--color-border)]" title="Comprobante PDF" />
+                <iframe src={orderDetail.latestProof.assetUrl} class="h-[32rem] w-full rounded-2xl border border-[var(--color-border)]" title="Comprobante PDF" />
               )}
             </div>
           ) : (
@@ -263,29 +281,29 @@ const statusChipClass =
           <div class="mt-5 space-y-3 text-sm text-[var(--color-text-muted)]">
             <div class="flex justify-between">
               <span>Subtotal</span>
-              <strong class="text-[var(--color-heading-sub)]">{Formatter.currency(data.order.subtotal)}</strong>
+              <strong class="text-[var(--color-heading-sub)]">{Formatter.currency(orderDetail.order.subtotal)}</strong>
             </div>
             <div class="flex justify-between">
               <span>Impuesto</span>
-              <strong class="text-[var(--color-heading-sub)]">{Formatter.currency(data.order.tax)}</strong>
+              <strong class="text-[var(--color-heading-sub)]">{Formatter.currency(orderDetail.order.tax)}</strong>
             </div>
             <div class="flex justify-between rounded-xl bg-[var(--color-surface-soft)] px-3 py-2 text-base font-black text-[var(--color-heading)]">
               <span>Total</span>
-              <strong>{Formatter.currency(data.order.total)}</strong>
+              <strong>{Formatter.currency(orderDetail.order.total)}</strong>
             </div>
           </div>
 
           <div class="mt-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 text-sm text-[var(--color-text-muted)]">
             <p class="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-guacamole-b">Pago</p>
             <div class="space-y-1">
-              <p>Método: <strong class="text-[var(--color-heading-sub)]">{data.payment.method}</strong></p>
-              <p>Estado: <strong class="text-[var(--color-heading-sub)]">{data.payment.status}</strong></p>
-              {data.payment.reviewerUid && (
-                <p>Reviewer: <strong class="text-[var(--color-heading-sub)]">{data.payment.reviewerUid}</strong></p>
+              <p>Método: <strong class="text-[var(--color-heading-sub)]">{labelPaymentMethod(orderDetail.payment.method)}</strong></p>
+              <p>Estado: <strong class="text-[var(--color-heading-sub)]">{orderDetail.payment.status}</strong></p>
+              {orderDetail.payment.reviewerUid && (
+                <p>Reviewer: <strong class="text-[var(--color-heading-sub)]">{orderDetail.payment.reviewerUid}</strong></p>
               )}
-              {data.payment.rejectionReason && (
+              {orderDetail.payment.rejectionReason && (
                 <p class="mt-2 rounded-xl border border-[var(--color-danger-border)] bg-[var(--color-danger-surface)] px-3 py-2 font-semibold text-[var(--color-danger-text)]">
-                  Motivo rechazo: {data.payment.rejectionReason}
+                  Motivo rechazo: {orderDetail.payment.rejectionReason}
                 </p>
               )}
             </div>

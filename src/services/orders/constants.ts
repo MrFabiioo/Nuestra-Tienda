@@ -18,8 +18,6 @@ export const PAYMENT_METHODS = {
   bancolombia: 'bancolombia',
   nequi: 'nequi',
   qr: 'qr',
-  // Deprecado: solo para órdenes históricas, no aparece en nuevos pagos
-  transferencia: 'transferencia',
 } as const;
 
 /** Métodos disponibles para nuevos pagos (excluye deprecados) */
@@ -70,5 +68,18 @@ export function formatOrderStatus(status: string) {
       return 'Cancelado';
     default:
       return status;
+  }
+}
+
+export function formatPaymentMethod(method: string) {
+  switch (method) {
+    case PAYMENT_METHODS.bancolombia:
+      return 'Bancolombia';
+    case PAYMENT_METHODS.nequi:
+      return 'Nequi';
+    case PAYMENT_METHODS.qr:
+      return 'QR';
+    default:
+      return method;
   }
 }

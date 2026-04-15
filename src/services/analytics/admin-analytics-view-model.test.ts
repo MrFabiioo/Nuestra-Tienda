@@ -72,7 +72,7 @@ function createAnalyticsData(overrides: Partial<AnalyticsData> = {}): AnalyticsD
       { label: 'Rechazado', count: 3 },
     ],
     byPaymentMethod: [
-      { label: 'Transferencia', count: 10 },
+      { label: 'Bancolombia', count: 10 },
       { label: 'Pago móvil', count: 6 },
       { label: 'Efectivo', count: 4 },
     ],

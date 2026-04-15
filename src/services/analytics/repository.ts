@@ -6,6 +6,7 @@ import {
   buildBusinessHourExpression,
 } from './sqlite-business-time';
 import { buildEstimatedProfitabilityRanking } from './estimated-profitability';
+import { formatPaymentMethod } from '../orders/constants';
 
 const DAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 const BUSINESS_DAY_OF_WEEK_SQL = sql.raw(buildBusinessDayOfWeekExpression('createdAt'));
@@ -225,14 +226,18 @@ export async function getAnalyticsData() {
   }));
 
   // ── Distributions ──────────────────────────────────────────────────
-  const toDist = (rows: unknown[]) =>
-    (rows as Record<string, unknown>[]).map(r => ({
-      label: String(r.label ?? r.status),
-      count: Number(r.count),
-    }));
+  const toDist = (rows: unknown[], transformLabel?: (label: string) => string) =>
+    (rows as Record<string, unknown>[]).map(r => {
+      const label = String(r.label ?? r.status);
+
+      return {
+        label: transformLabel ? transformLabel(label) : label,
+        count: Number(r.count),
+      };
+    });
 
   const byStatus         = toDist(byStatusResult.rows);
-  const byPaymentMethod  = toDist(byPaymentMethodResult.rows);
+  const byPaymentMethod  = toDist(byPaymentMethodResult.rows, formatPaymentMethod);
 
   return {
     summary,
