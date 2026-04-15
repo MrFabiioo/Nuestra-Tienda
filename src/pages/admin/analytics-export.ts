@@ -15,22 +15,10 @@
 import type { APIRoute } from 'astro';
 import * as XLSX from 'xlsx';
 import { getAnalyticsData } from '../../services/analytics/repository';
-import { BUSINESS_TIMEZONE_OFFSET_HOURS } from '../../services/analytics/business-timezone';
+import { businessDateToUTC } from '../../services/analytics/business-timezone';
 import { formatPaymentMethod } from '../../services/orders/constants';
 
 export const prerender = false;
-
-/**
- * Converts a YYYY-MM-DD calendar date (in business timezone) to a UTC Date.
- * `endOfDay=true` → start of NEXT calendar day (exclusive upper bound).
- */
-function businessDateToUTC(dateStr: string, endOfDay = false): Date {
-  const d = new Date(dateStr + 'T00:00:00.000Z');
-  if (endOfDay) d.setUTCDate(d.getUTCDate() + 1);
-  // Bogotá UTC-5 → "midnight Bogotá" = "05:00 UTC"
-  d.setUTCHours(d.getUTCHours() - BUSINESS_TIMEZONE_OFFSET_HOURS);
-  return d;
-}
 
 function safeFilename(label: string): string {
   return label.replace(/[^a-z0-9\-_]/gi, '-').replace(/-+/g, '-').slice(0, 50);

@@ -41,3 +41,20 @@ export function getLast30BusinessDayWindow(referenceDate = new Date()) {
     dates,
   };
 }
+
+/**
+ * Converts a YYYY-MM-DD calendar date (in business timezone) to a UTC Date.
+ *   endOfDay = false → start of that calendar day in business tz (inclusive lower bound)
+ *   endOfDay = true  → start of the NEXT calendar day (exclusive upper bound)
+ *
+ * Example (Bogotá UTC-5):
+ *   "2026-04-07" → 2026-04-07T05:00:00Z  (midnight Bogotá = 05:00 UTC)
+ *   "2026-04-13" endOfDay → 2026-04-14T05:00:00Z
+ */
+export function businessDateToUTC(dateStr: string, endOfDay = false): Date {
+  const d = new Date(dateStr + 'T00:00:00.000Z');
+  if (endOfDay) d.setUTCDate(d.getUTCDate() + 1);
+  // offset is negative for west timezones (Bogotá = -5), so subtract it to get UTC
+  d.setUTCHours(d.getUTCHours() - BUSINESS_TIMEZONE_OFFSET_HOURS);
+  return d;
+}
