@@ -113,6 +113,43 @@ const temporalWarnings = staticCopy.temporalWarnings;
         </div>
       </div>
 
+      <!-- Export widget -->
+      <div class="export-widget mt-6 border-t pt-5" style="border-color: var(--color-border);">
+        <p class="export-eyebrow">Exportar período</p>
+        <p class="export-hint mt-1">Elegí un período exacto para obtener datos aislados y comparables semana a semana.</p>
+
+        <form id="export-form" action="/admin/analytics-export" method="get" class="mt-3 flex flex-wrap items-end gap-3">
+          <!-- Presets -->
+          <div class="flex flex-wrap gap-2">
+            <button type="button" class="export-preset" data-preset="this-week">Esta semana</button>
+            <button type="button" class="export-preset" data-preset="last-week">Semana pasada</button>
+            <button type="button" class="export-preset" data-preset="this-month">Este mes</button>
+            <button type="button" class="export-preset" data-preset="last-month">Mes pasado</button>
+          </div>
+
+          <!-- Date inputs -->
+          <div class="flex flex-wrap items-end gap-2">
+            <div class="export-field">
+              <label for="export-from" class="export-label">Desde</label>
+              <input type="date" id="export-from" name="from" class="export-date-input" required />
+            </div>
+            <div class="export-field">
+              <label for="export-to" class="export-label">Hasta</label>
+              <input type="date" id="export-to" name="to" class="export-date-input" required />
+            </div>
+            <input type="hidden" id="export-label" name="label" value="periodo" />
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" class="export-submit">
+            <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Exportar Excel
+          </button>
+        </form>
+      </div>
+
       <div class="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         {dashboardModel.executiveMetrics.map(metric => (
           <AnalyticsMetricCard {...metric} />
@@ -766,6 +803,101 @@ const temporalWarnings = staticCopy.temporalWarnings;
     color: var(--color-text-subtle);
   }
 
+  /* ── Export widget ─────────────────────────────────────────────── */
+  .export-eyebrow {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+
+  .export-hint {
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+  }
+
+  .export-preset {
+    padding: 0.35rem 0.875rem;
+    border-radius: 9999px;
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+    color: var(--color-text-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+
+  .export-preset:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface-elevated));
+  }
+
+  .export-preset--active {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface-elevated));
+    color: var(--color-accent);
+    font-weight: 700;
+  }
+
+  .export-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .export-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-subtle);
+  }
+
+  .export-date-input {
+    padding: 0.4rem 0.75rem;
+    border-radius: 0.625rem;
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+    color: var(--color-text);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: border-color 0.18s;
+    color-scheme: light dark;
+  }
+
+  .export-date-input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+  }
+
+  .export-submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-strong) 100%);
+    color: var(--color-text-on-accent);
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--color-accent) 24%, transparent);
+  }
+
+  .export-submit:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 18px color-mix(in srgb, var(--color-accent-strong) 30%, transparent);
+  }
+
+  .export-submit:active {
+    transform: scale(0.98);
+  }
+
   /* ── Light mode contrast fixes ─────────────────────────────────
      --color-text-subtle (52% opacity) fails WCAG AA on the light
      cream background (~3:1). Override only the analytics elements
@@ -815,5 +947,78 @@ const temporalWarnings = staticCopy.temporalWarnings;
 
   document.addEventListener('astro:page-load', () => {
     initAdminAnalyticsDashboard();
+  });
+</script>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const fromInput = document.getElementById('export-from') as HTMLInputElement | null;
+    const toInput   = document.getElementById('export-to')   as HTMLInputElement | null;
+    const labelInput = document.getElementById('export-label') as HTMLInputElement | null;
+    const presetBtns = document.querySelectorAll<HTMLButtonElement>('[data-preset]');
+
+    if (!fromInput || !toInput || !labelInput) return;
+
+    function toDateStr(d: Date): string {
+      return d.toISOString().slice(0, 10);
+    }
+
+    function getMondayOf(d: Date): Date {
+      const day = d.getDay(); // 0=Sun
+      const diff = day === 0 ? -6 : 1 - day;
+      const monday = new Date(d);
+      monday.setDate(d.getDate() + diff);
+      monday.setHours(0, 0, 0, 0);
+      return monday;
+    }
+
+    presetBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const preset = btn.dataset.preset;
+        const now = new Date();
+        let from: Date, to: Date, label: string;
+
+        switch (preset) {
+          case 'this-week': {
+            from = getMondayOf(now);
+            to = new Date(now);
+            to.setHours(0, 0, 0, 0);
+            label = `semana-${toDateStr(from)}`;
+            break;
+          }
+          case 'last-week': {
+            const thisMonday = getMondayOf(now);
+            from = new Date(thisMonday);
+            from.setDate(thisMonday.getDate() - 7);
+            to = new Date(thisMonday);
+            to.setDate(thisMonday.getDate() - 1);
+            label = `semana-${toDateStr(from)}`;
+            break;
+          }
+          case 'this-month': {
+            from = new Date(now.getFullYear(), now.getMonth(), 1);
+            to = new Date(now);
+            to.setHours(0, 0, 0, 0);
+            label = `mes-${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+            break;
+          }
+          case 'last-month': {
+            const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            from = lastMonth;
+            to = new Date(now.getFullYear(), now.getMonth(), 0);
+            label = `mes-${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, '0')}`;
+            break;
+          }
+          default: return;
+        }
+
+        fromInput.value = toDateStr(from);
+        toInput.value   = toDateStr(to);
+        labelInput.value = label;
+
+        presetBtns.forEach(p => p.classList.remove('export-preset--active'));
+        btn.classList.add('export-preset--active');
+      });
+    });
   });
 </script>
