@@ -1,14 +1,8 @@
 ---
 import Layout from '@layouts/Layout.astro';
 import AnalyticsPanel from '@components/admin/analytics/AnalyticsPanel.astro';
-import AnalyticsMetricCard from '@components/admin/analytics/AnalyticsMetricCard.astro';
 
 import { buildAdminAnalyticsStaticCopy } from '../../services/analytics/admin-analytics-copy';
-import { buildAdminAnalyticsSectionsLayout } from '../../services/analytics/admin-analytics-sections';
-import { buildAdminAnalyticsDashboardModel } from '../../services/analytics/admin-analytics-view-model';
-import { getAnalyticsData } from '../../services/analytics/repository';
-import { businessDateToUTC } from '../../services/analytics/business-timezone';
-import { Formatter } from '@utils/formatter';
 
 export const prerender = false;
 
@@ -19,84 +13,10 @@ const fromParam = Astro.url.searchParams.get('from');
 const toParam   = Astro.url.searchParams.get('to');
 const isValidDate = (s: string | null): s is string => !!s && /^\d{4}-\d{2}-\d{2}$/.test(s);
 const isFiltered  = isValidDate(fromParam) && isValidDate(toParam) && fromParam! < toParam!;
-
-const range = isFiltered
-  ? { from: businessDateToUTC(fromParam!, false), to: businessDateToUTC(toParam!, true) }
-  : undefined;
-
-let data: Awaited<ReturnType<typeof getAnalyticsData>>;
-try {
-  data = await getAnalyticsData(range);
-} catch {
-  return Astro.redirect('/admin/dashboard');
-}
-
-const statusLabels: Record<string, string> = {
-  pending_payment: 'Pendiente pago',
-  under_review: 'En revisión',
-  approved: 'Aprobado',
-  rejected: 'Rechazado',
-  cancelled: 'Cancelado',
-};
-
-function labelStatus(status: string) {
-  return statusLabels[status] ?? status;
-}
-
-function withShare(items: Array<{ label: string; count: number }>) {
-  const total = items.reduce((acc, item) => acc + item.count, 0);
-
-  return items.map(item => ({
-    ...item,
-    share: total > 0 ? Math.round((item.count / total) * 100) : 0,
-  }));
-}
-
-const labeledStatus = data.byStatus.map(item => ({ ...item, label: labelStatus(item.label) }));
-const dashboardModel = buildAdminAnalyticsDashboardModel({ ...data, byStatus: labeledStatus });
 const staticCopy = buildAdminAnalyticsStaticCopy();
-const sectionsLayout = buildAdminAnalyticsSectionsLayout();
-
-const statusMix = withShare(labeledStatus);
-const paymentMix = withShare(data.byPaymentMethod);
-
-const profitTotal = data.topByEstimatedProfit.reduce((sum, item) => sum + item.estimatedProfit, 0);
-const profitMix = data.topByEstimatedProfit.map(item => ({
-  ...item,
-  share: profitTotal > 0 ? Math.round((item.estimatedProfit / profitTotal) * 100) : 0,
-}));
-
-const approvedShare = data.summary.totalOrders > 0
-  ? Math.round((data.summary.approvedOrders / data.summary.totalOrders) * 100)
-  : 0;
-
-const pendingShare = data.summary.totalOrders > 0
-  ? Math.round((data.summary.pendingOrders / data.summary.totalOrders) * 100)
-  : 0;
-
-const rejectedShare = data.summary.totalOrders > 0
-  ? Math.round((data.summary.rejectedOrders / data.summary.totalOrders) * 100)
-  : 0;
-
-const executiveHighlights = [
-  {
-    label: 'Aprobación',
-    value: `${approvedShare}%`,
-    detail: `${data.summary.approvedOrders} de ${data.summary.totalOrders} pedidos`,
-  },
-  {
-    label: 'Pendientes',
-    value: `${data.summary.pendingOrders}`,
-    detail: pendingShare > 0 ? `${pendingShare}% del pipeline` : 'Sin backlog actual',
-  },
-  {
-    label: 'Rechazos',
-    value: `${rejectedShare}%`,
-    detail: `${data.summary.rejectedOrders} pedidos caídos`,
-  },
-];
-
-const temporalWarnings = staticCopy.temporalWarnings;
+const analyticsRequest = isFiltered
+  ? { from: fromParam, to: toParam }
+  : {};
 ---
 
 <Layout title="Admin · Analytics">
@@ -186,271 +106,37 @@ const temporalWarnings = staticCopy.temporalWarnings;
         </form>
       </div>
 
-      <div class="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        {dashboardModel.executiveMetrics.map(metric => (
-          <AnalyticsMetricCard {...metric} />
-        ))}
-      </div>
-
-      <div class="mt-6 grid gap-3 lg:grid-cols-3">
-        {dashboardModel.executiveNarrative.map(item => (
-          <article class:list={['analytics-story-card', `analytics-story-card--${item.tone}`]}>
-            <p class="analytics-story-card__title">{item.title}</p>
-            <p class="analytics-story-card__description">{item.description}</p>
-          </article>
-        ))}
-      </div>
     </div>
 
-    <div class="mt-6">
+    <div id="analytics-dashboard-root" class="mt-6" aria-live="polite">
       <AnalyticsPanel
-        eyebrow={dashboardModel.trend.eyebrow}
-        title={dashboardModel.trend.title}
-        description={dashboardModel.trend.description}
-        icon="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"
-        tone="warning"
-      >
-        <div class="analytics-alert analytics-alert--warning" role="alert">
-          <strong>{staticCopy.trendAlert.title}:</strong>
-          {staticCopy.trendAlert.description}
-        </div>
-
-        <div class="mt-4 grid gap-3 md:grid-cols-3">
-          {executiveHighlights.map(item => (
-            <div class="analytics-mini-stat">
-              <p class="analytics-mini-stat__label">{item.label}</p>
-              <p class="analytics-mini-stat__value">{item.value}</p>
-              <p class="analytics-mini-stat__detail">{item.detail}</p>
-            </div>
-          ))}
-        </div>
-
-        <div class="chart-wrap chart-wrap--tall mt-5">
-          <canvas id="chart-trend" aria-label="Serie diaria de demanda bruta y pedidos"></canvas>
-        </div>
-      </AnalyticsPanel>
-    </div>
-
-    <div class:list={['mt-6', 'grid', 'gap-6', sectionsLayout.productGridClass]}>
-      {sectionsLayout.productPanels.includes('status') && (
-        <AnalyticsPanel
-          eyebrow="Pipeline comercial"
-          title={dashboardModel.mix.operationalCharts.status.title}
-          description={dashboardModel.mix.operationalCharts.status.description}
-          icon="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-        >
-          {statusMix.length === 0 ? (
-            <p class="analytics-empty">Todavía no hay pedidos para construir el pipeline.</p>
-          ) : (
-            <>
-              <ul class="analytics-breakdown-list">
-                {statusMix.map(item => (
-                  <li class="analytics-breakdown-item">
-                    <div>
-                      <p class="analytics-breakdown-item__label">{item.label}</p>
-                      <p class="analytics-breakdown-item__sub">{item.count} pedidos · {item.share}% del total</p>
-                    </div>
-                    <span class="analytics-breakdown-item__value">{item.share}%</span>
-                  </li>
-                ))}
-              </ul>
-
-              <div class="chart-wrap chart-wrap--medium mt-5">
-                <canvas id="chart-status" aria-label="Pipeline por estado del pedido"></canvas>
-              </div>
-            </>
-          )}
-        </AnalyticsPanel>
-      )}
-
-      {sectionsLayout.productPanels.includes('topByQty') && (
-        <AnalyticsPanel
-          eyebrow="Productos · demanda"
-          title={dashboardModel.productHighlights.byQty.title}
-          description={dashboardModel.productHighlights.byQty.description}
-          icon="M3 7h18M3 12h18M3 17h18"
-        >
-          {data.topByQty.length === 0 ? (
-            <p class="analytics-empty">Sin historial suficiente para rankear productos todavía.</p>
-          ) : (
-            <div class="chart-wrap chart-wrap--medium">
-              <canvas id="chart-top-qty" aria-label="Top productos por unidades demandadas"></canvas>
-            </div>
-          )}
-        </AnalyticsPanel>
-      )}
-
-      {sectionsLayout.productPanels.includes('topByRevenue') && (
-        <AnalyticsPanel
-          eyebrow="Productos · valor histórico"
-          title={dashboardModel.productHighlights.byRevenue.title}
-          description={dashboardModel.productHighlights.byRevenue.description}
-          icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-        >
-          {data.topByRevenue.length === 0 ? (
-            <p class="analytics-empty">Sin historial suficiente para medir valor histórico por producto.</p>
-          ) : (
-            <div class="chart-wrap chart-wrap--medium">
-              <canvas id="chart-top-rev" aria-label="Top productos por monto bruto histórico"></canvas>
-            </div>
-          )}
-        </AnalyticsPanel>
-      )}
-    </div>
-
-    <div class:list={['mt-6', 'grid', 'gap-6', sectionsLayout.mixGridClass]}>
-      {sectionsLayout.mixPanels.includes('payment') && (
-        <AnalyticsPanel
-          eyebrow="Mix operativo"
-          title={dashboardModel.mix.operationalCharts.payment.title}
-          description={dashboardModel.mix.operationalCharts.payment.description}
-          icon="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"
-        >
-          {paymentMix.length === 0 ? (
-            <p class="analytics-empty">Todavía no hay pagos registrados para comparar métodos.</p>
-          ) : (
-            <>
-              <ul class="analytics-inline-list">
-                {paymentMix.map(item => <li>{item.label}: {item.share}%</li>)}
-              </ul>
-
-              <div class="chart-wrap chart-wrap--medium mt-4">
-                <canvas id="chart-payment" aria-label="Comparación por método de pago"></canvas>
-              </div>
-            </>
-          )}
-        </AnalyticsPanel>
-      )}
-
-      {sectionsLayout.mixPanels.includes('estimatedProfit') && (
-        <AnalyticsPanel
-          eyebrow="Productos · rentabilidad estimada"
-          title={dashboardModel.productHighlights.byEstimatedProfit.title}
-          icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-        >
-          {data.topByEstimatedProfit.length === 0 ? (
-            <p class="analytics-empty">Todavía no hay productos con costo estimable y pedidos aprobados para rankear rentabilidad.</p>
-          ) : (
-            <>
-              <ul class="analytics-breakdown-list analytics-breakdown-list--compact">
-                {profitMix.map(item => (
-                  <li class="analytics-breakdown-item analytics-breakdown-item--sm">
-                    <div>
-                      <p class="analytics-breakdown-item__label">{item.title}</p>
-                      <p class="analytics-breakdown-item__sub">{item.qty} unid. · {item.share}% del total</p>
-                    </div>
-                    <span class="analytics-breakdown-item__value">{Formatter.currency(item.estimatedProfit, 0)}</span>
-                  </li>
-                ))}
-                <li class="analytics-breakdown-item analytics-breakdown-item--sm analytics-breakdown-item--total">
-                  <div>
-                    <p class="analytics-breakdown-item__label">Ganancia total estimada</p>
-                    <p class="analytics-breakdown-item__sub">{profitMix.length} producto{profitMix.length === 1 ? '' : 's'} rankeados</p>
-                  </div>
-                  <span class="analytics-breakdown-item__value">{Formatter.currency(profitTotal, 0)}</span>
-                </li>
-              </ul>
-
-              <div class="chart-wrap chart-wrap--medium">
-                <canvas id="chart-top-profit" aria-label="Top productos por ganancia estimada"></canvas>
-              </div>
-            </>
-          )}
-        </AnalyticsPanel>
-      )}
-    </div>
-
-    {data.neverOrdered.length > 0 && (
-      <div class="mt-6">
-        <AnalyticsPanel
-          eyebrow="Acción de catálogo"
-          title="Productos sin movimiento histórico"
-          description="Este bloque sí es accionable hoy: revisar visibilidad, precio, copy o continuidad del producto."
-          icon="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
-          tone="warning"
-          badge={data.neverOrdered.length}
-        >
-          <div class="admin-table-scroll">
-            <table class="admin-table">
-              <thead>
-                <tr>
-                  <th>Producto</th>
-                  <th>Acción sugerida</th>
-                  <th>Ir al detalle</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.neverOrdered.map(product => (
-                  <tr>
-                    <td>
-                      <p class="font-semibold" style="color: var(--color-text);">{product.title}</p>
-                      <p class="text-xs" style="color: var(--color-text-subtle);">Sin pedidos históricos registrados</p>
-                    </td>
-                    <td class="text-sm" style="color: var(--color-text-muted);">
-                      Revisar posicionamiento, precio o continuidad en catálogo.
-                    </td>
-                    <td>
-                      <a href={`/admin/products/${product.id}`} class="premium-action-secondary text-xs">Editar producto</a>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </AnalyticsPanel>
-      </div>
-    )}
-
-    <div class="mt-6">
-      <AnalyticsPanel
-        eyebrow={staticCopy.temporalSectionEyebrow}
-        title={dashboardModel.temporal.notice.title}
-        description={dashboardModel.temporal.notice.description}
+        eyebrow="Carga diferida"
+        title="Estamos preparando el tablero"
+        description="Primero entregamos la shell SSR y después pedimos datasets pesados por action autenticada, así el request principal no se clava."
         icon="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5"
         tone="warning"
       >
-        <ul class="analytics-warning-list">
-          {temporalWarnings.map(item => <li>{item}</li>)}
-        </ul>
+        <div class="analytics-alert" role="status">
+          <strong>{staticCopy.trendAlert.title}:</strong>
+          {staticCopy.hero.description}
+        </div>
 
-        <div class="mt-5 grid gap-6 lg:grid-cols-2">
-          <div class="analytics-temporal-card">
-            <p class="analytics-temporal-card__eyebrow">{staticCopy.temporalCards.byDayOfWeekEyebrow}</p>
-            <h3 class="analytics-temporal-card__title">{dashboardModel.temporal.byDayOfWeek.title}</h3>
-            <p class="analytics-temporal-card__description">{dashboardModel.temporal.byDayOfWeek.description}</p>
-            <div class="chart-wrap chart-wrap--small mt-4">
-              <canvas id="chart-dow" aria-label="Pedidos por día de la semana"></canvas>
+        <div class="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          {Array.from({ length: 5 }).map(() => (
+            <div class="analytics-metric-card analytics-skeleton-card" aria-hidden="true">
+              <div class="analytics-skeleton analytics-skeleton--icon"></div>
+              <div class="analytics-skeleton analytics-skeleton--label"></div>
+              <div class="analytics-skeleton analytics-skeleton--value"></div>
+              <div class="analytics-skeleton analytics-skeleton--sub"></div>
             </div>
-          </div>
-
-          <div class="analytics-temporal-card">
-            <p class="analytics-temporal-card__eyebrow">{staticCopy.temporalCards.byHourEyebrow}</p>
-            <h3 class="analytics-temporal-card__title">{dashboardModel.temporal.byHour.title}</h3>
-            <p class="analytics-temporal-card__description">{dashboardModel.temporal.byHour.description}</p>
-            <div class="chart-wrap chart-wrap--small mt-4">
-              <canvas id="chart-hour" aria-label="Pedidos por hora del día"></canvas>
-            </div>
-          </div>
+          ))}
         </div>
       </AnalyticsPanel>
     </div>
   </section>
 </Layout>
 
-<script
-  id="analytics-data"
-  type="application/json"
-  set:html={JSON.stringify({
-    byDay: data.byDay,
-    topByQty: data.topByQty,
-    topByRevenue: data.topByRevenue,
-    topByEstimatedProfit: data.topByEstimatedProfit,
-    byDayOfWeek: data.byDayOfWeek,
-    byHour: data.byHour,
-    byStatus: labeledStatus,
-    byPaymentMethod: data.byPaymentMethod,
-  })}
-/>
+<script id="analytics-request" type="application/json" is:inline set:html={JSON.stringify(analyticsRequest)} />
 
 <style is:global>
   .analytics-hero {
@@ -1033,17 +719,102 @@ const temporalWarnings = staticCopy.temporalWarnings;
   :root[data-theme='dark'] .analytics-temporal-card__description {
     color: rgba(241, 243, 249, 0.66);
   }
+
+  .analytics-dashboard-state {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .analytics-skeleton-card {
+    gap: 0.75rem;
+  }
+
+  .analytics-skeleton-stack {
+    display: grid;
+    gap: 0.55rem;
+    width: 100%;
+  }
+
+  .analytics-skeleton {
+    border-radius: 9999px;
+    background: linear-gradient(90deg, rgba(148, 163, 184, 0.14), rgba(148, 163, 184, 0.28), rgba(148, 163, 184, 0.14));
+    background-size: 200% 100%;
+    animation: analytics-skeleton-pulse 1.4s ease-in-out infinite;
+  }
+
+  .analytics-skeleton--icon {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .analytics-skeleton--label {
+    width: 45%;
+    height: 0.75rem;
+  }
+
+  .analytics-skeleton--title {
+    width: 72%;
+    height: 1rem;
+  }
+
+  .analytics-skeleton--value {
+    width: 58%;
+    height: 1.5rem;
+  }
+
+  .analytics-skeleton--sub {
+    width: 82%;
+    height: 0.8rem;
+  }
+
+  .analytics-skeleton--chart {
+    width: 100%;
+    height: 14rem;
+    border-radius: 1rem;
+  }
+
+  @keyframes analytics-skeleton-pulse {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
 </style>
 
 <script>
-  import { destroyAdminAnalyticsDashboard, initAdminAnalyticsDashboard } from '../../scripts/admin/admin-analytics-dashboard';
+  import { actions } from 'astro:actions';
+  import {
+    destroyAdminAnalyticsDashboard,
+    renderAdminAnalyticsDashboard,
+    renderAdminAnalyticsDashboardError,
+    renderAdminAnalyticsDashboardLoading,
+  } from '../../scripts/admin/admin-analytics-dashboard';
+
+  const analyticsRequestElement = document.getElementById('analytics-request');
+  const analyticsRequest = analyticsRequestElement?.textContent
+    ? JSON.parse(analyticsRequestElement.textContent)
+    : {};
+
+  async function loadAnalyticsDashboard() {
+    renderAdminAnalyticsDashboardLoading();
+
+    const { data, error } = await actions.getAnalytics(analyticsRequest);
+
+    if (error || !data) {
+      renderAdminAnalyticsDashboardError(error?.message ?? 'La action autenticada devolvió un error inesperado.');
+      document.getElementById('analytics-retry-button')?.addEventListener('click', () => {
+        void loadAnalyticsDashboard();
+      }, { once: true });
+      return;
+    }
+
+    renderAdminAnalyticsDashboard(data);
+  }
 
   document.addEventListener('astro:before-swap', () => {
     destroyAdminAnalyticsDashboard();
   });
 
   document.addEventListener('astro:page-load', () => {
-    initAdminAnalyticsDashboard();
+    void loadAnalyticsDashboard();
   });
 </script>
 

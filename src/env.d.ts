@@ -2,6 +2,8 @@
 
 interface ImportMetaEnv {
   readonly ADMIN_ALLOWED_EMAILS?: string;
+  readonly ASTRO_DB_APP_TOKEN?: string;
+  readonly ASTRO_DB_REMOTE_URL?: string;
   readonly ORDER_NOTIFICATIONS_ADMIN_EMAIL?: string;
 }
 

@@ -1,11 +1,9 @@
 import { ActionError, defineAction } from 'astro:actions';
-import { db, Order, Payment, sql } from 'astro:db';
 import { z } from 'astro:schema';
-import { serializeDbDate } from '@utils/db-date';
 import { requireSensitiveAdminAccess } from '../../firebase/guards';
 import { dispatchOrderNotifications } from '../../services/notifications/dispatcher';
-import { ORDER_STATUS, PAYMENT_STATUS } from '../../services/orders/constants';
-import { getOrderById, getOrderSnapshotById } from '../../services/orders/repository';
+import { ORDER_STATUS } from '../../services/orders/constants';
+import { getOrderById, getOrderSnapshotById, reviewOrderPayment } from '../../services/orders/repository';
 
 export const reviewPayment = defineAction({
   accept: 'form',
@@ -39,27 +37,13 @@ export const reviewPayment = defineAction({
       });
     }
 
-    const now = new Date();
-    const nowSql = serializeDbDate(now);
-    const orderStatus = decision === 'approved' ? ORDER_STATUS.approved : ORDER_STATUS.rejected;
-    const paymentStatus = decision === 'approved' ? PAYMENT_STATUS.approved : PAYMENT_STATUS.rejected;
-
-    await db.run(sql`
-      update ${Order}
-      set status = ${orderStatus}, updatedAt = ${nowSql}
-      where id = ${orderId}
-    `);
-
-    await db.run(sql`
-      update ${Payment}
-      set
-        status = ${paymentStatus},
-        reviewedAt = ${nowSql},
-        reviewerUid = ${user.uid},
-        rejectionReason = ${decision === 'rejected' ? rejectionReason?.trim() ?? null : null},
-        updatedAt = ${nowSql}
-      where id = ${detail.payment.id}
-    `);
+    const result = await reviewOrderPayment({
+      orderId,
+      paymentId: detail.payment.id,
+      decision,
+      reviewerUid: user.uid,
+      rejectionReason,
+    });
 
     const snapshot = await getOrderSnapshotById(orderId);
     if (snapshot) {
@@ -68,8 +52,8 @@ export const reviewPayment = defineAction({
 
     return {
       ok: true,
-      status: orderStatus,
-      reviewedAt: now.toISOString(),
+      status: result.status,
+      reviewedAt: result.reviewedAt.toISOString(),
     };
   },
 });

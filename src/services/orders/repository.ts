@@ -1,11 +1,14 @@
 import type { ActionAPIContext } from 'astro:actions';
 import { ActionError } from 'astro:actions';
-import { db, desc, eq, inArray, Order, OrderItem, Payment, PaymentProof, Product, ProductImage, sql } from 'astro:db';
+import { desc, eq, inArray, NotificationLog, Order, OrderItem, Payment, PaymentProof, Product, ProductImage, sql } from 'astro:db';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
-import type { CartItem } from '@interfaces/cart-item';
+import { databaseAdapter } from '../data/database-adapter';
+import type { DatabaseSession } from '../data/transaction-runner';
 import { serializeDbDate } from '@utils/db-date';
 import { mapAdminOrderSummary, type AdminOrderSummary } from './admin-order-summary.mapper';
+import { parseCartCookie } from './cart-cookie';
 import { ORDER_STATUS, PAYMENT_METHODS, PAYMENT_STATUS, roundMoney } from './constants';
+import { buildPaymentProofCleanupTarget, type PaymentProofCleanupTarget } from './payment-proof-compensation';
 
 export type CartOrderLine = {
   productId: string;
@@ -64,17 +67,6 @@ export function hashPublicToken(token: string) {
   return createHash('sha256').update(`${secret}:${token}`).digest('hex');
 }
 
-function parseCartCookie(raw: string | undefined): CartItem[] {
-  if (!raw) return [];
-
-  try {
-    const parsed = JSON.parse(raw) as CartItem[];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
 export async function getCartOrderLinesFromContext(context: ActionAPIContext) {
   const cart = parseCartCookie(context.cookies.get('cart')?.value);
   if (cart.length === 0) {
@@ -85,8 +77,8 @@ export async function getCartOrderLinesFromContext(context: ActionAPIContext) {
   }
 
   const productIds = [...new Set(cart.map((item) => item.productId))];
-  const products = await db.select().from(Product).where(inArray(Product.id, productIds));
-  const images = await db.select().from(ProductImage).where(inArray(ProductImage.productId, productIds));
+  const products = await getProductsByIds(databaseAdapter, productIds);
+  const images = await getProductImagesByProductIds(databaseAdapter, productIds);
 
   return cart.map((item) => {
     const product = products.find((candidate) => candidate.id === item.productId);
@@ -175,49 +167,46 @@ function mapPublicOrder(orderRow: typeof Order.$inferSelect, paymentRow: typeof 
   };
 }
 
-export async function getOrderSnapshotById(orderId: string): Promise<PublicOrder | null> {
-  const [orderRow] = await db.select().from(Order).where(eq(Order.id, orderId)).limit(1);
-  if (!orderRow) return null;
-
-  const [paymentRow] = await db.select().from(Payment).where(eq(Payment.orderId, orderRow.id)).limit(1);
-  if (!paymentRow) return null;
-
-  const items = await db.select().from(OrderItem).where(eq(OrderItem.orderId, orderRow.id));
-  const proofs = await db.select().from(PaymentProof).where(eq(PaymentProof.paymentId, paymentRow.id)).orderBy(desc(PaymentProof.uploadedAt)).limit(1);
-
-  return mapPublicOrder(orderRow, paymentRow, items, proofs[0] ?? null);
+async function getProductsByIds(adapter: DatabaseSession, productIds: string[]) {
+  return adapter.select().from(Product).where(inArray(Product.id, productIds));
 }
 
-export async function getPublicOrderByToken(token: string): Promise<PublicOrder | null> {
-  const tokenHash = hashPublicToken(token);
-  const [orderRow] = await db.select().from(Order).where(eq(Order.publicTokenHash, tokenHash)).limit(1);
-  if (!orderRow) return null;
-
-  const snapshot = await getOrderSnapshotById(orderRow.id);
-  return snapshot ? { ...snapshot, token } : null;
+async function getProductImagesByProductIds(adapter: DatabaseSession, productIds: string[]) {
+  return adapter.select().from(ProductImage).where(inArray(ProductImage.productId, productIds));
 }
 
-export async function getOrderById(orderId: string) {
-  const [orderRow] = await db.select().from(Order).where(eq(Order.id, orderId)).limit(1);
-  if (!orderRow) return null;
-
-  const [paymentRow] = await db.select().from(Payment).where(eq(Payment.orderId, orderRow.id)).limit(1);
-  if (!paymentRow) return null;
-
-  const items = await db.select().from(OrderItem).where(eq(OrderItem.orderId, orderRow.id));
-  const proofs = await db.select().from(PaymentProof).where(eq(PaymentProof.paymentId, paymentRow.id)).orderBy(desc(PaymentProof.uploadedAt)).limit(1);
-
-  return {
-    order: orderRow,
-    payment: paymentRow,
-    items,
-    latestProof: proofs[0] ?? null,
-  };
+async function getOrderRowById(adapter: DatabaseSession, orderId: string) {
+  const [orderRow] = await adapter.select().from(Order).where(eq(Order.id, orderId)).limit(1);
+  return orderRow ?? null;
 }
 
-export async function listAdminOrders(status?: string): Promise<AdminOrderSummary[]> {
+async function getOrderRowByTokenHash(adapter: DatabaseSession, tokenHash: string) {
+  const [orderRow] = await adapter.select().from(Order).where(eq(Order.publicTokenHash, tokenHash)).limit(1);
+  return orderRow ?? null;
+}
+
+async function getPaymentByOrderId(adapter: DatabaseSession, orderId: string) {
+  const [paymentRow] = await adapter.select().from(Payment).where(eq(Payment.orderId, orderId)).limit(1);
+  return paymentRow ?? null;
+}
+
+async function getOrderItemsByOrderId(adapter: DatabaseSession, orderId: string) {
+  return adapter.select().from(OrderItem).where(eq(OrderItem.orderId, orderId));
+}
+
+async function getLatestProofByPaymentId(adapter: DatabaseSession, paymentId: string) {
+  const proofs = await adapter.select().from(PaymentProof).where(eq(PaymentProof.paymentId, paymentId)).orderBy(desc(PaymentProof.uploadedAt)).limit(1);
+  return proofs[0] ?? null;
+}
+
+async function getProofsByPaymentId(adapter: DatabaseSession, paymentId: string) {
+  return adapter.select().from(PaymentProof).where(eq(PaymentProof.paymentId, paymentId));
+}
+
+async function listAdminOrderRows(adapter: DatabaseSession, status?: string) {
   const whereClause = status ? sql`where o.status = ${status}` : sql``;
-  const result = await db.run(sql`
+
+  return adapter.run(sql`
     select
       o.id,
       o.customerName,
@@ -239,6 +228,181 @@ export async function listAdminOrders(status?: string): Promise<AdminOrderSummar
     ${whereClause}
     order by o.createdAt desc;
   `);
+}
+
+async function insertOrderRecord(adapter: DatabaseSession, input: {
+  orderId: string;
+  publicTokenHash: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  deliveryMethod: string;
+  address: string;
+  city: string;
+  notes?: string;
+  subtotal: number;
+  tax: number;
+  total: number;
+  nowSql: string;
+}) {
+  await adapter.run(sql`
+    insert into ${Order} (
+      id, publicTokenHash, customerName, customerEmail, customerPhone, deliveryMethod, address, city, notes, subtotal, tax, total, status, createdAt, updatedAt
+    ) values (
+      ${input.orderId}, ${input.publicTokenHash}, ${input.customerName}, ${input.customerEmail}, ${input.customerPhone}, ${input.deliveryMethod}, ${input.address}, ${input.city}, ${input.notes?.trim() || null}, ${input.subtotal}, ${input.tax}, ${input.total}, ${ORDER_STATUS.pendingPayment}, ${input.nowSql}, ${input.nowSql}
+    )
+  `);
+}
+
+async function insertOrderItemRecord(adapter: DatabaseSession, orderId: string, item: CartOrderLine) {
+  await adapter.run(sql`
+    insert into ${OrderItem} (
+      id, orderId, productId, title, slug, size, quantity, unitPrice, lineTotal, image
+    ) values (
+      ${randomUUID()}, ${orderId}, ${item.productId}, ${item.title}, ${item.slug}, ${item.size}, ${item.quantity}, ${item.unitPrice}, ${item.lineTotal}, ${item.image}
+    )
+  `);
+}
+
+async function insertPaymentRecord(adapter: DatabaseSession, input: {
+  paymentId: string;
+  orderId: string;
+  amount: number;
+  nowSql: string;
+}) {
+  await adapter.run(sql`
+    insert into ${Payment} (
+      id, orderId, method, amount, status, createdAt, updatedAt
+    ) values (
+      ${input.paymentId}, ${input.orderId}, ${PAYMENT_METHODS.bancolombia}, ${input.amount}, ${PAYMENT_STATUS.pending}, ${input.nowSql}, ${input.nowSql}
+    )
+  `);
+}
+
+async function insertPaymentProofRecord(adapter: DatabaseSession, input: {
+  proofId: string;
+  paymentId: string;
+  assetUrl: string;
+  assetPublicId: string;
+  originalFilename: string;
+  mimeType: string;
+  sizeBytes: number;
+  uploadedAtSql: string;
+}) {
+  await adapter.run(sql`
+    insert into ${PaymentProof} (
+      id, paymentId, assetUrl, assetPublicId, originalFilename, mimeType, sizeBytes, uploadedAt
+    ) values (
+      ${input.proofId}, ${input.paymentId}, ${input.assetUrl}, ${input.assetPublicId}, ${input.originalFilename}, ${input.mimeType}, ${input.sizeBytes}, ${input.uploadedAtSql}
+    )
+  `);
+}
+
+async function updatePaymentForProofSubmission(adapter: DatabaseSession, input: {
+  paymentId: string;
+  paymentMethod: string;
+  nowSql: string;
+}) {
+  await adapter.run(sql`
+    update ${Payment}
+    set method = ${input.paymentMethod}, status = ${PAYMENT_STATUS.underReview}, submittedAt = ${input.nowSql}, rejectionReason = ${null}, updatedAt = ${input.nowSql}
+    where id = ${input.paymentId}
+  `);
+}
+
+async function updateOrderStatus(adapter: DatabaseSession, input: {
+  orderId: string;
+  status: string;
+  nowSql: string;
+}) {
+  await adapter.run(sql`
+    update ${Order}
+    set status = ${input.status}, updatedAt = ${input.nowSql}
+    where id = ${input.orderId}
+  `);
+}
+
+async function reviewPaymentRecord(adapter: DatabaseSession, input: {
+  paymentId: string;
+  status: string;
+  reviewerUid: string;
+  rejectionReason: string | null;
+  nowSql: string;
+}) {
+  await adapter.run(sql`
+    update ${Payment}
+    set
+      status = ${input.status},
+      reviewedAt = ${input.nowSql},
+      reviewerUid = ${input.reviewerUid},
+      rejectionReason = ${input.rejectionReason},
+      updatedAt = ${input.nowSql}
+    where id = ${input.paymentId}
+  `);
+}
+
+async function deletePaymentProofRecords(adapter: DatabaseSession, paymentId: string) {
+  await adapter.run(sql`delete from ${PaymentProof} where paymentId = ${paymentId}`);
+}
+
+async function deleteNotificationLogs(adapter: DatabaseSession, orderId: string) {
+  await adapter.run(sql`delete from ${NotificationLog} where orderId = ${orderId}`);
+}
+
+async function deletePaymentRecord(adapter: DatabaseSession, orderId: string) {
+  await adapter.run(sql`delete from ${Payment} where orderId = ${orderId}`);
+}
+
+async function deleteOrderItems(adapter: DatabaseSession, orderId: string) {
+  await adapter.run(sql`delete from ${OrderItem} where orderId = ${orderId}`);
+}
+
+async function deleteOrderRecord(adapter: DatabaseSession, orderId: string) {
+  await adapter.run(sql`delete from ${Order} where id = ${orderId}`);
+}
+
+export async function getOrderSnapshotById(orderId: string): Promise<PublicOrder | null> {
+  const orderRow = await getOrderRowById(databaseAdapter, orderId);
+  if (!orderRow) return null;
+
+  const paymentRow = await getPaymentByOrderId(databaseAdapter, orderRow.id);
+  if (!paymentRow) return null;
+
+  const items = await getOrderItemsByOrderId(databaseAdapter, orderRow.id);
+  const latestProof = await getLatestProofByPaymentId(databaseAdapter, paymentRow.id);
+
+  return mapPublicOrder(orderRow, paymentRow, items, latestProof);
+}
+
+export async function getPublicOrderByToken(token: string): Promise<PublicOrder | null> {
+  const tokenHash = hashPublicToken(token);
+  const orderRow = await getOrderRowByTokenHash(databaseAdapter, tokenHash);
+  if (!orderRow) return null;
+
+  const snapshot = await getOrderSnapshotById(orderRow.id);
+  return snapshot ? { ...snapshot, token } : null;
+}
+
+export async function getOrderById(orderId: string) {
+  const orderRow = await getOrderRowById(databaseAdapter, orderId);
+  if (!orderRow) return null;
+
+  const paymentRow = await getPaymentByOrderId(databaseAdapter, orderRow.id);
+  if (!paymentRow) return null;
+
+  const items = await getOrderItemsByOrderId(databaseAdapter, orderRow.id);
+  const latestProof = await getLatestProofByPaymentId(databaseAdapter, paymentRow.id);
+
+  return {
+    order: orderRow,
+    payment: paymentRow,
+    items,
+    latestProof,
+  };
+}
+
+export async function listAdminOrders(status?: string): Promise<AdminOrderSummary[]> {
+  const result = await listAdminOrderRows(databaseAdapter, status);
 
   return result.rows.map((row) => mapAdminOrderSummary(row as Record<string, unknown>));
 }
@@ -261,31 +425,34 @@ export async function createPersistentOrder(input: {
   const publicTokenHash = hashPublicToken(publicToken);
   const totals = buildOrderTotals(input.items);
 
-  await db.run(sql`
-    insert into ${Order} (
-      id, publicTokenHash, customerName, customerEmail, customerPhone, deliveryMethod, address, city, notes, subtotal, tax, total, status, createdAt, updatedAt
-    ) values (
-      ${orderId}, ${publicTokenHash}, ${input.customerName}, ${input.customerEmail}, ${input.customerPhone}, ${input.deliveryMethod}, ${input.address}, ${input.city}, ${input.notes?.trim() || null}, ${totals.subtotal}, ${totals.tax}, ${totals.total}, ${ORDER_STATUS.pendingPayment}, ${nowSql}, ${nowSql}
-    )
-  `);
+  await databaseAdapter.transaction.run(async (session) => {
+    await insertOrderRecord(session, {
+      orderId,
+      publicTokenHash,
+      customerName: input.customerName,
+      customerEmail: input.customerEmail,
+      customerPhone: input.customerPhone,
+      deliveryMethod: input.deliveryMethod,
+      address: input.address,
+      city: input.city,
+      notes: input.notes,
+      subtotal: totals.subtotal,
+      tax: totals.tax,
+      total: totals.total,
+      nowSql,
+    });
 
-  for (const item of input.items) {
-    await db.run(sql`
-      insert into ${OrderItem} (
-        id, orderId, productId, title, slug, size, quantity, unitPrice, lineTotal, image
-      ) values (
-        ${randomUUID()}, ${orderId}, ${item.productId}, ${item.title}, ${item.slug}, ${item.size}, ${item.quantity}, ${item.unitPrice}, ${item.lineTotal}, ${item.image}
-      )
-    `);
-  }
+    for (const item of input.items) {
+      await insertOrderItemRecord(session, orderId, item);
+    }
 
-  await db.run(sql`
-    insert into ${Payment} (
-      id, orderId, method, amount, status, createdAt, updatedAt
-    ) values (
-      ${paymentId}, ${orderId}, ${PAYMENT_METHODS.bancolombia}, ${totals.total}, ${PAYMENT_STATUS.pending}, ${nowSql}, ${nowSql}
-    )
-  `);
+    await insertPaymentRecord(session, {
+      paymentId,
+      orderId,
+      amount: totals.total,
+      nowSql,
+    });
+  });
 
   return {
     orderId,
@@ -297,4 +464,117 @@ export async function createPersistentOrder(input: {
 
 export function clearCartCookie(context: ActionAPIContext) {
   context.cookies.delete('cart', { path: '/' });
+}
+
+export async function submitPaymentProof(input: {
+  orderId: string;
+  paymentId: string;
+  paymentMethod: string;
+  assetUrl: string;
+  assetPublicId: string;
+  originalFilename: string;
+  mimeType: string;
+  sizeBytes: number;
+}) {
+  const uploadedAt = new Date();
+  const uploadedAtSql = serializeDbDate(uploadedAt);
+
+  await databaseAdapter.transaction.run(async (session) => {
+    await insertPaymentProofRecord(session, {
+      proofId: randomUUID(),
+      paymentId: input.paymentId,
+      assetUrl: input.assetUrl,
+      assetPublicId: input.assetPublicId,
+      originalFilename: input.originalFilename,
+      mimeType: input.mimeType,
+      sizeBytes: input.sizeBytes,
+      uploadedAtSql,
+    });
+
+    await updatePaymentForProofSubmission(session, {
+      paymentId: input.paymentId,
+      paymentMethod: input.paymentMethod,
+      nowSql: uploadedAtSql,
+    });
+
+    await updateOrderStatus(session, {
+      orderId: input.orderId,
+      status: ORDER_STATUS.underReview,
+      nowSql: uploadedAtSql,
+    });
+  });
+
+  return {
+    status: ORDER_STATUS.underReview,
+    uploadedAt,
+  };
+}
+
+export async function reviewOrderPayment(input: {
+  orderId: string;
+  paymentId: string;
+  decision: 'approved' | 'rejected';
+  reviewerUid: string;
+  rejectionReason?: string;
+}) {
+  const reviewedAt = new Date();
+  const reviewedAtSql = serializeDbDate(reviewedAt);
+  const orderStatus = input.decision === 'approved' ? ORDER_STATUS.approved : ORDER_STATUS.rejected;
+  const paymentStatus = input.decision === 'approved' ? PAYMENT_STATUS.approved : PAYMENT_STATUS.rejected;
+
+  await databaseAdapter.transaction.run(async (session) => {
+    await updateOrderStatus(session, {
+      orderId: input.orderId,
+      status: orderStatus,
+      nowSql: reviewedAtSql,
+    });
+
+    await reviewPaymentRecord(session, {
+      paymentId: input.paymentId,
+      status: paymentStatus,
+      reviewerUid: input.reviewerUid,
+      rejectionReason: input.decision === 'rejected' ? input.rejectionReason?.trim() ?? null : null,
+      nowSql: reviewedAtSql,
+    });
+  });
+
+  return {
+    status: orderStatus,
+    reviewedAt,
+  };
+}
+
+export async function deleteOrderRecords(orderId: string) {
+  return databaseAdapter.transaction.run(async (session) => {
+    const orderRow = await getOrderRowById(session, orderId);
+    if (!orderRow) {
+      throw new ActionError({
+        code: 'NOT_FOUND',
+        message: 'No se encontró el pedido a eliminar.',
+      });
+    }
+
+    const paymentRow = await getPaymentByOrderId(session, orderId);
+    const proofs = paymentRow ? await getProofsByPaymentId(session, paymentRow.id) : [];
+    const cleanupTargets = proofs
+      .map((proof) => buildPaymentProofCleanupTarget(proof.assetPublicId, proof.mimeType))
+      .filter((proof): proof is PaymentProofCleanupTarget => proof !== null);
+
+    if (paymentRow) {
+      await deletePaymentProofRecords(session, paymentRow.id);
+    }
+
+    await deleteNotificationLogs(session, orderId);
+
+    if (paymentRow) {
+      await deletePaymentRecord(session, orderId);
+    }
+
+    await deleteOrderItems(session, orderId);
+    await deleteOrderRecord(session, orderId);
+
+    return {
+      cleanupTargets,
+    };
+  });
 }

@@ -4,8 +4,11 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
+    "dev:local": "astro dev",
     "dev:remote": "astro dev --remote",
-    "build": "astro build",
+    "build": "astro build --remote",
+    "build:local": "astro build",
+    "build:remote": "astro build --remote",
     "preview": "astro preview",
     "astro": "astro"
   },

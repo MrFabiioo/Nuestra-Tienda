@@ -1,8 +1,8 @@
-import { ActionError, defineAction } from 'astro:actions';
-import { db, eq, Order, OrderItem, Payment, PaymentProof, NotificationLog } from 'astro:db';
+import { defineAction } from 'astro:actions';
 import { z } from 'astro:schema';
 import { requireSensitiveAdminAccess } from '../../firebase/guards';
 import { ImageUpload } from '@utils/image-upload';
+import { deleteOrderRecords } from '../../services/orders/repository';
 
 export const deleteOrder = defineAction({
   accept: 'json',
@@ -12,42 +12,21 @@ export const deleteOrder = defineAction({
   handler: async ({ id }, context) => {
     requireSensitiveAdminAccess(context, 'eliminar pedidos');
 
-    const [order] = await db.select().from(Order).where(eq(Order.id, id));
-    if (!order) {
-      throw new ActionError({
-        code: 'NOT_FOUND',
-        message: 'No se encontró el pedido a eliminar.',
-      });
-    }
+    const { cleanupTargets } = await deleteOrderRecords(id);
 
-    // 1. Limpiar assets de Cloudinary si hay comprobantes
-    const [payment] = await db.select().from(Payment).where(eq(Payment.orderId, id));
-
-    if (payment) {
-      const proofs = await db.select().from(PaymentProof).where(eq(PaymentProof.paymentId, payment.id));
-
-      await Promise.all(
-        proofs
-          .filter((p) => p.assetPublicId && !p.assetPublicId.startsWith('inline'))
-          .map((p) =>
-            ImageUpload.deleteAsset(
-              p.assetPublicId!,
-              p.mimeType === 'application/pdf' ? 'raw' : 'image',
-            ),
-          ),
+    if (cleanupTargets.length > 0) {
+      const results = await Promise.all(
+        cleanupTargets.map((target) => ImageUpload.deleteAsset(target.publicId, target.resourceType)),
       );
 
-      // 2. Eliminar comprobantes de DB
-      await db.delete(PaymentProof).where(eq(PaymentProof.paymentId, payment.id));
+      const failedAssets = cleanupTargets.filter((_, index) => !results[index]);
+      if (failedAssets.length > 0) {
+        console.error('[deleteOrder] Algunos assets remotos no se pudieron limpiar después del commit.', {
+          orderId: id,
+          assets: failedAssets,
+        });
+      }
     }
-
-    // 3. Cascade en orden correcto por FK
-    await db.delete(NotificationLog).where(eq(NotificationLog.orderId, id));
-    if (payment) {
-      await db.delete(Payment).where(eq(Payment.orderId, id));
-    }
-    await db.delete(OrderItem).where(eq(OrderItem.orderId, id));
-    await db.delete(Order).where(eq(Order.id, id));
 
     return { ok: true };
   },

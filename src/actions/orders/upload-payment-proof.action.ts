@@ -1,13 +1,11 @@
 import { ActionError, defineAction } from 'astro:actions';
-import { db, Order, Payment, PaymentProof, sql } from 'astro:db';
-import { randomUUID } from 'node:crypto';
 import { z } from 'astro:schema';
 import { ImageUpload } from '@utils/image-upload';
-import { serializeDbDate } from '@utils/db-date';
 import { dispatchOrderNotifications } from '../../services/notifications/dispatcher';
-import { ORDER_STATUS, PAYMENT_METHODS, PAYMENT_PROOF_MAX_BYTES, PAYMENT_PROOF_MIME_TYPES, PAYMENT_STATUS } from '../../services/orders/constants';
+import { ORDER_STATUS, PAYMENT_METHODS, PAYMENT_PROOF_MAX_BYTES, PAYMENT_PROOF_MIME_TYPES } from '../../services/orders/constants';
 import { clearPendingOrderPointerForToken } from '../../services/orders/pending-order';
-import { getPublicOrderByToken } from '../../services/orders/repository';
+import { getPaymentProofCleanupResourceType } from '../../services/orders/payment-proof-compensation';
+import { getPublicOrderByToken, submitPaymentProof } from '../../services/orders/repository';
 
 const paymentProofFile = z.instanceof(File)
   .refine((file) => file.size > 0, 'Adjuntá un comprobante antes de enviar.')
@@ -40,32 +38,39 @@ export const uploadPaymentProof = defineAction({
     const uploaded = await ImageUpload.uploadDetailed(proofFile, {
       folder: 'guacamole-shop/payment-proofs',
       publicIdPrefix: `payment-proof-${publicOrder.id}`,
-      resourceType: proofFile.type === 'application/pdf' ? 'raw' : 'image',
+      resourceType: getPaymentProofCleanupResourceType(proofFile.type),
       useDataUrlFallback: true,
     });
 
-    const now = new Date();
-    const nowSql = serializeDbDate(now);
+    let result: Awaited<ReturnType<typeof submitPaymentProof>>;
 
-    await db.run(sql`
-      insert into ${PaymentProof} (
-        id, paymentId, assetUrl, assetPublicId, originalFilename, mimeType, sizeBytes, uploadedAt
-      ) values (
-        ${randomUUID()}, ${publicOrder.payment.id}, ${uploaded.secureUrl}, ${uploaded.publicId}, ${uploaded.originalFilename}, ${uploaded.mimeType}, ${uploaded.bytes}, ${nowSql}
-      )
-    `);
+    try {
+      result = await submitPaymentProof({
+        orderId: publicOrder.id,
+        paymentId: publicOrder.payment.id,
+        paymentMethod,
+        assetUrl: uploaded.secureUrl,
+        assetPublicId: uploaded.publicId,
+        originalFilename: uploaded.originalFilename,
+        mimeType: uploaded.mimeType,
+        sizeBytes: uploaded.bytes,
+      });
+    } catch (error) {
+      const cleanupOk = await ImageUpload.deleteAsset(
+        uploaded.publicId,
+        getPaymentProofCleanupResourceType(proofFile.type),
+      );
 
-    await db.run(sql`
-      update ${Payment}
-      set method = ${paymentMethod}, status = ${PAYMENT_STATUS.underReview}, submittedAt = ${nowSql}, rejectionReason = ${null}, updatedAt = ${nowSql}
-      where id = ${publicOrder.payment.id}
-    `);
+      if (!cleanupOk) {
+        console.error('[uploadPaymentProof] No se pudo compensar el asset subido tras rollback.', {
+          orderId: publicOrder.id,
+          paymentId: publicOrder.payment.id,
+          publicId: uploaded.publicId,
+        });
+      }
 
-    await db.run(sql`
-      update ${Order}
-      set status = ${ORDER_STATUS.underReview}, updatedAt = ${nowSql}
-      where id = ${publicOrder.id}
-    `);
+      throw error;
+    }
 
     const updatedOrder = await getPublicOrderByToken(token);
     if (updatedOrder) {
@@ -76,8 +81,8 @@ export const uploadPaymentProof = defineAction({
 
     return {
       ok: true,
-      status: ORDER_STATUS.underReview,
-      uploadedAt: now.toISOString(),
+      status: result.status,
+      uploadedAt: result.uploadedAt.toISOString(),
     };
   },
 });

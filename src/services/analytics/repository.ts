@@ -1,4 +1,4 @@
-import { db, Order, OrderItem, Payment, Product, sql } from 'astro:db';
+import { Order, OrderItem, Payment, Product, sql } from 'astro:db';
 import { getLast30BusinessDayWindow, BUSINESS_TIMEZONE_OFFSET_HOURS } from './business-timezone';
 import {
   buildBusinessDateExpression,
@@ -6,6 +6,8 @@ import {
   buildBusinessHourExpression,
 } from './sqlite-business-time';
 import { buildEstimatedProfitabilityRanking } from './estimated-profitability';
+import { databaseAdapter } from '../data/database-adapter';
+import type { DatabaseSession } from '../data/transaction-runner';
 import { formatPaymentMethod } from '../orders/constants';
 
 const DAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
@@ -17,6 +19,39 @@ export interface DateRange {
   from: Date;
   to: Date;
 }
+
+type AnalyticsWindow = {
+  fromMs: number;
+  toMs: number;
+  last30BusinessDayWindow: ReturnType<typeof getLast30BusinessDayWindow>;
+};
+
+type AnalyticsSummary = {
+  totalOrders: number;
+  totalRevenue: number;
+  approvedRevenue: number;
+  avgOrderValue: number;
+  totalItemsSold: number;
+  approvedOrders: number;
+  pendingOrders: number;
+  rejectedOrders: number;
+};
+
+type AnalyticsDatasets = {
+  topByQty: Array<{ productId: string; title: string; qty: number; revenue: number }>;
+  topByRevenue: Array<{ productId: string; title: string; qty: number; revenue: number }>;
+  topByEstimatedProfit: ReturnType<typeof buildEstimatedProfitabilityRanking>['items'];
+  profitabilityCoverage: {
+    rankedProducts: number;
+    productsWithoutEstimatedCost: ReturnType<typeof buildEstimatedProfitabilityRanking>['productsWithoutEstimatedCost'];
+  };
+  neverOrdered: Array<{ id: string; title: string; price: number }>;
+  byDayOfWeek: Array<{ day: number; dayName: string; count: number; revenue: number }>;
+  byHour: Array<{ hour: number; count: number }>;
+  byDay: Array<{ date: string; orders: number; revenue: number }>;
+  byStatus: Array<{ label: string; count: number }>;
+  byPaymentMethod: Array<{ label: string; count: number }>;
+};
 
 /**
  * Generates an array of YYYY-MM-DD strings in business timezone for a UTC date range.
@@ -41,30 +76,41 @@ function generateRangeDates(from: Date, to: Date): string[] {
   return dates;
 }
 
-export async function getAnalyticsData(range?: DateRange) {
+function resolveAnalyticsWindow(range?: DateRange): AnalyticsWindow {
   const analyticsReferenceDate = new Date();
-  const last30BusinessDayWindow = getLast30BusinessDayWindow(analyticsReferenceDate);
 
-  // Safe defaults: 0 → far future means "all time" when no range is given.
-  const fromMs = range?.from.getTime() ?? 0;
-  const toMs   = range?.to.getTime()   ?? 9_999_999_999_999;
+  return {
+    fromMs: range?.from.getTime() ?? 0,
+    toMs: range?.to.getTime() ?? 9_999_999_999_999,
+    last30BusinessDayWindow: getLast30BusinessDayWindow(analyticsReferenceDate),
+  };
+}
 
-  const [
-    summaryResult,
-    itemsSoldResult,
-    topByQtyResult,
-    topByRevenueResult,
-    topByEstimatedProfitResult,
-    neverOrderedResult,
-    byDayOfWeekResult,
-    byHourResult,
-    byDayResult,
-    byStatusResult,
-    byPaymentMethodResult,
-  ] = await Promise.all([
+function toProductRanking(rows: unknown[]) {
+  return (rows as Record<string, unknown>[]).map((row) => ({
+    productId: String(row.productId),
+    title: String(row.title),
+    qty: Number(row.qty),
+    revenue: Number(row.revenue),
+  }));
+}
 
-    // KPI summary
-    db.run(sql`
+function toDistribution(rows: unknown[], transformLabel?: (label: string) => string) {
+  return (rows as Record<string, unknown>[]).map((row) => {
+    const label = String(row.label ?? row.status);
+
+    return {
+      label: transformLabel ? transformLabel(label) : label,
+      count: Number(row.count),
+    };
+  });
+}
+
+export async function getAnalyticsSummary(range?: DateRange): Promise<AnalyticsSummary> {
+  const { fromMs, toMs } = resolveAnalyticsWindow(range);
+
+  const [summaryResult, itemsSoldResult] = await Promise.all([
+    databaseAdapter.run(sql`
       SELECT
         COUNT(*) as totalOrders,
         COALESCE(ROUND(SUM(total), 2), 0) as totalRevenue,
@@ -76,17 +122,44 @@ export async function getAnalyticsData(range?: DateRange) {
       FROM ${Order}
       WHERE createdAt >= ${fromMs} AND createdAt < ${toMs}
     `),
-
-    // Total units sold
-    db.run(sql`
+    databaseAdapter.run(sql`
       SELECT COALESCE(SUM(oi.quantity), 0) as totalItemsSold
       FROM ${OrderItem} oi
       INNER JOIN ${Order} o ON o.id = oi.orderId
       WHERE o.createdAt >= ${fromMs} AND o.createdAt < ${toMs}
     `),
+  ]);
 
-    // Top 10 products by quantity
-    db.run(sql`
+  const sr = (summaryResult.rows[0] ?? {}) as Record<string, unknown>;
+  const ir = (itemsSoldResult.rows[0] ?? {}) as Record<string, unknown>;
+
+  return {
+    totalOrders: Number(sr.totalOrders ?? 0),
+    totalRevenue: Number(sr.totalRevenue ?? 0),
+    approvedRevenue: Number(sr.approvedRevenue ?? 0),
+    avgOrderValue: Number(sr.avgOrderValue ?? 0),
+    totalItemsSold: Number(ir.totalItemsSold ?? 0),
+    approvedOrders: Number(sr.approvedOrders ?? 0),
+    pendingOrders: Number(sr.pendingOrders ?? 0),
+    rejectedOrders: Number(sr.rejectedOrders ?? 0),
+  };
+}
+
+export async function getAnalyticsDatasets(range?: DateRange, adapter: DatabaseSession = databaseAdapter): Promise<AnalyticsDatasets> {
+  const { fromMs, toMs, last30BusinessDayWindow } = resolveAnalyticsWindow(range);
+
+  const [
+    topByQtyResult,
+    topByRevenueResult,
+    topByEstimatedProfitResult,
+    neverOrderedResult,
+    byDayOfWeekResult,
+    byHourResult,
+    byDayResult,
+    byStatusResult,
+    byPaymentMethodResult,
+  ] = await Promise.all([
+    adapter.run(sql`
       SELECT
         oi.productId,
         oi.title,
@@ -99,9 +172,7 @@ export async function getAnalyticsData(range?: DateRange) {
       ORDER BY qty DESC
       LIMIT 10
     `),
-
-    // Top 10 products by gross revenue
-    db.run(sql`
+    adapter.run(sql`
       SELECT
         oi.productId,
         oi.title,
@@ -114,9 +185,7 @@ export async function getAnalyticsData(range?: DateRange) {
       ORDER BY revenue DESC
       LIMIT 10
     `),
-
-    // Top approved products by estimated profitability
-    db.run(sql`
+    adapter.run(sql`
       SELECT
         oi.productId,
         oi.title,
@@ -129,18 +198,14 @@ export async function getAnalyticsData(range?: DateRange) {
       WHERE o.status = 'approved' AND o.createdAt >= ${fromMs} AND o.createdAt < ${toMs}
       GROUP BY oi.productId, oi.title, p.recipe
     `),
-
-    // Products with zero orders — always all-time (catalog health, not period-specific)
-    db.run(sql`
+    adapter.run(sql`
       SELECT p.id, p.title, p.price
       FROM ${Product} p
       LEFT JOIN ${OrderItem} oi ON oi.productId = p.id
       WHERE oi.id IS NULL
       ORDER BY p.title
     `),
-
-    // Orders grouped by day of week
-    db.run(sql`
+    adapter.run(sql`
       SELECT
         ${BUSINESS_DAY_OF_WEEK_SQL} as day,
         COUNT(*) as count,
@@ -150,9 +215,7 @@ export async function getAnalyticsData(range?: DateRange) {
       GROUP BY day
       ORDER BY day
     `),
-
-    // Orders grouped by business hour
-    db.run(sql`
+    adapter.run(sql`
       SELECT
         ${BUSINESS_HOUR_SQL} as hour,
         COUNT(*) as count
@@ -161,10 +224,8 @@ export async function getAnalyticsData(range?: DateRange) {
       GROUP BY hour
       ORDER BY hour
     `),
-
-    // Daily trend — range when given, last 30 business days otherwise
     range
-      ? db.run(sql`
+      ? adapter.run(sql`
           SELECT
             ${BUSINESS_DATE_SQL} as orderDate,
             COUNT(*) as orders,
@@ -174,7 +235,7 @@ export async function getAnalyticsData(range?: DateRange) {
           GROUP BY orderDate
           ORDER BY orderDate
         `)
-      : db.run(sql`
+      : adapter.run(sql`
           SELECT
             ${BUSINESS_DATE_SQL} as orderDate,
             COUNT(*) as orders,
@@ -184,18 +245,14 @@ export async function getAnalyticsData(range?: DateRange) {
           GROUP BY orderDate
           ORDER BY orderDate
         `),
-
-    // Order status distribution
-    db.run(sql`
+    adapter.run(sql`
       SELECT status, COUNT(*) as count
       FROM ${Order}
       WHERE createdAt >= ${fromMs} AND createdAt < ${toMs}
       GROUP BY status
       ORDER BY count DESC
     `),
-
-    // Payment method distribution — join to filter by order date
-    db.run(sql`
+    adapter.run(sql`
       SELECT pay.method as label, COUNT(*) as count
       FROM ${Payment} pay
       INNER JOIN ${Order} o ON o.id = pay.orderId
@@ -205,34 +262,8 @@ export async function getAnalyticsData(range?: DateRange) {
     `),
   ]);
 
-  // ── Summary ────────────────────────────────────────────────────────
-  const sr = (summaryResult.rows[0] ?? {}) as Record<string, unknown>;
-  const ir = (itemsSoldResult.rows[0] ?? {}) as Record<string, unknown>;
-
-  const summary = {
-    totalOrders:     Number(sr.totalOrders   ?? 0),
-    totalRevenue:    Number(sr.totalRevenue  ?? 0),
-    approvedRevenue: Number(sr.approvedRevenue ?? 0),
-    avgOrderValue:   Number(sr.avgOrderValue ?? 0),
-    totalItemsSold:  Number(ir.totalItemsSold ?? 0),
-    approvedOrders:  Number(sr.approvedOrders ?? 0),
-    pendingOrders:   Number(sr.pendingOrders  ?? 0),
-    rejectedOrders:  Number(sr.rejectedOrders ?? 0),
-  };
-
-  // ── Top products ───────────────────────────────────────────────────
-  const toProduct = (rows: unknown[]) =>
-    (rows as Record<string, unknown>[]).map(r => ({
-      productId: String(r.productId),
-      title:     String(r.title),
-      qty:       Number(r.qty),
-      revenue:   Number(r.revenue),
-    }));
-
-  const topByQty = toProduct(topByQtyResult.rows);
-  const topByRevenue = toProduct(topByRevenueResult.rows);
   const profitabilityRanking = buildEstimatedProfitabilityRanking(
-    (topByEstimatedProfitResult.rows as Record<string, unknown>[]).map(row => ({
+    (topByEstimatedProfitResult.rows as Record<string, unknown>[]).map((row) => ({
       productId: String(row.productId),
       title: String(row.title),
       approvedQty: Number(row.approvedQty),
@@ -241,78 +272,67 @@ export async function getAnalyticsData(range?: DateRange) {
     })),
   );
 
-  // ── Never ordered ──────────────────────────────────────────────────
-  const neverOrdered = (neverOrderedResult.rows as Record<string, unknown>[]).map(r => ({
-    id:    String(r.id),
-    title: String(r.title),
-    price: Number(r.price),
-  }));
-
-  // ── Day of week — fill all 7 ───────────────────────────────────────
   const rawDow = new Map<number, { count: number; revenue: number }>();
-  (byDayOfWeekResult.rows as Record<string, unknown>[]).forEach(r => {
-    rawDow.set(Number(r.day), { count: Number(r.count), revenue: Number(r.revenue) });
+  (byDayOfWeekResult.rows as Record<string, unknown>[]).forEach((row) => {
+    rawDow.set(Number(row.day), { count: Number(row.count), revenue: Number(row.revenue) });
   });
-  const byDayOfWeek = Array.from({ length: 7 }, (_, i) => ({
-    day:     i,
-    dayName: DAY_NAMES[i],
-    count:   rawDow.get(i)?.count   ?? 0,
-    revenue: rawDow.get(i)?.revenue ?? 0,
-  }));
 
-  // ── Hour of day — fill all 24 ──────────────────────────────────────
   const rawHour = new Map<number, number>();
-  (byHourResult.rows as Record<string, unknown>[]).forEach(r => {
-    rawHour.set(Number(r.hour), Number(r.count));
+  (byHourResult.rows as Record<string, unknown>[]).forEach((row) => {
+    rawHour.set(Number(row.hour), Number(row.count));
   });
-  const byHour = Array.from({ length: 24 }, (_, h) => ({
-    hour:  h,
-    count: rawHour.get(h) ?? 0,
-  }));
 
-  // ── Daily trend ────────────────────────────────────────────────────
   const rawByDate = new Map<string, { orders: number; revenue: number }>();
-  (byDayResult.rows as Record<string, unknown>[]).forEach(r => {
-    rawByDate.set(String(r.orderDate), { orders: Number(r.orders), revenue: Number(r.revenue) });
+  (byDayResult.rows as Record<string, unknown>[]).forEach((row) => {
+    rawByDate.set(String(row.orderDate), { orders: Number(row.orders), revenue: Number(row.revenue) });
   });
+
   const byDayDates = range
     ? generateRangeDates(range.from, range.to)
     : last30BusinessDayWindow.dates;
-  const byDay = byDayDates.map(date => ({
-    date,
-    orders:  rawByDate.get(date)?.orders  ?? 0,
-    revenue: rawByDate.get(date)?.revenue ?? 0,
-  }));
-
-  // ── Distributions ──────────────────────────────────────────────────
-  const toDist = (rows: unknown[], transformLabel?: (label: string) => string) =>
-    (rows as Record<string, unknown>[]).map(r => {
-      const label = String(r.label ?? r.status);
-
-      return {
-        label: transformLabel ? transformLabel(label) : label,
-        count: Number(r.count),
-      };
-    });
-
-  const byStatus         = toDist(byStatusResult.rows);
-  const byPaymentMethod  = toDist(byPaymentMethodResult.rows, formatPaymentMethod);
 
   return {
-    summary,
-    topByQty,
-    topByRevenue,
+    topByQty: toProductRanking(topByQtyResult.rows),
+    topByRevenue: toProductRanking(topByRevenueResult.rows),
     topByEstimatedProfit: profitabilityRanking.items,
     profitabilityCoverage: {
       rankedProducts: profitabilityRanking.items.length,
       productsWithoutEstimatedCost: profitabilityRanking.productsWithoutEstimatedCost,
     },
-    neverOrdered,
-    byDayOfWeek,
-    byHour,
-    byDay,
-    byStatus,
-    byPaymentMethod,
+    neverOrdered: (neverOrderedResult.rows as Record<string, unknown>[]).map((row) => ({
+      id: String(row.id),
+      title: String(row.title),
+      price: Number(row.price),
+    })),
+    byDayOfWeek: Array.from({ length: 7 }, (_, day) => ({
+      day,
+      dayName: DAY_NAMES[day],
+      count: rawDow.get(day)?.count ?? 0,
+      revenue: rawDow.get(day)?.revenue ?? 0,
+    })),
+    byHour: Array.from({ length: 24 }, (_, hour) => ({
+      hour,
+      count: rawHour.get(hour) ?? 0,
+    })),
+    byDay: byDayDates.map((date) => ({
+      date,
+      orders: rawByDate.get(date)?.orders ?? 0,
+      revenue: rawByDate.get(date)?.revenue ?? 0,
+    })),
+    byStatus: toDistribution(byStatusResult.rows),
+    byPaymentMethod: toDistribution(byPaymentMethodResult.rows, formatPaymentMethod),
+  };
+}
+
+export async function getAnalyticsData(range?: DateRange) {
+  const [summary, datasets] = await Promise.all([
+    getAnalyticsSummary(range),
+    getAnalyticsDatasets(range),
+  ]);
+
+  return {
+    summary,
+    ...datasets,
   };
 }
 

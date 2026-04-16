@@ -1,11 +1,20 @@
 import { defineAction } from 'astro:actions';
+import { z } from 'astro:schema';
 import { requireAuth } from '../../firebase/guards';
+import { resolveAnalyticsRange } from '../../services/analytics/analytics-range';
 import { getAnalyticsData } from '../../services/analytics/repository';
 
 export const getAnalytics = defineAction({
   accept: 'json',
-  handler: async (_input, context) => {
+  input: z.object({
+    from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+    to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  }).optional(),
+  handler: async (input, context) => {
     requireAuth(context);
-    return await getAnalyticsData();
+
+    const range = resolveAnalyticsRange(input);
+
+    return await getAnalyticsData(range);
   },
 });
