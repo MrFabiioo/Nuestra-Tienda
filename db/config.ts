@@ -29,6 +29,8 @@ export const Product = defineTable({
         recipe: column.text({ optional: true }),
         // Marca el producto para aparecer en el banner del home
         featured: column.boolean({ optional: true }),
+        // Habilita/deshabilita el producto para su compra (NULL = habilitado por defecto)
+        isEnabled: column.boolean({ optional: true }),
     }
 })
 

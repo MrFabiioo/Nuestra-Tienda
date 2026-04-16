@@ -4,6 +4,7 @@ import { defineAction } from "astro:actions";
 import { Category, count, db, Product, ProductImage, sql } from "astro:db";
 import { z } from "astro:schema";
 import type {ProductWithImages} from '../../interfaces/products-with-images.interface'
+import { ensureIsEnabledColumnExists } from "@utils/product-db";
 
 export const getProductsByPage= defineAction({
         accept:'json',
@@ -13,6 +14,7 @@ export const getProductsByPage= defineAction({
         }),
         handler:async({page,limit})=>{
             page = page <= 0 ? 1 : page;
+            await ensureIsEnabledColumnExists();
             const [totalRecords] = await db.select({count: count()}).from(Product);
             //console.log(`totalRecords : ${totalRecords[0]}`)
             const totalPages  = Math.ceil(totalRecords.count/limit);
