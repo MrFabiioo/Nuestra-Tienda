@@ -1,0 +1,425 @@
+---
+import Layout from '@layouts/Layout.astro';
+import { actions } from 'astro:actions';
+import { Formatter } from '@utils/formatter';
+import { getOrderById } from '../../../services/orders/repository';
+import { formatOrderStatus, formatPaymentStatus, ORDER_STATUS } from '../../../services/orders/constants';
+
+export const prerender = false;
+
+const id = Astro.params.id ?? '';
+const { data, error } = await Astro.callAction(actions.getOrders, { orderId: id });
+
+if (error || !data) {
+  return Astro.redirect('/admin/orders');
+}
+
+type OrderDetail = NonNullable<Awaited<ReturnType<typeof getOrderById>>>;
+
+const orderDetail: OrderDetail = data as unknown as OrderDetail;
+
+function labelPaymentMethod(method: string) {
+  switch (method) {
+    case 'bancolombia':
+      return 'Bancolombia';
+    case 'nequi':
+      return 'Nequi';
+    case 'qr':
+      return 'QR';
+    default:
+      return method;
+  }
+}
+
+const statusLabel = formatOrderStatus(orderDetail.order.status);
+const canReview = orderDetail.order.status === ORDER_STATUS.underReview;
+const proofIsImage = orderDetail.latestProof?.mimeType?.startsWith('image/');
+const reviewMessage = Astro.url.searchParams.get('review');
+
+const statusChipClass =
+  orderDetail.order.status === ORDER_STATUS.approved
+    ? 'admin-chip admin-chip--success'
+    : orderDetail.order.status === ORDER_STATUS.rejected
+      ? 'admin-chip admin-chip--danger'
+      : orderDetail.order.status === ORDER_STATUS.underReview
+        ? 'admin-chip admin-chip--warning'
+        : 'admin-chip';
+---
+
+<Layout title={`Admin · pedido ${id.slice(0, 8)}`}>
+  <section class="admin-shell">
+
+    <!-- Page header -->
+    <div class="admin-shell__header">
+      <div class="space-y-4">
+        <a href="/admin/orders" class="premium-action-ghost w-fit">
+          <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M12 5l-7 7 7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Volver a pedidos
+        </a>
+        <div>
+          <p class="admin-shell__eyebrow">Dashboard admin · pagos</p>
+          <h1 class="admin-shell__title">Pedido {id.slice(0, 8)}</h1>
+          <p class="admin-shell__copy">Revisá el comprobante, confirmá el estado y dejá trazabilidad de quién aprobó o rechazó.</p>
+        </div>
+        <div class="admin-chip-row">
+          <span class={statusChipClass}>
+            <span class="chip-dot" aria-hidden="true"></span>
+            Estado: {statusLabel}
+          </span>
+          <span class="admin-chip">Pago: <strong>{formatPaymentStatus(orderDetail.payment.status)}</strong></span>
+          <span class="admin-chip">Cliente: <strong>{orderDetail.order.customerName}</strong></span>
+        </div>
+      </div>
+
+      <!-- Zona destructiva — separada del flujo normal -->
+      <div class="mt-4 flex items-end md:mt-0">
+        <button
+          id="delete-order-btn"
+          data-order-id={id}
+          class="premium-action-destructive gap-2"
+          type="button"
+        >
+          <svg class="h-4 w-4 flex-shrink-0" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M4 6h12M8 6V4h4v2M7 6v9a1 1 0 001 1h4a1 1 0 001-1V6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Eliminar pedido
+        </button>
+      </div>
+    </div>
+
+    <!-- Review result banner -->
+    {reviewMessage && (
+      <div class={`rounded-3xl border px-5 py-4 text-sm ${reviewMessage === 'approved' ? 'border-[var(--color-border-strong)] bg-[var(--color-surface-soft)] text-[var(--color-accent-strong)]' : 'border-[var(--color-danger-border)] bg-[var(--color-danger-surface)] text-[var(--color-danger-text)]'}`}>
+        <div class="flex items-center gap-3">
+          {reviewMessage === 'approved' ? (
+            <svg class="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M7 10l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          ) : (
+            <svg class="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M7 7l6 6M13 7l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          )}
+          <p>Decisión registrada: <strong>{reviewMessage === 'approved' ? 'Pago aprobado' : 'Pago rechazado'}</strong>. El estado del pedido fue actualizado.</p>
+        </div>
+      </div>
+    )}
+
+    <!-- Main grid -->
+    <div class="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+
+      <!-- Left column -->
+      <div class="space-y-6">
+
+        <!-- Order detail -->
+        <article class="premium-panel rounded-3xl p-6 md:p-8">
+          <div class="flex items-center gap-3 border-b border-[var(--color-border)] pb-5">
+            <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--color-surface-soft)]">
+              <svg class="h-5 w-5 text-guacamole-b" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M6 2h8a1 1 0 011 1v14a1 1 0 01-1 1H6a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M8 6h4M8 9h4M8 12h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-lg font-bold text-[var(--color-heading)]">Detalle del pedido</h2>
+              <p class="mt-0.5 text-xs text-[var(--color-text-subtle)]">Datos de contacto y entrega</p>
+            </div>
+          </div>
+
+          <div class="mt-5 grid gap-4 md:grid-cols-2">
+            <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 text-sm text-[var(--color-text-muted)]">
+              <p class="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-guacamole-b">Contacto</p>
+              <p class="font-semibold text-[var(--color-heading-sub)]">{orderDetail.order.customerName}</p>
+              <p class="mt-1">{orderDetail.order.customerEmail}</p>
+              <p>{orderDetail.order.customerPhone}</p>
+            </div>
+            <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 text-sm text-[var(--color-text-muted)]">
+              <p class="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-guacamole-b">Entrega</p>
+              <p class="font-semibold text-[var(--color-heading-sub)]">{orderDetail.order.deliveryMethod}</p>
+              <p class="mt-1">{orderDetail.order.address}</p>
+              <p>{orderDetail.order.city}</p>
+              {orderDetail.order.notes && <p class="mt-2 italic text-[var(--color-text-subtle)]">"{orderDetail.order.notes}"</p>}
+            </div>
+          </div>
+
+          <div class="mt-5 space-y-2">
+            <p class="text-xs font-bold uppercase tracking-[0.18em] text-guacamole-b">Productos</p>
+            {orderDetail.items.map((item) => (
+              <div class="flex items-center justify-between rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-3 text-sm">
+                <div class="min-w-0">
+                  <p class="font-bold text-[var(--color-heading)]">{item.title}</p>
+                  <p class="text-[var(--color-text-subtle)]">{item.size} · x{item.quantity}</p>
+                </div>
+                <strong class="ml-4 flex-shrink-0 text-guacamole-a">{Formatter.currency(item.lineTotal)}</strong>
+              </div>
+            ))}
+          </div>
+        </article>
+
+        <!-- Proof -->
+        <article class="premium-panel rounded-3xl p-6 md:p-8">
+          <div class="flex items-center gap-3 border-b border-[var(--color-border)] pb-5">
+            <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--color-surface-soft)]">
+              <svg class="h-5 w-5 text-guacamole-b" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M3 13l4-4 3 3 2-2 5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-lg font-bold text-[var(--color-heading)]">Comprobante cargado</h2>
+              <p class="mt-0.5 text-xs text-[var(--color-text-subtle)]">
+                {orderDetail.latestProof ? `Subido el ${Formatter.dateTime(orderDetail.latestProof.uploadedAt, 'Sin fecha')}` : 'Sin comprobante adjunto'}
+              </p>
+            </div>
+          </div>
+
+          {orderDetail.latestProof ? (
+            <div class="mt-5 space-y-4">
+              <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-3 text-sm">
+                <div class="space-y-0.5 text-[var(--color-text-muted)]">
+                  <p><span class="font-semibold text-[var(--color-heading-sub)]">Archivo:</span> {orderDetail.latestProof.originalFilename}</p>
+                  <p><span class="font-semibold text-[var(--color-heading-sub)]">Tipo:</span> {orderDetail.latestProof.mimeType}</p>
+                </div>
+                <a href={orderDetail.latestProof.assetUrl} target="_blank" rel="noreferrer" class="premium-action-secondary text-xs">
+                  <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                    <path d="M10 3v9m0 0l-3-3m3 3l3-3M4 17h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  Abrir archivo
+                </a>
+              </div>
+              {proofIsImage ? (
+                <img src={orderDetail.latestProof.assetUrl} alt="Comprobante de pago" class="max-h-[32rem] w-full rounded-2xl border border-[var(--color-border)] object-contain" />
+              ) : (
+                <iframe src={orderDetail.latestProof.assetUrl} class="h-[32rem] w-full rounded-2xl border border-[var(--color-border)]" title="Comprobante PDF" />
+              )}
+            </div>
+          ) : (
+            <div class="mt-5 rounded-2xl border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface-soft)] p-6 text-center">
+              <svg class="mx-auto mb-3 h-8 w-8 text-[var(--color-border-strong)]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <p class="text-sm text-[var(--color-text-subtle)]">Este pedido todavía no tiene comprobante adjunto.</p>
+            </div>
+          )}
+        </article>
+      </div>
+
+      <!-- Right/aside -->
+      <aside class="space-y-6 lg:sticky lg:top-6 lg:self-start">
+
+        <!-- Decision — primary action, primero en el aside -->
+        <article class="premium-panel rounded-3xl p-6 md:p-8">
+          <div class="flex items-center gap-3 border-b border-[var(--color-border)] pb-5">
+            <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--color-surface-soft)]">
+              <svg class="h-5 w-5 text-guacamole-b" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M10 2l2.4 4.8 5.3.8-3.85 3.75.91 5.3L10 14.25l-4.76 2.38.91-5.3L2.3 7.6l5.3-.8L10 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-lg font-bold text-[var(--color-heading)]">Decisión manual</h2>
+              <p class="mt-0.5 text-xs text-[var(--color-text-subtle)]">
+                {canReview ? 'Este pedido está esperando tu revisión' : 'Ya se emitió una decisión'}
+              </p>
+            </div>
+          </div>
+
+          {canReview ? (
+            <form id="review-payment-form" class="mt-5 space-y-4">
+              <input type="hidden" name="orderId" value={id} />
+              <input type="hidden" name="decision" id="review-decision" value="approved" />
+              <div>
+                <label for="rejectionReason" class="mb-2 block text-sm font-semibold text-[var(--color-heading-sub)]">
+                  Motivo de rechazo <span class="font-normal text-[var(--color-text-subtle)]">(obligatorio si rechazás)</span>
+                </label>
+                <textarea id="rejectionReason" name="rejectionReason" rows="3" class="premium-field resize-none" placeholder="Explicá por qué se rechaza el comprobante."></textarea>
+              </div>
+              <p id="review-feedback" class="min-h-[1.25rem] text-sm text-[var(--color-text-muted)]" aria-live="polite"></p>
+              <div class="grid gap-3 sm:grid-cols-2">
+                <button type="submit" data-decision="approved" class="premium-action-primary justify-center">
+                  <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                    <path d="M7 10l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/>
+                  </svg>
+                  Aprobar pago
+                </button>
+                <button type="submit" data-decision="rejected" class="premium-action-destructive justify-center">
+                  <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                    <path d="M7 7l6 6M13 7l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/>
+                  </svg>
+                  Rechazar pago
+                </button>
+              </div>
+            </form>
+          ) : (
+            <div class="mt-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 text-sm text-[var(--color-text-muted)]">
+              Este pedido está en estado <strong class="text-[var(--color-heading-sub)]">{statusLabel}</strong>. Para emitir otra decisión el pedido debe volver a <em>En revisión</em> desde el backoffice.
+            </div>
+          )}
+        </article>
+
+        <!-- Financial summary -->
+        <article class="premium-panel rounded-3xl p-6 md:p-8">
+          <div class="flex items-center gap-3 border-b border-[var(--color-border)] pb-5">
+            <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--color-surface-soft)]">
+              <svg class="h-5 w-5 text-guacamole-b" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <rect x="2" y="5" width="16" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M2 9h16" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M6 13h2M10 13h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-lg font-bold text-[var(--color-heading)]">Resumen financiero</h2>
+              <p class="mt-0.5 text-xs text-[var(--color-text-subtle)]">Desglose del pedido</p>
+            </div>
+          </div>
+
+          <div class="mt-5 space-y-3 text-sm text-[var(--color-text-muted)]">
+            <div class="flex justify-between">
+              <span>Subtotal</span>
+              <strong class="text-[var(--color-heading-sub)]">{Formatter.currency(orderDetail.order.subtotal)}</strong>
+            </div>
+            <div class="flex justify-between">
+              <span>Impuesto</span>
+              <strong class="text-[var(--color-heading-sub)]">{Formatter.currency(orderDetail.order.tax)}</strong>
+            </div>
+            <div class="flex justify-between rounded-xl bg-[var(--color-surface-soft)] px-3 py-2 text-base font-black text-[var(--color-heading)]">
+              <span>Total</span>
+              <strong>{Formatter.currency(orderDetail.order.total)}</strong>
+            </div>
+          </div>
+
+          <div class="mt-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 text-sm text-[var(--color-text-muted)]">
+            <p class="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-guacamole-b">Pago</p>
+            <div class="space-y-1">
+              <p>Método: <strong class="text-[var(--color-heading-sub)]">{labelPaymentMethod(orderDetail.payment.method)}</strong></p>
+              <p>Estado: <strong class="text-[var(--color-heading-sub)]">{formatPaymentStatus(orderDetail.payment.status)}</strong></p>
+              {orderDetail.payment.reviewerUid && (
+                <p>Reviewer: <strong class="text-[var(--color-heading-sub)]">{orderDetail.payment.reviewerUid}</strong></p>
+              )}
+              {orderDetail.payment.rejectionReason && (
+                <p class="mt-2 rounded-xl border border-[var(--color-danger-border)] bg-[var(--color-danger-surface)] px-3 py-2 font-semibold text-[var(--color-danger-text)]">
+                  Motivo rechazo: {orderDetail.payment.rejectionReason}
+                </p>
+              )}
+            </div>
+          </div>
+        </article>
+      </aside>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .admin-chip--success {
+    border-color: var(--color-border-strong);
+    background: var(--color-surface-soft);
+    color: var(--color-accent-strong);
+  }
+
+  .admin-chip--danger {
+    border-color: var(--color-danger-border);
+    background: var(--color-danger-surface);
+    color: var(--color-danger-text);
+  }
+
+  .admin-chip--warning {
+    border-color: color-mix(in srgb, #ca8a04 30%, transparent);
+    background: color-mix(in srgb, #ca8a04 8%, transparent);
+    color: #92400e;
+  }
+
+  :root[data-theme='dark'] .admin-chip--warning {
+    color: #fcd34d;
+  }
+
+  .chip-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+</style>
+
+<script>
+  import { actions } from 'astro:actions';
+
+  document.addEventListener('astro:page-load', () => {
+    // ── Eliminar pedido ───────────────────────────────────────────────
+    const deleteBtn = document.getElementById('delete-order-btn') as HTMLButtonElement | null;
+
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', async () => {
+        const orderId = deleteBtn.dataset.orderId ?? '';
+
+        const confirmed = window.confirm(
+          `¿Eliminás el pedido ${orderId.slice(0, 8)}?\n\nEsta acción es irreversible: se borran el pedido, los ítems, el pago, los comprobantes y los logs de notificaciones.`
+        );
+
+        if (!confirmed) return;
+
+        deleteBtn.disabled = true;
+        deleteBtn.textContent = 'Eliminando...';
+
+        const { error } = await actions.deleteOrder({ id: orderId });
+
+        if (error) {
+          alert(`No se pudo eliminar el pedido: ${error.message}`);
+          deleteBtn.disabled = false;
+          deleteBtn.innerHTML = `<svg class="h-4 w-4 flex-shrink-0" viewBox="0 0 20 20" fill="none"><path d="M4 6h12M8 6V4h4v2M7 6v9a1 1 0 001 1h4a1 1 0 001-1V6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Eliminar pedido`;
+          return;
+        }
+
+        window.location.href = '/admin/orders';
+      });
+    }
+
+    // ── Revisión de pago ─────────────────────────────────────────────
+    const form = document.getElementById('review-payment-form') as HTMLFormElement | null;
+    const feedback = document.getElementById('review-feedback') as HTMLParagraphElement | null;
+    const decisionInput = document.getElementById('review-decision') as HTMLInputElement | null;
+
+    if (!form || !feedback || !decisionInput) return;
+
+    let currentDecision: 'approved' | 'rejected' = 'approved';
+
+    form.querySelectorAll<HTMLButtonElement>('button[type="submit"]').forEach((button) => {
+      button.addEventListener('click', () => {
+        currentDecision = (button.dataset.decision as 'approved' | 'rejected') ?? 'approved';
+        decisionInput.value = currentDecision;
+      });
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(form);
+      formData.set('decision', currentDecision);
+
+      if (currentDecision === 'rejected' && !(formData.get('rejectionReason')?.toString().trim())) {
+        feedback.textContent = 'Si vas a rechazar, dejá un motivo claro para el cliente.';
+        feedback.className = 'min-h-[1.25rem] text-sm text-[var(--color-danger)]';
+        return;
+      }
+
+      feedback.textContent = 'Guardando decisión y disparando notificaciones...';
+      feedback.className = 'min-h-[1.25rem] text-sm text-[var(--color-text-muted)]';
+
+      const { error } = await actions.reviewPayment(formData);
+
+      if (error) {
+        feedback.textContent = error.message;
+        feedback.className = 'min-h-[1.25rem] text-sm text-[var(--color-danger)]';
+        return;
+      }
+
+      window.location.href = `${window.location.pathname}?review=${currentDecision}`;
+    });
+  });
+</script>

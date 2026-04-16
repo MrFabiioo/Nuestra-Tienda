@@ -1,0 +1,42 @@
+---
+interface Props {
+  eyebrow: string;
+  title: string;
+  description?: string;
+  icon: string;
+  tone?: 'default' | 'warning';
+  badge?: string | number;
+}
+
+const {
+  eyebrow,
+  title,
+  description,
+  icon,
+  tone = 'default',
+  badge,
+} = Astro.props;
+---
+
+<div class:list={['analytics-panel', { 'analytics-panel--warning': tone === 'warning' }]}>
+  <div class="analytics-panel__header">
+    <div class:list={['analytics-panel__icon-wrap', { 'analytics-panel__icon-wrap--warning': tone === 'warning' }]}>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d={icon} />
+      </svg>
+    </div>
+
+    <div class="analytics-panel__heading">
+      <p class:list={['analytics-panel__eyebrow', { 'analytics-panel__eyebrow--warning': tone === 'warning' }]}>{eyebrow}</p>
+      <h2 class="analytics-panel__title">
+        {title}
+        {badge && <span class:list={['analytics-count-badge', { 'analytics-count-badge--warning': tone === 'warning' }]}>{badge}</span>}
+      </h2>
+      {description && <p class="analytics-panel__description">{description}</p>}
+    </div>
+  </div>
+
+  <div class="analytics-panel__body">
+    <slot />
+  </div>
+</div>

@@ -68,6 +68,20 @@ const initialRecipe: ProductRecipe = (product as any).recipe ?? {
           )}
         </div>
       </div>
+
+      <!-- ── Acción principal del header ──────────────────────── -->
+      <div class="admin-shell__header-actions">
+        <button
+          type="submit"
+          form="product-form"
+          class="premium-action-primary"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Guardar producto
+        </button>
+      </div>
     </div>
 
     <!-- ── Formulario ──────────────────────────────────────────── -->
@@ -439,7 +453,7 @@ const initialRecipe: ProductRecipe = (product as any).recipe ?? {
 
           <!-- Main: lista de ingredientes -->
           <div class="recipe-calculator-main">
-            <div class="mb-5 flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-center sm:justify-between" style="border-color: var(--color-border);">
+            <div class="mb-5 border-b pb-5" style="border-color: var(--color-border);">
               <div class="flex items-center gap-3">
                 <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style="background: var(--color-surface-soft); color: var(--color-accent);">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
@@ -456,23 +470,24 @@ const initialRecipe: ProductRecipe = (product as any).recipe ?? {
                 </div>
               </div>
 
-              <button
-                type="button"
-                id="btn-add-ingredient"
-                class="premium-action-ghost justify-center border border-dashed sm:w-auto"
-                style="border-color: var(--color-border-strong);"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
-                Agregar ingrediente
-              </button>
             </div>
 
             <!-- Lista de ingredientes con scroll cuando hay muchos -->
             <div id="ingredients-list" class="recipe-ingredients-scroll">
               <!-- Los ingredientes se renderizan vía JS con la receta inicial -->
             </div>
+
+            <button
+              type="button"
+              id="btn-add-ingredient"
+              class="premium-action-ghost mt-4 w-full justify-center border border-dashed"
+              style="border-color: var(--color-border-strong);"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              Agregar ingrediente
+            </button>
           </div>
           <!-- /Main -->
 
@@ -575,22 +590,24 @@ const initialRecipe: ProductRecipe = (product as any).recipe ?? {
       </div>
       <!-- /Calculadora de receta -->
 
-    </form>
-
-    <!-- ── Sticky save bar ───────────────────────────────────────── -->
-    <div class="sticky-save-bar">
-      <div class="sticky-save-bar__inner">
-        <div class="sticky-save-bar__info">
-          <span class="sticky-save-bar__dot"></span>
-          <p class="text-sm font-semibold" style="color: var(--color-text);">
-            {isNew ? 'Nuevo producto' : product.title}
-          </p>
-          <span class="premium-chip text-xs">{isNew ? 'Sin guardar' : 'Editando'}</span>
+      <!-- ── Footer de acción ─────────────────────────────────── -->
+      <div class="form-action-footer">
+        <div class="form-action-footer__info">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-5 w-5 flex-shrink-0" style="color: var(--color-accent);">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 2.625c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125m16.5 5.625c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
+          </svg>
+          <div class="min-w-0">
+            <p class="text-sm font-semibold truncate" style="color: var(--color-text);">
+              {isNew ? 'Nuevo producto listo para publicar' : product.title}
+            </p>
+            <p class="text-xs mt-0.5" style="color: var(--color-text-subtle);">
+              Los cambios se reflejan en el storefront al guardar.
+            </p>
+          </div>
         </div>
         <button
           type="submit"
-          form="product-form"
-          class="premium-action-primary"
+          class="premium-action-primary flex-shrink-0"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -598,7 +615,8 @@ const initialRecipe: ProductRecipe = (product as any).recipe ?? {
           Guardar producto
         </button>
       </div>
-    </div>
+
+    </form>
 
   </section>
 
@@ -903,42 +921,27 @@ const initialRecipe: ProductRecipe = (product as any).recipe ?? {
       background: var(--recipe-results-body-bg);
     }
 
-    /* ── Sticky save bar ────────────────────────────────────────── */
-    .sticky-save-bar {
-      position: sticky;
-      bottom: 1rem;
-      z-index: 40;
-      pointer-events: none;
+    /* ── Header: acción principal ───────────────────────────────── */
+    .admin-shell__header-actions {
+      flex-shrink: 0;
     }
 
-    .sticky-save-bar__inner {
-      @apply flex items-center justify-between gap-4 mx-auto px-5 py-3 rounded-2xl;
-      pointer-events: auto;
-      max-width: 64rem;
+    /* ── Form action footer ──────────────────────────────────────── */
+    .form-action-footer {
+      @apply flex flex-col gap-4 rounded-[1.5rem] p-5;
+      border: 1px solid var(--color-border);
       background: color-mix(in srgb, var(--color-surface-elevated) 96%, transparent);
-      border: 1px solid var(--color-border-strong);
-      box-shadow: 0 8px 32px color-mix(in srgb, var(--color-text) 12%, transparent),
-                  0 2px 8px color-mix(in srgb, var(--color-text) 6%, transparent);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 4px 16px color-mix(in srgb, var(--color-text) 6%, transparent);
     }
 
-    .sticky-save-bar__info {
+    .form-action-footer__info {
       @apply flex items-center gap-3 min-w-0;
     }
 
-    .sticky-save-bar__dot {
-      @apply flex-shrink-0;
-      width: 0.5rem;
-      height: 0.5rem;
-      border-radius: 9999px;
-      background: var(--color-accent);
-      animation: pulse-dot 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse-dot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.6; transform: scale(0.8); }
+    @media (min-width: 640px) {
+      .form-action-footer {
+        @apply flex-row items-center justify-between;
+      }
     }
 
     /* ── Calculadora: shell full-width con scroll en ingredientes ── */
@@ -1459,6 +1462,30 @@ function emptyIngredient(): RecipeIngredient {
 
 // ── Inicialización y eventos globales ─────────────────────────────────────
 document.addEventListener('astro:page-load', () => {
+  // ── Auto-slug desde título ─────────────────────────────────────────────
+  const titleInput = document.getElementById('title') as HTMLInputElement | null;
+  const slugInput  = document.getElementById('slug')  as HTMLInputElement | null;
+
+  if (titleInput && slugInput) {
+    // Si el slug ya tiene valor (edición), no lo sobreescribimos
+    if (slugInput.value) slugInput.dataset.userModified = 'true';
+
+    titleInput.addEventListener('input', () => {
+      if (slugInput.dataset.userModified) return;
+      slugInput.value = titleInput.value
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // quita tildes
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '')
+        .replace(/-+/g, '-')
+        .trim();
+    });
+
+    slugInput.addEventListener('input', () => {
+      slugInput.dataset.userModified = 'true';
+    });
+  }
+
   // Leer datos de receta inicial inyectados por el servidor
   const dataEl = document.getElementById('recipe-initial-data');
   if (dataEl) {

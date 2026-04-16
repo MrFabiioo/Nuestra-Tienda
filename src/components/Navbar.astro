@@ -1,9 +1,10 @@
 ---
 import CartButton from "./CartButton.tsx";
-import SearchBar from "./SearchBar.astro";
+import { getPendingOrderFromCookies } from '../services/orders/pending-order';
 
 // Mostrar link Admin solo cuando hay sesión válida
 const user = Astro.locals.user;
+const pendingOrder = await getPendingOrderFromCookies(Astro.cookies);
 ---
 
 <header class="navbar">
@@ -25,16 +26,12 @@ const user = Astro.locals.user;
             </svg>
         </a>
 
-        <!-- Centro: Barra de busqueda con sugerencias -->
-        <SearchBar />
-
         <!-- Derecha: Nav desktop + Carrito + Hamburguesa mobile -->
         <div class="navbar__right">
             <nav class="desktop-nav" aria-label="Navegación principal">
                 <ul class="desktop-nav__list">
                     <li><a href="/" class="desktop-nav__link">Inicio</a></li>
                     <li><a href="/tienda" class="desktop-nav__link">Tienda</a></li>
-                    <li><a href="/pagos" class="desktop-nav__link">Pagos</a></li>
                     {user ? (
                         <>
                             <li>
@@ -77,7 +74,7 @@ const user = Astro.locals.user;
                 <span class="theme-toggle__label" data-theme-label>Modo claro</span>
             </button>
             <div class="cart-icon">
-                <CartButton client:only="preact" transition:persist>
+                <CartButton client:only="preact" pendingOrderUrl={pendingOrder ? `/pagos/${pendingOrder.token}` : null}>
                     <button
                         slot="fallback"
                         type="button"
@@ -110,7 +107,6 @@ const user = Astro.locals.user;
         <ul class="mobile-menu__list">
             <li><a href="/" class="mobile-menu__link">Inicio</a></li>
             <li><a href="/tienda" class="mobile-menu__link">Tienda</a></li>
-            <li><a href="/pagos" class="mobile-menu__link">Pagos</a></li>
             {user ? (
                 <>
                     <li><a href="/admin/dashboard" class="mobile-menu__link mobile-menu__link--admin">Admin · Dashboard</a></li>

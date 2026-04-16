@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    ".astro/types.d.ts",
+    "src/scripts/admin/admin-analytics-dashboard.ts",
+    "src/scripts/admin/admin-analytics-dashboard.contract.ts"
+  ],
+  "exclude": [
+    "dist"
+  ]
+}

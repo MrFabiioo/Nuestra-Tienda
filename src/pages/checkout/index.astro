@@ -3,10 +3,11 @@ import Layout from '@layouts/Layout.astro'
 import { actions } from 'astro:actions';
 import {Formatter} from '@utils/formatter'
 import BreadcrumbTrail from '../../components/shared/BreadcrumbTrail.astro';
-
-const cart = Astro.cookies.get('cart');
+import { getPendingOrderFromCookies } from '../../services/orders/pending-order';
 
 export const prerender = false
+
+const pendingOrder = await getPendingOrderFromCookies(Astro.cookies);
 
 const {data:products,error}= await Astro.callAction(actions.loadProductsFromCart,{});
 
@@ -23,6 +24,13 @@ const total = products.reduce(
 );
 
 const isEmpty = products.length === 0;
+const lockedDeliveryData = {
+  method: 'wemi',
+  address: 'CR 48 14 49',
+  city: 'Medellin - Poblado',
+  notes: 'Grupo Emi Falk - Sala de Rdio'
+};
+
 const checkoutBreadcrumbs = [
   { label: 'Inicio', href: '/' },
   { label: 'Tienda', href: '/tienda' },
@@ -45,6 +53,15 @@ const checkoutBreadcrumbs = [
     {isEmpty ? (
       <!-- Empty Cart State -->
       <div class="mx-auto max-w-2xl py-16 text-center">
+        {pendingOrder && (
+          <div class="mb-8 rounded-3xl border border-guacamole-b/30 bg-guacamole-fondo/20 px-6 py-5 text-left">
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-guacamole-b">Pedido pendiente de pago</p>
+            <p class="mt-1 text-sm text-gray-600">Tenés un pedido real esperando tu acción. Podés volver a la página de pago y seguir desde donde lo dejaste.</p>
+            <a href={`/pagos/${pendingOrder.token}`} class="mt-3 inline-flex items-center gap-1.5 rounded-full bg-guacamole-b px-5 py-2.5 text-sm font-bold text-white hover:bg-guacamole-a">
+              Ver mi pedido pendiente →
+            </a>
+          </div>
+        )}
         <div class="premium-subtle-panel p-8 md:p-12">
           <!-- Icon -->
           <div class="w-24 h-24 mx-auto mb-6 bg-guacamole-fondo/20 rounded-full flex items-center justify-center">
@@ -53,7 +70,7 @@ const checkoutBreadcrumbs = [
             </svg>
           </div>
           
-          <h1 class="mb-4 text-3xl font-black uppercase tracking-wide text-guacamole-icons md:text-4xl">
+          <h1 class="mb-4 text-3xl font-black uppercase tracking-wide text-[var(--color-heading)] md:text-4xl">
             Tu pedido todavía está vacío
           </h1>
           
@@ -70,13 +87,13 @@ const checkoutBreadcrumbs = [
           
           <!-- Trust badges -->
           <div class="mt-10 grid grid-cols-1 gap-4 border-t border-gray-200 pt-8 md:grid-cols-2">
-            <div class="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-guacamole-icons">
+            <div class="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-[var(--color-heading-sub)]">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-guacamole-b" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
               </svg>
               <span class="text-sm font-semibold">Envío gratis +$50</span>
             </div>
-            <div class="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-guacamole-icons">
+            <div class="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-[var(--color-heading-sub)]">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-guacamole-b" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -93,7 +110,7 @@ const checkoutBreadcrumbs = [
             <span class="premium-chip">
               Paso 1 de 2 · Datos y entrega
             </span>
-            <h1 class="text-3xl md:text-4xl font-black text-guacamole-icons uppercase tracking-wide">
+            <h1 class="text-3xl md:text-4xl font-black text-[var(--color-heading)] uppercase tracking-wide">
               Revisar pedido
             </h1>
             <p class="text-gray-600 mt-2">
@@ -156,12 +173,12 @@ const checkoutBreadcrumbs = [
                         <div>
                           <a
                             href={`/products/${product.slug}`}
-                            class="text-lg font-bold text-guacamole-icons hover:text-guacamole-b hover:underline transition-colors line-clamp-1"
+                            class="text-lg font-bold text-[var(--color-heading)] hover:text-guacamole-b hover:underline transition-colors line-clamp-1"
                           >
                             {product.title}
                           </a>
                           <div class="flex items-center gap-3 mt-1 text-sm text-gray-500">
-                            <span class="rounded-full border border-guacamole-fondo/30 bg-guacamole-fondo/20 px-3 py-1 font-semibold text-guacamole-icons">
+                            <span class="rounded-full border border-guacamole-fondo/30 bg-guacamole-fondo/20 px-3 py-1 font-semibold text-[var(--color-heading-sub)]">
                               {product.sizes}
                             </span>
                             <span>Cantidad: <strong>{product.quantity}</strong></span>
@@ -206,22 +223,22 @@ const checkoutBreadcrumbs = [
               <form id="customer-form" class="p-6 space-y-6">
                 <div id="form-feedback" class="hidden rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert"></div>
 
-                <div class="rounded-2xl border border-guacamole-fondo/40 bg-guacamole-fondo/10 px-4 py-4 text-sm text-guacamole-icons">
-                  <p class="font-bold">Tus datos se usan solo para confirmar el pedido y coordinar la entrega o el retiro.</p>
+                <div class="rounded-2xl border border-guacamole-fondo/40 bg-guacamole-fondo/10 px-4 py-4 text-sm text-[var(--color-heading-sub)]">
+                  <p class="font-bold">Tus datos se usan solo para confirmar el pedido y coordinar la entrega en la WEMI.</p>
                   <p class="mt-1 text-gray-600">Los campos con <span class="font-bold text-red-500">*</span> son los mínimos para avanzar a pago sin perder contexto.</p>
                 </div>
 
                 <!-- Section: Contact Information -->
                 <div class="space-y-4">
                   <div class="border-b border-gray-100 pb-2">
-                    <h3 class="text-lg font-bold text-guacamole-icons">Información de contacto</h3>
+                    <h3 class="text-lg font-bold text-[var(--color-heading)]">Información de contacto</h3>
                     <p class="text-sm text-gray-500">Así te confirmamos el pedido y cualquier detalle importante de entrega.</p>
                   </div>
 
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Nombre completo -->
                     <div data-field-wrapper>
-                      <label for="fullName" class="block text-sm font-semibold text-guacamole-icons mb-2">
+                      <label for="fullName" class="block text-sm font-semibold text-[var(--color-heading-sub)] mb-2">
                         Nombre completo <span class="text-red-500">*</span>
                       </label>
                       <input
@@ -239,7 +256,7 @@ const checkoutBreadcrumbs = [
 
                     <!-- Teléfono -->
                     <div data-field-wrapper>
-                      <label for="phone" class="block text-sm font-semibold text-guacamole-icons mb-2">
+                      <label for="phone" class="block text-sm font-semibold text-[var(--color-heading-sub)] mb-2">
                         Teléfono <span class="text-red-500">*</span>
                       </label>
                       <input
@@ -252,14 +269,14 @@ const checkoutBreadcrumbs = [
                         class="premium-field"
                         placeholder="+58 412 123 4567"
                       />
-                      <p class="field-help">Te contactamos por acá si surge algo con la entrega o el retiro.</p>
+                      <p class="field-help">Te contactamos por acá si surge algo con la entrega en la WEMI.</p>
                       <p class="field-error hidden" data-field-error></p>
                     </div>
                   </div>
 
                   <!-- Correo electrónico -->
                   <div data-field-wrapper>
-                    <label for="email" class="block text-sm font-semibold text-guacamole-icons mb-2">
+                    <label for="email" class="block text-sm font-semibold text-[var(--color-heading-sub)] mb-2">
                       Correo electrónico <span class="text-red-500">*</span>
                     </label>
                     <input
@@ -279,13 +296,13 @@ const checkoutBreadcrumbs = [
                 <!-- Section: Delivery Information -->
                 <div class="space-y-4 pt-4">
                   <div class="border-b border-gray-100 pb-2">
-                    <h3 class="text-lg font-bold text-guacamole-icons">Entrega y referencias</h3>
+                    <h3 class="text-lg font-bold text-[var(--color-heading)]">Entrega y referencias</h3>
                     <p class="text-sm text-gray-500">Dejanos el contexto justo para que la coordinación salga prolija desde el primer mensaje.</p>
                   </div>
 
                   <!-- Método de entrega -->
                   <div data-field-wrapper>
-                    <label class="block text-sm font-semibold text-guacamole-icons mb-3">
+                    <label class="block text-sm font-semibold text-[var(--color-heading-sub)] mb-3">
                       Método de entrega <span class="text-red-500">*</span>
                     </label>
                     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -293,35 +310,36 @@ const checkoutBreadcrumbs = [
                         <input
                           type="radio"
                           name="deliveryMethod"
-                          value="domicilio"
+                          value={lockedDeliveryData.method}
                           checked
                           class="mt-1 h-5 w-5 text-guacamole-b focus:ring-guacamole-b"
                         />
                         <span>
-                          <span class="block font-semibold text-guacamole-icons">Domicilio</span>
-                          <span class="mt-1 block text-sm text-gray-500">Ideal si querés recibir tu pedido en una dirección específica.</span>
+                          <span class="block font-semibold text-[var(--color-heading-sub)]">En la WEMI</span>
+                          <span class="mt-1 block text-sm text-gray-500">Retirás o recibís tu pedido en el punto fijo habilitado por ahora.</span>
                         </span>
                       </label>
-                      <label class="checkout-delivery-option flex cursor-pointer items-start gap-3 rounded-2xl px-4 py-4 transition-all">
+                      <label class="checkout-delivery-option checkout-delivery-option-disabled flex items-start gap-3 rounded-2xl px-4 py-4 transition-all" aria-disabled="true">
                         <input
                           type="radio"
                           name="deliveryMethod"
-                          value="recoger"
+                          value="domicilio"
+                          disabled
                           class="mt-1 h-5 w-5 text-guacamole-b focus:ring-guacamole-b"
                         />
                         <span>
-                          <span class="block font-semibold text-guacamole-icons">Retiro acordado</span>
-                          <span class="mt-1 block text-sm text-gray-500">Perfecto si preferís coordinar un punto de encuentro o retiro pautado.</span>
+                          <span class="block font-semibold text-[var(--color-heading-sub)]">Domicilio</span>
+                          <span class="mt-1 block text-sm text-gray-500">La opción sigue visible, pero por ahora no está disponible para nuevos pedidos.</span>
                         </span>
                       </label>
                     </div>
-                    <p class="field-help">Elegí la opción que mejor te quede y después dejá las referencias necesarias para evitar idas y vueltas.</p>
+                    <p class="field-help">Por ahora todos los pedidos se entregan únicamente en la WEMI.</p>
                     <p class="field-error hidden" data-field-error></p>
                   </div>
 
                   <!-- Dirección -->
                   <div data-field-wrapper>
-                    <label for="address" class="block text-sm font-semibold text-guacamole-icons mb-2">
+                    <label for="address" class="block text-sm font-semibold text-[var(--color-heading-sub)] mb-2">
                       Dirección de entrega <span class="text-red-500">*</span>
                     </label>
                     <input
@@ -330,17 +348,18 @@ const checkoutBreadcrumbs = [
                       name="address"
                       required
                       autocomplete="street-address"
+                      readonly
                       class="premium-field"
-                      placeholder="Av. Principal, Calle 5, Edif. Miramar, Piso 3, Apto. 3B"
+                      value={lockedDeliveryData.address}
                     />
-                    <p class="field-help">Si elegiste retiro acordado, podés usar este espacio para la referencia principal o el punto de encuentro.</p>
+                    <p class="field-help">Dirección fija habilitada para las entregas actuales.</p>
                     <p class="field-error hidden" data-field-error></p>
                   </div>
 
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Ciudad / Sector -->
                     <div data-field-wrapper>
-                      <label for="city" class="block text-sm font-semibold text-guacamole-icons mb-2">
+                      <label for="city" class="block text-sm font-semibold text-[var(--color-heading-sub)] mb-2">
                         Ciudad / Sector <span class="text-red-500">*</span>
                       </label>
                       <input
@@ -349,34 +368,35 @@ const checkoutBreadcrumbs = [
                         name="city"
                         required
                         autocomplete="address-level2"
+                        readonly
                         class="premium-field"
-                        placeholder="Caracas, El Hatillo"
+                        value={lockedDeliveryData.city}
                       />
-                      <p class="field-help">Sumá la ciudad y el sector para hacer la coordinación más precisa.</p>
+                      <p class="field-help">Ciudad y sector definidos para este punto de entrega.</p>
                       <p class="field-error hidden" data-field-error></p>
                     </div>
 
                     <!-- Referencias / Notas -->
                     <div data-field-wrapper>
-                      <label for="notes" class="block text-sm font-semibold text-guacamole-icons mb-2">
-                        Referencias / Notas <span class="text-gray-400">(opcional)</span>
+                      <label for="notes" class="block text-sm font-semibold text-[var(--color-heading-sub)] mb-2">
+                        Referencia del punto de entrega
                       </label>
                       <textarea
                         id="notes"
                         name="notes"
                         rows="4"
+                        readonly
                         class="premium-field min-h-[112px] resize-y"
-                        placeholder="Ej. Portón verde, tocar timbre o llamar al llegar"
-                      ></textarea>
-                      <p class="field-help">Acá entran los detalles finos: torre, piso, horario, timbre o datos de acceso.</p>
+                      >{lockedDeliveryData.notes}</textarea>
+                      <p class="field-help">Referencia hardcodeada para identificar el punto exacto dentro de la WEMI.</p>
                       <p class="field-error hidden" data-field-error></p>
                     </div>
                   </div>
                 </div>
 
                 <div class="checkout-review-note rounded-2xl px-4 py-4 text-sm text-gray-600">
-                  <p class="font-semibold text-guacamole-icons">Antes de pasar a pago</p>
-                  <p class="mt-1">Chequeá que el teléfono y la dirección estén bien escritos. Ese detalle hace que la confirmación sea mucho más ágil.</p>
+                  <p class="font-semibold text-[var(--color-heading-sub)]">Antes de pasar a pago</p>
+                  <p class="mt-1">Chequeá que el teléfono esté bien escrito. El punto de entrega ya queda fijado automáticamente en la WEMI.</p>
                 </div>
               </form>
             </div>
@@ -396,7 +416,7 @@ const checkoutBreadcrumbs = [
                 <div class="space-y-3 text-gray-600">
                   <div class="flex justify-between items-center">
                     <span class="font-semibold">Subtotal</span>
-                    <span class="font-bold text-guacamole-icons">{Formatter.currency(total)}</span>
+                    <span class="font-bold text-[var(--color-heading-sub)]">{Formatter.currency(total)}</span>
                   </div>
                   
                   <div class="flex justify-between items-center">
@@ -406,7 +426,7 @@ const checkoutBreadcrumbs = [
                   
                   <div class="flex justify-between items-center">
                     <span class="font-semibold">Impuesto (15%)</span>
-                    <span class="font-bold text-guacamole-icons">{Formatter.currency(total * 0.15)}</span>
+                    <span class="font-bold text-[var(--color-heading-sub)]">{Formatter.currency(total * 0.15)}</span>
                   </div>
                 </div>
                 
@@ -419,7 +439,7 @@ const checkoutBreadcrumbs = [
                   data-total={total * 1.15}
                 >
                   <div class="flex justify-between items-center">
-                    <span class="text-xl font-black text-guacamole-icons uppercase">Total</span>
+                    <span class="text-xl font-black text-[var(--color-heading)] uppercase">Total</span>
                     <span class="text-2xl font-black text-guacamole-a">
                       {Formatter.currency(total * 1.15)}
                     </span>
@@ -429,19 +449,19 @@ const checkoutBreadcrumbs = [
                 <!-- Trust Badges -->
                 <div class="rounded-2xl border border-guacamole-fondo/25 bg-guacamole-fondo/10 p-4 space-y-2">
                   <p class="text-xs font-bold uppercase tracking-[0.22em] text-guacamole-b">Checklist premium</p>
-                  <div class="flex items-center gap-2 text-sm text-guacamole-icons">
+                  <div class="flex items-center gap-2 text-sm text-[var(--color-heading-sub)]">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-guacamole-b" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                     </svg>
                     <span class="font-semibold">Envío gratis en pedidos +$50</span>
                   </div>
-                  <div class="flex items-center gap-2 text-sm text-guacamole-icons">
+                  <div class="flex items-center gap-2 text-sm text-[var(--color-heading-sub)]">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-guacamole-b" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <span class="font-semibold">Garantía de devolución de 30 días</span>
                   </div>
-                  <div class="flex items-center gap-2 text-sm text-guacamole-icons">
+                  <div class="flex items-center gap-2 text-sm text-[var(--color-heading-sub)]">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-guacamole-b" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10m-11 8h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
@@ -450,8 +470,8 @@ const checkoutBreadcrumbs = [
                 </div>
                 
                 <!-- Pay Button -->
-                <a
-                  href="/pagos"
+                <button
+                  type="button"
                   id="proceed-to-payment"
                   class="group block w-full rounded-full bg-guacamole-b px-8 py-4 text-center text-sm font-bold uppercase tracking-wider text-white shadow-[0_4px_12px_rgba(86,130,3,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-guacamole-a hover:shadow-[0_6px_20px_rgba(62,97,2,0.35)]"
                 >
@@ -461,7 +481,7 @@ const checkoutBreadcrumbs = [
                     </svg>
                     Continuar a medios de pago
                   </span>
-                </a>
+                </button>
                 <p id="checkout-feedback" class="min-h-[1.25rem] text-center text-xs font-medium text-gray-500" aria-live="polite">
                   Completá tus datos y, cuando esté todo listo, seguimos al pago sin perder tu pedido.
                 </p>
@@ -554,7 +574,6 @@ const checkoutBreadcrumbs = [
     background: color-mix(in srgb, var(--color-danger-surface) 90%, var(--color-surface) 10%);
   }
 
-  .theme-checkout-page .text-guacamole-icons,
   .theme-checkout-page .text-black-dark {
     color: var(--color-text);
   }
@@ -602,6 +621,16 @@ const checkoutBreadcrumbs = [
     background: color-mix(in srgb, var(--color-surface-soft) 82%, var(--color-accent) 18%);
   }
 
+  .theme-checkout-page .checkout-delivery-option-disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+  }
+
+  .theme-checkout-page .checkout-delivery-option-disabled:hover {
+    border-color: var(--color-border);
+    background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+  }
+
   .theme-checkout-page .checkout-delivery-option:has(input:checked) {
     border-color: color-mix(in srgb, var(--color-accent) 42%, var(--color-border) 58%);
     background: color-mix(in srgb, var(--color-surface-soft) 74%, var(--color-accent) 26%);
@@ -619,20 +648,47 @@ const checkoutBreadcrumbs = [
 
 <script>
 import { CartCookiesClient } from "@utils/cart-cookies";
+import { actions } from "astro:actions";
 import { navigate } from "astro:transitions/client";
 
 document.addEventListener('astro:page-load',()=>{
   const form = document.getElementById('customer-form') as HTMLFormElement | null;
   const checkoutFeedback = document.getElementById('checkout-feedback') as HTMLParagraphElement | null;
   const feedbackBox = document.getElementById('form-feedback') as HTMLDivElement | null;
+  const lockedDeliveryData = {
+    method: 'wemi',
+    address: 'CR 48 14 49',
+    city: 'Medellin - Poblado',
+    notes: 'Grupo Emi Falk - Sala de Rdio'
+  };
 
   const validationMessages: Record<string, string> = {
     fullName: 'Decinos tu nombre completo para identificar el pedido.',
     phone: 'Necesitamos un teléfono válido para coordinar cualquier detalle.',
     email: 'Ingresá un correo válido para enviarte la confirmación.',
-    address: 'Sumá una dirección o punto de referencia para la entrega o el retiro.',
-    city: 'Indicá la ciudad o el sector para cerrar bien la coordinación.',
-    deliveryMethod: 'Elegí cómo preferís recibir tu pedido.'
+    address: 'La dirección de entrega en la WEMI debe quedar cargada.',
+    city: 'La ciudad del punto de entrega en la WEMI debe quedar cargada.',
+    deliveryMethod: 'La entrega se realiza únicamente en la WEMI.'
+  };
+
+  const applyLockedDeliveryData = () => {
+    if (!form) return;
+
+    const addressField = form.elements.namedItem('address') as HTMLInputElement | null;
+    const cityField = form.elements.namedItem('city') as HTMLInputElement | null;
+    const notesField = form.elements.namedItem('notes') as HTMLTextAreaElement | null;
+    const deliveryMethods = form.elements.namedItem('deliveryMethod') as RadioNodeList | null;
+
+    if (addressField) addressField.value = lockedDeliveryData.address;
+    if (cityField) cityField.value = lockedDeliveryData.city;
+    if (notesField) notesField.value = lockedDeliveryData.notes;
+
+    if (deliveryMethods) {
+      for (let i = 0; i < deliveryMethods.length; i++) {
+        const radio = deliveryMethods[i] as HTMLInputElement;
+        radio.checked = radio.value === lockedDeliveryData.method;
+      }
+    }
   };
 
   const setCheckoutFeedback = (message: string, tone: 'default' | 'error' | 'success' = 'default') => {
@@ -743,6 +799,8 @@ document.addEventListener('astro:page-load',()=>{
   };
 
   if (form) {
+    applyLockedDeliveryData();
+
     form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input, textarea').forEach((field) => {
       if (field.type === 'radio') {
         field.addEventListener('change', () => {
@@ -769,34 +827,6 @@ document.addEventListener('astro:page-load',()=>{
     });
   }
 
-  // Restore customer data from sessionStorage on page load
-  const savedCustomerData = sessionStorage.getItem('guacamole-customer-data');
-  if (savedCustomerData) {
-    try {
-      const data = JSON.parse(savedCustomerData);
-      if (form) {
-        (form.elements.namedItem('fullName') as HTMLInputElement).value = data.fullName || '';
-        (form.elements.namedItem('phone') as HTMLInputElement).value = data.phone || '';
-        (form.elements.namedItem('email') as HTMLInputElement).value = data.email || '';
-        (form.elements.namedItem('address') as HTMLInputElement).value = data.address || '';
-        (form.elements.namedItem('city') as HTMLInputElement).value = data.city || '';
-        (form.elements.namedItem('notes') as HTMLTextAreaElement).value = data.notes || '';
-        const deliveryMethods = form.elements.namedItem('deliveryMethod') as RadioNodeList;
-        if (deliveryMethods) {
-          for (let i = 0; i < deliveryMethods.length; i++) {
-            const radio = deliveryMethods[i] as HTMLInputElement;
-            if (radio.value === data.deliveryMethod) {
-              radio.checked = true;
-              break;
-            }
-          }
-        }
-      }
-    } catch (e) {
-      // Ignore parse errors
-    }
-  }
-
   // Handle delete buttons
   const deleteButtons = document.querySelectorAll('.btn-delete');
   deleteButtons.forEach(button => {
@@ -817,7 +847,7 @@ document.addEventListener('astro:page-load',()=>{
     })
   })
 
-  // Handle proceed to payment button with customer data persistence
+  // Handle proceed to payment button with real order creation
   const proceedButton = document.getElementById('proceed-to-payment');
   const proceedButtonLabel = document.getElementById('proceed-to-payment-label');
   if (proceedButton) {
@@ -834,8 +864,7 @@ document.addEventListener('astro:page-load',()=>{
       }
     };
 
-    proceedButton.addEventListener('click', (e) => {
-      // Prevent default <a> navigation — we control it via navigate()
+    proceedButton.addEventListener('click', async (e) => {
       e.preventDefault();
       if (!form) return;
 
@@ -847,37 +876,23 @@ document.addEventListener('astro:page-load',()=>{
         return;
       }
 
-      setProceedPending(true, 'Abriendo medios de pago...');
-      setCheckoutFeedback('Guardamos tus datos y te llevamos al pago.', 'success');
-      
-      // Save customer data to sessionStorage before navigating
-      const formData = new FormData(form);
-      const customerData = {
-        fullName: formData.get('fullName'),
-        phone: formData.get('phone'),
-        email: formData.get('email'),
-        address: formData.get('address'),
-        city: formData.get('city'),
-        notes: formData.get('notes'),
-        deliveryMethod: formData.get('deliveryMethod')
-      };
-      sessionStorage.setItem('guacamole-customer-data', JSON.stringify(customerData));
+      setProceedPending(true, 'Creando pedido...');
+      setCheckoutFeedback('Estamos guardando tu pedido para que el pago quede trazable.', 'success');
 
-      // Save order totals so pagos.astro can display the summary
-      const totalEl = document.querySelector('[data-checkout-total]') as HTMLElement | null;
-      if (totalEl) {
-        const subtotalRaw = totalEl.dataset.subtotal ?? '0';
-        const taxRaw = totalEl.dataset.tax ?? '0';
-        const totalRaw = totalEl.dataset.total ?? '0';
-        sessionStorage.setItem('guacamole-order-total', JSON.stringify({
-          subtotal: parseFloat(subtotalRaw),
-          tax: parseFloat(taxRaw),
-          total: parseFloat(totalRaw)
-        }));
+      const formData = new FormData(form);
+
+      const { data, error } = await actions.createOrder(formData);
+
+      if (error || !data) {
+        console.error(error);
+        showFormFeedback(error?.message ?? 'No pudimos crear tu pedido. Revisá los datos e intentá otra vez.');
+        setCheckoutFeedback('Hubo un problema al persistir el pedido. No seguimos hasta dejarlo bien guardado.', 'error');
+        setProceedPending(false, 'Continuar a medios de pago');
+        return;
       }
-      
-      // Navigate to payment page
-      navigate('/pagos');
+
+      setCheckoutFeedback('Pedido creado. Te llevamos a la referencia pública de pago.', 'success');
+      window.location.href = data.redirectUrl;
     });
   }
 });

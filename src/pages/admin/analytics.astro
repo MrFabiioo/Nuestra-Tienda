@@ -1,0 +1,1154 @@
+---
+import Layout from '@layouts/Layout.astro';
+import AnalyticsPanel from '@components/admin/analytics/AnalyticsPanel.astro';
+import AnalyticsMetricCard from '@components/admin/analytics/AnalyticsMetricCard.astro';
+
+import { buildAdminAnalyticsStaticCopy } from '../../services/analytics/admin-analytics-copy';
+import { buildAdminAnalyticsSectionsLayout } from '../../services/analytics/admin-analytics-sections';
+import { buildAdminAnalyticsDashboardModel } from '../../services/analytics/admin-analytics-view-model';
+import { getAnalyticsData } from '../../services/analytics/repository';
+import { businessDateToUTC } from '../../services/analytics/business-timezone';
+import { Formatter } from '@utils/formatter';
+
+export const prerender = false;
+
+const adminUser = Astro.locals.user!;
+
+// ── Date range filter ──────────────────────────────────────────────────────
+const fromParam = Astro.url.searchParams.get('from');
+const toParam   = Astro.url.searchParams.get('to');
+const isValidDate = (s: string | null): s is string => !!s && /^\d{4}-\d{2}-\d{2}$/.test(s);
+const isFiltered  = isValidDate(fromParam) && isValidDate(toParam) && fromParam! < toParam!;
+
+const range = isFiltered
+  ? { from: businessDateToUTC(fromParam!, false), to: businessDateToUTC(toParam!, true) }
+  : undefined;
+
+let data: Awaited<ReturnType<typeof getAnalyticsData>>;
+try {
+  data = await getAnalyticsData(range);
+} catch {
+  return Astro.redirect('/admin/dashboard');
+}
+
+const statusLabels: Record<string, string> = {
+  pending_payment: 'Pendiente pago',
+  under_review: 'En revisión',
+  approved: 'Aprobado',
+  rejected: 'Rechazado',
+  cancelled: 'Cancelado',
+};
+
+function labelStatus(status: string) {
+  return statusLabels[status] ?? status;
+}
+
+function withShare(items: Array<{ label: string; count: number }>) {
+  const total = items.reduce((acc, item) => acc + item.count, 0);
+
+  return items.map(item => ({
+    ...item,
+    share: total > 0 ? Math.round((item.count / total) * 100) : 0,
+  }));
+}
+
+const labeledStatus = data.byStatus.map(item => ({ ...item, label: labelStatus(item.label) }));
+const dashboardModel = buildAdminAnalyticsDashboardModel({ ...data, byStatus: labeledStatus });
+const staticCopy = buildAdminAnalyticsStaticCopy();
+const sectionsLayout = buildAdminAnalyticsSectionsLayout();
+
+const statusMix = withShare(labeledStatus);
+const paymentMix = withShare(data.byPaymentMethod);
+
+const profitTotal = data.topByEstimatedProfit.reduce((sum, item) => sum + item.estimatedProfit, 0);
+const profitMix = data.topByEstimatedProfit.map(item => ({
+  ...item,
+  share: profitTotal > 0 ? Math.round((item.estimatedProfit / profitTotal) * 100) : 0,
+}));
+
+const approvedShare = data.summary.totalOrders > 0
+  ? Math.round((data.summary.approvedOrders / data.summary.totalOrders) * 100)
+  : 0;
+
+const pendingShare = data.summary.totalOrders > 0
+  ? Math.round((data.summary.pendingOrders / data.summary.totalOrders) * 100)
+  : 0;
+
+const rejectedShare = data.summary.totalOrders > 0
+  ? Math.round((data.summary.rejectedOrders / data.summary.totalOrders) * 100)
+  : 0;
+
+const executiveHighlights = [
+  {
+    label: 'Aprobación',
+    value: `${approvedShare}%`,
+    detail: `${data.summary.approvedOrders} de ${data.summary.totalOrders} pedidos`,
+  },
+  {
+    label: 'Pendientes',
+    value: `${data.summary.pendingOrders}`,
+    detail: pendingShare > 0 ? `${pendingShare}% del pipeline` : 'Sin backlog actual',
+  },
+  {
+    label: 'Rechazos',
+    value: `${rejectedShare}%`,
+    detail: `${data.summary.rejectedOrders} pedidos caídos`,
+  },
+];
+
+const temporalWarnings = staticCopy.temporalWarnings;
+---
+
+<Layout title="Admin · Analytics">
+  <section class="px-2 py-8 sm:px-4 lg:px-6">
+    <div class="premium-subtle-panel analytics-hero px-5 py-6 sm:px-7">
+      <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <div class="max-w-3xl">
+          <div class="flex flex-wrap items-center gap-3">
+            <span class="premium-chip">Admin · analytics</span>
+            <span class="admin-chip text-xs">{staticCopy.hero.badges.context}</span>
+            {isFiltered && (
+              <span class="period-active-chip">
+                {fromParam} → {toParam}
+                <a href="/admin/analytics" class="period-active-chip__clear" title="Limpiar filtro">✕</a>
+              </span>
+            )}
+          </div>
+
+          <h1 class="mt-4 text-3xl font-black tracking-tight theme-text-primary sm:text-4xl">
+            {staticCopy.hero.title}
+          </h1>
+
+          <p class="theme-text-muted mt-3 max-w-2xl text-sm leading-relaxed sm:text-base">
+            {isFiltered
+              ? `Mostrando datos del ${fromParam} al ${toParam}. Todos los gráficos y métricas reflejan solo ese período.`
+              : staticCopy.hero.description
+            }
+          </p>
+
+          <p class="mt-2 text-xs text-gray-500">Sesión activa: {adminUser.email}</p>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+          <a href="/admin/dashboard" class="premium-action-secondary">← Volver al dashboard</a>
+          <a href="/admin/orders" class="premium-action-secondary">Ver pedidos</a>
+        </div>
+      </div>
+
+      <!-- Period filter + export widget -->
+      <div class="export-widget mt-6 border-t pt-5" style="border-color: var(--color-border);">
+        <p class="export-eyebrow">Filtrar por período</p>
+        <p class="export-hint mt-1">Elegí un rango para ver métricas y gráficos de ese período exacto, o exportarlo a Excel.</p>
+
+        <form id="filter-form" action="/admin/analytics" method="get" class="mt-3 flex flex-wrap items-end gap-3">
+          <!-- Presets -->
+          <div class="flex flex-wrap gap-2">
+            <button type="button" class="export-preset" data-preset="this-week">Esta semana</button>
+            <button type="button" class="export-preset" data-preset="last-week">Semana pasada</button>
+            <button type="button" class="export-preset" data-preset="this-month">Este mes</button>
+            <button type="button" class="export-preset" data-preset="last-month">Mes pasado</button>
+          </div>
+
+          <!-- Date inputs -->
+          <div class="flex flex-wrap items-end gap-2">
+            <div class="export-field">
+              <label for="export-from" class="export-label">Desde</label>
+              <input type="date" id="export-from" name="from" class="export-date-input"
+                value={fromParam ?? ''} required />
+            </div>
+            <div class="export-field">
+              <label for="export-to" class="export-label">Hasta</label>
+              <input type="date" id="export-to" name="to" class="export-date-input"
+                value={toParam ?? ''} required />
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="submit" class="filter-submit">
+              <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
+              </svg>
+              Aplicar filtro
+            </button>
+
+            <button type="button" id="export-btn" class="export-submit">
+              <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Exportar Excel
+            </button>
+
+            {isFiltered && (
+              <a href="/admin/analytics" class="clear-filter-link">Limpiar filtro</a>
+            )}
+          </div>
+        </form>
+      </div>
+
+      <div class="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+        {dashboardModel.executiveMetrics.map(metric => (
+          <AnalyticsMetricCard {...metric} />
+        ))}
+      </div>
+
+      <div class="mt-6 grid gap-3 lg:grid-cols-3">
+        {dashboardModel.executiveNarrative.map(item => (
+          <article class:list={['analytics-story-card', `analytics-story-card--${item.tone}`]}>
+            <p class="analytics-story-card__title">{item.title}</p>
+            <p class="analytics-story-card__description">{item.description}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-6">
+      <AnalyticsPanel
+        eyebrow={dashboardModel.trend.eyebrow}
+        title={dashboardModel.trend.title}
+        description={dashboardModel.trend.description}
+        icon="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"
+        tone="warning"
+      >
+        <div class="analytics-alert analytics-alert--warning" role="alert">
+          <strong>{staticCopy.trendAlert.title}:</strong>
+          {staticCopy.trendAlert.description}
+        </div>
+
+        <div class="mt-4 grid gap-3 md:grid-cols-3">
+          {executiveHighlights.map(item => (
+            <div class="analytics-mini-stat">
+              <p class="analytics-mini-stat__label">{item.label}</p>
+              <p class="analytics-mini-stat__value">{item.value}</p>
+              <p class="analytics-mini-stat__detail">{item.detail}</p>
+            </div>
+          ))}
+        </div>
+
+        <div class="chart-wrap chart-wrap--tall mt-5">
+          <canvas id="chart-trend" aria-label="Serie diaria de demanda bruta y pedidos"></canvas>
+        </div>
+      </AnalyticsPanel>
+    </div>
+
+    <div class:list={['mt-6', 'grid', 'gap-6', sectionsLayout.productGridClass]}>
+      {sectionsLayout.productPanels.includes('status') && (
+        <AnalyticsPanel
+          eyebrow="Pipeline comercial"
+          title={dashboardModel.mix.operationalCharts.status.title}
+          description={dashboardModel.mix.operationalCharts.status.description}
+          icon="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        >
+          {statusMix.length === 0 ? (
+            <p class="analytics-empty">Todavía no hay pedidos para construir el pipeline.</p>
+          ) : (
+            <>
+              <ul class="analytics-breakdown-list">
+                {statusMix.map(item => (
+                  <li class="analytics-breakdown-item">
+                    <div>
+                      <p class="analytics-breakdown-item__label">{item.label}</p>
+                      <p class="analytics-breakdown-item__sub">{item.count} pedidos · {item.share}% del total</p>
+                    </div>
+                    <span class="analytics-breakdown-item__value">{item.share}%</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div class="chart-wrap chart-wrap--medium mt-5">
+                <canvas id="chart-status" aria-label="Pipeline por estado del pedido"></canvas>
+              </div>
+            </>
+          )}
+        </AnalyticsPanel>
+      )}
+
+      {sectionsLayout.productPanels.includes('topByQty') && (
+        <AnalyticsPanel
+          eyebrow="Productos · demanda"
+          title={dashboardModel.productHighlights.byQty.title}
+          description={dashboardModel.productHighlights.byQty.description}
+          icon="M3 7h18M3 12h18M3 17h18"
+        >
+          {data.topByQty.length === 0 ? (
+            <p class="analytics-empty">Sin historial suficiente para rankear productos todavía.</p>
+          ) : (
+            <div class="chart-wrap chart-wrap--medium">
+              <canvas id="chart-top-qty" aria-label="Top productos por unidades demandadas"></canvas>
+            </div>
+          )}
+        </AnalyticsPanel>
+      )}
+
+      {sectionsLayout.productPanels.includes('topByRevenue') && (
+        <AnalyticsPanel
+          eyebrow="Productos · valor histórico"
+          title={dashboardModel.productHighlights.byRevenue.title}
+          description={dashboardModel.productHighlights.byRevenue.description}
+          icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        >
+          {data.topByRevenue.length === 0 ? (
+            <p class="analytics-empty">Sin historial suficiente para medir valor histórico por producto.</p>
+          ) : (
+            <div class="chart-wrap chart-wrap--medium">
+              <canvas id="chart-top-rev" aria-label="Top productos por monto bruto histórico"></canvas>
+            </div>
+          )}
+        </AnalyticsPanel>
+      )}
+    </div>
+
+    <div class:list={['mt-6', 'grid', 'gap-6', sectionsLayout.mixGridClass]}>
+      {sectionsLayout.mixPanels.includes('payment') && (
+        <AnalyticsPanel
+          eyebrow="Mix operativo"
+          title={dashboardModel.mix.operationalCharts.payment.title}
+          description={dashboardModel.mix.operationalCharts.payment.description}
+          icon="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"
+        >
+          {paymentMix.length === 0 ? (
+            <p class="analytics-empty">Todavía no hay pagos registrados para comparar métodos.</p>
+          ) : (
+            <>
+              <ul class="analytics-inline-list">
+                {paymentMix.map(item => <li>{item.label}: {item.share}%</li>)}
+              </ul>
+
+              <div class="chart-wrap chart-wrap--medium mt-4">
+                <canvas id="chart-payment" aria-label="Comparación por método de pago"></canvas>
+              </div>
+            </>
+          )}
+        </AnalyticsPanel>
+      )}
+
+      {sectionsLayout.mixPanels.includes('estimatedProfit') && (
+        <AnalyticsPanel
+          eyebrow="Productos · rentabilidad estimada"
+          title={dashboardModel.productHighlights.byEstimatedProfit.title}
+          icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        >
+          {data.topByEstimatedProfit.length === 0 ? (
+            <p class="analytics-empty">Todavía no hay productos con costo estimable y pedidos aprobados para rankear rentabilidad.</p>
+          ) : (
+            <>
+              <ul class="analytics-breakdown-list analytics-breakdown-list--compact">
+                {profitMix.map(item => (
+                  <li class="analytics-breakdown-item analytics-breakdown-item--sm">
+                    <div>
+                      <p class="analytics-breakdown-item__label">{item.title}</p>
+                      <p class="analytics-breakdown-item__sub">{item.qty} unid. · {item.share}% del total</p>
+                    </div>
+                    <span class="analytics-breakdown-item__value">{Formatter.currency(item.estimatedProfit, 0)}</span>
+                  </li>
+                ))}
+                <li class="analytics-breakdown-item analytics-breakdown-item--sm analytics-breakdown-item--total">
+                  <div>
+                    <p class="analytics-breakdown-item__label">Ganancia total estimada</p>
+                    <p class="analytics-breakdown-item__sub">{profitMix.length} producto{profitMix.length === 1 ? '' : 's'} rankeados</p>
+                  </div>
+                  <span class="analytics-breakdown-item__value">{Formatter.currency(profitTotal, 0)}</span>
+                </li>
+              </ul>
+
+              <div class="chart-wrap chart-wrap--medium">
+                <canvas id="chart-top-profit" aria-label="Top productos por ganancia estimada"></canvas>
+              </div>
+            </>
+          )}
+        </AnalyticsPanel>
+      )}
+    </div>
+
+    {data.neverOrdered.length > 0 && (
+      <div class="mt-6">
+        <AnalyticsPanel
+          eyebrow="Acción de catálogo"
+          title="Productos sin movimiento histórico"
+          description="Este bloque sí es accionable hoy: revisar visibilidad, precio, copy o continuidad del producto."
+          icon="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+          tone="warning"
+          badge={data.neverOrdered.length}
+        >
+          <div class="admin-table-scroll">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Acción sugerida</th>
+                  <th>Ir al detalle</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.neverOrdered.map(product => (
+                  <tr>
+                    <td>
+                      <p class="font-semibold" style="color: var(--color-text);">{product.title}</p>
+                      <p class="text-xs" style="color: var(--color-text-subtle);">Sin pedidos históricos registrados</p>
+                    </td>
+                    <td class="text-sm" style="color: var(--color-text-muted);">
+                      Revisar posicionamiento, precio o continuidad en catálogo.
+                    </td>
+                    <td>
+                      <a href={`/admin/products/${product.id}`} class="premium-action-secondary text-xs">Editar producto</a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </AnalyticsPanel>
+      </div>
+    )}
+
+    <div class="mt-6">
+      <AnalyticsPanel
+        eyebrow={staticCopy.temporalSectionEyebrow}
+        title={dashboardModel.temporal.notice.title}
+        description={dashboardModel.temporal.notice.description}
+        icon="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5"
+        tone="warning"
+      >
+        <ul class="analytics-warning-list">
+          {temporalWarnings.map(item => <li>{item}</li>)}
+        </ul>
+
+        <div class="mt-5 grid gap-6 lg:grid-cols-2">
+          <div class="analytics-temporal-card">
+            <p class="analytics-temporal-card__eyebrow">{staticCopy.temporalCards.byDayOfWeekEyebrow}</p>
+            <h3 class="analytics-temporal-card__title">{dashboardModel.temporal.byDayOfWeek.title}</h3>
+            <p class="analytics-temporal-card__description">{dashboardModel.temporal.byDayOfWeek.description}</p>
+            <div class="chart-wrap chart-wrap--small mt-4">
+              <canvas id="chart-dow" aria-label="Pedidos por día de la semana"></canvas>
+            </div>
+          </div>
+
+          <div class="analytics-temporal-card">
+            <p class="analytics-temporal-card__eyebrow">{staticCopy.temporalCards.byHourEyebrow}</p>
+            <h3 class="analytics-temporal-card__title">{dashboardModel.temporal.byHour.title}</h3>
+            <p class="analytics-temporal-card__description">{dashboardModel.temporal.byHour.description}</p>
+            <div class="chart-wrap chart-wrap--small mt-4">
+              <canvas id="chart-hour" aria-label="Pedidos por hora del día"></canvas>
+            </div>
+          </div>
+        </div>
+      </AnalyticsPanel>
+    </div>
+  </section>
+</Layout>
+
+<script
+  id="analytics-data"
+  type="application/json"
+  set:html={JSON.stringify({
+    byDay: data.byDay,
+    topByQty: data.topByQty,
+    topByRevenue: data.topByRevenue,
+    topByEstimatedProfit: data.topByEstimatedProfit,
+    byDayOfWeek: data.byDayOfWeek,
+    byHour: data.byHour,
+    byStatus: labeledStatus,
+    byPaymentMethod: data.byPaymentMethod,
+  })}
+/>
+
+<style is:global>
+  .analytics-hero {
+    display: block;
+  }
+
+  .admin-chip--warning {
+    background: color-mix(in srgb, #D97706 10%, var(--color-surface-soft));
+    color: #B45309;
+    border: 1px solid color-mix(in srgb, #D97706 18%, var(--color-border));
+  }
+
+  .analytics-metric-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 1rem 1.125rem;
+    border-radius: 1.25rem;
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+  }
+
+  .analytics-metric-card--accent {
+    border-color: color-mix(in srgb, var(--color-accent) 30%, var(--color-border));
+    background: color-mix(in srgb, var(--color-accent) 6%, var(--color-surface-elevated));
+  }
+
+  .analytics-metric-card--warning {
+    border-color: color-mix(in srgb, #D97706 24%, var(--color-border));
+    background: color-mix(in srgb, #D97706 5%, var(--color-surface-elevated));
+  }
+
+  .analytics-metric-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface-soft));
+    color: var(--color-accent);
+  }
+
+  .analytics-metric-card__icon--warning {
+    background: color-mix(in srgb, #D97706 12%, var(--color-surface-soft));
+    color: #D97706;
+  }
+
+  .analytics-metric-card__label {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-text-subtle);
+  }
+
+  .analytics-metric-card__value {
+    font-size: 1.55rem;
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--color-text);
+  }
+
+  .analytics-metric-card__sub {
+    font-size: 0.76rem;
+    line-height: 1.45;
+    color: var(--color-text-subtle);
+  }
+
+  .analytics-story-card {
+    padding: 1rem 1.125rem;
+    border-radius: 1.25rem;
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-surface) 72%, transparent);
+  }
+
+  .analytics-story-card--accent {
+    border-color: color-mix(in srgb, var(--color-accent) 24%, var(--color-border));
+  }
+
+  .analytics-story-card--warning {
+    border-color: color-mix(in srgb, #D97706 24%, var(--color-border));
+    background: color-mix(in srgb, #D97706 5%, var(--color-surface));
+  }
+
+  .analytics-story-card__title {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-text-subtle);
+  }
+
+  .analytics-story-card__description {
+    margin-top: 0.5rem;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--color-text);
+  }
+
+  .analytics-panel {
+    border: 1px solid var(--color-border);
+    border-radius: 1.5rem;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--color-surface-elevated) 92%, transparent);
+  }
+
+  .analytics-panel--warning {
+    border-color: color-mix(in srgb, #D97706 22%, var(--color-border));
+    background: color-mix(in srgb, #D97706 4%, var(--color-surface-elevated));
+  }
+
+  .analytics-panel__header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.875rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-surface) 60%, transparent);
+  }
+
+  .analytics-panel__heading {
+    min-width: 0;
+  }
+
+  .analytics-panel__icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface-soft));
+    color: var(--color-accent);
+  }
+
+  .analytics-panel__icon-wrap--warning {
+    background: color-mix(in srgb, #D97706 12%, var(--color-surface-soft));
+    color: #D97706;
+  }
+
+  .analytics-panel__eyebrow {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+
+  .analytics-panel__eyebrow--warning {
+    color: #B45309;
+  }
+
+  .analytics-panel__title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.15rem;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--color-text);
+  }
+
+  .analytics-panel__description {
+    margin-top: 0.35rem;
+    font-size: 0.84rem;
+    line-height: 1.55;
+    color: var(--color-text-muted);
+  }
+
+  .analytics-panel__body {
+    padding: 1.25rem;
+  }
+
+  .analytics-alert {
+    padding: 0.9rem 1rem;
+    border-radius: 1rem;
+    border: 1px solid var(--color-border);
+    font-size: 0.84rem;
+    line-height: 1.55;
+  }
+
+  .analytics-alert--warning {
+    border-color: color-mix(in srgb, #D97706 28%, var(--color-border));
+    background: color-mix(in srgb, #D97706 7%, var(--color-surface-soft));
+    color: var(--color-text);
+  }
+
+  .analytics-mini-stat {
+    padding: 0.9rem 1rem;
+    border-radius: 1rem;
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-surface) 74%, transparent);
+  }
+
+  .analytics-mini-stat__label {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-text-subtle);
+  }
+
+  .analytics-mini-stat__value {
+    margin-top: 0.35rem;
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: var(--color-text);
+  }
+
+  .analytics-mini-stat__detail {
+    margin-top: 0.15rem;
+    font-size: 0.76rem;
+    color: var(--color-text-muted);
+  }
+
+  .analytics-breakdown-list {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .analytics-breakdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.8rem 0.9rem;
+    border-radius: 1rem;
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-surface) 76%, transparent);
+  }
+
+  .analytics-breakdown-item__label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  .analytics-breakdown-item__sub {
+    margin-top: 0.15rem;
+    font-size: 0.76rem;
+    color: var(--color-text-muted);
+  }
+
+  .analytics-breakdown-item__value {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--color-accent);
+  }
+
+  .analytics-breakdown-list--compact {
+    max-height: 18rem;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+  }
+
+  .analytics-breakdown-item--sm {
+    padding: 0.55rem 0.75rem;
+  }
+
+  .analytics-breakdown-item--sm .analytics-breakdown-item__label {
+    font-size: 0.78rem;
+  }
+
+  .analytics-breakdown-item--sm .analytics-breakdown-item__sub {
+    font-size: 0.68rem;
+  }
+
+  .analytics-breakdown-item--sm .analytics-breakdown-item__value {
+    font-size: 0.8rem;
+  }
+
+  .analytics-breakdown-item--total {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface));
+  }
+
+  .analytics-breakdown-item--total .analytics-breakdown-item__value {
+    color: var(--color-accent);
+    font-size: 0.88rem;
+  }
+
+  .analytics-inline-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .analytics-inline-list li {
+    padding: 0.4rem 0.65rem;
+    border-radius: 9999px;
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-surface) 76%, transparent);
+    font-size: 0.76rem;
+    color: var(--color-text-muted);
+  }
+
+  .analytics-warning-list {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0;
+    padding-left: 1.1rem;
+    color: var(--color-text);
+    font-size: 0.88rem;
+    line-height: 1.6;
+  }
+
+  .analytics-temporal-card {
+    padding: 1rem;
+    border-radius: 1.25rem;
+    border: 1px dashed color-mix(in srgb, #D97706 30%, var(--color-border));
+    background: color-mix(in srgb, var(--color-surface) 72%, transparent);
+  }
+
+  .analytics-temporal-card__eyebrow {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #B45309;
+  }
+
+  .analytics-temporal-card__title {
+    margin-top: 0.35rem;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--color-text);
+  }
+
+  .analytics-temporal-card__description {
+    margin-top: 0.35rem;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    color: var(--color-text-muted);
+  }
+
+  .analytics-count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5rem;
+    height: 1.5rem;
+    padding: 0 0.4rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: color-mix(in srgb, var(--color-accent) 14%, var(--color-surface-soft));
+    color: var(--color-accent);
+    border: 1px solid color-mix(in srgb, var(--color-accent) 22%, var(--color-border));
+  }
+
+  .analytics-count-badge--warning {
+    background: color-mix(in srgb, #D97706 14%, var(--color-surface-soft));
+    color: #D97706;
+    border-color: color-mix(in srgb, #D97706 22%, var(--color-border));
+  }
+
+  .chart-wrap {
+    position: relative;
+    width: 100%;
+    height: 260px;
+  }
+
+  .chart-wrap--tall {
+    height: 320px;
+  }
+
+  .chart-wrap--medium {
+    height: 280px;
+  }
+
+  .chart-wrap--small {
+    height: 220px;
+  }
+
+  .analytics-empty {
+    padding: 1.5rem 0;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--color-text-subtle);
+  }
+
+  /* ── Export widget ─────────────────────────────────────────────── */
+  .export-eyebrow {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+
+  .export-hint {
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+  }
+
+  .export-preset {
+    padding: 0.35rem 0.875rem;
+    border-radius: 9999px;
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+    color: var(--color-text-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+
+  .export-preset:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface-elevated));
+  }
+
+  .export-preset--active {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface-elevated));
+    color: var(--color-accent);
+    font-weight: 700;
+  }
+
+  .export-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .export-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-subtle);
+  }
+
+  .export-date-input {
+    padding: 0.4rem 0.75rem;
+    border-radius: 0.625rem;
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+    color: var(--color-text);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: border-color 0.18s;
+    color-scheme: light dark;
+  }
+
+  .export-date-input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+  }
+
+  /* Primary: apply filter */
+  .filter-submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-strong) 100%);
+    color: var(--color-text-on-accent);
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--color-accent) 24%, transparent);
+  }
+
+  .filter-submit:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 18px color-mix(in srgb, var(--color-accent-strong) 30%, transparent);
+  }
+
+  .filter-submit:active { transform: scale(0.98); }
+
+  /* Secondary: export Excel */
+  .export-submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    border-radius: 9999px;
+    border: 1.5px solid var(--color-border-strong);
+    background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .export-submit:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface-elevated));
+  }
+
+  .export-submit:active { transform: scale(0.98); }
+
+  /* Ghost: clear filter */
+  .clear-filter-link {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--color-text-subtle);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.18s;
+    padding: 0.25rem;
+  }
+
+  .clear-filter-link:hover { color: var(--color-danger); }
+
+  /* Period active badge */
+  .period-active-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    border: 1px solid color-mix(in srgb, var(--color-accent) 35%, var(--color-border));
+    background: color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated));
+    color: var(--color-accent);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  .period-active-chip__clear {
+    color: inherit;
+    opacity: 0.6;
+    font-size: 0.7rem;
+    text-decoration: none;
+    transition: opacity 0.15s;
+  }
+
+  .period-active-chip__clear:hover { opacity: 1; }
+
+  /* ── Light mode contrast fixes ─────────────────────────────────
+     --color-text-subtle (52% opacity) fails WCAG AA on the light
+     cream background (~3:1). Override only the analytics elements
+     that use it to bump contrast to ≥4.5:1.                       */
+  :root:not([data-theme='dark']) .analytics-metric-card__label,
+  :root:not([data-theme='dark']) .analytics-metric-card__sub,
+  :root:not([data-theme='dark']) .analytics-story-card__title,
+  :root:not([data-theme='dark']) .analytics-mini-stat__label,
+  :root:not([data-theme='dark']) .analytics-empty {
+    color: rgba(24, 50, 11, 0.72);
+  }
+
+  :root[data-theme='dark'] .admin-chip--warning,
+  :root[data-theme='dark'] .analytics-panel__eyebrow--warning,
+  :root[data-theme='dark'] .analytics-temporal-card__eyebrow {
+    color: #fbbf24;
+  }
+
+  :root[data-theme='dark'] .analytics-story-card__description,
+  :root[data-theme='dark'] .analytics-metric-card__value,
+  :root[data-theme='dark'] .analytics-panel__title,
+  :root[data-theme='dark'] .analytics-mini-stat__value,
+  :root[data-theme='dark'] .analytics-breakdown-item__label,
+  :root[data-theme='dark'] .analytics-temporal-card__title {
+    color: rgba(241, 243, 249, 0.96);
+  }
+
+  :root[data-theme='dark'] .analytics-story-card__title,
+  :root[data-theme='dark'] .analytics-metric-card__label,
+  :root[data-theme='dark'] .analytics-metric-card__sub,
+  :root[data-theme='dark'] .analytics-panel__description,
+  :root[data-theme='dark'] .analytics-mini-stat__detail,
+  :root[data-theme='dark'] .analytics-breakdown-item__sub,
+  :root[data-theme='dark'] .analytics-inline-list li,
+  :root[data-theme='dark'] .analytics-empty,
+  :root[data-theme='dark'] .analytics-temporal-card__description {
+    color: rgba(241, 243, 249, 0.66);
+  }
+</style>
+
+<script>
+  import { destroyAdminAnalyticsDashboard, initAdminAnalyticsDashboard } from '../../scripts/admin/admin-analytics-dashboard';
+
+  document.addEventListener('astro:before-swap', () => {
+    destroyAdminAnalyticsDashboard();
+  });
+
+  document.addEventListener('astro:page-load', () => {
+    initAdminAnalyticsDashboard();
+  });
+</script>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const fromInput  = document.getElementById('export-from') as HTMLInputElement | null;
+    const toInput    = document.getElementById('export-to')   as HTMLInputElement | null;
+    const exportBtn  = document.getElementById('export-btn')  as HTMLButtonElement | null;
+    const presetBtns = document.querySelectorAll<HTMLButtonElement>('[data-preset]');
+
+    if (!fromInput || !toInput) return;
+
+    // ── Highlight active preset based on current URL params ───────────
+    const urlFrom = new URLSearchParams(window.location.search).get('from');
+    const urlTo   = new URLSearchParams(window.location.search).get('to');
+
+    function toDateStr(d: Date): string {
+      return d.toISOString().slice(0, 10);
+    }
+
+    function getMondayOf(d: Date): Date {
+      const day  = d.getDay();
+      const diff = day === 0 ? -6 : 1 - day;
+      const monday = new Date(d);
+      monday.setDate(d.getDate() + diff);
+      monday.setHours(0, 0, 0, 0);
+      return monday;
+    }
+
+    function computePreset(preset: string): { from: string; to: string; label: string } | null {
+      const now = new Date();
+      let from: Date, to: Date, label: string;
+
+      switch (preset) {
+        case 'this-week': {
+          from  = getMondayOf(now);
+          to    = new Date(now); to.setHours(0, 0, 0, 0);
+          label = `semana-${toDateStr(from)}`;
+          break;
+        }
+        case 'last-week': {
+          const thisMonday = getMondayOf(now);
+          from  = new Date(thisMonday); from.setDate(thisMonday.getDate() - 7);
+          to    = new Date(thisMonday); to.setDate(thisMonday.getDate() - 1);
+          label = `semana-${toDateStr(from)}`;
+          break;
+        }
+        case 'this-month': {
+          from  = new Date(now.getFullYear(), now.getMonth(), 1);
+          to    = new Date(now); to.setHours(0, 0, 0, 0);
+          label = `mes-${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+          break;
+        }
+        case 'last-month': {
+          const lm = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+          from  = lm;
+          to    = new Date(now.getFullYear(), now.getMonth(), 0);
+          label = `mes-${lm.getFullYear()}-${String(lm.getMonth() + 1).padStart(2, '0')}`;
+          break;
+        }
+        default: return null;
+      }
+
+      return { from: toDateStr(from), to: toDateStr(to), label };
+    }
+
+    // Highlight preset that matches current URL filter
+    presetBtns.forEach(btn => {
+      const result = computePreset(btn.dataset.preset ?? '');
+      if (result && result.from === urlFrom && result.to === urlTo) {
+        btn.classList.add('export-preset--active');
+      }
+    });
+
+    // ── Preset click → fill inputs ────────────────────────────────────
+    presetBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const result = computePreset(btn.dataset.preset ?? '');
+        if (!result) return;
+
+        fromInput.value = result.from;
+        toInput.value   = result.to;
+
+        presetBtns.forEach(p => p.classList.remove('export-preset--active'));
+        btn.classList.add('export-preset--active');
+      });
+    });
+
+    // ── Export button → download Excel with current inputs ────────────
+    exportBtn?.addEventListener('click', () => {
+      const from = fromInput.value;
+      const to   = toInput.value;
+
+      if (!from || !to) {
+        fromInput.reportValidity();
+        return;
+      }
+
+      if (from > to) {
+        alert('"Desde" debe ser anterior a "Hasta"');
+        return;
+      }
+
+      const label = `${from}_${to}`;
+      window.location.href = `/admin/analytics-export?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&label=${encodeURIComponent(label)}`;
+    });
+  });
+</script>

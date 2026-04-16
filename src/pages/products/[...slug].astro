@@ -3,13 +3,11 @@ import Layout from "@layouts/Layout.astro";
 import { actions } from "astro:actions";
 import ProductSliceShow from "src/components/products/ProductSliceShow.astro";
 import ProductCard from "src/components/products/ProductCard.astro";
-import BreadcrumbTrail from "src/components/shared/BreadcrumbTrail.astro";
 export const prerender = false;
-
 
 const {slug}= Astro.params;
 
-const {data,error} = await Astro.callAction(actions.getProductBySlug,slug ?? " ") 
+const {data,error} = await Astro.callAction(actions.getProductBySlug,slug ?? " ")
 
 if (error) {
     console.error('ERROR: ',error)
@@ -39,55 +37,10 @@ const descriptionParts = productDescription
     .filter(Boolean);
 
 const leadDescription = descriptionParts[0] ?? productDescription;
-const supportingDescription = descriptionParts.slice(1).join(' ');
 const categoryName = 'categoryName' in product
     ? (product as { categoryName?: string }).categoryName
     : undefined;
 const categoryLabel = categoryName ?? 'Selección premium';
-const productContext = [product.title, product.description, categoryName]
-    .filter(Boolean)
-    .join(' ')
-    .toLowerCase();
-const isFoodProduct = /(guacamole|salsa|aderezo|dip|postre|charcut|picada|snack|comida|food)/.test(productContext);
-const hasExtendedDescription = descriptionParts.length > 1;
-
-const keyFacts = [
-    {
-        label: 'Categoría',
-        value: categoryLabel,
-    },
-    {
-        label: 'Presentaciones',
-        value: `${sizes.length} ${sizes.length === 1 ? 'tamaño disponible' : 'tamaños disponibles'}`,
-    },
-    {
-        label: 'Compra flexible',
-        value: 'Podés sumar hasta 5 unidades por pedido',
-    },
-];
-
-const foodCareNotes = [
-    'Mantenelo refrigerado hasta el momento de consumirlo para conservar mejor su textura.',
-    'Si lo recibís frío, evitá cortar la cadena de frío hasta servirlo.',
-    'Una vez abierto, priorizá consumirlo según las indicaciones del envase.',
-];
-
-const usageIdeas = /(charcut|embutido|chorizo)/.test(productContext)
-    ? [
-        'Funciona bien para tablas, picadas o sandwiches donde querés subir el nivel del producto principal.',
-        'Puede ser una buena opción para resolver una entrada o sumar una proteína lista para compartir.',
-      ]
-    : /(postre|galleta|dulce)/.test(productContext)
-        ? [
-            'Sirve para cerrar una comida o resolver una merienda con una porción práctica.',
-            'Las distintas presentaciones te ayudan a elegir mejor si es para consumo individual o para compartir.',
-          ]
-        : /(guacamole|salsa|aderezo|dip)/.test(productContext)
-            ? [
-                'Es una compra útil para acompañar snacks, picadas o sumar un extra a wraps, tacos y sandwiches.',
-                'Las presentaciones disponibles te permiten elegir mejor si querés resolver una ocasión puntual o una mesa para compartir.',
-              ]
-            : [];
 
 const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.productsByCategory || !categoryName
     ? []
@@ -97,11 +50,7 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
         .filter((candidate) => candidate.slug !== product.slug)
         .sort((a, b) => {
             const priceDifference = Math.abs(a.price - product.price) - Math.abs(b.price - product.price);
-
-            if (priceDifference !== 0) {
-                return priceDifference;
-            }
-
+            if (priceDifference !== 0) return priceDifference;
             return a.title.localeCompare(b.title, 'es');
         })
         .slice(0, 4)
@@ -112,371 +61,379 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
             image: candidate.image,
             slug: `/products/${candidate.slug}`,
         }));
-
-const productBreadcrumbs = [
-    { label: 'Inicio', href: '/' },
-    { label: 'Tienda', href: '/tienda' },
-    { label: categoryLabel, href: '/tienda' },
-    { label: product.title },
-];
 ---
 
 <Layout title={product.title} description={product.description}>
     <div class="theme-product-page mx-auto max-w-6xl px-4 py-6 sm:py-8 md:py-10">
-        <BreadcrumbTrail
-            items={productBreadcrumbs}
-            eyebrow="Tu recorrido"
-            summary="Estás viendo el detalle del producto. Desde acá podés volver a la tienda, revisar opciones relacionadas o seguir directo al checkout con esta configuración."
-        />
 
-        <!-- Main Product Card -->
-        <div class="product-detail-panel mt-5 overflow-hidden rounded-[1.75rem] md:rounded-3xl">
+        <!-- Breadcrumb minimal -->
+        <nav class="mb-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm" aria-label="Breadcrumb" style="color: var(--color-text-subtle);">
+            <a href="/" class="breadcrumb-link">Inicio</a>
+            <span aria-hidden="true">/</span>
+            <a href="/tienda" class="breadcrumb-link">Tienda</a>
+            <span aria-hidden="true">/</span>
+            <a href="/tienda" class="breadcrumb-link">{categoryLabel}</a>
+            <span aria-hidden="true">/</span>
+            <span class="font-semibold" style="color: var(--color-text);" aria-current="page">{product.title}</span>
+        </nav>
+
+        <!-- Hero Panel -->
+        <div class="product-hero overflow-hidden rounded-3xl">
             <div class="grid grid-cols-1 md:grid-cols-2">
-                
-                <!-- Product Image Section -->
-                <div class="product-detail-media relative flex min-h-[240px] items-center justify-center p-3 sm:min-h-[280px] md:min-h-auto md:p-6 lg:p-8">
-                    <div class="relative flex aspect-[1/1] w-full max-w-[420px] items-center justify-center overflow-hidden rounded-2xl shadow-lg">
-                        <ProductSliceShow images={images.map(i=>i.image)}/>
-                        <input type="hidden" name="" id="product-image"  value={images?.[0]?.image || ''}/>
-                    </div>
+
+                <!-- Image — full bleed -->
+                <div class="product-hero__media relative min-h-[300px] md:min-h-[540px]">
+                    <ProductSliceShow images={images.map(i=>i.image)}/>
+                    <input type="hidden" id="product-image" value={images?.[0]?.image || ''}/>
                 </div>
 
-                <!-- Product Details Section -->
-                <div class="flex flex-col gap-4 p-5 sm:p-6 md:gap-5 md:p-8 md:py-10">
-                    <div class="flex flex-wrap gap-2">
-                        <a href="/tienda" class="detail-link-pill inline-flex items-center rounded-full px-3 py-1 text-xs font-medium transition-colors duration-200">
-                            ← Volver a la tienda
-                        </a>
-                        <span class="inline-flex items-center rounded-full bg-guacamole-f/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-guacamole-b">
-                            {categoryLabel}
-                        </span>
-                        <span class="detail-context-chip inline-flex items-center rounded-full px-3 py-1 text-xs font-medium">
-                            Compra guiada desde este detalle
-                        </span>
+                <!-- Info -->
+                <div class="flex flex-col justify-center gap-5 p-7 sm:p-9 md:p-10 lg:p-12">
+
+                    <!-- Badges -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <a href="/tienda" class="back-pill">← Tienda</a>
+                        <span class="category-badge">{categoryLabel}</span>
                     </div>
 
-                    <!-- Title -->
-                    <div class="space-y-2">
-                        <h1 class="text-2xl font-bold leading-snug tracking-tight text-neutral-900 sm:text-[2rem] md:text-3xl">
-                            {product.title}
-                        </h1>
-                        <input type="hidden" name="product-name" id="product-name" value={product.title}/>
-                        <p class="text-sm leading-relaxed text-neutral-600 sm:text-base md:max-w-[52ch]">
-                            {leadDescription}
-                        </p>
+                    <!-- Title & Description -->
+                    <div class="space-y-3">
+                        <h1 class="product-title">{product.title}</h1>
+                        <input type="hidden" id="product-name" value={product.title}/>
+                        <p class="product-description">{leadDescription}</p>
                     </div>
 
                     <!-- Price -->
-                    <div class="space-y-1">
-                        <div class="flex flex-wrap items-baseline gap-2">
-                            <span class="text-2xl font-bold text-neutral-900 sm:text-3xl">${product.price}</span>
-                            <span class="text-sm text-neutral-500">precio base</span>
-                        </div>
-                        <input type="hidden" name="product-price" id="product-price" value={product.price}/>
+                    <div class="price-row">
+                        <span class="price-amount">${product.price.toLocaleString('es-AR')}</span>
+                        <span class="price-label">precio base</span>
+                        <input type="hidden" id="product-price" value={product.price}/>
                     </div>
-
-                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                        {keyFacts.map((fact) => (
-                            <div class="detail-fact-card rounded-2xl px-4 py-3 shadow-sm">
-                                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">{fact.label}</p>
-                                <p class="mt-1 text-sm font-semibold text-neutral-800 leading-snug">{fact.value}</p>
-                            </div>
-                        ))}
-                    </div>
-
-                    {hasExtendedDescription && (
-                        <div class="detail-note-card rounded-2xl px-4 py-4">
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-guacamole-b/80">Más contexto</p>
-                            <p class="mt-2 text-sm leading-relaxed text-neutral-700 md:max-w-[58ch] md:text-base">
-                                {supportingDescription}
-                            </p>
-                        </div>
-                    )}
 
                     <hr class="detail-divider"/>
 
-                    <!-- Quantity Selector -->
-                    <div class="space-y-2">
-                        <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Cantidad</h3>
-                        <div class="flex flex-wrap items-center gap-3">
-                            <button id="decrement" class="qty-btn-group" aria-label="Disminuir cantidad" disabled>−</button>
-                            <input id="quantity-input" class="qty-input" type="number" value="1" readonly/>
-                            <button id="increment" class="qty-btn-group" aria-label="Aumentar cantidad">+</button>
-                            <span class="text-xs text-gray-400 sm:ml-2">(máx. 5 unidades)</span>
-                        </div>
-                    </div>
-
-                    <!-- Size Options -->
-                    <div class="space-y-2">
-                        <h3 id="h3-g" class="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                            Tamaño:
-                        </h3>
-                        <p class="text-sm text-neutral-500 leading-relaxed">
-                            Elegí la presentación antes de agregarlo al carrito para llevar exactamente la versión que necesitás.
-                        </p>
-                        <ul class="flex flex-wrap gap-2.5">
-                            {
-                                sizes.map((t) => (
-                                    <li class="size-chip" data-size-option="true">
-                                        {t.trim()}
-                                    </li>
-                                ))
-                            }
+                    <!-- Size -->
+                    <div class="space-y-2.5">
+                        <p class="field-label">Tamaño</p>
+                        <ul class="flex flex-wrap gap-2">
+                            {sizes.map((t) => (
+                                <li class="size-chip" data-size-option="true">{t.trim()}</li>
+                            ))}
                         </ul>
                     </div>
 
-                    <!-- Add to Cart Button -->
-                    <div class="pt-1 sm:pt-2">
+                    <!-- Quantity -->
+                    <div class="space-y-2.5">
+                        <p class="field-label">Cantidad <span class="qty-max-hint">(máx. 5)</span></p>
+                        <div class="flex items-center gap-3">
+                            <button id="decrement" class="qty-btn-group" aria-label="Disminuir cantidad" disabled>−</button>
+                            <input id="quantity-input" class="qty-input" type="number" value="1" readonly/>
+                            <button id="increment" class="qty-btn-group" aria-label="Aumentar cantidad">+</button>
+                        </div>
+                    </div>
+
+                    <!-- CTA -->
+                    <div class="space-y-2 pt-1">
                         <button id="add-card" class="add-to-cart-btn" disabled aria-disabled="true">
                             <span id="add-card-label">Elegí un tamaño</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 8a2 2 0 100-4 2 2 0 000 4z" />
                             </svg>
                         </button>
+                        <p id="cart-feedback-note" class="theme-text-muted min-h-[1.25rem] text-xs font-medium" aria-live="polite"></p>
                     </div>
-
-                    <p id="cart-feedback-note" class="theme-text-muted min-h-[1.25rem] text-xs font-medium" aria-live="polite"></p>
-
-                    <p class="text-xs leading-relaxed text-neutral-500 sm:text-sm sm:max-w-[54ch]">
-                        Elegí un tamaño para habilitar el checkout rápido con esta configuración.
-                    </p>
-
 
                 </div>
             </div>
         </div>
 
-        <section class="mt-5 grid gap-3 sm:mt-6 sm:gap-4 md:grid-cols-2">
-            <article class="detail-glass-card rounded-3xl p-4 sm:p-5">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-guacamole-b/80">Resumen útil</p>
-                <h2 class="mt-2 text-xl font-bold text-neutral-900">Lo importante antes de comprar</h2>
-                <div class="mt-4 space-y-3">
-                    <div class="detail-soft-card rounded-2xl px-4 py-3">
-                        <p class="text-sm font-semibold text-neutral-800">Qué estás eligiendo</p>
-                        <p class="mt-1 text-sm text-neutral-600 leading-relaxed">{leadDescription}</p>
-                    </div>
-
-                    <div class="detail-soft-card rounded-2xl px-4 py-3">
-                        <p class="text-sm font-semibold text-neutral-800">Presentaciones disponibles</p>
-                        <p class="mt-1 text-sm text-neutral-600 leading-relaxed">
-                            Este producto se ofrece en {sizes.length} {sizes.length === 1 ? 'presentación' : 'presentaciones'} para que puedas elegir con más precisión según tu pedido.
-                        </p>
-                    </div>
-
-                    <div class="detail-soft-card rounded-2xl px-4 py-3">
-                        <p class="text-sm font-semibold text-neutral-800">Cómo se compra</p>
-                        <p class="mt-1 text-sm text-neutral-600 leading-relaxed">
-                            Primero seleccionás tamaño, después cantidad y recién ahí lo llevás al checkout con la configuración ya resuelta.
-                        </p>
-                    </div>
-                </div>
-            </article>
-
-            <div class="grid gap-3 sm:gap-4">
-                {usageIdeas.length > 0 && (
-                    <article class="detail-glass-card rounded-3xl p-4 sm:p-5">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-guacamole-b/80">Ideas de uso</p>
-                        <h2 class="mt-2 text-xl font-bold text-neutral-900">Cómo puede encajar en tu mesa</h2>
-                        <ul class="mt-4 space-y-3">
-                            {usageIdeas.map((idea) => (
-                                <li class="detail-soft-card rounded-2xl px-4 py-3 text-sm text-neutral-600 leading-relaxed">
-                                    {idea}
-                                </li>
-                            ))}
-                        </ul>
-                    </article>
-                )}
-
-                {isFoodProduct && (
-                    <article class="detail-glass-card rounded-3xl p-4 sm:p-5">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-guacamole-b/80">Conservación</p>
-                        <h2 class="mt-2 text-xl font-bold text-neutral-900">Recomendaciones generales</h2>
-                        <ul class="mt-4 space-y-3">
-                            {foodCareNotes.map((note) => (
-                                <li class="detail-soft-card rounded-2xl px-4 py-3 text-sm text-neutral-600 leading-relaxed">
-                                    {note}
-                                </li>
-                            ))}
-                        </ul>
-                    </article>
-                )}
-            </div>
-        </section>
-
+        <!-- Related Products -->
         {relatedProducts.length > 0 && (
-            <section class="detail-glass-card mt-8 rounded-3xl p-4 sm:p-5 md:mt-10 md:p-6">
-                <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-                    <div class="max-w-2xl">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-guacamole-b/80">Productos relacionados</p>
-                        <h2 class="mt-2 text-xl md:text-2xl font-bold text-neutral-900">Seguí explorando dentro de {categoryLabel}</h2>
-                        <p class="mt-2 text-sm leading-relaxed text-neutral-600 md:max-w-[58ch] md:text-base">
-                            Seleccionamos opciones de la misma categoría y priorizamos las que tienen un rango de precio parecido para que la recomendación sea coherente con este producto.
-                        </p>
+            <section class="mt-12 md:mt-16">
+                <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <p class="eyebrow-label">También en {categoryLabel}</p>
+                        <h2 class="section-title">Seguí explorando</h2>
                     </div>
-
-                    <a href="/tienda" class="detail-link-pill inline-flex min-h-11 items-center justify-center rounded-full px-5 py-3 text-sm font-semibold transition-colors duration-200">
-                        Ver catálogo completo
-                    </a>
+                    <a href="/tienda" class="back-pill self-start sm:self-auto">Ver catálogo completo</a>
                 </div>
-
-                <div class="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    {relatedProducts.map((relatedProduct) => (
-                        <ProductCard {...relatedProduct} />
+                <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    {relatedProducts.map((rp) => (
+                        <ProductCard {...rp} />
                     ))}
                 </div>
             </section>
         )}
-        
+
         <input id="product-id" type="hidden" value={product.id}/>
     </div>
 </Layout>
 
 <style>
-    /* Size selection - preserves original logic */
-    .selected-size {
-        @apply scale-105 text-white shadow-md;
-        border-color: var(--color-accent-strong);
-        background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-strong) 100%);
+    /* ── Design tokens ── */
+    .theme-product-page {
+        color: var(--color-text);
     }
 
-    .size-chip {
-        @apply cursor-pointer rounded-full border-2 px-4 py-2 font-semibold transition-all duration-200;
-        border-color: color-mix(in srgb, var(--color-accent) 28%, var(--color-border) 72%);
-        background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+    /* ── Breadcrumb ── */
+    .breadcrumb-link {
+        color: var(--color-text-subtle);
+        transition: color 0.2s;
+    }
+    .breadcrumb-link:hover {
         color: var(--color-accent);
     }
 
+    /* ── Hero ── */
+    .product-hero {
+        border: 1px solid var(--color-border);
+        background: color-mix(in srgb, var(--color-surface) 96%, transparent);
+        box-shadow: 0 20px 48px var(--color-shadow-strong);
+        backdrop-filter: blur(20px);
+    }
+
+    /* Image — fills left column completely */
+    .product-hero__media {
+        overflow: hidden;
+        background:
+            radial-gradient(circle at top right, color-mix(in srgb, var(--color-accent) 16%, transparent) 0%, transparent 60%),
+            linear-gradient(160deg, color-mix(in srgb, var(--color-surface-soft) 80%, var(--color-accent) 20%) 0%, color-mix(in srgb, var(--color-surface-elevated) 96%, transparent) 100%);
+    }
+
+    .product-hero__media :global(.swiper) {
+        position: absolute;
+        inset: 0;
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    .product-hero__media :global(.swiper-slide) {
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    .product-hero__media :global(.swiper-slide img) {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* ── Badges ── */
+    .back-pill {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 9999px;
+        border: 1px solid var(--color-border);
+        background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+        color: var(--color-text-muted);
+        padding: 0.25rem 0.875rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    .back-pill:hover {
+        border-color: var(--color-border-strong);
+        background: color-mix(in srgb, var(--color-surface-soft) 84%, var(--color-accent) 16%);
+        color: var(--color-accent);
+    }
+
+    .category-badge {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 9999px;
+        background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+        color: var(--color-accent);
+        padding: 0.25rem 0.875rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+    }
+
+    /* ── Typography ── */
+    .product-title {
+        font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+        font-weight: 800;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+        color: var(--color-text);
+    }
+
+    .product-description {
+        font-size: 0.9375rem;
+        line-height: 1.7;
+        color: var(--color-text-muted);
+        max-width: 52ch;
+    }
+
+    .price-row {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+    }
+
+    .price-amount {
+        font-size: clamp(1.75rem, 4vw, 2.5rem);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: var(--color-text);
+    }
+
+    .price-label {
+        font-size: 0.8125rem;
+        color: var(--color-text-subtle);
+    }
+
+    .field-label {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-text-muted);
+    }
+
+    .qty-max-hint {
+        font-weight: 400;
+        font-size: 0.6875rem;
+        letter-spacing: 0.05em;
+        text-transform: none;
+        color: var(--color-text-subtle);
+    }
+
+    .detail-divider {
+        border-color: var(--color-border);
+    }
+
+    /* ── Size chips ── */
+    .size-chip {
+        cursor: pointer;
+        border-radius: 9999px;
+        border: 2px solid color-mix(in srgb, var(--color-accent) 28%, var(--color-border) 72%);
+        background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+        color: var(--color-accent);
+        padding: 0.375rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
     .size-chip:hover {
         border-color: var(--color-accent);
         background: color-mix(in srgb, var(--color-surface-soft) 84%, var(--color-accent) 16%);
     }
-
-    /* Quantity buttons - pill style */
-    .qty-btn-group {
-        @apply flex h-10 w-10 items-center justify-center rounded-full border-2 text-xl font-bold transition-all duration-200 active:scale-95 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:bg-transparent;
-        border-color: var(--color-accent);
-        color: var(--color-accent);
+    .selected-size {
+        transform: scale(1.05);
+        color: white;
+        box-shadow: 0 4px 14px color-mix(in srgb, var(--color-accent) 30%, transparent);
+        border-color: var(--color-accent-strong);
+        background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-strong) 100%);
     }
 
+    /* ── Quantity ── */
+    .qty-btn-group {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 9999px;
+        border: 2px solid var(--color-accent);
+        color: var(--color-accent);
+        font-size: 1.25rem;
+        font-weight: 700;
+        transition: all 0.2s;
+        cursor: pointer;
+        background: transparent;
+    }
     .qty-btn-group:hover {
         transform: scale(1.05);
         background: var(--color-accent);
         color: var(--color-text-on-accent);
     }
-
     .qty-btn-group:disabled {
         border-color: var(--color-border);
         color: var(--color-text-subtle);
+        cursor: not-allowed;
+    }
+    .qty-btn-group:disabled:hover {
+        transform: none;
+        background: transparent;
+        color: var(--color-text-subtle);
+    }
+    .qty-btn-group:active:not(:disabled) {
+        transform: scale(0.95);
     }
 
     .qty-input {
-        @apply h-10 w-16 rounded-full border-2 text-center font-semibold focus:outline-none;
-        border-color: var(--color-border);
+        width: 4rem;
+        height: 2.5rem;
+        border-radius: 9999px;
+        border: 2px solid var(--color-border);
         background: var(--color-surface-elevated);
         color: var(--color-text);
+        text-align: center;
+        font-weight: 600;
+        font-size: 1rem;
     }
-
     .qty-input:focus {
+        outline: none;
         border-color: var(--color-accent);
     }
-
-    /* Remove spinners from number input */
     input[type="number"]::-webkit-outer-spin-button,
     input[type="number"]::-webkit-inner-spin-button {
         -webkit-appearance: none;
         margin: 0;
     }
 
-    /* Add to cart button - matches ProductCard styling */
+    /* ── CTA ── */
     .add-to-cart-btn {
-        @apply flex w-full items-center justify-center gap-2 rounded-full py-4 text-base font-bold uppercase tracking-wider text-white transition-all duration-300 active:scale-[0.98] disabled:cursor-not-allowed disabled:shadow-none disabled:hover:scale-100;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border-radius: 9999px;
+        padding: 1rem 1.5rem;
+        font-size: 0.9375rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
         background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-strong) 100%);
         color: var(--color-text-on-accent);
         box-shadow: 0 10px 24px color-mix(in srgb, var(--color-accent) 28%, transparent);
+        transition: all 0.3s;
+        cursor: pointer;
+        border: none;
     }
-
-    .add-to-cart-btn:hover {
+    .add-to-cart-btn:hover:not(:disabled) {
         transform: scale(1.02);
         background: linear-gradient(135deg, var(--color-accent-strong) 0%, var(--color-accent) 100%);
         box-shadow: 0 14px 30px color-mix(in srgb, var(--color-accent-strong) 34%, transparent);
     }
-
+    .add-to-cart-btn:active:not(:disabled) {
+        transform: scale(0.98);
+    }
     .add-to-cart-btn:disabled {
         background: var(--color-surface-soft-strong);
         color: var(--color-text-subtle);
+        box-shadow: none;
+        cursor: not-allowed;
     }
 
-    .theme-product-page {
+    /* ── Related Products ── */
+    .eyebrow-label {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: color-mix(in srgb, var(--color-accent) 80%, var(--color-text) 20%);
+    }
+
+    .section-title {
+        font-size: clamp(1.375rem, 3vw, 1.75rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
         color: var(--color-text);
-    }
-
-    .theme-product-page .text-neutral-900,
-    .theme-product-page .text-neutral-800,
-    .theme-product-page .text-gray-700,
-    .theme-product-page .text-guacamole-icons {
-        color: var(--color-text);
-    }
-
-    .theme-product-page .text-neutral-700,
-    .theme-product-page .text-neutral-600,
-    .theme-product-page .text-neutral-500,
-    .theme-product-page .text-gray-500,
-    .theme-product-page .text-gray-400 {
-        color: var(--color-text-muted);
-    }
-
-    .theme-product-page .text-guacamole-a,
-    .theme-product-page .text-guacamole-b {
-        color: var(--color-accent);
-    }
-
-    .product-detail-panel,
-    .detail-glass-card {
-        border: 1px solid var(--color-border);
-        background: color-mix(in srgb, var(--color-surface) 96%, transparent);
-        box-shadow: 0 18px 36px var(--color-shadow-strong);
-        backdrop-filter: blur(18px);
-    }
-
-    .product-detail-media {
-        background:
-            radial-gradient(circle at top right, color-mix(in srgb, var(--color-accent) 18%, transparent) 0%, transparent 58%),
-            linear-gradient(160deg, color-mix(in srgb, var(--color-surface-soft) 82%, var(--color-accent) 18%) 0%, color-mix(in srgb, var(--color-surface-elevated) 96%, transparent) 100%);
-    }
-
-    .detail-link-pill,
-    .detail-context-chip,
-    .detail-fact-card,
-    .detail-soft-card {
-        border: 1px solid var(--color-border);
-        background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
-    }
-
-    .detail-link-pill {
-        color: var(--color-text-muted);
-    }
-
-    .detail-link-pill:hover {
-        border-color: var(--color-border-strong);
-        background: color-mix(in srgb, var(--color-surface-soft) 84%, var(--color-accent) 16%);
-        color: var(--color-accent);
-    }
-
-    .detail-context-chip {
-        color: var(--color-text-muted);
-    }
-
-    .detail-fact-card {
-        box-shadow: 0 10px 24px var(--color-shadow-soft);
-    }
-
-    .detail-note-card {
-        border: 1px solid color-mix(in srgb, var(--color-accent) 20%, var(--color-border) 80%);
-        background: color-mix(in srgb, var(--color-surface-soft) 78%, var(--color-accent) 22%);
-    }
-
-    .detail-divider {
-        border-color: var(--color-border);
+        margin-top: 0.25rem;
     }
 </style>
 
@@ -541,14 +498,14 @@ const productBreadcrumbs = [
         };
 
         syncQuantityButtons();
-        
+
         // Increment - PRESERVED max=5 logic
         incrementButton.addEventListener('click',()=>{
             quantity = Math.min(quantity+1,5);
             quantityInput.value= quantity.toString();
             syncQuantityButtons();
         });
-        
+
         // Decrement - PRESERVED min=1 logic
         decrementButton.addEventListener('click',()=>{
             quantity = Math.max(quantity-1,1);

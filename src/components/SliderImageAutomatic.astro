@@ -68,7 +68,7 @@ const showControls = images.length > 1;
 
   <div class="slider-container" data-slider-root>
     <div class="slider-wrapper">
-      <div class="slider-track" id="sliderTrack">
+      <div class="slider-track" data-slider-track>
         {images.map((image, index) => (
           <div class="slide" data-index={index}>
              {image.href
@@ -83,19 +83,19 @@ const showControls = images.length > 1;
         ))}
       </div>
 
-      {showControls && <button class="slider-btn prev" id="prevBtn" aria-label="Imagen anterior">
+      {showControls && <button class="slider-btn prev" data-slider-prev aria-label="Imagen anterior">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="15 18 9 12 15 6"></polyline>
         </svg>
       </button>}
 
-      {showControls && <button class="slider-btn next" id="nextBtn" aria-label="Siguiente imagen">
+      {showControls && <button class="slider-btn next" data-slider-next aria-label="Siguiente imagen">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="9 18 15 12 9 6"></polyline>
         </svg>
       </button>}
 
-      {showControls && <div class="slider-dots" id="sliderDots">
+      {showControls && <div class="slider-dots">
         {images.map((image, index) => (
           <button 
             class={`dot ${index === 0 ? 'active' : ''}`} 
@@ -338,85 +338,131 @@ const showControls = images.length > 1;
 </style>
 
 <script>
-  const sliderTrack = document.getElementById('sliderTrack');
-  const prevBtn = document.getElementById('prevBtn');
-  const nextBtn = document.getElementById('nextBtn');
-  const dots = document.querySelectorAll('.dot');
-  const slides = document.querySelectorAll('.slide');
-  
-  let currentIndex = 0;
-  let autoPlayInterval: ReturnType<typeof setInterval> | null = null;
-  const slideCount = slides.length;
-  
-  function goToSlide(index: number) {
-    if (index < 0) {
-      currentIndex = slideCount - 1;
-    } else if (index >= slideCount) {
-      currentIndex = 0;
-    } else {
-      currentIndex = index;
-    }
-    
-    if (sliderTrack) {
+  type SliderCleanup = () => void;
+
+  type SliderWindow = Window & {
+    __sliderImageAutomaticBound?: boolean;
+    __sliderImageAutomaticCleanups?: Set<SliderCleanup>;
+  };
+
+  const sliderWindow = window as SliderWindow;
+  sliderWindow.__sliderImageAutomaticCleanups ??= new Set();
+
+  function cleanupSliders() {
+    sliderWindow.__sliderImageAutomaticCleanups?.forEach(cleanup => cleanup());
+    sliderWindow.__sliderImageAutomaticCleanups?.clear();
+  }
+
+  function initSlider(root: HTMLElement) {
+    if (root.dataset.sliderInitialized === 'true') return;
+
+    const sliderTrack = root.querySelector<HTMLElement>('[data-slider-track]');
+    const prevBtn = root.querySelector<HTMLButtonElement>('[data-slider-prev]');
+    const nextBtn = root.querySelector<HTMLButtonElement>('[data-slider-next]');
+    const dots = Array.from(root.querySelectorAll<HTMLButtonElement>('.dot'));
+    const slides = Array.from(root.querySelectorAll<HTMLElement>('.slide'));
+    const slideCount = slides.length;
+
+    if (!sliderTrack || slideCount === 0) return;
+
+    root.dataset.sliderInitialized = 'true';
+
+    let currentIndex = 0;
+    let autoPlayInterval: ReturnType<typeof setInterval> | null = null;
+
+    function goToSlide(index: number) {
+      if (index < 0) {
+        currentIndex = slideCount - 1;
+      } else if (index >= slideCount) {
+        currentIndex = 0;
+      } else {
+        currentIndex = index;
+      }
+
       sliderTrack.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+      dots.forEach((dot, dotIndex) => {
+        dot.classList.toggle('active', dotIndex === currentIndex);
+      });
     }
-    
-    dots.forEach((dot, i) => {
-      dot.classList.toggle('active', i === currentIndex);
-    });
-  }
-  
-  function nextSlide() {
-    goToSlide(currentIndex + 1);
-  }
-  
-  function prevSlide() {
-    goToSlide(currentIndex - 1);
-  }
-  
-  function startAutoPlay() {
-    if (slideCount <= 1) return;
-    if (autoPlayInterval) clearInterval(autoPlayInterval);
-    autoPlayInterval = setInterval(nextSlide, 3000);
-  }
-  
-  function stopAutoPlay() {
-    if (autoPlayInterval) {
+
+    function nextSlide() {
+      goToSlide(currentIndex + 1);
+    }
+
+    function prevSlide() {
+      goToSlide(currentIndex - 1);
+    }
+
+    function startAutoPlay() {
+      if (slideCount <= 1) return;
+      if (autoPlayInterval) clearInterval(autoPlayInterval);
+      autoPlayInterval = setInterval(nextSlide, 3000);
+    }
+
+    function stopAutoPlay() {
+      if (!autoPlayInterval) return;
       clearInterval(autoPlayInterval);
       autoPlayInterval = null;
     }
-  }
-  
-  // Event listeners
-  if (prevBtn) {
-    prevBtn.addEventListener('click', () => {
+
+    const handlePrevClick = () => {
       prevSlide();
       startAutoPlay();
-    });
-  }
-  
-  if (nextBtn) {
-    nextBtn.addEventListener('click', () => {
+    };
+
+    const handleNextClick = () => {
       nextSlide();
       startAutoPlay();
+    };
+
+    prevBtn?.addEventListener('click', handlePrevClick);
+    nextBtn?.addEventListener('click', handleNextClick);
+
+    const dotHandlers = dots.map((dot, index) => {
+      const handler = () => {
+        goToSlide(index);
+        startAutoPlay();
+      };
+
+      dot.addEventListener('click', handler);
+      return { dot, handler };
     });
-  }
-  
-  dots.forEach((dot, index) => {
-    dot.addEventListener('click', () => {
-      goToSlide(index);
+
+    root.addEventListener('mouseenter', stopAutoPlay);
+    root.addEventListener('mouseleave', startAutoPlay);
+
+    if (slideCount > 1) {
       startAutoPlay();
+    }
+
+    sliderWindow.__sliderImageAutomaticCleanups?.add(() => {
+      stopAutoPlay();
+      prevBtn?.removeEventListener('click', handlePrevClick);
+      nextBtn?.removeEventListener('click', handleNextClick);
+
+      dotHandlers.forEach(({ dot, handler }) => {
+        dot.removeEventListener('click', handler);
+      });
+
+      root.removeEventListener('mouseenter', stopAutoPlay);
+      root.removeEventListener('mouseleave', startAutoPlay);
+      delete root.dataset.sliderInitialized;
     });
-  });
-  
-  // Pausar auto-play cuando el mouse esta sobre el slider
-  const sliderContainer = document.querySelector('[data-slider-root]');
-  if (sliderContainer) {
-    sliderContainer.addEventListener('mouseenter', stopAutoPlay);
-    sliderContainer.addEventListener('mouseleave', startAutoPlay);
   }
-  
-  if (slideCount > 1) {
-    startAutoPlay();
+
+  function initSliders() {
+    cleanupSliders();
+
+    document
+      .querySelectorAll<HTMLElement>('[data-slider-root]')
+      .forEach(initSlider);
   }
+
+  if (!sliderWindow.__sliderImageAutomaticBound) {
+    document.addEventListener('astro:page-load', initSliders);
+    sliderWindow.__sliderImageAutomaticBound = true;
+  }
+
+  initSliders();
 </script>

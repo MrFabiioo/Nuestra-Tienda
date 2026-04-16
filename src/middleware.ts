@@ -43,6 +43,14 @@ const PROTECTED_ADMIN_ACTIONS = new Set([
   'getCategories',
   'createUpdateCategory',
   'deleteCategory',
+  'getOrders',
+  'reviewPayment',
+  'deleteOrder',
+  'getAnalytics',
+  'uploadPaymentQr',
+  'deletePaymentQr',
+  'savePaymentMethodConfig',
+  'deletePaymentMethodConfig',
 ]);
 
 /**

@@ -1,0 +1,34 @@
+---
+interface Props {
+  label: string;
+  value: string;
+  sub: string;
+  icon: string;
+  tone?: 'default' | 'accent' | 'warning';
+}
+
+const { label, value, sub, icon, tone = 'default' } = Astro.props;
+---
+
+<div class:list={[
+  'analytics-metric-card',
+  {
+    'analytics-metric-card--accent': tone === 'accent',
+    'analytics-metric-card--warning': tone === 'warning',
+  },
+]}>
+  <div class:list={[
+    'analytics-metric-card__icon',
+    {
+      'analytics-metric-card__icon--warning': tone === 'warning',
+    },
+  ]}>
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-4 w-4" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d={icon} />
+    </svg>
+  </div>
+
+  <p class="analytics-metric-card__label">{label}</p>
+  <p class="analytics-metric-card__value">{value}</p>
+  <p class="analytics-metric-card__sub">{sub}</p>
+</div>

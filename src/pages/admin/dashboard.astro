@@ -5,6 +5,7 @@ import { actions } from "astro:actions";
 import Pagination from "@components/shared/Pagination.astro";
 import { Formatter } from "@utils/formatter";
 import ProductImage from "@components/products/ProductImage.astro";
+import { getPaymentSettings } from "../../actions/settings/get-payment-settings.action";
 
 export const prerender = false;
 
@@ -23,6 +24,23 @@ if (error) {
 }
 
 const { products, totalPages } = data;
+
+const { data: qrData } = await Astro.callAction(actions.getPaymentQr, undefined);
+const currentQr = qrData?.qr ?? null;
+
+const { data: paymentSettingsData } = await Astro.callAction(getPaymentSettings, undefined);
+const currentBancolombia = paymentSettingsData?.bancolombia ?? null;
+const currentNequi = paymentSettingsData?.nequi ?? null;
+
+const sensitiveAdminAllowlist = new Set(
+    [import.meta.env.ADMIN_ALLOWED_EMAILS, import.meta.env.ORDER_NOTIFICATIONS_ADMIN_EMAIL]
+        .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+        .flatMap((value) => value.split(','))
+        .map((value) => value.trim().toLowerCase())
+        .filter(Boolean)
+);
+
+const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.trim().toLowerCase());
 ---
 
 <Layout title={`Dashboard`}>
@@ -60,6 +78,17 @@ const { products, totalPages } = data;
 
                     <a href="/admin/categories" id="btn-ver-categorias" class="premium-action-secondary">
                         Ver categorías
+                    </a>
+
+                    <a href="/admin/orders" id="btn-ver-pedidos" class="premium-action-secondary">
+                        Ver pedidos
+                    </a>
+
+                    <a href="/admin/analytics" id="btn-analytics" class="premium-action-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                        </svg>
+                        Analytics
                     </a>
                 </div>
             </div>
@@ -201,10 +230,267 @@ const { products, totalPages } = data;
 
         <Pagination pageParam={pageParam} totalPages={totalPages} />
     </section>
+
+    <!-- ── Configuración de pagos: QR ──────────────────────────────── -->
+    <section class="px-2 pb-10 sm:px-4 lg:px-6">
+        <div class="premium-subtle-panel px-5 py-6 sm:px-7">
+            <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                    <span class="premium-chip">Admin · configuración</span>
+                    <h2 class="mt-4 text-2xl font-black tracking-tight theme-text-primary sm:text-3xl">QR de pago</h2>
+                    <p class="theme-text-muted mt-2 max-w-xl text-sm leading-relaxed">
+                        Imagen QR que se muestra al cliente cuando elige pagar por QR. Se recomienda un QR de Nequi, Bancolombia o pasarela similar. Máx. 4MB · JPG, PNG o WEBP.
+                    </p>
+                </div>
+            </div>
+
+            {!canManageSensitiveSettings && (
+                <div class="mt-6 rounded-2xl border border-amber-400/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-900 dark:text-amber-100">
+                    Tu sesión está autenticada, pero no entra en la whitelist de acciones sensibles. Podés ver la configuración actual, pero los cambios server-side requieren que tu email esté en <code>ADMIN_ALLOWED_EMAILS</code> o <code>ORDER_NOTIFICATIONS_ADMIN_EMAIL</code>.
+                </div>
+            )}
+
+            <div class="mt-6 grid gap-6 lg:grid-cols-2">
+                <!-- Preview actual -->
+                <div class="premium-panel rounded-2xl p-5">
+                    <p class="text-xs font-bold uppercase tracking-[0.18em] text-[var(--color-heading-sub)]">Estado actual</p>
+
+                    {currentQr ? (
+                        <div class="mt-4 space-y-4">
+                            <img
+                                src={currentQr.url}
+                                alt="QR de pago actual"
+                                class="mx-auto max-h-64 w-auto rounded-xl border border-[var(--color-border)] object-contain"
+                            />
+                            <p class="text-center text-xs text-[var(--color-text-subtle)]">
+                                Subido: {new Date(currentQr.uploadedAt).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' })}
+                            </p>
+                            <button
+                                id="btn-delete-qr"
+                                type="button"
+                                class="premium-action-secondary w-full justify-center text-[var(--color-danger)]"
+                                style="border-color: var(--color-danger-border);"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                </svg>
+                                Eliminar QR
+                            </button>
+                        </div>
+                    ) : (
+                        <div class="mt-4 flex flex-col items-center gap-3 rounded-xl border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface-soft)] px-4 py-10 text-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-10 w-10 text-[var(--color-border-strong)]" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75z" />
+                            </svg>
+                            <p class="text-sm text-[var(--color-text-subtle)]">Sin QR configurado. Los clientes no podrán usar esta opción de pago.</p>
+                        </div>
+                    )}
+                </div>
+
+                <!-- Upload nuevo QR -->
+                <div class="premium-panel rounded-2xl p-5">
+                    <p class="text-xs font-bold uppercase tracking-[0.18em] text-[var(--color-heading-sub)]">{currentQr ? 'Reemplazar QR' : 'Subir QR'}</p>
+                    <p class="mt-1 text-xs text-[var(--color-text-subtle)]">Si ya hay uno, se elimina automáticamente de Cloudinary al reemplazarlo.</p>
+
+                    <form id="qr-upload-form" class="mt-4 space-y-4" enctype="multipart/form-data">
+                        <div>
+                            <label for="qrFile" class="mb-2 block text-sm font-semibold text-[var(--color-heading-sub)]">Imagen del QR</label>
+                            <input
+                                id="qrFile"
+                                name="qrFile"
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp"
+                                class="premium-field file:mr-4 file:rounded-full file:border-0 file:bg-guacamole-b file:px-4 file:py-2 file:font-semibold file:text-white"
+                                required
+                            />
+                        </div>
+                        <p id="qr-feedback" class="min-h-[1.25rem] text-sm text-[var(--color-text-muted)]" aria-live="polite"></p>
+                        <button id="qr-submit" type="submit" class="premium-action-primary w-full justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                            </svg>
+                            Subir imagen
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="px-2 pb-10 sm:px-4 lg:px-6">
+        <div class="premium-subtle-panel px-5 py-6 sm:px-7">
+            <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                    <span class="premium-chip">Admin · pagos</span>
+                    <h2 class="mt-4 text-2xl font-black tracking-tight theme-text-primary sm:text-3xl">Pagos manuales</h2>
+                    <p class="theme-text-muted mt-2 max-w-2xl text-sm leading-relaxed">
+                        Bancolombia y Nequi salen del hardcode y pasan a SiteSettings, igual que el QR. Si borrás un método, desaparece del flujo público de pagos.
+                    </p>
+                </div>
+            </div>
+
+            {!canManageSensitiveSettings && (
+                <div class="mt-6 rounded-2xl border border-amber-400/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-900 dark:text-amber-100">
+                    Tu sesión está autenticada, pero no entra en la whitelist de acciones sensibles. Podés ver Bancolombia y Nequi, pero para editarlos tu email tiene que estar en <code>ADMIN_ALLOWED_EMAILS</code> o <code>ORDER_NOTIFICATIONS_ADMIN_EMAIL</code>.
+                </div>
+            )}
+
+            <div class="mt-6 grid gap-6 xl:grid-cols-2">
+                <article class="premium-panel rounded-2xl p-5">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-[0.18em] text-[var(--color-heading-sub)]">Bancolombia</p>
+                            <h3 class="mt-2 text-xl font-black text-[var(--color-heading)]">Datos de cuenta</h3>
+                        </div>
+                        <span class:list={[
+                            'rounded-full border px-3 py-1 text-xs font-semibold',
+                            currentBancolombia
+                                ? 'border-guacamole-b/40 bg-guacamole-b/10 text-guacamole-b'
+                                : 'border-[var(--color-border)] text-[var(--color-text-subtle)]',
+                        ]}>
+                            {currentBancolombia ? 'Activo' : 'Sin configurar'}
+                        </span>
+                    </div>
+
+                    {currentBancolombia ? (
+                        <dl class="mt-4 space-y-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 text-sm">
+                            <div>
+                                <dt class="text-[var(--color-text-subtle)]">Tipo de cuenta</dt>
+                                <dd class="font-semibold text-[var(--color-heading-sub)]">{currentBancolombia.accountType}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-[var(--color-text-subtle)]">Número</dt>
+                                <dd class="font-semibold text-[var(--color-heading-sub)]">{currentBancolombia.accountNumber}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-[var(--color-text-subtle)]">Titular</dt>
+                                <dd class="font-semibold text-[var(--color-heading-sub)]">{currentBancolombia.holderName}</dd>
+                            </div>
+                            {currentBancolombia.note && (
+                                <div>
+                                    <dt class="text-[var(--color-text-subtle)]">Nota</dt>
+                                    <dd class="font-semibold text-[var(--color-heading-sub)]">{currentBancolombia.note}</dd>
+                                </div>
+                            )}
+                        </dl>
+                    ) : (
+                        <div class="mt-4 rounded-2xl border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface-soft)] px-4 py-6 text-sm text-[var(--color-text-subtle)]">
+                            No hay datos cargados para Bancolombia. Si lo dejás así, el cliente no verá este método en <code>/pagos/[token]</code>.
+                        </div>
+                    )}
+
+                    <form class="payment-config-form mt-5 space-y-4" data-method="bancolombia">
+                        <div>
+                            <label for="bancolombia-account-type" class="mb-2 block text-sm font-semibold text-[var(--color-heading-sub)]">Tipo de cuenta</label>
+                            <input id="bancolombia-account-type" name="accountType" class="premium-field" value={currentBancolombia?.accountType ?? ''} placeholder="Cuenta de ahorros" required disabled={!canManageSensitiveSettings} />
+                        </div>
+                        <div>
+                            <label for="bancolombia-account-number" class="mb-2 block text-sm font-semibold text-[var(--color-heading-sub)]">Número de cuenta</label>
+                            <input id="bancolombia-account-number" name="accountNumber" class="premium-field" value={currentBancolombia?.accountNumber ?? ''} placeholder="331-85984-045" required disabled={!canManageSensitiveSettings} />
+                        </div>
+                        <div>
+                            <label for="bancolombia-holder-name" class="mb-2 block text-sm font-semibold text-[var(--color-heading-sub)]">Titular</label>
+                            <input id="bancolombia-holder-name" name="holderName" class="premium-field" value={currentBancolombia?.holderName ?? ''} placeholder="Guacamole Shop" required disabled={!canManageSensitiveSettings} />
+                        </div>
+                        <div>
+                            <label for="bancolombia-note" class="mb-2 block text-sm font-semibold text-[var(--color-heading-sub)]">Nota opcional</label>
+                            <textarea id="bancolombia-note" name="note" class="premium-field min-h-24" placeholder="Usá el monto exacto del pedido." disabled={!canManageSensitiveSettings}>{currentBancolombia?.note ?? ''}</textarea>
+                        </div>
+                        {!canManageSensitiveSettings && (
+                            <p class="text-xs text-[var(--color-text-muted)]">
+                                Solo usuarios en la whitelist sensible pueden editar esta configuración.
+                            </p>
+                        )}
+                        <p class="payment-config-feedback min-h-[1.25rem] text-sm text-[var(--color-text-muted)]" aria-live="polite"></p>
+                        <div class="flex flex-col gap-3 sm:flex-row">
+                            <button type="submit" class="premium-action-primary w-full justify-center sm:w-auto" disabled={!canManageSensitiveSettings}>Guardar Bancolombia</button>
+                            <button type="button" class="payment-config-delete premium-action-secondary w-full justify-center text-[var(--color-danger)] sm:w-auto" data-method="bancolombia" disabled={!canManageSensitiveSettings || !currentBancolombia}>
+                                Eliminar método
+                            </button>
+                        </div>
+                    </form>
+                </article>
+
+                <article class="premium-panel rounded-2xl p-5">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-[0.18em] text-[var(--color-heading-sub)]">Nequi</p>
+                            <h3 class="mt-2 text-xl font-black text-[var(--color-heading)]">Pago por celular</h3>
+                        </div>
+                        <span class:list={[
+                            'rounded-full border px-3 py-1 text-xs font-semibold',
+                            currentNequi
+                                ? 'border-guacamole-b/40 bg-guacamole-b/10 text-guacamole-b'
+                                : 'border-[var(--color-border)] text-[var(--color-text-subtle)]',
+                        ]}>
+                            {currentNequi ? 'Activo' : 'Sin configurar'}
+                        </span>
+                    </div>
+
+                    {currentNequi ? (
+                        <dl class="mt-4 space-y-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 text-sm">
+                            <div>
+                                <dt class="text-[var(--color-text-subtle)]">Celular</dt>
+                                <dd class="font-semibold text-[var(--color-heading-sub)]">{currentNequi.phoneNumber}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-[var(--color-text-subtle)]">Titular</dt>
+                                <dd class="font-semibold text-[var(--color-heading-sub)]">{currentNequi.holderName}</dd>
+                            </div>
+                            {currentNequi.note && (
+                                <div>
+                                    <dt class="text-[var(--color-text-subtle)]">Nota</dt>
+                                    <dd class="font-semibold text-[var(--color-heading-sub)]">{currentNequi.note}</dd>
+                                </div>
+                            )}
+                        </dl>
+                    ) : (
+                        <div class="mt-4 rounded-2xl border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface-soft)] px-4 py-6 text-sm text-[var(--color-text-subtle)]">
+                            No hay datos cargados para Nequi. Si lo dejás así, el cliente no verá este método en <code>/pagos/[token]</code>.
+                        </div>
+                    )}
+
+                    <form class="payment-config-form mt-5 space-y-4" data-method="nequi">
+                        <div>
+                            <label for="nequi-phone-number" class="mb-2 block text-sm font-semibold text-[var(--color-heading-sub)]">Celular</label>
+                            <input id="nequi-phone-number" name="phoneNumber" class="premium-field" value={currentNequi?.phoneNumber ?? ''} placeholder="350 201 8487" required disabled={!canManageSensitiveSettings} />
+                        </div>
+                        <div>
+                            <label for="nequi-holder-name" class="mb-2 block text-sm font-semibold text-[var(--color-heading-sub)]">Titular</label>
+                            <input id="nequi-holder-name" name="holderName" class="premium-field" value={currentNequi?.holderName ?? ''} placeholder="Guacamole Shop" required disabled={!canManageSensitiveSettings} />
+                        </div>
+                        <div>
+                            <label for="nequi-note" class="mb-2 block text-sm font-semibold text-[var(--color-heading-sub)]">Nota opcional</label>
+                            <textarea id="nequi-note" name="note" class="premium-field min-h-24" placeholder="Ideal para pago rápido desde la app." disabled={!canManageSensitiveSettings}>{currentNequi?.note ?? ''}</textarea>
+                        </div>
+                        {!canManageSensitiveSettings && (
+                            <p class="text-xs text-[var(--color-text-muted)]">
+                                Solo usuarios en la whitelist sensible pueden editar esta configuración.
+                            </p>
+                        )}
+                        <p class="payment-config-feedback min-h-[1.25rem] text-sm text-[var(--color-text-muted)]" aria-live="polite"></p>
+                        <div class="flex flex-col gap-3 sm:flex-row">
+                            <button type="submit" class="premium-action-primary w-full justify-center sm:w-auto" disabled={!canManageSensitiveSettings}>Guardar Nequi</button>
+                            <button type="button" class="payment-config-delete premium-action-secondary w-full justify-center text-[var(--color-danger)] sm:w-auto" data-method="nequi" disabled={!canManageSensitiveSettings || !currentNequi}>
+                                Eliminar método
+                            </button>
+                        </div>
+                    </form>
+                </article>
+            </div>
+        </div>
+    </section>
 </Layout>
 
 <script>
+    // @ts-nocheck
     import { actions } from "astro:actions";
+
+    const adminActions = actions as typeof actions & {
+        savePaymentMethodConfig: (...args: any[]) => Promise<any>;
+        deletePaymentMethodConfig: (...args: any[]) => Promise<any>;
+    };
 
     document.addEventListener("astro:page-load", () => {
         // ── Toggle featured ───────────────────────────────────────────
@@ -218,6 +504,122 @@ const { products, totalPages } = data;
                 button.disabled = true;
 
                 const { error } = await actions.toggleFeatured({ id, featured: !currentFeatured });
+
+                if (error) {
+                    alert(`Error: ${error.message}`);
+                    button.disabled = false;
+                    return;
+                }
+
+                window.location.reload();
+            });
+        });
+
+        // ── QR upload ──────────────────────────────────────────────────
+        const qrForm     = document.getElementById('qr-upload-form') as HTMLFormElement | null;
+        const qrSubmit   = document.getElementById('qr-submit') as HTMLButtonElement | null;
+        const qrFeedback = document.getElementById('qr-feedback') as HTMLParagraphElement | null;
+
+        qrForm?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!qrSubmit || !qrFeedback) return;
+
+            qrSubmit.disabled = true;
+            qrFeedback.textContent = 'Subiendo imagen…';
+            qrFeedback.className = 'min-h-[1.25rem] text-sm text-[var(--color-text-muted)]';
+
+            const { error } = await actions.uploadPaymentQr(new FormData(qrForm));
+
+            if (error) {
+                qrFeedback.textContent = error.message;
+                qrFeedback.className = 'min-h-[1.25rem] text-sm text-[var(--color-danger)]';
+                qrSubmit.disabled = false;
+                return;
+            }
+
+            window.location.reload();
+        });
+
+        // ── QR delete ──────────────────────────────────────────────────
+        const deleteQrBtn = document.getElementById('btn-delete-qr') as HTMLButtonElement | null;
+
+        deleteQrBtn?.addEventListener('click', async () => {
+            if (!confirm('¿Eliminar el QR de pago? Los clientes no podrán usar esa opción hasta que subas uno nuevo.')) return;
+            deleteQrBtn.disabled = true;
+
+            const { error } = await actions.deletePaymentQr();
+
+            if (error) {
+                alert(`Error: ${error.message}`);
+                deleteQrBtn.disabled = false;
+                return;
+            }
+
+            window.location.reload();
+        });
+
+        document.querySelectorAll('.payment-config-form').forEach((node) => {
+            const form = node as HTMLFormElement;
+            const method = form.dataset.method as 'bancolombia' | 'nequi' | undefined;
+            const feedback = form.querySelector('.payment-config-feedback') as HTMLParagraphElement | null;
+            const submit = form.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                if (!method || !feedback || !submit) return;
+
+                submit.disabled = true;
+                feedback.textContent = 'Guardando configuración...';
+                feedback.className = 'payment-config-feedback min-h-[1.25rem] text-sm text-[var(--color-text-muted)]';
+
+                const formData = new FormData(form);
+                const payload = method === 'bancolombia'
+                    ? {
+                        method,
+                        data: {
+                            accountType: String(formData.get('accountType') ?? ''),
+                            accountNumber: String(formData.get('accountNumber') ?? ''),
+                            holderName: String(formData.get('holderName') ?? ''),
+                            note: String(formData.get('note') ?? ''),
+                        },
+                    }
+                    : {
+                        method,
+                        data: {
+                            phoneNumber: String(formData.get('phoneNumber') ?? ''),
+                            holderName: String(formData.get('holderName') ?? ''),
+                            note: String(formData.get('note') ?? ''),
+                        },
+                    };
+
+                const { error } = await adminActions.savePaymentMethodConfig(payload);
+
+                if (error) {
+                    feedback.textContent = error.message;
+                    feedback.className = 'payment-config-feedback min-h-[1.25rem] text-sm text-[var(--color-danger)]';
+                    submit.disabled = false;
+                    return;
+                }
+
+                window.location.reload();
+            });
+        });
+
+        document.querySelectorAll('.payment-config-delete').forEach((node) => {
+            const button = node as HTMLButtonElement;
+
+            button.addEventListener('click', async () => {
+                const method = button.dataset.method as 'bancolombia' | 'nequi' | undefined;
+                if (!method) return;
+
+                if (!confirm(`¿Eliminar ${method}? Va a desaparecer del flujo público de pagos hasta volver a configurarlo.`)) {
+                    return;
+                }
+
+                button.disabled = true;
+
+                const { error } = await adminActions.deletePaymentMethodConfig(method);
 
                 if (error) {
                     alert(`Error: ${error.message}`);

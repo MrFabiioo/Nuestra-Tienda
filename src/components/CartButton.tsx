@@ -18,7 +18,11 @@ type InlineFeedback = {
   message: string;
 };
 
-export default function CartButton() {
+type CartButtonProps = {
+  pendingOrderUrl?: string | null;
+};
+
+export default function CartButton({ pendingOrderUrl = null }: CartButtonProps) {
   const $cartItems = useStore(cartItems);
   const $totalQty = useStore(totalQuantity);
   const $totalPriceValue = useStore(totalPrice);
@@ -26,19 +30,23 @@ export default function CartButton() {
   const [feedback, setFeedback] = useState<InlineFeedback | null>(null);
   const cartRef = useRef<HTMLDivElement>(null);
   const feedbackTimeoutRef = useRef<number | null>(null);
+  const hasPendingOrder = Boolean(pendingOrderUrl);
 
   // Close cart on route change and page refresh
   useEffect(() => {
     const closeCart = () => setIsOpen(false);
+    const handlePageLoad = () => {
+      closeCart();
+    };
     
     // Close on initial page load (component mounts)
     closeCart();
     
     // Listen for Astro's navigation events
-    document.addEventListener('astro:page-load', closeCart);
+    document.addEventListener('astro:page-load', handlePageLoad);
     
     return () => {
-      document.removeEventListener('astro:page-load', closeCart);
+      document.removeEventListener('astro:page-load', handlePageLoad);
     };
   }, []);
 
@@ -175,6 +183,10 @@ export default function CartButton() {
   const formatPrice = (price: number) =>
     `$${price.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+  const cartAriaLabel = hasPendingOrder
+    ? 'Abrir carrito. Tenés un pago pendiente para retomar.'
+    : 'Abrir carrito';
+
   const tax = $totalPriceValue * 0.15;
   const grandTotal = $totalPriceValue + tax;
 
@@ -183,10 +195,24 @@ export default function CartButton() {
       {/* Trigger Button */}
       <button
         onClick={toggleCart}
+        aria-label={cartAriaLabel}
         aria-expanded={isOpen}
-        class="relative flex h-10 w-10 touch-manipulation items-center justify-center rounded-full text-sm transition-all active:translate-y-1 md:text-xl sm:h-11 sm:w-11"
+        title={hasPendingOrder ? 'Tenés un pago pendiente' : undefined}
+        class={`relative flex h-10 w-10 touch-manipulation items-center justify-center rounded-full text-sm transition-all active:translate-y-1 md:text-xl sm:h-11 sm:w-11 ${hasPendingOrder ? 'ring-2 ring-guacamole-b/30' : ''}`}
       >
         <Cart />
+        {hasPendingOrder && (
+          <>
+            <span
+              aria-hidden="true"
+              class="absolute -left-0.5 -top-0.5 h-3.5 w-3.5 rounded-full border-2 border-white bg-guacamole-b shadow-sm"
+            />
+            <span class="pointer-events-none absolute left-1/2 top-full mt-1 hidden -translate-x-1/2 whitespace-nowrap rounded-full bg-guacamole-b px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-sm sm:inline-flex">
+              Pago pendiente
+            </span>
+            <span class="sr-only">Tenés un pago pendiente. Abrí el carrito para retomar el pedido.</span>
+          </>
+        )}
         {$cartItems.length > 0 && (
           <span
             aria-hidden="true"
@@ -237,6 +263,22 @@ export default function CartButton() {
             </button>
           </div>
 
+          {/* Pending order banner */}
+          {pendingOrderUrl && (
+            <div class="shrink-0 border-b px-3.5 py-3 sm:px-5" style={{ borderColor: 'var(--color-border)', background: 'color-mix(in srgb, var(--color-accent) 8%, var(--color-surface))' }}>
+              <div class="min-w-0">
+                <p class="text-xs font-black uppercase tracking-[0.15em]" style={{ color: 'var(--color-accent)' }}>Pedido pendiente de pago</p>
+                <p class="theme-text-muted mt-0.5 text-xs leading-snug">Todavía tenés un pedido esperando el comprobante.</p>
+                <a
+                  href={pendingOrderUrl}
+                  class="mt-1.5 inline-flex items-center gap-1 text-xs font-bold text-guacamole-b hover:text-guacamole-a hover:underline"
+                >
+                  Ver mi pedido →
+                </a>
+              </div>
+            </div>
+          )}
+
           {/* Items - Scrollable */}
           <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain">
             {feedback && (
@@ -270,13 +312,13 @@ export default function CartButton() {
             ) : (
               <div class="divide-y" style={{ borderColor: 'var(--color-border)' }}>
                 {$cartItems.map((product: CartItem) => (
-                  <div class="group flex gap-2.5 p-3 transition-colors sm:gap-3 sm:p-4" style={{ borderColor: 'var(--color-border)' }}>
+                  <div class="group flex gap-2 px-3 py-2.5 transition-colors sm:gap-3 sm:p-4" style={{ borderColor: 'var(--color-border)' }}>
                     {/* Image */}
                     <div class="shrink-0">
                       <img
                         src={product.image}
                         alt={product.name}
-                        class="h-14 w-14 rounded-lg border-2 border-guacamole-b/20 object-cover shadow-sm sm:h-16 sm:w-16 sm:rounded-xl"
+                        class="h-12 w-12 rounded-lg border-2 border-guacamole-b/20 object-cover shadow-sm sm:h-16 sm:w-16 sm:rounded-xl"
                       />
                     </div>
 
@@ -327,7 +369,7 @@ export default function CartButton() {
           {$cartItems.length > 0 && (
             <div class="shrink-0 border-t" style={{ borderColor: 'var(--color-border)', background: 'color-mix(in srgb, var(--color-surface) 96%, transparent)' }}>
               {/* Price Breakdown */}
-              <div class="space-y-2 px-3.5 pb-2 pt-3.5 sm:px-5 sm:pt-4">
+              <div class="space-y-1.5 px-3.5 pb-2 pt-3 sm:px-5 sm:pt-4 sm:space-y-2">
                 <div class="theme-text-muted flex justify-between items-center text-sm">
                   <span class="font-medium">Subtotal</span>
                   <span class="theme-text-primary font-semibold">{formatPrice($totalPriceValue)}</span>
@@ -342,8 +384,8 @@ export default function CartButton() {
                 </div>
               </div>
 
-              {/* Trust Badges */}
-              <div class="theme-soft-surface mx-3.5 mb-3 space-y-1.5 rounded-xl p-3 sm:mx-5">
+              {/* Trust Badges — hidden on mobile to preserve item list space */}
+              <div class="hidden sm:block theme-soft-surface mx-3.5 mb-3 space-y-1.5 rounded-xl p-3 sm:mx-5">
                 <div class="theme-text-muted flex items-start gap-2 text-xs">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-guacamole-b shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
@@ -359,7 +401,7 @@ export default function CartButton() {
               </div>
 
               {/* CTA Primary */}
-                <div class="space-y-2 px-3.5 pb-3.5 sm:px-5 sm:pb-3">
+                <div class="space-y-2 px-3.5 pb-3 sm:px-5 sm:pb-3">
                   <a
                     href="/checkout"
                   class="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-guacamole-b px-4 py-3 text-center text-sm font-black uppercase tracking-wider text-white shadow-[0_4px_12px_rgba(86,130,3,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-guacamole-a hover:shadow-[0_6px_20px_rgba(62,97,2,0.35)] sm:px-6"
@@ -379,7 +421,7 @@ export default function CartButton() {
               </div>
 
               {/* Secure Badge */}
-              <div class="px-3.5 pb-4 sm:px-5">
+              <div class="px-3.5 pb-3 sm:px-5 sm:pb-4">
                 <p class="theme-text-subtle flex items-center justify-center gap-1 text-center text-[11px] sm:text-xs">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
