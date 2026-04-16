@@ -3,6 +3,7 @@ import { db, Order, Payment, PaymentProof, sql } from 'astro:db';
 import { randomUUID } from 'node:crypto';
 import { z } from 'astro:schema';
 import { ImageUpload } from '@utils/image-upload';
+import { serializeDbDate } from '@utils/db-date';
 import { dispatchOrderNotifications } from '../../services/notifications/dispatcher';
 import { ORDER_STATUS, PAYMENT_METHODS, PAYMENT_PROOF_MAX_BYTES, PAYMENT_PROOF_MIME_TYPES, PAYMENT_STATUS } from '../../services/orders/constants';
 import { clearPendingOrderPointerForToken } from '../../services/orders/pending-order';
@@ -44,24 +45,25 @@ export const uploadPaymentProof = defineAction({
     });
 
     const now = new Date();
+    const nowSql = serializeDbDate(now);
 
     await db.run(sql`
       insert into ${PaymentProof} (
         id, paymentId, assetUrl, assetPublicId, originalFilename, mimeType, sizeBytes, uploadedAt
       ) values (
-        ${randomUUID()}, ${publicOrder.payment.id}, ${uploaded.secureUrl}, ${uploaded.publicId}, ${uploaded.originalFilename}, ${uploaded.mimeType}, ${uploaded.bytes}, ${now}
+        ${randomUUID()}, ${publicOrder.payment.id}, ${uploaded.secureUrl}, ${uploaded.publicId}, ${uploaded.originalFilename}, ${uploaded.mimeType}, ${uploaded.bytes}, ${nowSql}
       )
     `);
 
     await db.run(sql`
       update ${Payment}
-      set method = ${paymentMethod}, status = ${PAYMENT_STATUS.underReview}, submittedAt = ${now}, rejectionReason = ${null}, updatedAt = ${now}
+      set method = ${paymentMethod}, status = ${PAYMENT_STATUS.underReview}, submittedAt = ${nowSql}, rejectionReason = ${null}, updatedAt = ${nowSql}
       where id = ${publicOrder.payment.id}
     `);
 
     await db.run(sql`
       update ${Order}
-      set status = ${ORDER_STATUS.underReview}, updatedAt = ${now}
+      set status = ${ORDER_STATUS.underReview}, updatedAt = ${nowSql}
       where id = ${publicOrder.id}
     `);
 

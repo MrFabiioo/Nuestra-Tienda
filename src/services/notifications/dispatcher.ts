@@ -1,4 +1,5 @@
 import { db, NotificationLog, sql } from 'astro:db';
+import { serializeDbDate } from '@utils/db-date';
 import { randomUUID } from 'node:crypto';
 import type { PublicOrder } from '../orders/repository';
 import { NOTIFICATION_CHANNEL, NOTIFICATION_STATUS } from '../orders/constants';
@@ -309,12 +310,13 @@ function buildDrafts(event: NotificationEvent, order: PublicOrder): Notification
 async function createLog(orderId: string, draft: NotificationDraft) {
   const id = randomUUID();
   const now = new Date();
+  const nowSql = serializeDbDate(now);
 
   await db.run(sql`
     insert into ${NotificationLog} (
       id, orderId, channel, template, recipient, provider, status, attempts, createdAt, updatedAt
     ) values (
-      ${id}, ${orderId}, ${draft.channel}, ${draft.template}, ${draft.recipient}, ${draft.provider}, ${NOTIFICATION_STATUS.pending}, ${0}, ${now}, ${now}
+      ${id}, ${orderId}, ${draft.channel}, ${draft.template}, ${draft.recipient}, ${draft.provider}, ${NOTIFICATION_STATUS.pending}, ${0}, ${nowSql}, ${nowSql}
     )
   `);
 
@@ -323,15 +325,16 @@ async function createLog(orderId: string, draft: NotificationDraft) {
 
 async function markLogResult(logId: string, result: { ok: boolean; error?: string }) {
   const now = new Date();
+  const nowSql = serializeDbDate(now);
 
   await db.run(sql`
     update ${NotificationLog}
     set
       status = ${result.ok ? NOTIFICATION_STATUS.sent : NOTIFICATION_STATUS.failed},
       attempts = ${1},
-      sentAt = ${result.ok ? now : null},
+      sentAt = ${result.ok ? nowSql : null},
       lastError = ${result.ok ? null : result.error ?? 'Unknown error'},
-      updatedAt = ${now}
+      updatedAt = ${nowSql}
     where id = ${logId}
   `);
 }

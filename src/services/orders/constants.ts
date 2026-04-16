@@ -71,6 +71,23 @@ export function formatOrderStatus(status: string) {
   }
 }
 
+export function formatPaymentStatus(status: string) {
+  switch (status) {
+    case PAYMENT_STATUS.pending:
+      return 'Pendiente';
+    case PAYMENT_STATUS.proofUploaded:
+      return 'Comprobante cargado';
+    case PAYMENT_STATUS.underReview:
+      return 'En revisión';
+    case PAYMENT_STATUS.approved:
+      return 'Aprobado';
+    case PAYMENT_STATUS.rejected:
+      return 'Rechazado';
+    default:
+      return status;
+  }
+}
+
 export function formatPaymentMethod(method: string) {
   switch (method) {
     case PAYMENT_METHODS.bancolombia:

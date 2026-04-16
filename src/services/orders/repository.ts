@@ -3,6 +3,8 @@ import { ActionError } from 'astro:actions';
 import { db, desc, eq, inArray, Order, OrderItem, Payment, PaymentProof, Product, ProductImage, sql } from 'astro:db';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import type { CartItem } from '@interfaces/cart-item';
+import { serializeDbDate } from '@utils/db-date';
+import { mapAdminOrderSummary, type AdminOrderSummary } from './admin-order-summary.mapper';
 import { ORDER_STATUS, ORDER_TAX_RATE, PAYMENT_METHODS, PAYMENT_STATUS, roundMoney } from './constants';
 
 export type CartOrderLine = {
@@ -51,19 +53,6 @@ export type PublicOrder = {
     sizeBytes: number;
     uploadedAt: Date;
   } | null;
-};
-
-export type AdminOrderSummary = {
-  id: string;
-  customerName: string;
-  customerEmail: string;
-  customerPhone: string;
-  total: number;
-  status: string;
-  createdAt: Date;
-  paymentStatus: string;
-  paymentMethod: string;
-  proofUploadedAt: Date | null;
 };
 
 export function generatePublicToken() {
@@ -251,7 +240,7 @@ export async function listAdminOrders(status?: string): Promise<AdminOrderSummar
     order by o.createdAt desc;
   `);
 
-  return result.rows as unknown as AdminOrderSummary[];
+  return result.rows.map((row) => mapAdminOrderSummary(row as Record<string, unknown>));
 }
 
 export async function createPersistentOrder(input: {
@@ -265,6 +254,7 @@ export async function createPersistentOrder(input: {
   items: CartOrderLine[];
 }) {
   const now = new Date();
+  const nowSql = serializeDbDate(now);
   const orderId = randomUUID();
   const paymentId = randomUUID();
   const publicToken = generatePublicToken();
@@ -275,7 +265,7 @@ export async function createPersistentOrder(input: {
     insert into ${Order} (
       id, publicTokenHash, customerName, customerEmail, customerPhone, deliveryMethod, address, city, notes, subtotal, tax, total, status, createdAt, updatedAt
     ) values (
-      ${orderId}, ${publicTokenHash}, ${input.customerName}, ${input.customerEmail}, ${input.customerPhone}, ${input.deliveryMethod}, ${input.address}, ${input.city}, ${input.notes?.trim() || null}, ${totals.subtotal}, ${totals.tax}, ${totals.total}, ${ORDER_STATUS.pendingPayment}, ${now}, ${now}
+      ${orderId}, ${publicTokenHash}, ${input.customerName}, ${input.customerEmail}, ${input.customerPhone}, ${input.deliveryMethod}, ${input.address}, ${input.city}, ${input.notes?.trim() || null}, ${totals.subtotal}, ${totals.tax}, ${totals.total}, ${ORDER_STATUS.pendingPayment}, ${nowSql}, ${nowSql}
     )
   `);
 
@@ -293,7 +283,7 @@ export async function createPersistentOrder(input: {
     insert into ${Payment} (
       id, orderId, method, amount, status, createdAt, updatedAt
     ) values (
-      ${paymentId}, ${orderId}, ${PAYMENT_METHODS.bancolombia}, ${totals.total}, ${PAYMENT_STATUS.pending}, ${now}, ${now}
+      ${paymentId}, ${orderId}, ${PAYMENT_METHODS.bancolombia}, ${totals.total}, ${PAYMENT_STATUS.pending}, ${nowSql}, ${nowSql}
     )
   `);
 

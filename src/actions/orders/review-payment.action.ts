@@ -1,6 +1,7 @@
 import { ActionError, defineAction } from 'astro:actions';
 import { db, Order, Payment, sql } from 'astro:db';
 import { z } from 'astro:schema';
+import { serializeDbDate } from '@utils/db-date';
 import { requireSensitiveAdminAccess } from '../../firebase/guards';
 import { dispatchOrderNotifications } from '../../services/notifications/dispatcher';
 import { ORDER_STATUS, PAYMENT_STATUS } from '../../services/orders/constants';
@@ -39,12 +40,13 @@ export const reviewPayment = defineAction({
     }
 
     const now = new Date();
+    const nowSql = serializeDbDate(now);
     const orderStatus = decision === 'approved' ? ORDER_STATUS.approved : ORDER_STATUS.rejected;
     const paymentStatus = decision === 'approved' ? PAYMENT_STATUS.approved : PAYMENT_STATUS.rejected;
 
     await db.run(sql`
       update ${Order}
-      set status = ${orderStatus}, updatedAt = ${now}
+      set status = ${orderStatus}, updatedAt = ${nowSql}
       where id = ${orderId}
     `);
 
@@ -52,10 +54,10 @@ export const reviewPayment = defineAction({
       update ${Payment}
       set
         status = ${paymentStatus},
-        reviewedAt = ${now},
+        reviewedAt = ${nowSql},
         reviewerUid = ${user.uid},
         rejectionReason = ${decision === 'rejected' ? rejectionReason?.trim() ?? null : null},
-        updatedAt = ${now}
+        updatedAt = ${nowSql}
       where id = ${detail.payment.id}
     `);
 

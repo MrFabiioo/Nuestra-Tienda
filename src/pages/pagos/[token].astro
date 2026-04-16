@@ -4,7 +4,7 @@ import BreadcrumbTrail from '../../components/shared/BreadcrumbTrail.astro';
 import { actions } from 'astro:actions';
 import { Formatter } from '@utils/formatter';
 import { getPaymentSettings } from '../../actions/settings/get-payment-settings.action';
-import { formatOrderStatus, ORDER_STATUS, PAYMENT_METHODS } from '../../services/orders/constants';
+import { formatOrderStatus, formatPaymentStatus, ORDER_STATUS, PAYMENT_METHODS } from '../../services/orders/constants';
 import { clearPendingOrderPointerForToken, reconcilePendingOrderPointer } from '../../services/orders/pending-order';
 
 export const prerender = false;
@@ -199,7 +199,7 @@ const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
                 <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 text-sm text-[var(--color-text-muted)]">
                   <p class="font-bold text-[var(--color-heading-sub)]">Pago actual</p>
                   <p class="mt-2">Método: <strong id="current-payment-method" class="text-[var(--color-heading-sub)]">{labelPaymentMethod(order.payment.method)}</strong></p>
-                  <p>Estado: <strong class="text-[var(--color-heading-sub)]">{order.payment.status}</strong></p>
+                  <p>Estado: <strong class="text-[var(--color-heading-sub)]">{formatPaymentStatus(order.payment.status)}</strong></p>
                   {order.payment.rejectionReason && (
                     <p class="mt-2 font-semibold text-[var(--color-danger-text)]">Motivo rechazo: {order.payment.rejectionReason}</p>
                   )}

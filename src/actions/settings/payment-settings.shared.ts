@@ -1,4 +1,5 @@
 import { db, eq, SiteSettings, sql } from 'astro:db';
+import { serializeDbDate } from '@utils/db-date';
 import { PAYMENT_METHODS } from '../../services/orders/constants';
 
 export const PAYMENT_QR_KEY = 'payment_qr_image';
@@ -165,14 +166,15 @@ export async function readPaymentSettingsSnapshot(): Promise<PaymentSettingsSnap
 
 export async function upsertSiteSetting(key: string, value: unknown) {
   const now = new Date();
+  const nowSql = serializeDbDate(now);
   const serialized = JSON.stringify(value);
 
   await db.run(sql`
     insert into ${SiteSettings} (key, value, updatedAt)
-    values (${key}, ${serialized}, ${now})
+    values (${key}, ${serialized}, ${nowSql})
     on conflict(key) do update set
       value = ${serialized},
-      updatedAt = ${now}
+      updatedAt = ${nowSql}
   `);
 }
 

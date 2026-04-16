@@ -2,7 +2,7 @@
 import Layout from '@layouts/Layout.astro';
 import { actions } from 'astro:actions';
 import { Formatter } from '@utils/formatter';
-import { formatOrderStatus } from '../../../services/orders/constants';
+import { formatOrderStatus, formatPaymentStatus } from '../../../services/orders/constants';
 
 export const prerender = false;
 
@@ -114,7 +114,7 @@ const statuses = [
                 <td>
                   <div class="min-w-[12rem]">
                     <p class="font-bold text-[var(--color-heading-sub)]">{order.id.slice(0, 8)}</p>
-                    <p class="text-xs text-gray-500">{new Date(order.createdAt).toLocaleString('es-CO')}</p>
+                    <p class="text-xs text-gray-500">{Formatter.dateTime(order.createdAt)}</p>
                   </div>
                 </td>
                 <td>
@@ -128,9 +128,9 @@ const statuses = [
                 </td>
                 <td>
                   <p class="font-semibold text-[var(--color-heading-sub)]">{order.paymentMethod}</p>
-                  <p class="text-xs text-gray-500">{order.paymentStatus}</p>
+                  <p class="text-xs text-gray-500">{formatPaymentStatus(order.paymentStatus)}</p>
                 </td>
-                <td class="text-sm text-gray-500">{order.proofUploadedAt ? new Date(order.proofUploadedAt).toLocaleString('es-CO') : 'Sin carga'}</td>
+                <td class="text-sm text-gray-500">{order.proofUploadedAt ? Formatter.dateTime(order.proofUploadedAt) : 'Sin carga'}</td>
                 <td>
                   <a href={`/admin/orders/${order.id}`} class="premium-action-secondary">Abrir</a>
                 </td>

@@ -3,7 +3,7 @@ import Layout from '@layouts/Layout.astro';
 import { actions } from 'astro:actions';
 import { Formatter } from '@utils/formatter';
 import { getOrderById } from '../../../services/orders/repository';
-import { formatOrderStatus, ORDER_STATUS } from '../../../services/orders/constants';
+import { formatOrderStatus, formatPaymentStatus, ORDER_STATUS } from '../../../services/orders/constants';
 
 export const prerender = false;
 
@@ -68,7 +68,7 @@ const statusChipClass =
             <span class="chip-dot" aria-hidden="true"></span>
             Estado: {statusLabel}
           </span>
-          <span class="admin-chip">Pago: <strong>{orderDetail.payment.status}</strong></span>
+          <span class="admin-chip">Pago: <strong>{formatPaymentStatus(orderDetail.payment.status)}</strong></span>
           <span class="admin-chip">Cliente: <strong>{orderDetail.order.customerName}</strong></span>
         </div>
       </div>
@@ -172,7 +172,7 @@ const statusChipClass =
             <div>
               <h2 class="text-lg font-bold text-[var(--color-heading)]">Comprobante cargado</h2>
               <p class="mt-0.5 text-xs text-[var(--color-text-subtle)]">
-                {orderDetail.latestProof ? `Subido el ${new Date(orderDetail.latestProof.uploadedAt).toLocaleDateString('es-CO')}` : 'Sin comprobante adjunto'}
+                {orderDetail.latestProof ? `Subido el ${Formatter.dateTime(orderDetail.latestProof.uploadedAt, 'Sin fecha')}` : 'Sin comprobante adjunto'}
               </p>
             </div>
           </div>
@@ -257,7 +257,7 @@ const statusChipClass =
             </form>
           ) : (
             <div class="mt-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 text-sm text-[var(--color-text-muted)]">
-              Este pedido está en estado <strong class="text-[var(--color-heading-sub)]">{statusLabel}</strong>. Para emitir otra decisión el pedido debe volver a <em>under_review</em> desde el backoffice.
+              Este pedido está en estado <strong class="text-[var(--color-heading-sub)]">{statusLabel}</strong>. Para emitir otra decisión el pedido debe volver a <em>En revisión</em> desde el backoffice.
             </div>
           )}
         </article>
@@ -297,7 +297,7 @@ const statusChipClass =
             <p class="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-guacamole-b">Pago</p>
             <div class="space-y-1">
               <p>Método: <strong class="text-[var(--color-heading-sub)]">{labelPaymentMethod(orderDetail.payment.method)}</strong></p>
-              <p>Estado: <strong class="text-[var(--color-heading-sub)]">{orderDetail.payment.status}</strong></p>
+              <p>Estado: <strong class="text-[var(--color-heading-sub)]">{formatPaymentStatus(orderDetail.payment.status)}</strong></p>
               {orderDetail.payment.reviewerUid && (
                 <p>Reviewer: <strong class="text-[var(--color-heading-sub)]">{orderDetail.payment.reviewerUid}</strong></p>
               )}
