@@ -136,18 +136,18 @@ export function buildAdminAnalyticsDashboardModel(data: AnalyticsData): AdminAna
     trend: {
       eyebrow: 'Tendencia ejecutiva',
       title: 'Demanda diaria bruta y volumen de pedidos',
-      description: 'Serie diaria histórica sin filtrar por aprobación para seguir ritmo comercial y volumen de pedidos.',
+      description: 'Serie diaria del período consultado para seguir ritmo comercial y volumen de pedidos.',
       chartType: 'line',
     },
     productHighlights: {
       byQty: {
         title: 'Top 10 por unidades demandadas',
-        description: 'Cuenta ítems históricos en pedidos, no ventas netas confirmadas.',
+        description: 'Cuenta ítems en pedidos del período consultado, no ventas netas confirmadas.',
         chartType: 'bar',
       },
       byRevenue: {
         title: 'Top 10 por monto bruto histórico',
-        description: 'Valor acumulado por producto; incluye pedidos no aprobados mientras no filtremos por estado.',
+        description: 'Valor acumulado por producto dentro del período consultado; incluye pedidos no aprobados mientras no filtremos por estado.',
         chartType: 'bar',
       },
       byEstimatedProfit: {

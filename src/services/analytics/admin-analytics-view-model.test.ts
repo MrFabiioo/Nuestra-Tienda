@@ -104,11 +104,13 @@ test('reorienta el dashboard hacia rentabilidad estimada por producto', () => {
   assert.equal(model.mix.operationalCharts.status.chartType, 'bar');
   assert.equal(model.mix.operationalCharts.payment.chartType, 'bar');
   assert.equal(model.productHighlights.byRevenue.title, 'Top 10 por monto bruto histórico');
+  assert.match(model.productHighlights.byRevenue.description, /período consultado/i);
   assert.match(model.productHighlights.byRevenue.description, /incluye pedidos no aprobados/i);
+  assert.match(model.productHighlights.byQty.description, /período consultado/i);
   assert.equal(model.trend.eyebrow, 'Tendencia ejecutiva');
   assert.equal(
     model.trend.description,
-    'Serie diaria histórica sin filtrar por aprobación para seguir ritmo comercial y volumen de pedidos.',
+    'Serie diaria del período consultado para seguir ritmo comercial y volumen de pedidos.',
   );
   assert.equal(model.temporal.notice.title, 'Patrones temporales');
   assert.equal(
