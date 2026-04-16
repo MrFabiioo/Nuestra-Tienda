@@ -107,7 +107,7 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
 
                     <!-- Price -->
                     <div class="price-row">
-                        <span class="price-amount">${product.price.toLocaleString('es-AR')}</span>
+                        <span class="price-amount">${product.price.toLocaleString('es-CO')}</span>
                         <span class="price-label">precio base</span>
                         <input type="hidden" id="product-price" value={product.price}/>
                     </div>
@@ -139,7 +139,7 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
                             <!-- CTA -->
                             <div class="space-y-2 pt-1">
                                 <button id="add-card" class="add-to-cart-btn" disabled aria-disabled="true">
-                                    <span id="add-card-label">Elegí un tamaño</span>
+                                    <span id="add-card-label">Elige un tamaño</span>
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 8a2 2 0 100-4 2 2 0 000 4z" />
                                     </svg>
@@ -157,7 +157,7 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
                             </div>
                             <div>
                                 <p class="disabled-product-notice__title">Producto próximamente disponible</p>
-                                <p class="disabled-product-notice__body">Este producto no está disponible para compra en este momento. Volvé a revisarlo pronto.</p>
+                                <p class="disabled-product-notice__body">Este producto no está disponible para compra en este momento. Vuelve a revisarlo pronto.</p>
                             </div>
                             <a href="/tienda" class="disabled-product-notice__cta">
                                 Ver otros productos
@@ -175,7 +175,7 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
                 <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                         <p class="eyebrow-label">También en {categoryLabel}</p>
-                        <h2 class="section-title">Seguí explorando</h2>
+                        <h2 class="section-title">Sigue explorando</h2>
                     </div>
                     <a href="/tienda" class="back-pill self-start sm:self-auto">Ver catálogo completo</a>
                 </div>
@@ -533,7 +533,7 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
                 addToCardButton.disabled = false;
                 addToCardButton.setAttribute('aria-disabled', 'false');
                 addToCartLabel.textContent = 'Agregar al carrito';
-                setCartFeedback('Tamaño listo. Si querés, te llevamos directo al checkout.', 'success');
+                setCartFeedback('Tamaño listo. Si quieres, te llevamos directo al checkout.', 'success');
             });
         });
 
@@ -600,7 +600,7 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
 
             const size = document.querySelector('.selected-size')?.textContent;
             if (!size) {
-                setCartFeedback('Elegí un tamaño antes de pasar al checkout.', 'error');
+                setCartFeedback('Elige un tamaño antes de pasar al checkout.', 'error');
                 return;
             }
 
@@ -627,7 +627,7 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
                     quantity:quantity,
                     size:size,
                     totalItems:cart.reduce((total, item) => total + item.quantity, 0),
-                    message:'Te llevamos al checkout con esta configuración ya resuelta.',
+                    message:'Te llevamos al checkout con esta selección lista.',
                 });
 
                 // PRESERVED navigation to /checkout
@@ -636,7 +636,7 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
                 addToCardButton.disabled = false;
                 addToCardButton.removeAttribute('aria-busy');
                 addToCardButton.setAttribute('aria-disabled', document.querySelector('.selected-size') ? 'false' : 'true');
-                addToCartLabel.textContent = document.querySelector('.selected-size') ? 'Agregar al carrito' : 'Elegí un tamaño';
+                addToCartLabel.textContent = document.querySelector('.selected-size') ? 'Agregar al carrito' : 'Elige un tamaño';
             }
         })
     })

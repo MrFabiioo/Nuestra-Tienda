@@ -45,7 +45,7 @@ export const login = defineAction({
       // Mensaje genérico — previene enumeración de usuarios
       throw new ActionError({
         code: 'UNAUTHORIZED',
-        message: 'Credenciales inválidas. Revisá tu email y contraseña.',
+        message: 'Credenciales inválidas. Revisa tu correo y tu contraseña.',
       });
     }
 

@@ -67,7 +67,7 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
                     <span class="premium-chip">Admin · productos</span>
                     <h1 class="mt-4 text-3xl font-black tracking-tight theme-text-primary sm:text-4xl">Listado de productos</h1>
                     <p class="theme-text-muted mt-3 max-w-2xl text-sm leading-relaxed sm:text-base">
-                        Vista editorial para revisar catálogo, precio, categoría y acceso rápido a edición con buena legibilidad en light y dark mode.
+                        Vista editorial para revisar catálogo, precio, categoría y acceso rápido a edición con buena legibilidad en modo claro y oscuro.
                     </p>
                 </div>
 
@@ -122,7 +122,7 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
 
                     <h2 class="admin-table-title text-xl font-bold">Todavía no hay productos cargados</h2>
                     <p class="admin-table-copy mt-2 max-w-xl text-sm leading-relaxed sm:text-base">
-                        Podés crear el primer producto para empezar a poblar el catálogo y después administrarlo desde esta misma tabla.
+                        Puedes crear el primer producto para empezar a poblar el catálogo y luego administrarlo desde esta misma tabla.
                     </p>
 
                     <a href="/admin/products/new-product" class="premium-action-primary mt-6">
@@ -264,14 +264,14 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
                     <span class="premium-chip">Admin · configuración</span>
                     <h2 class="mt-4 text-2xl font-black tracking-tight theme-text-primary sm:text-3xl">QR de pago</h2>
                     <p class="theme-text-muted mt-2 max-w-xl text-sm leading-relaxed">
-                        Imagen QR que se muestra al cliente cuando elige pagar por QR. Se recomienda un QR de Nequi, Bancolombia o pasarela similar. Máx. 4MB · JPG, PNG o WEBP.
+                        Imagen QR que se muestra al cliente cuando elige pagar por QR. Recomendamos un QR de Nequi, Bancolombia o una pasarela similar. Máx. 4MB · JPG, PNG o WEBP.
                     </p>
                 </div>
             </div>
 
             {!canManageSensitiveSettings && (
                 <div class="mt-6 rounded-2xl border border-amber-400/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-900 dark:text-amber-100">
-                    Tu sesión está autenticada, pero no entra en la whitelist de acciones sensibles. Podés ver la configuración actual, pero los cambios server-side requieren que tu email esté en <code>ADMIN_ALLOWED_EMAILS</code> o <code>ORDER_NOTIFICATIONS_ADMIN_EMAIL</code>.
+                    Tu sesión está autenticada, pero no hace parte de la lista autorizada para acciones sensibles. Puedes ver la configuración actual, pero los cambios del servidor requieren que tu correo esté en <code>ADMIN_ALLOWED_EMAILS</code> o <code>ORDER_NOTIFICATIONS_ADMIN_EMAIL</code>.
                 </div>
             )}
 
@@ -350,14 +350,14 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
                     <span class="premium-chip">Admin · pagos</span>
                     <h2 class="mt-4 text-2xl font-black tracking-tight theme-text-primary sm:text-3xl">Pagos manuales</h2>
                     <p class="theme-text-muted mt-2 max-w-2xl text-sm leading-relaxed">
-                        Bancolombia y Nequi salen del hardcode y pasan a SiteSettings, igual que el QR. Si borrás un método, desaparece del flujo público de pagos.
+                        Bancolombia y Nequi salen del hardcode y pasan a SiteSettings, igual que el QR. Si eliminas un método, desaparece del flujo público de pagos.
                     </p>
                 </div>
             </div>
 
             {!canManageSensitiveSettings && (
                 <div class="mt-6 rounded-2xl border border-amber-400/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-900 dark:text-amber-100">
-                    Tu sesión está autenticada, pero no entra en la whitelist de acciones sensibles. Podés ver Bancolombia y Nequi, pero para editarlos tu email tiene que estar en <code>ADMIN_ALLOWED_EMAILS</code> o <code>ORDER_NOTIFICATIONS_ADMIN_EMAIL</code>.
+                    Tu sesión está autenticada, pero no hace parte de la lista autorizada para acciones sensibles. Puedes ver Bancolombia y Nequi, pero para editarlos tu correo debe estar en <code>ADMIN_ALLOWED_EMAILS</code> o <code>ORDER_NOTIFICATIONS_ADMIN_EMAIL</code>.
                 </div>
             )}
 
@@ -401,7 +401,7 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
                         </dl>
                     ) : (
                         <div class="mt-4 rounded-2xl border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface-soft)] px-4 py-6 text-sm text-[var(--color-text-subtle)]">
-                            No hay datos cargados para Bancolombia. Si lo dejás así, el cliente no verá este método en <code>/pagos/[token]</code>.
+                            No hay datos cargados para Bancolombia. Si lo dejas así, el cliente no verá este método en <code>/pagos/[token]</code>.
                         </div>
                     )}
 
@@ -420,7 +420,7 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
                         </div>
                         <div>
                             <label for="bancolombia-note" class="mb-2 block text-sm font-semibold text-[var(--color-heading-sub)]">Nota opcional</label>
-                            <textarea id="bancolombia-note" name="note" class="premium-field min-h-24" placeholder="Usá el monto exacto del pedido." disabled={!canManageSensitiveSettings}>{currentBancolombia?.note ?? ''}</textarea>
+                            <textarea id="bancolombia-note" name="note" class="premium-field min-h-24" placeholder="Usa el monto exacto del pedido." disabled={!canManageSensitiveSettings}>{currentBancolombia?.note ?? ''}</textarea>
                         </div>
                         {!canManageSensitiveSettings && (
                             <p class="text-xs text-[var(--color-text-muted)]">
@@ -472,7 +472,7 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
                         </dl>
                     ) : (
                         <div class="mt-4 rounded-2xl border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface-soft)] px-4 py-6 text-sm text-[var(--color-text-subtle)]">
-                            No hay datos cargados para Nequi. Si lo dejás así, el cliente no verá este método en <code>/pagos/[token]</code>.
+                            No hay datos cargados para Nequi. Si lo dejas así, el cliente no verá este método en <code>/pagos/[token]</code>.
                         </div>
                     )}
 

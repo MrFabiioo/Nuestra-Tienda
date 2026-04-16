@@ -47,7 +47,7 @@ const {
       {!isEnabled && (
         <div class="product-card__disabled-overlay absolute inset-0 flex items-center justify-center">
           <span class="rounded-xl bg-black/60 px-4 py-2 text-xs font-bold uppercase tracking-widest text-white backdrop-blur-sm">
-            Producto deshabilitado
+            Producto no disponible
           </span>
         </div>
       )}
@@ -183,8 +183,8 @@ const {
           size: 'Normal',
           totalItems: cart.reduce((total, item) => total + item.quantity, 0),
           message: existingItem
-            ? `Le sumamos ${quantity} ${quantity === 1 ? 'unidad' : 'unidades'} más a tu selección.`
-            : `Quedó listo en tu mini carrito para que sigas comprando sin fricción.`,
+            ? `Agregamos ${quantity} ${quantity === 1 ? 'unidad' : 'unidades'} más a tu selección.`
+            : `Ya está en tu carrito para que sigas comprando con tranquilidad.`,
         });
         emitCartOpen();
         

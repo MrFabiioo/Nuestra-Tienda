@@ -4,7 +4,8 @@ export default {
   theme: {
     extend: {
       fontFamily:{
-        'unique': ['"Space Mono"', 'monospace'],
+        'unique': ['"Inter"', 'system-ui', 'sans-serif'],
+        'sans': ['"Inter"', 'system-ui', 'sans-serif'],
       },
       colors:{
         'guacamole-a': '#3E6102',

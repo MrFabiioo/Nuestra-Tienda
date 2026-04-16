@@ -79,13 +79,13 @@ export default function CartButton({ pendingOrderUrl = null }: CartButtonProps) 
             title: detail.productName ? `${detail.productName} ya está en tu carrito` : 'Producto agregado al carrito',
             message:
               detail.message ??
-              `Sumaste ${detail.quantity ?? 1} ${detail.quantity === 1 ? 'unidad' : 'unidades'}. Ahora tenés ${totalItemsLabel}.`,
+              `Agregaste ${detail.quantity ?? 1} ${detail.quantity === 1 ? 'unidad' : 'unidades'}. Ahora tienes ${totalItemsLabel}.`,
           };
         case 'remove':
           return {
             tone: 'neutral',
             title: detail.productName ? `${detail.productName} salió del carrito` : 'Producto quitado del carrito',
-            message: detail.message ?? `Listo, actualizamos tu selección. Ahora tenés ${totalItemsLabel}.`,
+            message: detail.message ?? `Listo, actualizamos tu selección. Ahora tienes ${totalItemsLabel}.`,
           };
         case 'clear':
           return {
@@ -166,7 +166,7 @@ export default function CartButton({ pendingOrderUrl = null }: CartButtonProps) 
     setFeedback({
       tone: 'neutral',
       title: itemToRemove?.name ? `${itemToRemove.name} salió del carrito` : 'Producto quitado del carrito',
-      message: `Ahora tenés ${updatedCart.length} ${updatedCart.length === 1 ? 'producto distinto' : 'productos distintos'} en tu mini carrito.`,
+      message: `Ahora tienes ${updatedCart.length} ${updatedCart.length === 1 ? 'producto distinto' : 'productos distintos'} en tu carrito.`,
     });
   };
 
@@ -176,15 +176,15 @@ export default function CartButton({ pendingOrderUrl = null }: CartButtonProps) 
     setFeedback({
       tone: 'neutral',
       title: 'Carrito reiniciado',
-      message: 'Tu selección se limpió por completo. Podés volver a cargarla en segundos.',
+      message: 'Tu selección se limpió por completo. Puedes volver a cargarla en segundos.',
     });
   };
 
   const formatPrice = (price: number) =>
-    `$${price.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    `$${price.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   const cartAriaLabel = hasPendingOrder
-    ? 'Abrir carrito. Tenés un pago pendiente para retomar.'
+    ? 'Abrir carrito. Tienes un pago pendiente para retomar.'
     : 'Abrir carrito';
 
   const grandTotal = $totalPriceValue;
@@ -196,7 +196,7 @@ export default function CartButton({ pendingOrderUrl = null }: CartButtonProps) 
         onClick={toggleCart}
         aria-label={cartAriaLabel}
         aria-expanded={isOpen}
-        title={hasPendingOrder ? 'Tenés un pago pendiente' : undefined}
+        title={hasPendingOrder ? 'Tienes un pago pendiente' : undefined}
         class={`relative flex h-10 w-10 touch-manipulation items-center justify-center rounded-full text-sm transition-all active:translate-y-1 md:text-xl sm:h-11 sm:w-11 ${hasPendingOrder ? 'ring-2 ring-guacamole-b/30' : ''}`}
       >
         <Cart />
@@ -209,7 +209,7 @@ export default function CartButton({ pendingOrderUrl = null }: CartButtonProps) 
             <span class="pointer-events-none absolute left-1/2 top-full mt-1 hidden -translate-x-1/2 whitespace-nowrap rounded-full bg-guacamole-b px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-sm sm:inline-flex">
               Pago pendiente
             </span>
-            <span class="sr-only">Tenés un pago pendiente. Abrí el carrito para retomar el pedido.</span>
+            <span class="sr-only">Tienes un pago pendiente. Abre el carrito para retomar el pedido.</span>
           </>
         )}
         {$cartItems.length > 0 && (
@@ -267,7 +267,7 @@ export default function CartButton({ pendingOrderUrl = null }: CartButtonProps) 
             <div class="shrink-0 border-b px-3.5 py-3 sm:px-5" style={{ borderColor: 'var(--color-border)', background: 'color-mix(in srgb, var(--color-accent) 8%, var(--color-surface))' }}>
               <div class="min-w-0">
                 <p class="text-xs font-black uppercase tracking-[0.15em]" style={{ color: 'var(--color-accent)' }}>Pedido pendiente de pago</p>
-                <p class="theme-text-muted mt-0.5 text-xs leading-snug">Todavía tenés un pedido esperando el comprobante.</p>
+                <p class="theme-text-muted mt-0.5 text-xs leading-snug">Todavía tienes un pedido pendiente por comprobante.</p>
                 <a
                   href={pendingOrderUrl}
                   class="mt-1.5 inline-flex items-center gap-1 text-xs font-bold text-guacamole-b hover:text-guacamole-a hover:underline"
@@ -299,7 +299,7 @@ export default function CartButton({ pendingOrderUrl = null }: CartButtonProps) 
                 </div>
                 <div>
                   <p class="theme-text-primary font-bold text-base">Tu carrito está esperando tu pedido</p>
-                  <p class="theme-text-subtle mt-1 text-sm">Sumá productos desde la tienda y armalo a tu ritmo.</p>
+                  <p class="theme-text-subtle mt-1 text-sm">Agrega productos desde la tienda y arma tu pedido a tu ritmo.</p>
                 </div>
                 <a href="/tienda" class="mt-1 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-guacamole-b transition-colors hover:text-guacamole-a">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -411,7 +411,7 @@ export default function CartButton({ pendingOrderUrl = null }: CartButtonProps) 
                   Revisar pedido
                   </a>
                   <p class="theme-soft-surface theme-text-muted rounded-2xl px-3 py-2 text-center text-[11px] font-medium leading-relaxed">
-                    Revisá tu selección acá y, cuando quieras cerrar la compra, seguís al checkout con todo claro.
+                    Revisa tu selección aquí y, cuando quieras cerrar la compra, continúa al checkout con todo claro.
                   </p>
                   <div class="flex flex-col gap-2 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
                     <a href="/tienda" class="text-xs font-semibold text-guacamole-b transition-colors hover:text-guacamole-a">← Seguir comprando</a>

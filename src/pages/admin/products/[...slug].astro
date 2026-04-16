@@ -50,8 +50,8 @@ const initialRecipe: ProductRecipe = (product as any).recipe ?? {
           </h1>
           <p class="admin-shell__copy">
             {isNew
-              ? 'Completá los datos del nuevo producto y subí las imágenes para publicarlo en el catálogo.'
-              : 'Editá los campos, actualizá las imágenes y guardá los cambios para reflejarlos en el storefront.'}
+              ? 'Completa los datos del nuevo producto y carga las imágenes para publicarlo en el catálogo.'
+              : 'Edita los campos, actualiza las imágenes y guarda los cambios para reflejarlos en la tienda pública.'}
           </p>
         </div>
 
@@ -192,7 +192,7 @@ const initialRecipe: ProductRecipe = (product as any).recipe ?? {
                 min="0"
                 step="0.01"
               />
-              <p class="field-help">Precio base visible en el storefront.</p>
+              <p class="field-help">Precio base visible en la vitrina pública.</p>
             </div>
 
             <!-- Categoría -->
@@ -370,7 +370,7 @@ const initialRecipe: ProductRecipe = (product as any).recipe ?? {
 
               <div>
                 <p class="text-sm font-semibold" style="color: var(--color-text);" id="lbl-selected-files">
-                  <span>Click aquí</span> o arrastrá los archivos
+                  <span>Haz clic aquí</span> o arrastra los archivos
                 </p>
                 <p class="mt-1 text-xs" style="color: var(--color-text-subtle);">
                   PNG, JPG, GIF, SVG · máx. 800×400 px
@@ -436,7 +436,7 @@ const initialRecipe: ProductRecipe = (product as any).recipe ?? {
                         </div>
                         <p class="admin-table-title text-base font-semibold">No hay imágenes cargadas todavía</p>
                         <p class="admin-table-copy mt-2 max-w-md text-sm leading-relaxed">
-                          Subí archivos desde el panel superior y la galería va a aparecer acá automáticamente.
+                          Carga archivos desde el panel superior y la galería aparecerá aquí automáticamente.
                         </p>
                       </div>
                     </td>
@@ -639,7 +639,7 @@ const initialRecipe: ProductRecipe = (product as any).recipe ?? {
               {isNew ? 'Nuevo producto listo para publicar' : product.title}
             </p>
             <p class="text-xs mt-0.5" style="color: var(--color-text-subtle);">
-              Los cambios se reflejan en el storefront al guardar.
+              Los cambios se reflejan en la vitrina pública al guardar.
             </p>
           </div>
         </div>

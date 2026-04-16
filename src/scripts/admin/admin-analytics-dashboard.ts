@@ -101,7 +101,7 @@ function applyChartDefaults(palette: AnalyticsPalette) {
 }
 
 function currency(value: number | null | undefined) {
-  return '$' + Number(value ?? 0).toLocaleString('es-VE', {
+  return '$' + Number(value ?? 0).toLocaleString('es-CO', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });

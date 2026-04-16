@@ -35,7 +35,7 @@ export const reviewPayment = defineAction({
     if (decision === 'rejected' && !rejectionReason?.trim()) {
       throw new ActionError({
         code: 'BAD_REQUEST',
-        message: 'Si rechazás el pago, dejá un motivo claro para el cliente.',
+        message: 'Si rechazas el pago, deja un motivo claro para el cliente.',
       });
     }
 

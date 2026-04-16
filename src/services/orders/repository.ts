@@ -80,7 +80,7 @@ export async function getCartOrderLinesFromContext(context: ActionAPIContext) {
   if (cart.length === 0) {
     throw new ActionError({
       code: 'BAD_REQUEST',
-      message: 'Tu carrito está vacío. Sumá productos antes de avanzar al pago.',
+      message: 'Tu carrito está vacío. Agrega productos antes de avanzar al pago.',
     });
   }
 
@@ -94,7 +94,7 @@ export async function getCartOrderLinesFromContext(context: ActionAPIContext) {
     if (!product) {
       throw new ActionError({
         code: 'BAD_REQUEST',
-        message: `El producto ${item.productId} ya no está disponible. Revisá el carrito antes de seguir.`,
+        message: `El producto ${item.productId} ya no está disponible. Revisa el carrito antes de continuar.`,
       });
     }
 

@@ -6,7 +6,7 @@
  *
  * Para el alcance actual (admin personal), esto es suficiente:
  * el logout limpia la cookie inmediatamente en el browser actual.
- * Si necesitás revocar sesiones en otros dispositivos, evaluá migrar a Admin SDK.
+ * Si necesitas revocar sesiones en otros dispositivos, evalúa migrar a Admin SDK.
  */
 
 import { defineAction } from 'astro:actions';

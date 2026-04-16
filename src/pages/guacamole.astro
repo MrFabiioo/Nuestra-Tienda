@@ -7,7 +7,7 @@ const tamaños = ["Pequeño", "Mediano", "Grande", "Extra-grande"];
 
 <Layout>
     <div
-        class="mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-8 items-center font-unique"
+        class="mx-auto grid grid-cols-1 items-center gap-8 p-6 md:grid-cols-2"
     >
         <!-- Imagen del producto -->
         <div class="relative">
@@ -70,7 +70,7 @@ const tamaños = ["Pequeño", "Mediano", "Grande", "Extra-grande"];
             </div>
 
             <!-- Botón de compra -->
-            <button id="add-card" class="bg-guacamole-pulpa">agregar al carrito</button>
+            <button id="add-card" class="bg-guacamole-pulpa">Agregar al carrito</button>
 
             <!-- Garantías -->
             <div class="text-sm text-black mt-4 uppercase">
@@ -134,7 +134,7 @@ const tamaños = ["Pequeño", "Mediano", "Grande", "Extra-grande"];
         addToCardButton.addEventListener('click',()=>{
             const size = document.querySelector('.selected-size')?.textContent;
             if (!size) {
-                alert('seleccione un tamaño')
+                alert('Selecciona un tamaño')
             }
     
             //addToCardButton.disabled = true;

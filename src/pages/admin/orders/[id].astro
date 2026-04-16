@@ -61,7 +61,7 @@ const statusChipClass =
         <div>
           <p class="admin-shell__eyebrow">Dashboard admin · pagos</p>
           <h1 class="admin-shell__title">Pedido {id.slice(0, 8)}</h1>
-          <p class="admin-shell__copy">Revisá el comprobante, confirmá el estado y dejá trazabilidad de quién aprobó o rechazó.</p>
+          <p class="admin-shell__copy">Revisa el comprobante, confirma el estado y deja trazabilidad de quién aprobó o rechazó.</p>
         </div>
         <div class="admin-chip-row">
           <span class={statusChipClass}>
@@ -233,7 +233,7 @@ const statusChipClass =
               <input type="hidden" name="decision" id="review-decision" value="approved" />
               <div>
                 <label for="rejectionReason" class="mb-2 block text-sm font-semibold text-[var(--color-heading-sub)]">
-                  Motivo de rechazo <span class="font-normal text-[var(--color-text-subtle)]">(obligatorio si rechazás)</span>
+                  Motivo de rechazo <span class="font-normal text-[var(--color-text-subtle)]">(obligatorio si rechazas)</span>
                 </label>
                 <textarea id="rejectionReason" name="rejectionReason" rows="3" class="premium-field resize-none" placeholder="Explicá por qué se rechaza el comprobante."></textarea>
               </div>
@@ -403,12 +403,12 @@ const statusChipClass =
       formData.set('decision', currentDecision);
 
       if (currentDecision === 'rejected' && !(formData.get('rejectionReason')?.toString().trim())) {
-        feedback.textContent = 'Si vas a rechazar, dejá un motivo claro para el cliente.';
+        feedback.textContent = 'Si vas a rechazar, deja un motivo claro para el cliente.';
         feedback.className = 'min-h-[1.25rem] text-sm text-[var(--color-danger)]';
         return;
       }
 
-      feedback.textContent = 'Guardando decisión y disparando notificaciones...';
+      feedback.textContent = 'Guardando decisión y enviando notificaciones...';
       feedback.className = 'min-h-[1.25rem] text-sm text-[var(--color-text-muted)]';
 
       const { error } = await actions.reviewPayment(formData);

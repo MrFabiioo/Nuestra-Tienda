@@ -82,7 +82,7 @@ if (paymentQr) {
   paymentCards.push({
     key: PAYMENT_METHODS.qr,
     title: 'QR',
-    subtitle: 'Escaneá con tu app bancaria',
+    subtitle: 'Escanea con tu app bancaria',
   });
 }
 
@@ -103,13 +103,13 @@ const paymentMethodOptions = Array.from(paymentMethodOptionsSet);
 const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
 ---
 
-<Layout title={`Pago pedido ${order.id.slice(0, 8)} | Guacamole Shop`} description="Revisá el pedido persistido y cargá tu comprobante.">
+<Layout title={`Pago pedido ${order.id.slice(0, 8)} | Guacamole Shop`} description="Revisa tu pedido y carga el comprobante de pago.">
   <main class="min-h-screen px-4 py-8 md:px-8">
     <div class="mx-auto max-w-6xl space-y-6">
         <BreadcrumbTrail
           items={paymentBreadcrumbs}
           eyebrow="Paso 2 de 2"
-          summary="Tu pedido está confirmado y esperándote. Realiza el pago y adjunta el comprobante aquí mismo para activar el envío. ¡Del resto me ocupo Yo!."
+          summary="Tu pedido ya quedó registrado. Realiza el pago y adjunta el comprobante aquí mismo para continuar con la confirmación de la entrega."
         />
 
         <!-- Page header -->
@@ -121,7 +121,7 @@ const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
             </h1>
           ) : (
             <h1 class="text-3xl font-black uppercase tracking-wide text-[var(--color-heading)] md:text-4xl">
-              Completá tu pago
+              Completa tu pago
             </h1>
           )}
           {isProofSubmitted ? (
@@ -130,7 +130,7 @@ const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
               </p>
           ) : (
               <p class="text-[var(--color-text-muted)]">
-                Realizá el pago con los datos de abajo, subí el comprobante y el pedido pasa a revisión automáticamente.
+                Realiza el pago con los datos de abajo, sube el comprobante y el pedido pasará a revisión automáticamente.
               </p>
           )}
           <div class="flex flex-wrap gap-3 pt-1 text-sm">
@@ -167,7 +167,7 @@ const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
               <div>
                 <p class="font-black uppercase tracking-wide text-[var(--color-heading)]">¡Comprobante recibido!</p>
                 <p class="mt-1 text-sm text-[var(--color-text-muted)]">
-                  Tu pedido quedó <strong class="text-guacamole-b">en revisión</strong>. Voy a verificar tu pago y te va a aviso cuando todo esté confirmado. Si tienes dudas, guarda el número de pedido como referencia.
+                  Tu pedido quedó <strong class="text-guacamole-b">en revisión</strong>. Verificaremos tu pago y te avisaremos cuando todo quede confirmado. Si tienes dudas, conserva el número de pedido como referencia.
                 </p>
               </div>
             </div>
@@ -268,7 +268,7 @@ const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
                 </div>
               ) : (
                 <div class="mt-5 rounded-2xl border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface-soft)] p-5 text-sm text-[var(--color-text-subtle)]">
-                  Todavía no hay medios de pago configurados desde el admin. Antes de pagar, pedile al comercio que cargue Bancolombia, Nequi o QR.
+                  Todavía no hay medios de pago configurados desde el panel administrativo. Antes de pagar, pídele al comercio que cargue Bancolombia, Nequi o QR.
                 </div>
               )}
             </article>
@@ -305,7 +305,7 @@ const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
                   <svg class="mx-auto mb-3 h-8 w-8 text-[var(--color-border-strong)]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
-                  Todavía no subiste comprobante. Cuando hagas el pago, cargalo abajo y el pedido pasa a revisión.
+                  Todavía no has subido el comprobante. Cuando hagas el pago, cárgalo abajo y el pedido pasará a revisión.
                 </div>
               )}
 
@@ -341,7 +341,7 @@ const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
                           <dd class="text-sm font-semibold text-[var(--color-heading-sub)]">{paymentSettings.bancolombia.holderName}</dd>
                         </div>
                       </dl>
-                      <p class="mt-4 text-center text-xs text-[var(--color-text-subtle)]">{paymentSettings.bancolombia.note ?? 'Usá el monto exacto del pedido · Guardá el comprobante'}</p>
+                      <p class="mt-4 text-center text-xs text-[var(--color-text-subtle)]">{paymentSettings.bancolombia.note ?? 'Usa el monto exacto del pedido · Conserva el comprobante'}</p>
                     </div>
                   )}
 
@@ -359,18 +359,18 @@ const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
                           <dd class="text-sm font-semibold text-[var(--color-heading-sub)]">{paymentSettings.nequi.holderName}</dd>
                         </div>
                       </dl>
-                      <p class="mt-4 text-center text-xs text-[var(--color-text-subtle)]">{paymentSettings.nequi.note ?? 'Ideal para pago rápido desde la app · Guardá el comprobante'}</p>
+                      <p class="mt-4 text-center text-xs text-[var(--color-text-subtle)]">{paymentSettings.nequi.note ?? 'Ideal para pagos ágiles desde la app · Conserva el comprobante'}</p>
                     </div>
                   )}
 
                   {/* QR banner — visible only when paymentQr exists */}
                   {paymentQr && (
                     <div id="banner-qr" class="hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-6">
-                      <p class="mb-4 text-center text-sm font-semibold text-[var(--color-heading-sub)]">Escaneá este código con tu app bancaria</p>
+                      <p class="mb-4 text-center text-sm font-semibold text-[var(--color-heading-sub)]">Escanea este código con tu app bancaria</p>
                       <div class="flex justify-center">
                         <img src={paymentQr.url} alt="QR de pago" class="h-64 w-64 rounded-2xl object-contain shadow-lg" />
                       </div>
-                      <p class="mt-4 text-center text-xs text-[var(--color-text-subtle)]">Usá el monto exacto del pedido · Guardá el comprobante</p>
+                      <p class="mt-4 text-center text-xs text-[var(--color-text-subtle)]">Usa el monto exacto del pedido · Conserva el comprobante</p>
                     </div>
                   )}
 
@@ -388,11 +388,11 @@ const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
                 </form>
               ) : canUploadProof ? (
                 <div class="mt-5 rounded-2xl border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface-soft)] p-5 text-sm text-[var(--color-text-subtle)]">
-                  No hay medios de pago configurados para este pedido. Antes de subir un comprobante, el comercio tiene que cargar Bancolombia, Nequi o QR desde el panel admin.
+                  No hay medios de pago configurados para este pedido. Antes de subir un comprobante, el comercio debe cargar Bancolombia, Nequi o QR desde el panel administrativo.
                 </div>
               ) : (
                 <div class="mt-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-5 text-sm text-[var(--color-text-muted)]">
-                  Este pedido ya está en sistema. ¡No necesitas hacer nada más por aquí! Si tienes alguna duda con los datos escribeme 3502018487.
+                  Este pedido ya fue procesado en el sistema. No necesitas hacer nada más por aquí. Si tienes alguna duda con los datos, escríbenos al 3502018487.
                 </div>
               )}
             </article>
@@ -497,7 +497,7 @@ const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
           const file = formData.get('proofFile');
 
           if (!(file instanceof File) || file.size === 0) {
-            feedback.textContent = 'Elegí un comprobante antes de enviarlo.';
+            feedback.textContent = 'Elige un comprobante antes de enviarlo.';
             feedback.className = 'min-h-[1.25rem] text-sm text-[var(--color-danger)]';
             return;
           }

@@ -84,7 +84,7 @@ function buildCustomerWhatsApp(event: NotificationEvent, order: PublicOrder, ref
     ``,
     `📝 *Motivo:* ${order.payment.rejectionReason ?? 'sin detalle adicional'}`,
     ``,
-    `Podés subir uno nuevo desde tu link público.`,
+    `Puedes subir uno nuevo desde tu enlace público.`,
   ].join('\n');
 }
 
@@ -161,7 +161,7 @@ function wrapEmailHtml(opts: {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
 </head>
-<body style="margin:0;padding:24px;background:#f5f5f5;font-family:system-ui,-apple-system,sans-serif;">
+<body style="margin:0;padding:24px;background:#f5f5f5;font-family:Inter,system-ui,-apple-system,sans-serif;">
   <table style="max-width:600px;margin:0 auto;width:100%;border-collapse:collapse;">
     <tr>
       <td>
@@ -246,7 +246,7 @@ function buildDrafts(event: NotificationEvent, order: PublicOrder): Notification
       admin: `Se aprobó el pago del ${ref}.`,
     },
     payment_rejected: {
-      customer: `Hola ${order.customerName}, el comprobante fue rechazado. Motivo: ${order.payment.rejectionReason ?? 'sin detalle adicional'}. Podés subir uno nuevo desde tu link público.`,
+      customer: `Hola ${order.customerName}, el comprobante fue rechazado. Motivo: ${order.payment.rejectionReason ?? 'sin detalle adicional'}. Puedes subir uno nuevo desde tu enlace público.`,
       admin: `Se rechazó el pago del ${ref}.`,
     },
   };

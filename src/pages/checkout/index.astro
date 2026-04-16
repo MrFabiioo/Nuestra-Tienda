@@ -38,15 +38,15 @@ const checkoutBreadcrumbs = [
 ];
 ---
 
-<Layout title="Checkout | Nuestra Tienda" description="Revisá tu pedido y prepará el pago">
+<Layout title="Checkout | Nuestra Tienda" description="Revisa tu pedido y deja listo el paso al pago">
   <main class="theme-checkout-page min-h-screen bg-guacamole-fondo/10 py-8 px-4 md:px-8">
     <div class="max-w-6xl mx-auto mb-6">
       <BreadcrumbTrail
         items={checkoutBreadcrumbs}
         eyebrow="Paso 1 de 2"
         summary={isEmpty
-          ? 'Tu checkout está listo para recibir productos. Volvé a la tienda para armar el pedido y después completás tus datos acá.'
-          : 'Estás revisando tu pedido antes de pagar. Si necesitás ajustar productos, podés volver a la tienda o entrar al detalle desde esta misma pantalla.'}
+          ? 'Tu checkout está listo para recibir productos. Vuelve a la tienda para armar tu pedido y luego completa tus datos aquí.'
+          : 'Estás revisando tu pedido antes de pagar. Si necesitas ajustar productos, puedes volver a la tienda o entrar al detalle desde esta misma pantalla.'}
       />
     </div>
     
@@ -56,7 +56,7 @@ const checkoutBreadcrumbs = [
         {pendingOrder && (
           <div class="mb-8 rounded-3xl border border-guacamole-b/30 bg-guacamole-fondo/20 px-6 py-5 text-left">
             <p class="text-xs font-bold uppercase tracking-[0.2em] text-guacamole-b">Pedido pendiente de pago</p>
-            <p class="mt-1 text-sm text-gray-600">Tenés un pedido real esperando tu acción. Podés volver a la página de pago y seguir desde donde lo dejaste.</p>
+            <p class="mt-1 text-sm text-gray-600">Tienes un pedido pendiente esperando tu acción. Puedes volver a la página de pago y continuar desde donde lo habías dejado.</p>
             <a href={`/pagos/${pendingOrder.token}`} class="mt-3 inline-flex items-center gap-1.5 rounded-full bg-guacamole-b px-5 py-2.5 text-sm font-bold text-white hover:bg-guacamole-a">
               Ver mi pedido pendiente →
             </a>
@@ -75,7 +75,7 @@ const checkoutBreadcrumbs = [
           </h1>
           
           <p class="mb-8 text-lg text-gray-600">
-            Sumá productos desde la tienda para revisar tu compra y avanzar al pago cuando quieras.
+            Agrega productos desde la tienda para revisar tu compra y avanzar al pago cuando quieras.
           </p>
           
           <a 
@@ -91,13 +91,13 @@ const checkoutBreadcrumbs = [
               <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-guacamole-b" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
               </svg>
-              <span class="text-sm font-semibold">Envío gratis +$50</span>
+              <span class="text-sm font-semibold">Pedido fresco y recién preparado</span>
             </div>
             <div class="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-[var(--color-heading-sub)]">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-guacamole-b" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span class="text-sm font-semibold">Garantía de 30 días</span>
+              <span class="text-sm font-semibold">Acompañamiento por WhatsApp y correo</span>
             </div>
           </div>
         </div>
@@ -114,7 +114,7 @@ const checkoutBreadcrumbs = [
               Revisar pedido
             </h1>
             <p class="text-gray-600 mt-2">
-              Revisá tus productos, completá tus datos con calma y dejá listo el paso a pago sin fricción.
+              Revisa tus productos, completa tus datos con calma y deja listo el paso al pago sin fricción.
             </p>
             <div class="mt-4 flex flex-wrap gap-3 text-sm text-gray-600">
               <span class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 shadow-sm">
@@ -250,7 +250,7 @@ const checkoutBreadcrumbs = [
                         class="premium-field"
                         placeholder="Ej. Juan Pérez"
                       />
-                      <p class="field-help">Usá nombre y apellido para identificar tu pedido más rápido.</p>
+                      <p class="field-help">Usa nombre y apellido para identificar tu pedido más rápido.</p>
                       <p class="field-error hidden" data-field-error></p>
                     </div>
 
@@ -267,9 +267,9 @@ const checkoutBreadcrumbs = [
                         autocomplete="tel"
                         inputmode="tel"
                         class="premium-field"
-                        placeholder="+58 412 123 4567"
+                        placeholder="+57 300 123 4567"
                       />
-                      <p class="field-help">Te contactamos por acá si surge algo con la entrega en la WEMI.</p>
+                      <p class="field-help">Te contactamos por aquí si surge algo con la entrega en la WEMI.</p>
                       <p class="field-error hidden" data-field-error></p>
                     </div>
                   </div>
@@ -288,7 +288,7 @@ const checkoutBreadcrumbs = [
                       class="premium-field"
                       placeholder="juan@email.com"
                     />
-                    <p class="field-help">Acá te llega la confirmación del pedido y cualquier actualización relevante.</p>
+                    <p class="field-help">Aquí te llega la confirmación del pedido y cualquier actualización relevante.</p>
                     <p class="field-error hidden" data-field-error></p>
                   </div>
                 </div>
@@ -297,7 +297,7 @@ const checkoutBreadcrumbs = [
                 <div class="space-y-4 pt-4">
                   <div class="border-b border-gray-100 pb-2">
                     <h3 class="text-lg font-bold text-[var(--color-heading)]">Entrega y referencias</h3>
-                    <p class="text-sm text-gray-500">Dejanos el contexto justo para que la coordinación salga prolija desde el primer mensaje.</p>
+                    <p class="text-sm text-gray-500">Déjanos el contexto justo para que la coordinación salga clara desde el primer mensaje.</p>
                   </div>
 
                   <!-- Método de entrega -->
@@ -316,7 +316,7 @@ const checkoutBreadcrumbs = [
                         />
                         <span>
                           <span class="block font-semibold text-[var(--color-heading-sub)]">En la WEMI</span>
-                          <span class="mt-1 block text-sm text-gray-500">Retirás o recibís tu pedido en el punto fijo habilitado por ahora.</span>
+                          <span class="mt-1 block text-sm text-gray-500">Recoges o recibes tu pedido en el punto fijo habilitado por ahora.</span>
                         </span>
                       </label>
                       <label class="checkout-delivery-option checkout-delivery-option-disabled flex items-start gap-3 rounded-2xl px-4 py-4 transition-all" aria-disabled="true">
@@ -396,7 +396,7 @@ const checkoutBreadcrumbs = [
 
                 <div class="checkout-review-note rounded-2xl px-4 py-4 text-sm text-gray-600">
                   <p class="font-semibold text-[var(--color-heading-sub)]">Antes de pasar a pago</p>
-                  <p class="mt-1">Chequeá que el teléfono y el email esté bien escrito. El punto de entrega ya queda fijado automáticamente en la WEMI.</p>
+                  <p class="mt-1">Verifica que el teléfono y el correo estén bien escritos. El punto de entrega queda fijado automáticamente en la WEMI.</p>
                 </div>
               </form>
             </div>
@@ -453,13 +453,13 @@ const checkoutBreadcrumbs = [
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-guacamole-b" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                     </svg>
-                    <span class="font-semibold">Envío gratis en pedidos +$50</span>
+                    <span class="font-semibold">Entrega sin costo en pedidos desde $50</span>
                   </div>
                   <div class="flex items-center gap-2 text-sm text-[var(--color-heading-sub)]">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-guacamole-b" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span class="font-semibold">Garantía de devolución de 30 días</span>
+                    <span class="font-semibold">Acompañamiento en tu pedido hasta la entrega</span>
                   </div>
                   <div class="flex items-center gap-2 text-sm text-[var(--color-heading-sub)]">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-guacamole-b" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -483,7 +483,7 @@ const checkoutBreadcrumbs = [
                   </span>
                 </button>
                 <p id="checkout-feedback" class="min-h-[1.25rem] text-center text-xs font-medium text-gray-500" aria-live="polite">
-                  Completá tus datos y, cuando esté todo listo, seguimos al pago sin perder tu pedido.
+                  Completa tus datos y, cuando todo esté listo, continuamos al pago sin perder tu pedido.
                 </p>
                 
                 <!-- Secure Badge -->
@@ -491,7 +491,7 @@ const checkoutBreadcrumbs = [
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
-                  Compra 100% segura
+                  Compra con seguimiento claro
                 </p>
               </div>
             </div>
@@ -663,7 +663,7 @@ document.addEventListener('astro:page-load',()=>{
   };
 
   const validationMessages: Record<string, string> = {
-    fullName: 'Decinos tu nombre completo para identificar el pedido.',
+    fullName: 'Compártenos tu nombre completo para identificar el pedido.',
     phone: 'Necesitamos un teléfono válido para coordinar cualquier detalle.',
     email: 'Ingresá un correo válido para enviarte la confirmación.',
     address: 'La dirección de entrega en la WEMI debe quedar cargada.',
@@ -754,7 +754,7 @@ document.addEventListener('astro:page-load',()=>{
     }
 
     if (field.validity.typeMismatch && field.name === 'email') {
-      return 'Ese correo no parece válido. Revisalo antes de seguir.';
+      return 'Ese correo no parece válido. Revísalo antes de continuar.';
     }
 
     return '';
@@ -790,7 +790,7 @@ document.addEventListener('astro:page-load',()=>{
     });
 
     if (invalidFields.length > 0) {
-      showFormFeedback('Hay algunos datos para ajustar antes de pasar al pago. Revisá los campos marcados y seguimos.');
+      showFormFeedback('Hay algunos datos por ajustar antes de pasar al pago. Revisa los campos marcados y continuamos.');
       invalidFields[0].focus();
       return false;
     }
@@ -872,7 +872,7 @@ document.addEventListener('astro:page-load',()=>{
       
       // Check form validity
       if (!validateForm()) {
-        setCheckoutFeedback('Falta completar algunos datos antes de pasar al pago.', 'error');
+        setCheckoutFeedback('Faltan algunos datos antes de pasar al pago.', 'error');
         return;
       }
 
@@ -885,8 +885,8 @@ document.addEventListener('astro:page-load',()=>{
 
       if (error || !data) {
         console.error(error);
-        showFormFeedback(error?.message ?? 'No pudimos crear tu pedido. Revisá los datos e intentá otra vez.');
-        setCheckoutFeedback('Hubo un problema al persistir el pedido. No seguimos hasta dejarlo bien guardado.', 'error');
+        showFormFeedback(error?.message ?? 'No pudimos crear tu pedido. Revisa los datos e inténtalo de nuevo.');
+        setCheckoutFeedback('Hubo un problema al guardar el pedido. No continuaremos hasta dejarlo bien registrado.', 'error');
         setProceedPending(false, 'Continuar a medios de pago');
         return;
       }
