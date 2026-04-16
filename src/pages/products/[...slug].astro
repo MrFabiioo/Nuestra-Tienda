@@ -25,6 +25,8 @@ type RelatedProductCard = {
     slug: string;
 };
 
+const isEnabled = 'isEnabled' in product ? (product as any).isEnabled !== false : true;
+
 const sizes = product.sizes
     .split(',')
     .map((size) => size.trim())
@@ -112,36 +114,56 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
 
                     <hr class="detail-divider"/>
 
-                    <!-- Size -->
-                    <div class="space-y-2.5">
-                        <p class="field-label">Tamaño</p>
-                        <ul class="flex flex-wrap gap-2">
-                            {sizes.map((t) => (
-                                <li class="size-chip" data-size-option="true">{t.trim()}</li>
-                            ))}
-                        </ul>
-                    </div>
+                    {isEnabled ? (
+                        <>
+                            <!-- Size -->
+                            <div class="space-y-2.5">
+                                <p class="field-label">Tamaño</p>
+                                <ul class="flex flex-wrap gap-2">
+                                    {sizes.map((t) => (
+                                        <li class="size-chip" data-size-option="true">{t.trim()}</li>
+                                    ))}
+                                </ul>
+                            </div>
 
-                    <!-- Quantity -->
-                    <div class="space-y-2.5">
-                        <p class="field-label">Cantidad <span class="qty-max-hint">(máx. 5)</span></p>
-                        <div class="flex items-center gap-3">
-                            <button id="decrement" class="qty-btn-group" aria-label="Disminuir cantidad" disabled>−</button>
-                            <input id="quantity-input" class="qty-input" type="number" value="1" readonly/>
-                            <button id="increment" class="qty-btn-group" aria-label="Aumentar cantidad">+</button>
+                            <!-- Quantity -->
+                            <div class="space-y-2.5">
+                                <p class="field-label">Cantidad <span class="qty-max-hint">(máx. 5)</span></p>
+                                <div class="flex items-center gap-3">
+                                    <button id="decrement" class="qty-btn-group" aria-label="Disminuir cantidad" disabled>−</button>
+                                    <input id="quantity-input" class="qty-input" type="number" value="1" readonly/>
+                                    <button id="increment" class="qty-btn-group" aria-label="Aumentar cantidad">+</button>
+                                </div>
+                            </div>
+
+                            <!-- CTA -->
+                            <div class="space-y-2 pt-1">
+                                <button id="add-card" class="add-to-cart-btn" disabled aria-disabled="true">
+                                    <span id="add-card-label">Elegí un tamaño</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 8a2 2 0 100-4 2 2 0 000 4z" />
+                                    </svg>
+                                </button>
+                                <p id="cart-feedback-note" class="theme-text-muted min-h-[1.25rem] text-xs font-medium" aria-live="polite"></p>
+                            </div>
+                        </>
+                    ) : (
+                        <!-- Producto deshabilitado — bloque informativo -->
+                        <div class="disabled-product-notice">
+                            <div class="disabled-product-notice__icon" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="disabled-product-notice__title">Producto próximamente disponible</p>
+                                <p class="disabled-product-notice__body">Este producto no está disponible para compra en este momento. Volvé a revisarlo pronto.</p>
+                            </div>
+                            <a href="/tienda" class="disabled-product-notice__cta">
+                                Ver otros productos
+                            </a>
                         </div>
-                    </div>
-
-                    <!-- CTA -->
-                    <div class="space-y-2 pt-1">
-                        <button id="add-card" class="add-to-cart-btn" disabled aria-disabled="true">
-                            <span id="add-card-label">Elegí un tamaño</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 8a2 2 0 100-4 2 2 0 000 4z" />
-                            </svg>
-                        </button>
-                        <p id="cart-feedback-note" class="theme-text-muted min-h-[1.25rem] text-xs font-medium" aria-live="polite"></p>
-                    </div>
+                    )}
 
                 </div>
             </div>
@@ -417,6 +439,63 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
         color: var(--color-text-subtle);
         box-shadow: none;
         cursor: not-allowed;
+    }
+
+    /* ── Disabled product notice ── */
+    .disabled-product-notice {
+        display: flex;
+        flex-direction: column;
+        gap: 0.875rem;
+        border-radius: 1.25rem;
+        border: 1px solid color-mix(in srgb, var(--color-danger, #ef4444) 30%, var(--color-border) 70%);
+        background: color-mix(in srgb, var(--color-danger, #ef4444) 6%, var(--color-surface-elevated) 94%);
+        padding: 1.25rem 1.375rem;
+    }
+
+    .disabled-product-notice__icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 9999px;
+        background: color-mix(in srgb, var(--color-danger, #ef4444) 12%, transparent);
+        color: var(--color-danger, #ef4444);
+        flex-shrink: 0;
+    }
+
+    .disabled-product-notice__title {
+        font-size: 0.9375rem;
+        font-weight: 700;
+        color: var(--color-text);
+        margin-bottom: 0.25rem;
+    }
+
+    .disabled-product-notice__body {
+        font-size: 0.8125rem;
+        line-height: 1.55;
+        color: var(--color-text-muted);
+    }
+
+    .disabled-product-notice__cta {
+        display: inline-flex;
+        align-items: center;
+        align-self: flex-start;
+        border-radius: 9999px;
+        border: 1px solid var(--color-border);
+        background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+        color: var(--color-text-muted);
+        padding: 0.375rem 1rem;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .disabled-product-notice__cta:hover {
+        border-color: var(--color-accent);
+        color: var(--color-accent);
+        background: color-mix(in srgb, var(--color-surface-soft) 84%, var(--color-accent) 16%);
     }
 
     /* ── Related Products ── */

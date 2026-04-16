@@ -40,6 +40,7 @@ const PROTECTED_ADMIN_ACTIONS = new Set([
   'deleteProduct',
   'deleteProductImage',
   'toggleFeatured',
+  'toggleEnabled',
   'getCategories',
   'createUpdateCategory',
   'deleteCategory',

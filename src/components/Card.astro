@@ -9,9 +9,10 @@ const product = Astro.props;
 // Support both flat structure and legacy nested structure
 const displayProduct = product.product ?? product;
 const currentImage = displayProduct.images.split(',');
+const isEnabled = displayProduct.isEnabled === null || displayProduct.isEnabled === undefined ? true : Boolean(displayProduct.isEnabled);
 ---
 
-<article class="product-card product-card-theme group relative overflow-hidden rounded-2xl transition-all duration-300 ease-out hover:-translate-y-1">
+<article class:list={["product-card product-card-theme group relative overflow-hidden rounded-2xl transition-all duration-300 ease-out", { "product-card--disabled": !isEnabled, "hover:-translate-y-1": isEnabled }]}>
     <a href={`products/${displayProduct.slug}`} class="flex flex-col h-full">
         <!-- Imagen con proporción fija -->
         <div class="product-card__media relative aspect-[4/3] overflow-hidden">
@@ -22,10 +23,23 @@ const currentImage = displayProduct.images.split(',');
                 loading="lazy"
             />
             
-            <!-- Tag artesanal -->
-            <span class="product-card__badge absolute left-3 top-3 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest shadow-sm">
-                Artesanal
-            </span>
+            {isEnabled ? (
+                <span class="product-card__badge absolute left-3 top-3 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest shadow-sm">
+                    Artesanal
+                </span>
+            ) : (
+                <span class="absolute left-3 top-3 rounded-full bg-neutral-500 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-white shadow-sm">
+                    Próximamente
+                </span>
+            )}
+
+            {!isEnabled && (
+                <div class="absolute inset-0 flex items-center justify-center" style="background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.35) 100%);">
+                    <span class="rounded-xl bg-black/60 px-4 py-2 text-xs font-bold uppercase tracking-widest text-white backdrop-blur-sm">
+                        Producto deshabilitado
+                    </span>
+                </div>
+            )}
         </div>
 
         <!-- Contenido -->
@@ -45,12 +59,18 @@ const currentImage = displayProduct.images.split(',');
                 <span class="product-card__price text-lg font-bold tracking-tight sm:text-xl">
                     ${displayProduct.price.toLocaleString()}
                 </span>
-                <span class="product-card__cta inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-semibold transition-all duration-200 sm:px-4">
-                    Ver más
-                    <svg class="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </span>
+                {isEnabled ? (
+                    <span class="product-card__cta inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-semibold transition-all duration-200 sm:px-4">
+                        Ver más
+                        <svg class="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </span>
+                ) : (
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-neutral-300 px-3.5 py-2 text-sm font-semibold text-neutral-500 sm:px-4 dark:bg-neutral-700 dark:text-neutral-400">
+                        Próximamente
+                    </span>
+                )}
             </div>
         </div>
     </a>
@@ -73,6 +93,18 @@ const currentImage = displayProduct.images.split(',');
     .product-card-theme:hover {
         border-color: var(--color-border-strong);
         box-shadow: 0 16px 32px var(--color-shadow-strong);
+    }
+
+    .product-card--disabled {
+        filter: grayscale(1);
+        opacity: 0.72;
+        cursor: default;
+    }
+
+    .product-card--disabled:hover {
+        border-color: var(--color-border);
+        box-shadow: 0 12px 28px var(--color-shadow-soft);
+        transform: none;
     }
 
     .product-card__media {

@@ -17,6 +17,7 @@ import { getProductsByCategory } from "./products/get-products-by-category";
 import { getProductsByPage } from "./products/getProducts";
 import { loadProductsFromCart } from "./products/load-products-from-cart.action";
 import { toggleFeatured } from "./products/toggle-featured.action";
+import { toggleEnabled } from "./products/toggle-enabled.action";
 import { login } from "./auth/login.action";
 import { logout } from "./auth/logout.action";
 import { createOrder } from "./orders/create-order.action";
@@ -25,6 +26,7 @@ import { getOrders } from "./orders/get-orders";
 import { deleteOrder } from "./orders/delete-order.action";
 import { reviewPayment } from "./orders/review-payment.action";
 import { uploadPaymentProof } from "./orders/upload-payment-proof.action";
+
 
 export const server = {
     // ── Public actions (storefront) ──────────────────────────────────
@@ -46,6 +48,7 @@ export const server = {
     deleteProduct,
     deleteProductImage,
     toggleFeatured,
+    toggleEnabled,
     getCategories,
     createUpdateCategory,
     deleteCategory,
@@ -61,4 +64,5 @@ export const server = {
     // ── Public settings ──────────────────────────────────────────────
     getPaymentQr,
     getPaymentSettings,
+    
 };

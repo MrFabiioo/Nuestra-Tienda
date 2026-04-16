@@ -1,6 +1,7 @@
 import { defineAction } from "astro:actions";
 import { Category, db, Product, ProductImage, sql } from "astro:db";
 import { z } from "astro:schema";
+import { ensureIsEnabledColumnExists } from "@utils/product-db";
 
 interface ProductByCategory {
     categoryId: string;
@@ -13,6 +14,7 @@ interface ProductByCategory {
         sizes: string;
         slug: string;
         image: string;
+        isEnabled: boolean;
     }[];
 }
 
@@ -20,12 +22,13 @@ export const getProductsByCategory = defineAction({
     accept: 'json',
     input: z.object({}).optional(),
     handler: async () => {
+        await ensureIsEnabledColumnExists();
         // Get all categories
         const categories = await db.select().from(Category);
-        
+
         // Get all products with their first image and category name
         const productQuery = sql`
-            SELECT 
+            SELECT
                 a.id,
                 a.title,
                 a.description,
@@ -33,6 +36,7 @@ export const getProductsByCategory = defineAction({
                 a.sizes,
                 a.slug,
                 a.categoryId,
+                a.isEnabled,
                 (SELECT name FROM ${Category} WHERE id = a.categoryId) as categoryName,
                 (SELECT image FROM ${ProductImage} WHERE productId = a.id LIMIT 1) as image
             FROM ${Product} a
@@ -74,7 +78,8 @@ export const getProductsByCategory = defineAction({
                         price: Number(p.price),
                         sizes: String(p.sizes),
                         slug: String(p.slug),
-                        image: p.image ? String(p.image) : '/images/no-image.png'
+                        image: p.image ? String(p.image) : '/images/no-image.png',
+                        isEnabled: p.isEnabled === null || p.isEnabled === undefined ? true : Boolean(p.isEnabled),
                     }))
                 });
             }
@@ -92,7 +97,8 @@ export const getProductsByCategory = defineAction({
                     price: Number(p.price),
                     sizes: String(p.sizes),
                     slug: String(p.slug),
-                    image: p.image ? String(p.image) : '/images/no-image.png'
+                    image: p.image ? String(p.image) : '/images/no-image.png',
+                    isEnabled: p.isEnabled === null || p.isEnabled === undefined ? true : Boolean(p.isEnabled),
                 }))
             });
         }

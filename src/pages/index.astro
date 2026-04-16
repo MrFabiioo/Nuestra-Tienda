@@ -36,10 +36,9 @@ if (error) {
             name: product.title,
             price: product.price,
             description: product.description,
-            // Use the image URL as-is from DB (Cloudinary full URL or /images/no-image.png fallback)
-            // The action already handles the fallback correctly
             image: product.image,
-            slug: `/products/${product.slug}`
+            slug: `/products/${product.slug}`,
+            isEnabled: product.isEnabled,
         }))
     }));
 }
@@ -118,11 +117,7 @@ if (error) {
     <SliderImageAutomatic featuredProducts={featuredProducts} />
 
     <!-- Barra de señales de confianza — debajo del slider, antes del catálogo -->
-    <div class="hero-echo hero-echo--trust">
-        <div class="hero-echo__inner">
-            <TrustBanner />
-        </div>
-    </div>
+    <TrustBanner />
 
     <!-- Catálogo de productos por categoría -->
     <section id="catalogo" aria-label="Catálogo destacado">

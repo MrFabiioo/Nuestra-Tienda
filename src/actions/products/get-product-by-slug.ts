@@ -1,7 +1,7 @@
 
 
 import { emptyRecipe } from "@utils/recipe-calculator";
-import { ensureFeaturedColumnExists, isMissingRecipeColumnError } from "@utils/product-db";
+import { ensureFeaturedColumnExists, ensureIsEnabledColumnExists, isMissingRecipeColumnError } from "@utils/product-db";
 import { defineAction } from "astro:actions";
 import { Category, db, eq, Product, ProductImage, sql } from "astro:db";
 import { z } from "astro:schema";
@@ -17,6 +17,7 @@ type ProductBySlugRow = {
     categoryId: string | null;
     recipe: ProductRecipe;
     featured: boolean;
+    isEnabled: boolean;
 };
 
 const newProduct = {
@@ -41,10 +42,11 @@ function parseRecipe(raw: string | null | undefined): ProductRecipe {
 
 async function findProductBySlug(slug: string) {
     await ensureFeaturedColumnExists();
+    await ensureIsEnabledColumnExists();
 
     try {
         const { rows } = await db.run(sql`
-            SELECT id, title, description, price, sizes, slug, categoryId, recipe, featured
+            SELECT id, title, description, price, sizes, slug, categoryId, recipe, featured, isEnabled
             FROM ${Product}
             WHERE slug = ${slug}
             LIMIT 1
@@ -59,6 +61,7 @@ async function findProductBySlug(slug: string) {
             ...productRow,
             recipe: parseRecipe(productRow.recipe as string | null | undefined),
             featured: Boolean(productRow.featured),
+            isEnabled: productRow.isEnabled === null || productRow.isEnabled === undefined ? true : Boolean(productRow.isEnabled),
         } as ProductBySlugRow;
     } catch (error) {
         if (!isMissingRecipeColumnError(error)) {
@@ -66,7 +69,7 @@ async function findProductBySlug(slug: string) {
         }
 
         const { rows } = await db.run(sql`
-            SELECT id, title, description, price, sizes, slug, categoryId, featured
+            SELECT id, title, description, price, sizes, slug, categoryId, featured, isEnabled
             FROM ${Product}
             WHERE slug = ${slug}
             LIMIT 1
@@ -81,6 +84,7 @@ async function findProductBySlug(slug: string) {
             ...productRow,
             recipe: emptyRecipe(),
             featured: Boolean(productRow.featured),
+            isEnabled: productRow.isEnabled === null || productRow.isEnabled === undefined ? true : Boolean(productRow.isEnabled),
         } as ProductBySlugRow;
     }
 }

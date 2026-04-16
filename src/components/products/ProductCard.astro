@@ -7,6 +7,7 @@ interface Props {
   image: string;
   slug?: string;
   borderColor?: string;
+  isEnabled?: boolean;
 }
 
 const {
@@ -16,11 +17,12 @@ const {
   description,
   image,
   slug = "#",
+  isEnabled = true,
 } = Astro.props;
 ---
 
-<article 
-  class="product-card group relative overflow-hidden rounded-2xl border transition-all duration-300 ease-out hover:-translate-y-1"
+<article
+  class:list={["product-card group relative overflow-hidden rounded-2xl border transition-all duration-300 ease-out", { "product-card--disabled": !isEnabled, "hover:-translate-y-1": isEnabled }]}
 >
   <a href={slug} class="flex flex-col h-full">
     <!-- Imagen -->
@@ -32,10 +34,23 @@ const {
         loading="lazy"
       />
 
-      <!-- Tag artesanal — identidad de marca -->
-      <span class="absolute top-3 left-3 bg-guacamole-b text-white text-[10px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-full shadow-sm">
-        Artesanal
-      </span>
+      {isEnabled ? (
+        <span class="absolute top-3 left-3 bg-guacamole-b text-white text-[10px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-full shadow-sm">
+          Artesanal
+        </span>
+      ) : (
+        <span class="absolute top-3 left-3 bg-neutral-500 text-white text-[10px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-full shadow-sm">
+          Próximamente
+        </span>
+      )}
+
+      {!isEnabled && (
+        <div class="product-card__disabled-overlay absolute inset-0 flex items-center justify-center">
+          <span class="rounded-xl bg-black/60 px-4 py-2 text-xs font-bold uppercase tracking-widest text-white backdrop-blur-sm">
+            Producto deshabilitado
+          </span>
+        </div>
+      )}
     </div>
 
     <!-- Contenido -->
@@ -57,18 +72,32 @@ const {
         <span class="product-card__price text-lg font-bold tracking-tight text-guacamole-a sm:text-xl">
           ${price.toLocaleString()}
         </span>
-        <span class="product-card__link-pill inline-flex items-center gap-1.5 rounded-full bg-guacamole-b px-3.5 py-2 text-sm font-semibold text-white transition-all duration-200 group-hover:bg-guacamole-a group-hover:shadow-md group-hover:shadow-guacamole-a/25 sm:px-4">
-          Ver más
-          <svg class="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
-          </svg>
-        </span>
+        {isEnabled ? (
+          <span class="product-card__link-pill inline-flex items-center gap-1.5 rounded-full bg-guacamole-b px-3.5 py-2 text-sm font-semibold text-white transition-all duration-200 group-hover:bg-guacamole-a group-hover:shadow-md group-hover:shadow-guacamole-a/25 sm:px-4">
+            Ver más
+            <svg class="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+            </svg>
+          </span>
+        ) : (
+          <span class="inline-flex items-center gap-1.5 rounded-full bg-neutral-300 px-3.5 py-2 text-sm font-semibold text-neutral-500 sm:px-4 dark:bg-neutral-700 dark:text-neutral-400">
+            Próximamente
+          </span>
+        )}
       </div>
     </div>
   </a>
 
-  <!-- Botón agregar al carrito — solo visible si hay id de producto -->
-  {id && (
+  <!-- Botón agregar al carrito — solo visible si hay id de producto y está habilitado -->
+  {id && !isEnabled && (
+    <div class="product-card__cart-zone flex items-center justify-center border-t px-4 py-3">
+      <span class="text-xs font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+        No disponible para compra
+      </span>
+    </div>
+  )}
+
+  {id && isEnabled && (
     <div class="product-card__cart-zone add-to-cart-zone flex flex-col gap-3 border-t border-neutral-100 bg-neutral-50/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
       <!-- Selector de cantidad -->
       <div class="qty-control flex items-center gap-1">
@@ -242,6 +271,26 @@ const {
   .product-card:hover {
     border-color: var(--color-border-strong);
     box-shadow: 0 18px 36px var(--color-shadow-soft);
+  }
+
+  .product-card--disabled {
+    filter: grayscale(1);
+    opacity: 0.72;
+    cursor: default;
+  }
+
+  .product-card--disabled:hover {
+    border-color: var(--color-border);
+    box-shadow: 0 12px 28px var(--color-shadow-soft);
+    transform: none;
+  }
+
+  .product-card__disabled-overlay {
+    background: linear-gradient(
+      to bottom,
+      transparent 40%,
+      rgba(0, 0, 0, 0.35) 100%
+    );
   }
 
   .product-card__media {
