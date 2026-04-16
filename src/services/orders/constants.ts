@@ -44,7 +44,6 @@ export const PAYMENT_PROOF_MIME_TYPES = [
 ] as const;
 
 export const PAYMENT_PROOF_MAX_BYTES = 8 * 1024 * 1024;
-export const ORDER_TAX_RATE = 0.15;
 
 export type OrderStatus = typeof ORDER_STATUS[keyof typeof ORDER_STATUS];
 export type PaymentStatus = typeof PAYMENT_STATUS[keyof typeof PAYMENT_STATUS];

@@ -187,8 +187,7 @@ export default function CartButton({ pendingOrderUrl = null }: CartButtonProps) 
     ? 'Abrir carrito. Tenés un pago pendiente para retomar.'
     : 'Abrir carrito';
 
-  const tax = $totalPriceValue * 0.15;
-  const grandTotal = $totalPriceValue + tax;
+  const grandTotal = $totalPriceValue;
 
   return (
     <>
@@ -375,8 +374,8 @@ export default function CartButton({ pendingOrderUrl = null }: CartButtonProps) 
                   <span class="theme-text-primary font-semibold">{formatPrice($totalPriceValue)}</span>
                 </div>
                 <div class="theme-text-muted flex justify-between items-center text-sm">
-                  <span class="font-medium">Impuesto (15%)</span>
-                  <span class="theme-text-primary font-semibold">{formatPrice(tax)}</span>
+                  <span class="font-medium">Envío</span>
+                  <span class="theme-text-primary font-semibold">Gratis</span>
                 </div>
                 <div class="flex justify-between items-center border-t pt-2" style={{ borderColor: 'var(--color-border-strong)' }}>
                   <span class="theme-text-primary text-base font-black uppercase tracking-wide">Total</span>

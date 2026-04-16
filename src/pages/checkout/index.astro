@@ -396,7 +396,7 @@ const checkoutBreadcrumbs = [
 
                 <div class="checkout-review-note rounded-2xl px-4 py-4 text-sm text-gray-600">
                   <p class="font-semibold text-[var(--color-heading-sub)]">Antes de pasar a pago</p>
-                  <p class="mt-1">Chequeá que el teléfono esté bien escrito. El punto de entrega ya queda fijado automáticamente en la WEMI.</p>
+                  <p class="mt-1">Chequeá que el teléfono y el email esté bien escrito. El punto de entrega ya queda fijado automáticamente en la WEMI.</p>
                 </div>
               </form>
             </div>
@@ -425,8 +425,8 @@ const checkoutBreadcrumbs = [
                   </div>
                   
                   <div class="flex justify-between items-center">
-                    <span class="font-semibold">Impuesto (15%)</span>
-                    <span class="font-bold text-[var(--color-heading-sub)]">{Formatter.currency(total * 0.15)}</span>
+                    <span class="font-semibold">Envío</span>
+                    <span class="font-bold text-guacamole-b">Gratis</span>
                   </div>
                 </div>
                 
@@ -435,13 +435,13 @@ const checkoutBreadcrumbs = [
                   class="border-t-2 border-guacamole-b/20 pt-4"
                   data-checkout-total
                   data-subtotal={total}
-                  data-tax={total * 0.15}
-                  data-total={total * 1.15}
+                  data-tax={0}
+                  data-total={total}
                 >
                   <div class="flex justify-between items-center">
                     <span class="text-xl font-black text-[var(--color-heading)] uppercase">Total</span>
                     <span class="text-2xl font-black text-guacamole-a">
-                      {Formatter.currency(total * 1.15)}
+                      {Formatter.currency(total)}
                     </span>
                   </div>
                 </div>

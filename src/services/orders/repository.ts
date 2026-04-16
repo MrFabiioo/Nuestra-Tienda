@@ -5,7 +5,7 @@ import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import type { CartItem } from '@interfaces/cart-item';
 import { serializeDbDate } from '@utils/db-date';
 import { mapAdminOrderSummary, type AdminOrderSummary } from './admin-order-summary.mapper';
-import { ORDER_STATUS, ORDER_TAX_RATE, PAYMENT_METHODS, PAYMENT_STATUS, roundMoney } from './constants';
+import { ORDER_STATUS, PAYMENT_METHODS, PAYMENT_STATUS, roundMoney } from './constants';
 
 export type CartOrderLine = {
   productId: string;
@@ -119,8 +119,8 @@ export async function getCartOrderLinesFromContext(context: ActionAPIContext) {
 
 export function buildOrderTotals(items: CartOrderLine[]) {
   const subtotal = roundMoney(items.reduce((acc, item) => acc + item.lineTotal, 0));
-  const tax = roundMoney(subtotal * ORDER_TAX_RATE);
-  const total = roundMoney(subtotal + tax);
+  const tax = 0;
+  const total = subtotal;
 
   return { subtotal, tax, total };
 }

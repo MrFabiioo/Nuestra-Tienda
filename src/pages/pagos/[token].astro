@@ -109,7 +109,7 @@ const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
         <BreadcrumbTrail
           items={paymentBreadcrumbs}
           eyebrow="Paso 2 de 2"
-          summary="Este link ya está ligado a un pedido real. Pagás, subís el comprobante y después seguimos todo desde estado persistido, como corresponde."
+          summary="Tu pedido está confirmado y esperándote. Realiza el pago y adjunta el comprobante aquí mismo para activar el envío. ¡Del resto me ocupo Yo!."
         />
 
         <!-- Page header -->
@@ -150,7 +150,7 @@ const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
             )}
             <span class="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2 text-[var(--color-text-subtle)] shadow-sm">
               <span class="h-2 w-2 rounded-full bg-[var(--color-border-strong)]"></span>
-              Siguiente: confirmación del comercio
+              Siguiente: confirmación del pedido
             </span>
           </div>
         </div>
@@ -167,7 +167,7 @@ const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
               <div>
                 <p class="font-black uppercase tracking-wide text-[var(--color-heading)]">¡Comprobante recibido!</p>
                 <p class="mt-1 text-sm text-[var(--color-text-muted)]">
-                  Tu pedido quedó <strong class="text-guacamole-b">en revisión</strong>. El comercio va a verificar tu pago y te va a avisar cuando todo esté confirmado. Si tenés dudas, guardá el número de pedido como referencia.
+                  Tu pedido quedó <strong class="text-guacamole-b">en revisión</strong>. Voy a verificar tu pago y te va a aviso cuando todo esté confirmado. Si tienes dudas, guarda el número de pedido como referencia.
                 </p>
               </div>
             </div>
@@ -183,7 +183,20 @@ const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
                 <div>
                   <p class="text-xs font-bold uppercase tracking-[0.22em] text-guacamole-b">Referencia pública</p>
                   <h2 class="mt-2 text-2xl font-black uppercase tracking-wide text-[var(--color-heading)]">Pedido {order.id.slice(0, 8)}</h2>
-                  <p class="mt-2 text-sm text-[var(--color-text-muted)]">Cliente: <strong class="text-[var(--color-heading-sub)]">{order.customerName}</strong> · {order.customerEmail} · {order.customerPhone}</p>
+                  <dl class="mt-5 grid gap-2.5 border-t border-[var(--color-border)] pt-4 sm:grid-cols-3 sm:gap-0 md:[grid-template-columns:minmax(0,1fr)_minmax(0,1.2fr)_minmax(0,1fr)]">
+                    <div class="min-w-0 border-b border-[var(--color-border)] py-2.5 first:pt-0 last:pb-0 last:border-b-0 sm:border-b-0 sm:py-0 sm:pr-5">
+                      <dt class="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--color-text-muted)]">Cliente</dt>
+                      <dd class="mt-1.5 text-sm font-semibold leading-6 text-[var(--color-heading-sub)]">{order.customerName}</dd>
+                    </div>
+                    <div class="min-w-0 border-b border-[var(--color-border)] py-2.5 last:pb-0 last:border-b-0 sm:border-b-0 sm:border-l sm:border-[var(--color-border)] sm:px-5 sm:py-0 md:px-6">
+                      <dt class="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--color-text-muted)]">Email</dt>
+                      <dd class="mt-1.5 text-[13px] font-medium leading-6 tracking-[0.01em] text-[var(--color-heading)] [overflow-wrap:anywhere] sm:text-sm">{order.customerEmail}</dd>
+                    </div>
+                    <div class="min-w-0 py-2.5 last:pb-0 sm:border-l sm:border-[var(--color-border)] sm:pl-5 sm:py-0 md:pl-6 md:text-right">
+                      <dt class="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--color-text-muted)]">Teléfono</dt>
+                      <dd class="mt-1.5 text-sm leading-6 text-[var(--color-heading-sub)]">{order.customerPhone}</dd>
+                    </div>
+                  </dl>
                 </div>
                 <span class="premium-chip self-start">{statusLabel}</span>
               </div>
@@ -249,7 +262,7 @@ const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
                         )}
                       </div>
                       <p class="font-bold text-guacamole-a">{method.title}</p>
-                      <p class="mt-1 text-xs text-[var(--color-text-subtle)]">{method.subtitle}</p>
+                      <p class="mt-1 text-xs text-[var(--color-text-subtle)]"></p>
                     </div>
                   ))}
                 </div>
@@ -379,7 +392,7 @@ const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
                 </div>
               ) : (
                 <div class="mt-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-5 text-sm text-[var(--color-text-muted)]">
-                  Este pedido ya no necesita una nueva carga desde el link público. Si ves algo raro, revisalo con el comercio desde el backoffice.
+                  Este pedido ya está en sistema. ¡No necesitas hacer nada más por aquí! Si tienes alguna duda con los datos escribeme 3502018487.
                 </div>
               )}
             </article>
@@ -421,8 +434,8 @@ const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
                   <strong class="text-[var(--color-heading-sub)]">{Formatter.currency(order.subtotal)}</strong>
                 </div>
                 <div class="flex justify-between">
-                  <span>Impuesto</span>
-                  <strong class="text-[var(--color-heading-sub)]">{Formatter.currency(order.tax)}</strong>
+                  <span>Envío</span>
+                  <strong class="text-guacamole-b">Gratis</strong>
                 </div>
                 <div class="flex justify-between rounded-xl bg-[var(--color-surface-soft)] px-3 py-2 text-base font-black text-[var(--color-heading)]">
                   <span>Total</span>
