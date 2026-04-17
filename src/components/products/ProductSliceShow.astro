@@ -1,66 +1,230 @@
 ---
-import 'swiper/css';
-import 'swiper/css/pagination';
+import { resolveProductImageList } from '@utils/product-images';
 
 interface Props {
   images: string[];
+  alt?: string;
 }
 
-const { images } = Astro.props;
+const { images, alt = 'Imagen del producto' } = Astro.props;
 
-const fullImages = images.map((image) => {
-  return image.startsWith('http')
-    ? image
-    : `${import.meta.env.PUBLIC_URL}/images/products/${image}`;
+const fullImages = resolveProductImageList(images, {
+  baseUrl: import.meta.env.PUBLIC_URL,
 });
+
+const hasMultipleImages = fullImages.length > 1;
 ---
 
-<!-- Slider main container -->
-<div class="swiper col-span-1 sm:col-span-2">
-  <!-- Additional required wrapper -->
-  <div class="swiper-wrapper">
-    <!-- Slides -->
-    {
-      fullImages.map((image) => (
-        <div class="swiper-slide">
-          <div class="w-full h-full flex items-center justify-center">
+<section class="product-gallery" data-product-gallery aria-label={`Galería de ${alt}`}>
+  <div class="product-gallery__viewport" data-gallery-viewport tabindex="0">
+    <div class="product-gallery__track">
+      {
+        fullImages.map((image, index) => (
+          <figure class="product-gallery__slide" data-gallery-slide>
             <img
               src={image}
-              alt="Product image"
-              class="w-full h-full object-cover"
+              alt={hasMultipleImages ? `${alt} · imagen ${index + 1}` : alt}
+              class="product-gallery__image"
+              width="1200"
+              height="900"
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              loading={index === 0 ? 'eager' : 'lazy'}
+              fetchpriority={index === 0 ? 'high' : 'auto'}
+              decoding={index === 0 ? 'sync' : 'async'}
             />
-          </div>
-        </div>
-      ))
-    }
+          </figure>
+        ))
+      }
+    </div>
   </div>
-  <!-- If we need pagination -->
-  <div class="swiper-pagination"></div>
-</div>
+
+  {hasMultipleImages && (
+    <>
+      <div class="product-gallery__controls">
+        <button type="button" class="product-gallery__arrow" data-gallery-prev aria-label="Imagen anterior">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+        <button type="button" class="product-gallery__arrow" data-gallery-next aria-label="Siguiente imagen">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="product-gallery__pagination" role="tablist" aria-label="Navegación de imágenes">
+        {fullImages.map((_, index) => (
+          <button
+            type="button"
+            class:list={['product-gallery__dot', { 'product-gallery__dot--active': index === 0 }]}
+            data-gallery-dot
+            data-gallery-index={index}
+            role="tab"
+            aria-label={`Ver imagen ${index + 1} de ${fullImages.length}`}
+            aria-selected={index === 0 ? 'true' : 'false'}
+          ></button>
+        ))}
+      </div>
+    </>
+  )}
+</section>
 
 <style>
-  .swiper {
+  .product-gallery {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    min-height: 100%;
+  }
+
+  .product-gallery__viewport {
+    width: 100%;
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .product-gallery__viewport::-webkit-scrollbar {
+    display: none;
+  }
+
+  .product-gallery__viewport:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--color-accent) 82%, white 18%);
+    outline-offset: -3px;
+  }
+
+  .product-gallery__track {
+    display: flex;
     width: 100%;
     height: 100%;
   }
-  .swiper-slide {
+
+  .product-gallery__slide {
+    flex: 0 0 100%;
     width: 100%;
     height: 100%;
+    margin: 0;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  .product-gallery__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .product-gallery__controls {
+    position: absolute;
+    top: 50%;
+    left: 1rem;
+    right: 1rem;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: none;
+  }
+
+  .product-gallery__arrow {
+    pointer-events: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    background: rgba(17, 24, 39, 0.48);
+    color: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(10px);
+    transition: transform 180ms ease, background-color 180ms ease, opacity 180ms ease;
+  }
+
+  .product-gallery__arrow:hover:not(:disabled) {
+    transform: translateY(-1px);
+    background: rgba(17, 24, 39, 0.7);
+  }
+
+  .product-gallery__arrow:focus-visible,
+  .product-gallery__dot:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.95);
+    outline-offset: 2px;
+  }
+
+  .product-gallery__arrow:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .product-gallery__arrow svg {
+    width: 1.15rem;
+    height: 1.15rem;
+  }
+
+  .product-gallery__pagination {
+    position: absolute;
+    left: 50%;
+    bottom: 1rem;
+    transform: translateX(-50%);
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.45rem;
+    max-width: calc(100% - 7rem);
+    z-index: 1;
+  }
+
+  .product-gallery__dot {
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 999px;
+    border: none;
+    background: rgba(255, 255, 255, 0.4);
+    transition: transform 180ms ease, background-color 180ms ease;
+  }
+
+  .product-gallery__dot:hover,
+  .product-gallery__dot--active {
+    transform: scale(1.08);
+    background: rgba(255, 255, 255, 0.92);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .product-gallery__viewport {
+      scroll-behavior: auto;
+    }
+
+    .product-gallery__arrow,
+    .product-gallery__dot {
+      transition: none;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .product-gallery__controls {
+      left: 0.75rem;
+      right: 0.75rem;
+    }
+
+    .product-gallery__pagination {
+      bottom: 0.85rem;
+      max-width: calc(100% - 6rem);
+    }
   }
 </style>
 
 <script>
-  import Swiper from 'swiper';
-  import { Pagination } from 'swiper/modules';
-  document.addEventListener('astro:page-load',()=>{
+  import { initProductGalleries } from '../../scripts/product-gallery';
 
-    const swiper = new Swiper('.swiper', {
-      // If we need pagination
-      pagination: {
-        el: '.swiper-pagination',
-      },
-  
-      modules: [Pagination],
-    });
-  })
+  const run = () => initProductGalleries(document);
+
+  run();
+  document.addEventListener('astro:page-load', run);
 </script>
