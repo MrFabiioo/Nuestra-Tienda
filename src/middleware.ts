@@ -26,6 +26,7 @@
 import { defineMiddleware } from 'astro:middleware';
 import { verifyFirebaseIdToken } from './firebase/auth';
 import { SESSION_COOKIE_NAME } from './firebase/config';
+import { isSensitiveSeoPath } from './utils/seo';
 
 const ADMIN_LOGIN_PATH = '/admin/login';
 const ADMIN_LOGOUT_PATH = '/admin/logout';
@@ -78,6 +79,15 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
 
   const isAdminPageRequest = pathname.startsWith('/admin');
+  const isSensitiveRoute = isSensitiveSeoPath(pathname);
+
+  const applySensitiveSeoHeaders = (response: Response) => {
+    if (isSensitiveRoute) {
+      response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+    }
+
+    return response;
+  };
 
   // Extraer nombre de action desde la URL — es confiable siempre.
   // getActionContext puede devolver undefined con FormData multipart.
@@ -88,7 +98,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   // Solo procesar páginas admin y actions protegidas del admin
   if (!isAdminPageRequest && !isProtectedAdminAction) {
-    return next();
+    return applySensitiveSeoHeaders(await next());
   }
 
   const projectId = import.meta.env.PUBLIC_FIREBASE_PROJECT_ID as string | undefined;
@@ -96,13 +106,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // Si el project ID no está configurado, bloquear el área admin con mensaje claro
   if (!projectId) {
     if (pathname === ADMIN_LOGIN_PATH) {
-      return next();
+      return applySensitiveSeoHeaders(await next());
     }
-    return new Response(
+    return applySensitiveSeoHeaders(new Response(
       'Error de configuración: PUBLIC_FIREBASE_PROJECT_ID no está definido. ' +
         'Obtenerlo en Firebase Console > Configuración del proyecto > General > "ID del proyecto".',
       { status: 503 }
-    );
+    ));
   }
 
   const sessionCookie = context.cookies.get(SESSION_COOKIE_NAME)?.value;
@@ -110,7 +120,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // ── Paths públicos de admin (login, logout) ──────────────────────────────────
   if (isAdminPageRequest && PUBLIC_ADMIN_PATHS.has(pathname)) {
     if (pathname === ADMIN_LOGOUT_PATH) {
-      return next();
+      return applySensitiveSeoHeaders(await next());
     }
 
     // /admin/login: si ya está autenticado, redirigir al dashboard
@@ -118,21 +128,21 @@ export const onRequest = defineMiddleware(async (context, next) => {
       const user = await verifyFirebaseIdToken(sessionCookie, projectId);
       if (user) {
         context.locals.user = user;
-        return context.redirect(ADMIN_DEFAULT_PATH);
+        return applySensitiveSeoHeaders(context.redirect(ADMIN_DEFAULT_PATH));
       }
       // Token inválido/expirado → limpiar cookie y mostrar login
       context.cookies.delete(SESSION_COOKIE_NAME, { path: '/' });
     }
-    return next();
+    return applySensitiveSeoHeaders(await next());
   }
 
   // ── Ruta admin protegida ─────────────────────────────────────────────────────
   if (!sessionCookie) {
     if (isProtectedAdminAction) {
-      return next();
+      return applySensitiveSeoHeaders(await next());
     }
     const encodedRedirect = encodeURIComponent(pathname);
-    return context.redirect(`${ADMIN_LOGIN_PATH}?redirect=${encodedRedirect}`);
+    return applySensitiveSeoHeaders(context.redirect(`${ADMIN_LOGIN_PATH}?redirect=${encodedRedirect}`));
   }
 
   const user = await verifyFirebaseIdToken(sessionCookie, projectId);
@@ -141,10 +151,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
     // Token inválido o expirado → limpiar cookie y redirigir al login
     context.cookies.delete(SESSION_COOKIE_NAME, { path: '/' });
     if (isProtectedAdminAction) {
-      return next();
+      return applySensitiveSeoHeaders(await next());
     }
     const encodedRedirect = encodeURIComponent(pathname);
-    return context.redirect(`${ADMIN_LOGIN_PATH}?redirect=${encodedRedirect}`);
+    return applySensitiveSeoHeaders(context.redirect(`${ADMIN_LOGIN_PATH}?redirect=${encodedRedirect}`));
   }
 
   // ── Autenticado ───────────────────────────────────────────────────────────────
@@ -160,5 +170,5 @@ export const onRequest = defineMiddleware(async (context, next) => {
     response.headers.set('Vary', 'Cookie');
   }
 
-  return response;
+  return applySensitiveSeoHeaders(response);
 });

@@ -32,7 +32,7 @@ export type AdminAnalyticsDashboardData = {
   byHour: AnalyticsByHourItem[];
   byStatus: AnalyticsSeriesItem[];
   byPaymentMethod: AnalyticsSeriesItem[];
-  neverOrdered: Array<{ id: string; title: string; price: number }>;
+  neverOrdered: Array<{ id: string; slug: string; title: string; price: number }>;
   profitabilityCoverage: {
     rankedProducts: number;
     productsWithoutEstimatedCost: number;
@@ -638,7 +638,7 @@ function renderDashboardMarkup(data: AdminAnalyticsDashboardData) {
                         <p class="text-xs" style="color: var(--color-text-subtle);">Sin pedidos históricos registrados</p>
                       </td>
                       <td class="text-sm" style="color: var(--color-text-muted);">Revisar posicionamiento, precio o continuidad en catálogo.</td>
-                      <td><a href="/admin/products/${encodeURIComponent(product.id)}" class="premium-action-secondary text-xs">Editar producto</a></td>
+                      <td><a href="/admin/products/${encodeURIComponent(product.slug)}" class="premium-action-secondary text-xs">Editar producto</a></td>
                     </tr>
                   `).join('')}
                 </tbody>

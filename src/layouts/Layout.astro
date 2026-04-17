@@ -3,20 +3,33 @@ import "../styles/global.css";
 import Navbar from "../components/Navbar.astro";
 import Footer from "../components/Footer.astro";
 import { ClientRouter } from "astro:transitions";
+import { BRAND_NAME, DEFAULT_OG_IMAGE_PATH, buildPageTitle, getSiteOrigin, isSensitiveSeoPath, toAbsoluteUrl } from "../utils/seo";
 
 interface Props {
 	title?: string;
 	description?: string;
 	image?: string;
+	robots?: string;
+	canonical?: string;
+	noindex?: boolean;
+	ogType?: string;
 }
 
 const {
-	title = "Nuestra Tienda",
+	title,
 	description = "Guacamole y recetas frescas con una experiencia de compra clara, ágil y deliciosa.",
-	image = "/og-image.png",
+	image = DEFAULT_OG_IMAGE_PATH,
+	robots,
+	canonical,
+	noindex = false,
+	ogType = "website",
 } = Astro.props;
 
-const pageTitle = title === "Nuestra Tienda" ? title : `${title} | Nuestra Tienda`;
+const siteOrigin = getSiteOrigin(Astro.url);
+const canonicalUrl = toAbsoluteUrl(canonical, siteOrigin ?? Astro.url) ?? (siteOrigin ? new URL(Astro.url.pathname, siteOrigin) : undefined);
+const socialImageUrl = toAbsoluteUrl(image, siteOrigin ?? Astro.url);
+const pageTitle = buildPageTitle(title);
+const robotsContent = robots ?? (noindex || isSensitiveSeoPath(Astro.url.pathname) ? "noindex, nofollow" : "index, follow");
 ---
 
 <!doctype html>
@@ -28,10 +41,19 @@ const pageTitle = title === "Nuestra Tienda" ? title : `${title} | Nuestra Tiend
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<meta name="description" content={description} />
+		<meta name="robots" content={robotsContent} />
+		{canonicalUrl && <link rel="canonical" href={canonicalUrl.href} />}
 		<meta property="og:title" content={pageTitle} />
 		<meta property="og:description" content={description} />
-		<meta property="og:image" content={image} />
-		<meta property="og:type" content="website" />
+		{canonicalUrl && <meta property="og:url" content={canonicalUrl.href} />}
+		<meta property="og:site_name" content={BRAND_NAME} />
+		<meta property="og:locale" content="es_CO" />
+		{socialImageUrl && <meta property="og:image" content={socialImageUrl.href} />}
+		<meta property="og:type" content={ogType} />
+		<meta name="twitter:card" content={socialImageUrl ? "summary_large_image" : "summary"} />
+		<meta name="twitter:title" content={pageTitle} />
+		<meta name="twitter:description" content={description} />
+		{socialImageUrl && <meta name="twitter:image" content={socialImageUrl.href} />}
 		<title>{pageTitle}</title>
 		<script is:inline>
 			const storageKey = "guacashop-theme";

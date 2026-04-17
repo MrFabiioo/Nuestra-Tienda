@@ -45,7 +45,7 @@ type AnalyticsDatasets = {
     rankedProducts: number;
     productsWithoutEstimatedCost: ReturnType<typeof buildEstimatedProfitabilityRanking>['productsWithoutEstimatedCost'];
   };
-  neverOrdered: Array<{ id: string; title: string; price: number }>;
+  neverOrdered: Array<{ id: string; slug: string; title: string; price: number }>;
   byDayOfWeek: Array<{ day: number; dayName: string; count: number; revenue: number }>;
   byHour: Array<{ hour: number; count: number }>;
   byDay: Array<{ date: string; orders: number; revenue: number }>;
@@ -199,7 +199,7 @@ export async function getAnalyticsDatasets(range?: DateRange, adapter: DatabaseS
       GROUP BY oi.productId, oi.title, p.recipe
     `),
     adapter.run(sql`
-      SELECT p.id, p.title, p.price
+      SELECT p.id, p.slug, p.title, p.price
       FROM ${Product} p
       LEFT JOIN ${OrderItem} oi ON oi.productId = p.id
       WHERE oi.id IS NULL
@@ -301,6 +301,7 @@ export async function getAnalyticsDatasets(range?: DateRange, adapter: DatabaseS
     },
     neverOrdered: (neverOrderedResult.rows as Record<string, unknown>[]).map((row) => ({
       id: String(row.id),
+      slug: String(row.slug),
       title: String(row.title),
       price: Number(row.price),
     })),

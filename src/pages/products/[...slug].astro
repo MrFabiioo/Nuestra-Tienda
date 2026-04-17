@@ -63,9 +63,16 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
             image: candidate.image,
             slug: `/products/${candidate.slug}`,
         }));
+
+const primaryImage = images[0]?.image;
+const seoImage = primaryImage
+    ? (primaryImage.startsWith('http') || primaryImage.startsWith('data:')
+        ? primaryImage
+        : `/images/products/${primaryImage}`)
+    : undefined;
 ---
 
-<Layout title={product.title} description={product.description}>
+<Layout title={product.title} description={product.description} image={seoImage} ogType="product">
     <div class="theme-product-page mx-auto max-w-6xl px-4 py-6 sm:py-8 md:py-10">
 
         <!-- Breadcrumb minimal -->

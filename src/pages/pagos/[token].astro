@@ -101,9 +101,10 @@ if (order.payment.method && paymentMethodLabels[order.payment.method]) {
 const paymentMethodOptions = Array.from(paymentMethodOptionsSet);
 
 const hasSelectablePaymentMethods = paymentMethodOptions.length > 0;
+const primaryImage = order.items[0]?.image;
 ---
 
-<Layout title={`Pago pedido ${order.id.slice(0, 8)} | Guacamole Shop`} description="Revisa tu pedido y carga el comprobante de pago.">
+<Layout title={`Pago pedido ${order.id.slice(0, 8)}`} description="Revisa tu pedido y carga el comprobante de pago." image={primaryImage} noindex={true}>
   <main class="min-h-screen px-4 py-8 md:px-8">
     <div class="mx-auto max-w-6xl space-y-6">
         <BreadcrumbTrail

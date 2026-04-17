@@ -47,8 +47,8 @@ function createAnalyticsData(overrides: Partial<AnalyticsData> = {}): AnalyticsD
       },
     ],
     neverOrdered: [
-      { id: 'prod-1', title: 'Salsa ahumada', price: 12 },
-      { id: 'prod-2', title: 'Dip picante', price: 16 },
+      { id: 'prod-1', slug: 'salsa-ahumada', title: 'Salsa ahumada', price: 12 },
+      { id: 'prod-2', slug: 'dip-picante', title: 'Dip picante', price: 16 },
     ],
     byDayOfWeek: [
       { day: 0, dayName: 'Domingo', count: 2, revenue: 120 },
