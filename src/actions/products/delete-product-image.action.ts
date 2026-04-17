@@ -2,23 +2,26 @@
 
 import { ImageUpload } from "@utils/image-upload";
 import { defineAction } from "astro:actions";
-import { db, eq, ProductImage } from "astro:db";
+import { db, eq, ProductImage, sql } from "astro:db";
 import { z } from "astro:schema";
 import { requireAuth } from "../../firebase/guards";
+import { ensureImageMetaColumnsExist } from "@utils/product-db";
 
 export const deleteProductImage= defineAction({
         accept:'json',
         input:z.string(),
         handler:async(imageId, context)=>{
             requireAuth(context);
-            
-            const [productImage] = await db.select().from(ProductImage).where(eq(ProductImage.id,imageId))
+            await ensureImageMetaColumnsExist();
+
+            const { rows } = await db.run(sql`SELECT id, image FROM ${ProductImage} WHERE id = ${imageId} LIMIT 1`);
+            const productImage = rows[0] as { id: string; image: string } | undefined;
 
             if (!productImage) {
                 throw new Error(`image with id ${imageId} not found`);    
             }
 
-            const deleted = await db.delete(ProductImage).where(eq(ProductImage.id,imageId));
+            await db.run(sql`DELETE FROM ${ProductImage} WHERE id = ${imageId}`);
 
             if(productImage.image.includes('http')){
                 await ImageUpload.delete(productImage.image);

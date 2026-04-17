@@ -4,7 +4,7 @@ import { defineAction } from "astro:actions";
 import { Category, count, db, Product, ProductImage, sql } from "astro:db";
 import { z } from "astro:schema";
 import type {ProductWithImages} from '../../interfaces/products-with-images.interface'
-import { ensureIsEnabledColumnExists } from "@utils/product-db";
+import { ensureImageMetaColumnsExist, ensureIsEnabledColumnExists } from "@utils/product-db";
 
 export const getProductsByPage= defineAction({
         accept:'json',
@@ -15,6 +15,7 @@ export const getProductsByPage= defineAction({
         handler:async({page,limit})=>{
             page = page <= 0 ? 1 : page;
             await ensureIsEnabledColumnExists();
+            await ensureImageMetaColumnsExist();
             const [totalRecords] = await db.select({count: count()}).from(Product);
             //console.log(`totalRecords : ${totalRecords[0]}`)
             const totalPages  = Math.ceil(totalRecords.count/limit);
@@ -32,11 +33,14 @@ export const getProductsByPage= defineAction({
 
                 select a.*,
                 (select GROUP_CONCAT(image,',') from
-                    (select * from ${ProductImage} where productId = a.id limit 2)
+                    (select image from ${ProductImage} where productId = a.id
+                     order by COALESCE(isCard, 0) desc, COALESCE(sortOrder, 9999), rowid
+                     limit 2)
                 ) as images,
                 (select name from ${Category} where id = a.categoryId) as categoryName,
                 (select slug from ${Category} where id = a.categoryId) as categorySlug
                 from ${Product} a
+                ORDER BY COALESCE(a.isEnabled, 1) DESC, a.title
                 LIMIT ${limit} OFFSET ${(page-1)*limit};
 
             `

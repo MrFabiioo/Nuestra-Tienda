@@ -1,7 +1,7 @@
 
 
 import { emptyRecipe } from "@utils/recipe-calculator";
-import { ensureFeaturedColumnExists, ensureIsEnabledColumnExists, isMissingRecipeColumnError } from "@utils/product-db";
+import { ensureFeaturedColumnExists, ensureImageMetaColumnsExist, ensureIsEnabledColumnExists, isMissingRecipeColumnError } from "@utils/product-db";
 import { defineAction } from "astro:actions";
 import { Category, db, eq, Product, ProductImage, sql } from "astro:db";
 import { z } from "astro:schema";
@@ -43,6 +43,7 @@ function parseRecipe(raw: string | null | undefined): ProductRecipe {
 async function findProductBySlug(slug: string) {
     await ensureFeaturedColumnExists();
     await ensureIsEnabledColumnExists();
+    await ensureImageMetaColumnsExist();
 
     try {
         const { rows } = await db.run(sql`
@@ -105,7 +106,19 @@ export const getProductBySlug = defineAction({
                 throw new Error(`Producto de nombre ${slug} no encontrado`);
             }
 
-            const images = await db.select().from(ProductImage).where(eq(ProductImage.productId, productRow.id));
+            const { rows: imageRows } = await db.run(sql`
+                SELECT id, productId, image, sortOrder, isCard
+                FROM ${ProductImage}
+                WHERE productId = ${productRow.id}
+                ORDER BY COALESCE(sortOrder, 9999), rowid
+            `);
+            const images = (imageRows as any[]).map(r => ({
+                id: r.id as string,
+                productId: r.productId as string,
+                image: r.image as string,
+                sortOrder: r.sortOrder as number | null,
+                isCard: Boolean(r.isCard),
+            }));
             const [category] = productRow.categoryId
                 ? await db.select().from(Category).where(eq(Category.id, productRow.categoryId))
                 : [undefined];

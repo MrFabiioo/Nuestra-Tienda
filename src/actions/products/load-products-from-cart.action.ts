@@ -2,40 +2,52 @@
 
 import type { CartItem } from "@interfaces/cart-item";
 import { defineAction } from "astro:actions";
-import { db, eq, inArray, Product, ProductImage } from "astro:db";
-import { z } from "astro:schema";
+import { db, inArray, Product, ProductImage, sql } from "astro:db";
+import { ensureImageMetaColumnsExist } from "@utils/product-db";
 
 export const loadProductsFromCart= defineAction({
         accept:'json',
-        //input:z.object({}),
         handler:async(_,{cookies})=>{
             const cart = JSON.parse(cookies.get('cart')?.value ?? '[]') as CartItem[];
             if(cart.length ===0) return [];
-            const productId = cart.map((item)=>item.productId);
-            const dbProducts = await db.select().from(Product).innerJoin(ProductImage,eq(Product.id,ProductImage.productId)).where(inArray(Product.id,productId))
 
-            //console.log('product Cart: ',dbProducts)
+            await ensureImageMetaColumnsExist();
+
+            const productIds = cart.map((item)=>item.productId);
+
+            const products = await db.select().from(Product).where(inArray(Product.id, productIds));
+
+            const imageMap = new Map<string, string>();
+            await Promise.all(products.map(async (product) => {
+                const { rows } = await db.run(sql`
+                    SELECT COALESCE(
+                        (SELECT image FROM ${ProductImage} WHERE productId = ${product.id} AND isCard = 1 LIMIT 1),
+                        (SELECT image FROM ${ProductImage} WHERE productId = ${product.id} ORDER BY COALESCE(sortOrder, 9999), rowid LIMIT 1)
+                    ) as image
+                `);
+                const image = (rows[0] as any)?.image as string | null;
+                if (image) imageMap.set(product.id, image);
+            }));
 
             return cart.map(item =>{
-                const dbProduct = dbProducts.find(product=> product.Product.id === item.productId );
-                if (!dbProduct) {
+                const product = products.find(p => p.id === item.productId);
+                if (!product) {
                     throw new Error(`ERROR: el producto con id: ${item.productId} no fue encontrado !!!`);
-                    
                 }
 
-                const {title,price,slug} = dbProduct.Product
-                const  image = dbProduct.ProductImage.image;
+                const image = imageMap.get(item.productId) ?? null;
 
                 return {
-                    productId:item.productId,
-                    title:title,
-                    sizes:  item.size,
-                    quantity:item.quantity,
-                    price:price,
-                    slug:slug,
-                    image: image.startsWith('http') ? image : `${import.meta.env.PUBLIC_URL}/images/products/${image}`
-                }
-
-            }) ;
+                    productId: item.productId,
+                    title: product.title,
+                    sizes: item.size,
+                    quantity: item.quantity,
+                    price: product.price,
+                    slug: product.slug,
+                    image: image
+                        ? (image.startsWith('http') ? image : `${import.meta.env.PUBLIC_URL}/images/products/${image}`)
+                        : `${import.meta.env.PUBLIC_URL}/images/no-image.png`
+                };
+            });
         }
     })

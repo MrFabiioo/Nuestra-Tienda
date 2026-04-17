@@ -11,6 +11,7 @@ import { getCategories } from "./categories/get-categories";
 import { createUpdateProduct } from "./products/create-update-product.action";
 import { deleteProduct } from "./products/delete-product.action";
 import { deleteProductImage } from "./products/delete-product-image.action";
+import { updateProductImagesMeta } from "./products/update-product-images-meta.action";
 import { getFeaturedProducts } from "./products/get-featured-products";
 import { getProductBySlug } from "./products/get-product-by-slug";
 import { getProductsByCategory } from "./products/get-products-by-category";
@@ -47,6 +48,7 @@ export const server = {
     createUpdateProduct,
     deleteProduct,
     deleteProductImage,
+    updateProductImagesMeta,
     toggleFeatured,
     toggleEnabled,
     getCategories,

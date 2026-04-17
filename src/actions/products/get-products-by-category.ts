@@ -1,7 +1,7 @@
 import { defineAction } from "astro:actions";
 import { Category, db, Product, ProductImage, sql } from "astro:db";
 import { z } from "astro:schema";
-import { ensureIsEnabledColumnExists } from "@utils/product-db";
+import { ensureImageMetaColumnsExist, ensureIsEnabledColumnExists } from "@utils/product-db";
 
 interface ProductByCategory {
     categoryId: string;
@@ -23,6 +23,7 @@ export const getProductsByCategory = defineAction({
     input: z.object({}).optional(),
     handler: async () => {
         await ensureIsEnabledColumnExists();
+        await ensureImageMetaColumnsExist();
         // Get all categories
         const categories = await db.select().from(Category);
 
@@ -38,9 +39,12 @@ export const getProductsByCategory = defineAction({
                 a.categoryId,
                 a.isEnabled,
                 (SELECT name FROM ${Category} WHERE id = a.categoryId) as categoryName,
-                (SELECT image FROM ${ProductImage} WHERE productId = a.id LIMIT 1) as image
+                COALESCE(
+                    (SELECT image FROM ${ProductImage} WHERE productId = a.id AND isCard = 1 LIMIT 1),
+                    (SELECT image FROM ${ProductImage} WHERE productId = a.id ORDER BY COALESCE(sortOrder, 9999), rowid LIMIT 1)
+                ) as image
             FROM ${Product} a
-            ORDER BY a.categoryId, a.title;
+            ORDER BY a.categoryId, COALESCE(a.isEnabled, 1) DESC, a.title;
         `;
         
         const { rows } = await db.run(productQuery);

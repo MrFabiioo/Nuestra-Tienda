@@ -1,4 +1,4 @@
-import { db, Product, sql } from "astro:db";
+import { db, Product, ProductImage, sql } from "astro:db";
 
 function isMissingColumn(error: unknown, column: string): boolean {
   if (!(error instanceof Error)) return false;
@@ -10,6 +10,8 @@ function isMissingColumn(error: unknown, column: string): boolean {
 export const isMissingRecipeColumnError    = (e: unknown) => isMissingColumn(e, 'recipe');
 export const isMissingFeaturedColumnError  = (e: unknown) => isMissingColumn(e, 'featured');
 export const isMissingIsEnabledColumnError = (e: unknown) => isMissingColumn(e, 'isEnabled');
+export const isMissingSortOrderColumnError = (e: unknown) => isMissingColumn(e, 'sortOrder');
+export const isMissingIsCardColumnError    = (e: unknown) => isMissingColumn(e, 'isCard');
 
 function isDuplicateColumnError(error: unknown, column: string): boolean {
   if (!(error instanceof Error)) return false;
@@ -18,6 +20,7 @@ function isDuplicateColumnError(error: unknown, column: string): boolean {
 
 let featuredColumnReady: Promise<void> | null = null;
 let isEnabledColumnReady: Promise<void> | null = null;
+let imageMetaColumnsReady: Promise<void> | null = null;
 
 export async function ensureFeaturedColumnExists() {
   if (!featuredColumnReady) {
@@ -71,4 +74,37 @@ export async function ensureIsEnabledColumnExists() {
   }
 
   await isEnabledColumnReady;
+}
+
+export async function ensureImageMetaColumnsExist() {
+  if (!imageMetaColumnsReady) {
+    imageMetaColumnsReady = (async () => {
+      try {
+        await db.run(sql`SELECT sortOrder FROM ${ProductImage} LIMIT 1`);
+      } catch (error) {
+        if (!isMissingSortOrderColumnError(error)) throw error;
+        try {
+          await db.run(sql`ALTER TABLE ${ProductImage} ADD COLUMN sortOrder INTEGER`);
+        } catch (e) {
+          if (!isDuplicateColumnError(e, 'sortOrder')) throw e;
+        }
+      }
+
+      try {
+        await db.run(sql`SELECT isCard FROM ${ProductImage} LIMIT 1`);
+      } catch (error) {
+        if (!isMissingIsCardColumnError(error)) throw error;
+        try {
+          await db.run(sql`ALTER TABLE ${ProductImage} ADD COLUMN isCard INTEGER DEFAULT 0`);
+        } catch (e) {
+          if (!isDuplicateColumnError(e, 'isCard')) throw e;
+        }
+      }
+    })().catch((error) => {
+      imageMetaColumnsReady = null;
+      throw error;
+    });
+  }
+
+  await imageMetaColumnsReady;
 }

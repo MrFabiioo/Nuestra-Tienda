@@ -39,6 +39,8 @@ export const ProductImage = defineTable({
     id: column.text({ primaryKey: true }),
     productId: column.text({ references: () => Product.columns.id }),
     image: column.text(),
+    sortOrder: column.number({ optional: true }),
+    isCard: column.boolean({ optional: true }),
   },
 });
 
