@@ -515,13 +515,18 @@ select {
 
     .admin-table-shell {
         @apply overflow-hidden rounded-[1.75rem];
+        position: relative;
+        width: 100%;
         border: 1px solid var(--color-border);
         background: color-mix(in srgb, var(--color-surface) 96%, transparent);
         box-shadow: 0 18px 42px var(--color-shadow-strong);
     }
 
     .admin-table-scroll {
+        width: 100%;
         overflow-x: auto;
+        overscroll-behavior-x: contain;
+        scrollbar-gutter: stable both-edges;
     }
 
     .admin-table {

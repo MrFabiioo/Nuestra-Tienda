@@ -409,25 +409,44 @@ const initialRecipe: ProductRecipe = (product as any).recipe ?? {
               <p class="admin-table-subcopy text-[0.72rem] font-bold uppercase tracking-[0.18em]">Galería actual</p>
               <h3 class="admin-table-title mt-1 text-lg font-bold">Imágenes del producto</h3>
             </div>
-            <span class="admin-table-badge admin-table-badge--accent">
-              {images.length} {images.length === 1 ? 'imagen' : 'imágenes'}
-            </span>
+            <div class="flex items-center gap-3">
+              <span class="admin-table-badge admin-table-badge--accent">
+                {images.length} {images.length === 1 ? 'imagen' : 'imágenes'}
+              </span>
+              {images.length > 0 && (
+                <button
+                  id="btn-save-images-meta"
+                  type="button"
+                  class="premium-action-secondary text-sm"
+                >
+                  Guardar configuración
+                </button>
+              )}
+            </div>
           </div>
+
+          {images.length > 0 && (
+            <p class="px-5 py-3 text-xs" style="color: var(--color-text-subtle);">
+              Usá ↑↓ para reordenar el slider. La imagen marcada con ★ se muestra en la tarjeta del catálogo.
+            </p>
+          )}
 
           <div class="admin-table-scroll">
             <table class="admin-table min-w-[640px]">
               <thead>
                 <tr>
+                  <th>Orden</th>
                   <th>Preview</th>
                   <th>Referencia</th>
+                  <th class="text-center">Card</th>
                   <th class="text-right">Acción</th>
                 </tr>
               </thead>
 
-              <tbody>
+              <tbody id="images-tbody">
                 {images.length === 0 ? (
                   <tr>
-                    <td colspan="3">
+                    <td colspan="5">
                       <div class="flex flex-col items-center justify-center px-4 py-10 text-center">
                         <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full" style="background: var(--color-surface-soft); color: var(--color-accent);">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-6 w-6">
@@ -442,8 +461,27 @@ const initialRecipe: ProductRecipe = (product as any).recipe ?? {
                     </td>
                   </tr>
                 ) : (
-                  images.map(({image,id}, index) => (
-                    <tr id={id}>
+                  images.map(({image, id, isCard}, index) => (
+                    <tr class="image-row" data-id={id} data-is-card={isCard ? 'true' : 'false'}>
+                      <td>
+                        <div class="flex flex-col gap-1">
+                          <button
+                            type="button"
+                            class="img-order-btn"
+                            data-action="move-up"
+                            aria-label="Mover arriba"
+                            disabled={index === 0}
+                          >↑</button>
+                          <button
+                            type="button"
+                            class="img-order-btn"
+                            data-action="move-down"
+                            aria-label="Mover abajo"
+                            disabled={index === images.length - 1}
+                          >↓</button>
+                        </div>
+                      </td>
+
                       <td>
                         <div class="admin-table-thumbnail">
                           <ProductImage
@@ -455,10 +493,19 @@ const initialRecipe: ProductRecipe = (product as any).recipe ?? {
                       </td>
 
                       <td>
-                        <div class="min-w-[16rem]">
+                        <div class="min-w-[12rem]">
                           <p class="admin-table-title text-sm font-bold">Imagen {index + 1}</p>
                           <p class="admin-table-copy mt-1 break-all text-xs leading-relaxed">{image}</p>
                         </div>
+                      </td>
+
+                      <td class="text-center">
+                        <button
+                          type="button"
+                          class:list={['btn-set-card', { 'btn-set-card--active': isCard }]}
+                          aria-label="Usar como imagen de la tarjeta"
+                          title="Usar como imagen de la tarjeta"
+                        >★</button>
                       </td>
 
                       <td class="text-right">
@@ -677,6 +724,61 @@ const initialRecipe: ProductRecipe = (product as any).recipe ?? {
       border-color: color-mix(in srgb, var(--color-accent) 36%, var(--color-border));
       background: color-mix(in srgb, var(--color-accent) 14%, var(--color-surface));
       color: var(--color-accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 14%, transparent);
+    }
+
+    /* ── Image order & card buttons ────────────────────────────── */
+    .img-order-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.75rem;
+      height: 1.75rem;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+      line-height: 1;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: 1px solid var(--color-border);
+      background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+      color: var(--color-text-muted);
+    }
+
+    .img-order-btn:hover:not(:disabled) {
+      border-color: var(--color-border-strong);
+      background: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface));
+      color: var(--color-accent);
+    }
+
+    .img-order-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .btn-set-card {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: 1px solid var(--color-border);
+      background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+      color: var(--color-text-muted);
+    }
+
+    .btn-set-card:hover {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+    }
+
+    .btn-set-card--active {
+      border-color: var(--color-accent) !important;
+      background: color-mix(in srgb, var(--color-accent) 14%, var(--color-surface)) !important;
+      color: var(--color-accent) !important;
       box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 14%, transparent);
     }
 
@@ -1741,5 +1843,81 @@ document.addEventListener('astro:page-load', () => {
       window.location.reload();
     });
   }
+
+  // ── Image ordering & card selection ──────────────────────────────────
+  const tbody = document.getElementById('images-tbody');
+
+  function refreshOrderButtons() {
+    if (!tbody) return;
+    const rows = Array.from(tbody.querySelectorAll('.image-row'));
+    rows.forEach((row, idx) => {
+      const upBtn = row.querySelector<HTMLButtonElement>('[data-action="move-up"]');
+      const downBtn = row.querySelector<HTMLButtonElement>('[data-action="move-down"]');
+      if (upBtn) upBtn.disabled = idx === 0;
+      if (downBtn) downBtn.disabled = idx === rows.length - 1;
+    });
+  }
+
+  tbody?.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+
+    // Move up / down
+    const orderBtn = target.closest<HTMLButtonElement>('[data-action="move-up"],[data-action="move-down"]');
+    if (orderBtn && !orderBtn.disabled) {
+      const row = orderBtn.closest('.image-row') as HTMLElement | null;
+      if (!row) return;
+      const action = orderBtn.dataset.action;
+      if (action === 'move-up' && row.previousElementSibling?.classList.contains('image-row')) {
+        tbody.insertBefore(row, row.previousElementSibling);
+      } else if (action === 'move-down' && row.nextElementSibling?.classList.contains('image-row')) {
+        tbody.insertBefore(row.nextElementSibling, row);
+      }
+      refreshOrderButtons();
+      return;
+    }
+
+    // Card selection
+    const cardBtn = target.closest('.btn-set-card') as HTMLElement | null;
+    if (cardBtn) {
+      tbody.querySelectorAll('.image-row').forEach(r => {
+        (r as HTMLElement).dataset.isCard = 'false';
+        r.querySelector('.btn-set-card')?.classList.remove('btn-set-card--active');
+      });
+      const row = cardBtn.closest('.image-row') as HTMLElement | null;
+      if (row) {
+        row.dataset.isCard = 'true';
+        cardBtn.classList.add('btn-set-card--active');
+      }
+    }
+  });
+
+  const btnSaveImagesMeta = document.getElementById('btn-save-images-meta') as HTMLButtonElement | null;
+  btnSaveImagesMeta?.addEventListener('click', async () => {
+    if (!tbody) return;
+    const imageMeta = Array.from(tbody.querySelectorAll('.image-row')).map((row, index) => ({
+      id: (row as HTMLElement).dataset.id!,
+      sortOrder: index,
+      isCard: (row as HTMLElement).dataset.isCard === 'true',
+    }));
+
+    btnSaveImagesMeta.disabled = true;
+    const original = btnSaveImagesMeta.textContent;
+    btnSaveImagesMeta.textContent = 'Guardando...';
+
+    const { error } = await actions.updateProductImagesMeta({ images: imageMeta });
+
+    if (error) {
+      alert(`Error al guardar: ${error.message}`);
+      btnSaveImagesMeta.disabled = false;
+      btnSaveImagesMeta.textContent = original;
+      return;
+    }
+
+    btnSaveImagesMeta.textContent = '✓ Guardado';
+    setTimeout(() => {
+      btnSaveImagesMeta.disabled = false;
+      btnSaveImagesMeta.textContent = original;
+    }, 1800);
+  });
 });
 </script>
