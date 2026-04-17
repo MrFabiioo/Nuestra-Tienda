@@ -87,6 +87,18 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
                 <div class="product-hero__media relative min-h-[300px] md:min-h-[540px]">
                     <ProductSliceShow images={images.map(i=>i.image)}/>
                     <input type="hidden" id="product-image" value={images?.[0]?.image || ''}/>
+
+                    <!-- AI image disclaimer -->
+                    <div class="ai-photo-notice" aria-label="Nota sobre la imagen del producto">
+                        <span class="ai-photo-notice__icon" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
+                            </svg>
+                        </span>
+                        <p class="ai-photo-notice__text">
+                            Inspirada en lo real, perfeccionada con IA. Receta real con un destello de magia digital.
+                        </p>
+                    </div>
                 </div>
 
                 <!-- Info -->
@@ -238,6 +250,54 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
         width: 100%;
         height: 100%;
         object-fit: cover;
+    }
+
+    /* ── AI photo notice ── */
+    .ai-photo-notice {
+        position: absolute;
+        bottom: 1rem;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        white-space: nowrap;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(0, 0, 0, 0.52);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        padding: 0.35rem 0.85rem 0.35rem 0.65rem;
+        max-width: calc(100% - 2rem);
+    }
+
+    .ai-photo-notice__icon {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .ai-photo-notice__text {
+        font-size: 0.7rem;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+        color: rgba(255, 255, 255, 0.78);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        margin: 0;
+    }
+
+    @media (max-width: 480px) {
+        .ai-photo-notice {
+            bottom: 0.75rem;
+            max-width: calc(100% - 1.5rem);
+        }
+        .ai-photo-notice__text {
+            font-size: 0.65rem;
+        }
     }
 
     /* ── Badges ── */
