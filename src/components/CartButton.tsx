@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from 'preact/hooks';
 import { useStore } from '@nanostores/preact';
 import Cart from './svgs/Cart';
-import { cartItems, totalQuantity, totalPrice } from 'src/store/cart.store';
+import { cartItems, totalQuantity, totalPrice } from '../store/cart.store';
 import { CartCookiesClient } from '@utils/cart-cookies';
 import type { CartItem } from '@interfaces/cart-item';
 import {

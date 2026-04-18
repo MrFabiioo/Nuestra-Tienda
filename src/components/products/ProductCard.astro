@@ -131,9 +131,9 @@ const resolvedImage = resolveProductImageUrl(image, {
 </article>
 
 <script>
-  import { cartItems } from "src/store/cart.store";
-  import { CartCookiesClient } from "src/utils/cart-cookies";
-  import { emitCartFeedback, emitCartOpen } from "src/utils/cart-feedback";
+  import { cartItems } from "../../store/cart.store";
+  import { CartCookiesClient } from "@utils/cart-cookies";
+  import { emitCartFeedback, emitCartOpen } from "@utils/cart-feedback";
 
   document.addEventListener('astro:page-load', initProductCards);
   document.addEventListener('astro:beforematch', initProductCards);

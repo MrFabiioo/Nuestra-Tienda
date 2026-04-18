@@ -1,4 +1,4 @@
-import { cartItems } from 'src/store/cart.store';
+import { cartItems } from '../store/cart.store';
 import { CartCookiesClient } from '@utils/cart-cookies';
 import { emitCartFeedback } from '@utils/cart-feedback';
 

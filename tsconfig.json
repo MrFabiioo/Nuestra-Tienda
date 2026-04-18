@@ -10,15 +10,13 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "jsxImportSource": "preact",
-    "baseUrl": ".",
     "paths": {
-      "@layouts/*":["src/layouts/*"],
-      "@interfaces/*":["src/interfaces/*"],
-      "@utils/*":["src/utils/*"],
-      "@components/*":["src/components/*"],
-      "@svg/*":["src/components/svgs/*"],
-      "@data/*":["src/data/*"],
+      "@layouts/*": ["./src/layouts/*"],
+      "@interfaces/*": ["./src/interfaces/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@components/*": ["./src/components/*"],
+      "@svg/*": ["./src/components/svgs/*"],
+      "@data/*": ["./src/data/*"]
     }
   },
-  
 }
