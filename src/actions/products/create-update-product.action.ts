@@ -2,8 +2,9 @@
 
 import { ImageUpload } from "@utils/image-upload";
 import { isMissingRecipeColumnError } from "@utils/product-db";
-import { defineAction } from "astro:actions";
-import { db, eq, Product, ProductImage, sql } from "astro:db";
+import { serializeProductSizes } from "@utils/product-sizes";
+import { ActionError, defineAction } from "astro:actions";
+import { db, Product, ProductImage, sql } from "astro:db";
 import { z } from "astro:schema";
 import { v4 as UUID } from "uuid";
 import { requireAuth } from "../../firebase/guards";
@@ -61,6 +62,15 @@ export const createUpdateProduct = defineAction({
 
         const { id = UUID(), imageFiles, recipe: recipeRaw, ...rest } = form;
         rest.slug = rest.slug.toLowerCase().replace(/ /g, '-').trim();
+
+        const normalizedSizes = serializeProductSizes(rest.sizes);
+        if (!normalizedSizes) {
+            throw new ActionError({
+                code: 'BAD_REQUEST',
+                message: 'Agregá al menos un tamaño disponible antes de guardar el producto.',
+            });
+        }
+        rest.sizes = normalizedSizes;
 
         // Validar y serializar la receta; si no viene o es inválida, no se guarda
         let recipeJson: string | null = null;

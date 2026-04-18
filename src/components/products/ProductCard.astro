@@ -1,5 +1,6 @@
 ---
 import { resolveProductImageUrl } from '@utils/product-images';
+import { parseProductSizes } from '@utils/product-sizes';
 
 interface Props {
   id?: string;
@@ -7,6 +8,7 @@ interface Props {
   price: number;
   description: string;
   image: string;
+  sizes?: string;
   slug?: string;
   borderColor?: string;
   isEnabled?: boolean;
@@ -18,6 +20,7 @@ const {
   price,
   description,
   image,
+  sizes = '',
   slug = "#",
   isEnabled = true,
 } = Astro.props;
@@ -25,6 +28,8 @@ const {
 const resolvedImage = resolveProductImageUrl(image, {
   baseUrl: import.meta.env.PUBLIC_URL,
 });
+const availableSizes = parseProductSizes(sizes);
+const quickAddSize = availableSizes.length === 1 ? availableSizes[0] : null;
 ---
 
 <article
@@ -107,7 +112,7 @@ const resolvedImage = resolveProductImageUrl(image, {
     </div>
   )}
 
-  {id && isEnabled && (
+  {id && isEnabled && quickAddSize && (
     <div class="product-card__cart-zone add-to-cart-zone flex flex-col gap-3 border-t border-neutral-100 bg-neutral-50/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
       <!-- Selector de cantidad -->
       <div class="qty-control flex items-center gap-1">
@@ -122,10 +127,22 @@ const resolvedImage = resolveProductImageUrl(image, {
         data-product-name={name}
         data-product-price={price}
         data-product-image={resolvedImage}
+        data-product-size={quickAddSize}
         aria-live="polite"
       >
         Agregar
       </button>
+    </div>
+  )}
+
+  {id && isEnabled && !quickAddSize && (
+    <div class="product-card__cart-zone flex items-center justify-center border-t border-neutral-100 bg-neutral-50/60 px-4 py-3 sm:px-5">
+      <a
+        href={slug}
+        class="flex min-h-11 w-full items-center justify-center rounded-full border border-guacamole-b/20 px-3 py-2 text-sm font-bold uppercase tracking-wide text-guacamole-a transition-all duration-200 hover:border-guacamole-b hover:bg-guacamole-b hover:text-white hover:shadow-md hover:shadow-guacamole-a/20"
+      >
+        Elegir tamaño
+      </a>
     </div>
   )}
 </article>
@@ -163,14 +180,15 @@ const resolvedImage = resolveProductImageUrl(image, {
         const productName = btn.dataset.productName;
         const productPrice = parseFloat(btn.dataset.productPrice || '0');
         const productImage = btn.dataset.productImage;
+        const productSize = btn.dataset.productSize;
         
-        if (!productId) return;
+        if (!productId || !productSize) return;
         
         const zone = btn.closest('.add-to-cart-zone');
         const qtyDisplay = zone?.querySelector('.qty-value');
         const currentCart = CartCookiesClient.getCart();
         const existingItem = currentCart.find(
-          (item) => item.productId === productId && item.size === 'Normal'
+          (item) => item.productId === productId && item.size === productSize
         );
         const quantity = parseInt(qtyDisplay?.textContent || '1', 10);
 
@@ -180,7 +198,7 @@ const resolvedImage = resolveProductImageUrl(image, {
         
         const cart = CartCookiesClient.addItem({
           productId,
-          size: 'Normal',
+          size: productSize,
           quantity,
           name: productName,
           price: productPrice,
@@ -192,7 +210,7 @@ const resolvedImage = resolveProductImageUrl(image, {
           type: 'add',
           productName,
           quantity,
-          size: 'Normal',
+          size: productSize,
           totalItems: cart.reduce((total, item) => total + item.quantity, 0),
           message: existingItem
             ? `Agregamos ${quantity} ${quantity === 1 ? 'unidad' : 'unidades'} más a tu selección.`

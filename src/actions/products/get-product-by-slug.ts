@@ -2,6 +2,7 @@
 
 import { emptyRecipe } from "@utils/recipe-calculator";
 import { ensureFeaturedColumnExists, ensureImageMetaColumnsExist, ensureIsEnabledColumnExists, isMissingRecipeColumnError } from "@utils/product-db";
+import { serializeProductSizes } from "@utils/product-sizes";
 import { defineAction } from "astro:actions";
 import { Category, db, eq, Product, ProductImage, sql } from "astro:db";
 import { z } from "astro:schema";
@@ -25,7 +26,7 @@ const newProduct = {
       title: 'nuevo producto',
       description: 'descripcion',
       price: 0,
-      sizes: 'Pequeño',
+      sizes: serializeProductSizes(['Pequeño']),
       slug: '',
       recipe: null as string | null,
 };
@@ -60,6 +61,7 @@ async function findProductBySlug(slug: string) {
 
         return {
             ...productRow,
+            sizes: serializeProductSizes(productRow.sizes as string | null | undefined),
             recipe: parseRecipe(productRow.recipe as string | null | undefined),
             featured: Boolean(productRow.featured),
             isEnabled: productRow.isEnabled === null || productRow.isEnabled === undefined ? true : Boolean(productRow.isEnabled),
@@ -83,6 +85,7 @@ async function findProductBySlug(slug: string) {
 
         return {
             ...productRow,
+            sizes: serializeProductSizes(productRow.sizes as string | null | undefined),
             recipe: emptyRecipe(),
             featured: Boolean(productRow.featured),
             isEnabled: productRow.isEnabled === null || productRow.isEnabled === undefined ? true : Boolean(productRow.isEnabled),

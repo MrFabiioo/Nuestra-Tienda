@@ -4,6 +4,7 @@ import { actions } from "astro:actions";
 import ProductSliceShow from "@components/products/ProductSliceShow.astro";
 import ProductCard from "@components/products/ProductCard.astro";
 import { resolveProductImageUrl, resolveSocialImageUrl } from "@utils/product-images";
+import { parseProductSizes } from "@utils/product-sizes";
 export const prerender = false;
 
 const {slug}= Astro.params;
@@ -28,10 +29,7 @@ type RelatedProductCard = {
 
 const isEnabled = 'isEnabled' in product ? (product as any).isEnabled !== false : true;
 
-const sizes = product.sizes
-    .split(',')
-    .map((size) => size.trim())
-    .filter(Boolean);
+const sizes = parseProductSizes(product.sizes);
 
 const productDescription = product.description?.trim() ?? '';
 const descriptionParts = productDescription

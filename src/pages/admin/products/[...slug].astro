@@ -4,6 +4,7 @@ import Layout from '@layouts/Layout.astro';
 import { actions } from 'astro:actions';
 import ProductSliceShow from "@components/products/ProductSliceShow.astro";
 import { MARGIN_PRESETS } from '@utils/recipe-calculator';
+import { parseProductSizes } from '@utils/product-sizes';
 import type { ProductRecipe } from '@interfaces/recipe.interface';
 
 export const prerender = false
@@ -23,6 +24,7 @@ const selectedCategoryId = 'categoryId' in product ? product.categoryId : null;
 const isNew = slug === 'new-product';
 const isFeatured = !isNew && !!((product as any).featured);
 const isEnabled = !isNew && ((product as any).isEnabled === null || (product as any).isEnabled === undefined ? true : !!(product as any).isEnabled);
+const productSizes = parseProductSizes(product.sizes);
 
 // Receta: si el producto ya tiene una, la usamos; sino vacía
 const initialRecipe: ProductRecipe = (product as any).recipe ?? {
@@ -234,18 +236,40 @@ const initialRecipe: ProductRecipe = (product as any).recipe ?? {
             </div>
           </div>
 
-          <div class="flex flex-wrap gap-2">
-            {(['Pequeño', 'Mediano', 'Grande', 'Exra-grande', 'Normal'] as const).map((size) => (
-              <button
-                type="button"
-                class:list={['btn-size', { 'btn-size--active': product.sizes.split(',').includes(size) }]}
-                onclick="this.classList.toggle('btn-size--active')"
-              >
-                {size}
+          <div class="space-y-4">
+            <div id="sizes-list" class="space-y-3">
+              {(productSizes.length > 0 ? productSizes : ['']).map((size, index) => (
+                <div class="size-row" data-size-row>
+                  <span class="size-row__index">#{index + 1}</span>
+                  <input
+                    type="text"
+                    value={size}
+                    class="premium-field size-row__input"
+                    data-size-input
+                    placeholder="Ej: 250 g, Mediano o Familiar"
+                  />
+                  <button
+                    type="button"
+                    class="premium-action-ghost size-row__remove"
+                    data-size-remove
+                  >
+                    Quitar
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3">
+              <button type="button" id="btn-add-size" class="premium-action-secondary">
+                <span aria-hidden="true">＋</span>
+                Agregar tamaño
               </button>
-            ))}
+              <p class="field-help">
+                Agregá, editá o quitá talles dinámicamente. Estos mismos valores se usan en la pantalla del producto y en el carrito.
+              </p>
+            </div>
           </div>
-          <p class="field-help mt-3">Seleccioná los tamaños habilitados para este producto. Se guardan al presionar "Guardar".</p>
+          <input type="hidden" name="sizes" id="sizes-hidden" value={productSizes.join(',')} />
         </div>
 
         <!-- Sección: Banner del home -->
@@ -706,25 +730,47 @@ const initialRecipe: ProductRecipe = (product as any).recipe ?? {
   </section>
 
   <style>
-    /* ── Botones de tamaño ──────────────────────────────────────── */
-    .btn-size {
-      @apply inline-flex min-h-10 cursor-pointer items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200;
+    /* ── Tamaños dinámicos ──────────────────────────────────────── */
+    .size-row {
+      display: grid;
+      gap: 0.75rem;
+      align-items: center;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+    }
+
+    .size-row__index {
+      display: inline-flex;
+      min-width: 3rem;
+      justify-content: center;
+      align-items: center;
+      border-radius: 9999px;
+      padding: 0.65rem 0.9rem;
       border: 1px solid var(--color-border);
-      background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+      background: color-mix(in srgb, var(--color-surface-soft) 88%, transparent);
       color: var(--color-text-muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
 
-    .btn-size:hover {
-      border-color: var(--color-border-strong);
-      background: color-mix(in srgb, var(--color-surface-elevated) 86%, var(--color-accent) 14%);
-      color: var(--color-accent);
+    .size-row__input {
+      width: 100%;
     }
 
-    .btn-size--active {
-      border-color: color-mix(in srgb, var(--color-accent) 36%, var(--color-border));
-      background: color-mix(in srgb, var(--color-accent) 14%, var(--color-surface));
-      color: var(--color-accent);
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 14%, transparent);
+    .size-row__remove {
+      white-space: nowrap;
+    }
+
+    @media (max-width: 640px) {
+      .size-row {
+        grid-template-columns: 1fr;
+      }
+
+      .size-row__index,
+      .size-row__remove {
+        width: 100%;
+      }
     }
 
     /* ── Image order & card buttons ────────────────────────────── */
@@ -1710,11 +1756,13 @@ document.addEventListener('astro:page-load', () => {
 
   // ── Form submit ───────────────────────────────────────────────────────
   const form = document.querySelector('#product-form') as HTMLFormElement;
-  const sizeButtons = document.querySelectorAll('.btn-size');
   const btnsDeleteImage = document.querySelectorAll('.btn-delete-image');
   const lblSelectedFiles = document.querySelector('#lbl-selected-files') as HTMLParagraphElement;
   const dropZone = document.querySelector('#drop-zone') as HTMLLabelElement;
   const fileInput = document.querySelector('#file-upload') as HTMLInputElement;
+  const sizesList = document.getElementById('sizes-list') as HTMLDivElement | null;
+  const addSizeButton = document.getElementById('btn-add-size') as HTMLButtonElement | null;
+  const sizesHiddenInput = document.getElementById('sizes-hidden') as HTMLInputElement | null;
   const featuredStatusCopy = document.getElementById('featured-status-copy') as HTMLParagraphElement | null;
   const enabledStatusCopy = document.getElementById('enabled-status-copy') as HTMLParagraphElement | null;
   const enabledStatusHelp = document.getElementById('enabled-status-help') as HTMLParagraphElement | null;
@@ -1736,6 +1784,96 @@ document.addEventListener('astro:page-load', () => {
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${featured ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.8" class="h-5 w-5">
       <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
     </svg>`;
+
+  const getSizeInputs = () =>
+    sizesList
+      ? Array.from(sizesList.querySelectorAll<HTMLInputElement>('[data-size-input]'))
+      : [];
+
+  const serializeSizeInputs = () => {
+    const uniqueValues = new Set<string>();
+
+    getSizeInputs().forEach((input) => {
+      const normalized = input.value.trim();
+      if (!normalized) return;
+      uniqueValues.add(normalized);
+    });
+
+    return Array.from(uniqueValues).join(',');
+  };
+
+  const updateSizeRowIndexes = () => {
+    if (!sizesList) return;
+
+    Array.from(sizesList.querySelectorAll<HTMLElement>('[data-size-row]')).forEach((row, index) => {
+      const label = row.querySelector<HTMLElement>('.size-row__index');
+      if (label) {
+        label.textContent = `#${index + 1}`;
+      }
+    });
+  };
+
+  const createSizeRow = (value = '') => {
+    const row = document.createElement('div');
+    row.className = 'size-row';
+    row.dataset.sizeRow = 'true';
+    const index = document.createElement('span');
+    index.className = 'size-row__index';
+    index.textContent = '#0';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = value;
+    input.className = 'premium-field size-row__input';
+    input.dataset.sizeInput = 'true';
+    input.placeholder = 'Ej: 250 g, Mediano o Familiar';
+
+    const removeButton = document.createElement('button');
+    removeButton.type = 'button';
+    removeButton.className = 'premium-action-ghost size-row__remove';
+    removeButton.dataset.sizeRemove = 'true';
+    removeButton.textContent = 'Quitar';
+
+    row.append(index, input, removeButton);
+
+    return row;
+  };
+
+  const syncSizesField = () => {
+    if (sizesHiddenInput) {
+      sizesHiddenInput.value = serializeSizeInputs();
+    }
+
+    updateSizeRowIndexes();
+  };
+
+  addSizeButton?.addEventListener('click', () => {
+    if (!sizesList) return;
+
+    const newRow = createSizeRow();
+    sizesList.append(newRow);
+    syncSizesField();
+    newRow.querySelector<HTMLInputElement>('[data-size-input]')?.focus();
+  });
+
+  sizesList?.addEventListener('click', (event) => {
+    const removeButton = (event.target as HTMLElement | null)?.closest<HTMLButtonElement>('[data-size-remove]');
+    if (!removeButton) return;
+
+    removeButton.closest<HTMLElement>('[data-size-row]')?.remove();
+
+    if (sizesList.querySelectorAll('[data-size-row]').length === 0) {
+      sizesList.append(createSizeRow());
+    }
+
+    syncSizesField();
+  });
+
+  sizesList?.addEventListener('input', () => {
+    syncSizesField();
+  });
+
+  syncSizesField();
 
   const updateFeaturedUi = (button: HTMLButtonElement, featured: boolean) => {
     button.dataset.featured = String(featured);
@@ -1778,10 +1916,12 @@ document.addEventListener('astro:page-load', () => {
     const recipeHidden = document.getElementById('recipe-hidden') as HTMLInputElement | null;
     if (recipeHidden) recipeHidden.value = JSON.stringify(recipe);
 
-    const selectedSizes = Array.from(sizeButtons)
-      .filter((btn) => btn.classList.contains('btn-size--active'))
-      .map((btn) => btn.textContent?.trim())
-      .join(',');
+    const selectedSizes = serializeSizeInputs();
+    if (!selectedSizes) {
+      alert('Agregá al menos un tamaño disponible antes de guardar el producto.');
+      getSizeInputs()[0]?.focus();
+      return;
+    }
 
     const formData = new FormData(form);
     formData.set('sizes', selectedSizes);

@@ -9,7 +9,14 @@ export default defineConfig({
   integrations: [tailwind(), preact(), db()],
   vite: {
     optimizeDeps: {
-      include: ['chart.js'],
+      include: [
+        'chart.js',
+        '@astrojs/preact/client-dev.js',
+        '@nanostores/preact',
+        'js-cookie',
+        'nanostores',
+        'preact/hooks',
+      ],
     },
     resolve: {
       alias: {
