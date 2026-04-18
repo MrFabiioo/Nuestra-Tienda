@@ -111,13 +111,13 @@ const resolvedImage = resolveProductImageUrl(image, {
     <div class="product-card__cart-zone add-to-cart-zone flex flex-col gap-3 border-t border-neutral-100 bg-neutral-50/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
       <!-- Selector de cantidad -->
       <div class="qty-control flex items-center gap-1">
-        <button class="qty-btn qty-decrease w-7 h-7 rounded-full border font-bold text-base flex items-center justify-center transition-all hover:bg-guacamole-b hover:text-white hover:border-guacamole-b disabled:opacity-40 disabled:cursor-not-allowed" data-action="decrease" aria-label="Disminuir cantidad">−</button>
+        <button class="qty-btn qty-decrease flex h-11 w-11 items-center justify-center rounded-full border text-base font-bold transition-all hover:border-guacamole-b hover:bg-guacamole-b hover:text-white disabled:cursor-not-allowed disabled:opacity-40" data-action="decrease" aria-label="Disminuir cantidad">−</button>
         <span class="qty-value min-w-[20px] text-center text-sm font-semibold">1</span>
-        <button class="qty-btn qty-increase w-7 h-7 rounded-full border font-bold text-base flex items-center justify-center transition-all hover:bg-guacamole-b hover:text-white hover:border-guacamole-b disabled:opacity-40 disabled:cursor-not-allowed" data-action="increase" aria-label="Aumentar cantidad">+</button>
+        <button class="qty-btn qty-increase flex h-11 w-11 items-center justify-center rounded-full border text-base font-bold transition-all hover:border-guacamole-b hover:bg-guacamole-b hover:text-white disabled:cursor-not-allowed disabled:opacity-40" data-action="increase" aria-label="Aumentar cantidad">+</button>
       </div>
 
       <button 
-        class="add-to-cart-btn w-full flex-1 rounded-full bg-guacamole-b px-3 py-2 text-sm font-bold uppercase tracking-wide text-white transition-all duration-200 hover:bg-guacamole-a hover:shadow-md hover:shadow-guacamole-a/25 active:scale-[0.97] disabled:cursor-wait disabled:opacity-80 disabled:hover:bg-guacamole-b disabled:hover:shadow-none sm:w-auto"
+        class="add-to-cart-btn flex min-h-11 w-full flex-1 items-center justify-center rounded-full bg-guacamole-b px-3 py-2 text-sm font-bold uppercase tracking-wide text-white transition-all duration-200 hover:bg-guacamole-a hover:shadow-md hover:shadow-guacamole-a/25 active:scale-[0.97] disabled:cursor-wait disabled:opacity-80 disabled:hover:bg-guacamole-b disabled:hover:shadow-none sm:w-auto"
         data-product-id={id}
         data-product-name={name}
         data-product-price={price}

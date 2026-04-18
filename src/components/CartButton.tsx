@@ -30,7 +30,10 @@ export default function CartButton({ pendingOrderUrl = null, initialQuantity = 0
   const [feedback, setFeedback] = useState<InlineFeedback | null>(null);
   const [hasSyncedCart, setHasSyncedCart] = useState(initialQuantity === 0);
   const cartRef = useRef<HTMLDivElement>(null);
+  const cartTriggerRef = useRef<HTMLAnchorElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const feedbackTimeoutRef = useRef<number | null>(null);
+  const wasOpenRef = useRef(false);
   const hasPendingOrder = Boolean(pendingOrderUrl);
   const visibleQuantity = hasSyncedCart ? $totalQty : Math.max(initialQuantity, $totalQty);
 
@@ -158,6 +161,35 @@ export default function CartButton({ pendingOrderUrl = null, initialQuantity = 0
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    closeButtonRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen && wasOpenRef.current) {
+      cartTriggerRef.current?.focus();
+    }
+
+    wasOpenRef.current = isOpen;
+  }, [isOpen]);
+
   const toggleCart = () => {
     if (!isOpen) {
       syncCartFromCookies();
@@ -208,12 +240,15 @@ export default function CartButton({ pendingOrderUrl = null, initialQuantity = 0
     <>
       {/* Trigger Button */}
       <a
+        ref={cartTriggerRef}
         href={cartHref}
         onClick={handleCartTrigger}
         aria-label={cartAriaLabel}
         aria-expanded={isOpen}
+        aria-haspopup="dialog"
+        aria-controls="mini-cart-dialog"
         title={hasPendingOrder ? 'Tienes un pago pendiente' : undefined}
-        class={`relative flex h-10 w-10 touch-manipulation items-center justify-center rounded-full text-sm transition-all active:translate-y-1 md:text-xl sm:h-11 sm:w-11 ${hasPendingOrder ? 'ring-2 ring-guacamole-b/30' : ''}`}
+        class={`relative flex h-11 w-11 touch-manipulation items-center justify-center rounded-full text-sm transition-all active:translate-y-1 md:text-xl sm:h-11 sm:w-11 ${hasPendingOrder ? 'ring-2 ring-guacamole-b/30' : ''}`}
       >
         <Cart />
         {hasPendingOrder && (
@@ -249,9 +284,10 @@ export default function CartButton({ pendingOrderUrl = null, initialQuantity = 0
           />
 
           <div
+            id="mini-cart-dialog"
             ref={cartRef}
             role="dialog"
-            aria-label="Tu carrito de compras"
+            aria-labelledby="mini-cart-title"
             aria-modal="true"
             class="theme-cart-panel fixed inset-x-2 top-16 z-50 mt-2 flex max-h-[calc(100dvh-5rem)] w-auto flex-col overflow-hidden rounded-[1.25rem] sm:inset-x-auto sm:right-3 sm:top-16 sm:mt-0 sm:max-h-[min(80vh,calc(100dvh-5.5rem))] sm:w-[min(24rem,calc(100vw-1.5rem))] sm:rounded-2xl lg:absolute lg:right-0 lg:top-full lg:mt-3 lg:max-h-[80vh] lg:w-96"
           >
@@ -260,7 +296,7 @@ export default function CartButton({ pendingOrderUrl = null, initialQuantity = 0
             <div class="flex min-w-0 items-center gap-2 theme-text-primary sm:gap-2.5">
               <span class="opacity-90" style={{ color: 'var(--color-accent)' }}><Cart /></span>
               <div class="flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2.5">
-                <h2 class="truncate text-sm font-black uppercase leading-none tracking-wide sm:text-base">Tu carrito</h2>
+                <h2 id="mini-cart-title" class="truncate text-sm font-black uppercase leading-none tracking-wide sm:text-base">Tu carrito</h2>
                 {visibleQuantity > 0 && (
                   <span class="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold sm:text-xs" style={{ border: '1px solid var(--color-border)', background: 'var(--color-surface-soft)', color: 'var(--color-accent)' }}>
                     {visibleQuantity} {visibleQuantity === 1 ? 'producto' : 'productos'}
@@ -269,9 +305,10 @@ export default function CartButton({ pendingOrderUrl = null, initialQuantity = 0
               </div>
             </div>
             <button
+              ref={closeButtonRef}
               onClick={toggleCart}
               aria-label="Cerrar carrito"
-              class="theme-text-muted flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xl font-light transition-colors hover:text-guacamole-b"
+              class="theme-text-muted flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-xl font-light transition-colors hover:text-guacamole-b"
               style={{ backgroundColor: 'transparent' }}
             >
               ×
@@ -366,7 +403,7 @@ export default function CartButton({ pendingOrderUrl = null, initialQuantity = 0
                     <button
                       onClick={() => handleRemoveItem(product.productId, product.size)}
                       aria-label={'Eliminar ' + product.name + ' del carrito'}
-                      class="theme-text-subtle theme-danger-ghost mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center self-start rounded-lg p-0 transition-all hover:text-red-500 focus:opacity-100 sm:h-auto sm:w-auto sm:p-1.5 sm:opacity-0 sm:group-hover:opacity-100"
+                      class="theme-text-subtle theme-danger-ghost mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center self-start rounded-lg p-0 transition-all hover:text-red-500 focus:opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M3 6h18"></path>

@@ -18,9 +18,7 @@ export const getProductsByPage= defineAction({
             await ensureIsEnabledColumnExists();
             await ensureImageMetaColumnsExist();
             const [totalRecords] = await db.select({count: count()}).from(Product);
-            //console.log(`totalRecords : ${totalRecords[0]}`)
             const totalPages  = Math.ceil(totalRecords.count/limit);
-            //console.log(`total pages: ${totalPages}`)
             if (page > totalPages) {
                 return{
                     products: [] as ProductWithImages[],

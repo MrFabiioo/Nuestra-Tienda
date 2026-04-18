@@ -51,7 +51,7 @@ const catalogSkeletonCards = Array.from({ length: 4 });
     title="Tienda"
     description="Explora el catálogo completo de Guacamole Shop, filtra por categoría y encuentra productos frescos para comprar online con facilidad."
 >
-    <main class="store-page min-h-screen">
+    <div class="store-page min-h-screen" data-store-page>
         <!-- Hero Section -->
         <section class="store-hero-section px-4 pb-6 pt-8 md:pb-8 md:pt-10">
             <div class="mx-auto max-w-6xl">
@@ -136,24 +136,28 @@ const catalogSkeletonCards = Array.from({ length: 4 });
             <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <!-- Search Input -->
                 <div class="relative w-full max-w-lg md:w-auto md:flex-1">
+                    <label for="search-input" class="sr-only">Buscar productos en la tienda</label>
                     <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                         <svg class="store-search-icon h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                     </div>
                     <input
-                        type="text"
+                        type="search"
                         id="search-input"
                         placeholder="Buscar por producto, ingrediente o antojo..."
+                        aria-describedby="results-count results-loading"
                         class="store-search-input premium-field w-full pl-12 pr-4 py-3 shadow-sm transition-all duration-300"
                     />
                 </div>
 
                 <!-- Category Filter Pills -->
-                <div class="flex w-full gap-2 overflow-x-auto pb-1 md:w-auto md:flex-wrap md:justify-center md:pb-0" id="category-filters">
+                <div class="flex w-full gap-2 overflow-x-auto pb-1 md:w-auto md:flex-wrap md:justify-center md:pb-0" id="category-filters" aria-label="Filtrar productos por categoría">
                     <button 
                         class="category-pill store-filter-pill is-active shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200"
                         data-category="todos"
+                        aria-pressed="true"
+                        aria-controls="product-grid"
                     >
                         Todos
                     </button>
@@ -161,6 +165,8 @@ const catalogSkeletonCards = Array.from({ length: 4 });
                         <button 
                             class="category-pill store-filter-pill shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200"
                             data-category={slug}
+                            aria-pressed="false"
+                            aria-controls="product-grid"
                         >
                             {name}
                         </button>
@@ -173,10 +179,10 @@ const catalogSkeletonCards = Array.from({ length: 4 });
         <section class="mx-auto max-w-6xl px-4 pb-4">
             <div class="store-results-panel flex flex-col gap-2 rounded-2xl px-4 py-3 text-sm md:flex-row md:items-center md:justify-between">
                 <div class="flex flex-col gap-2">
-                    <p id="results-count">
+                    <p id="results-count" role="status" aria-live="polite">
                         Estás viendo {products.length} productos en esta página de la tienda
                     </p>
-                    <p id="results-loading" class="hidden items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-guacamole-b">
+                    <p id="results-loading" role="status" aria-live="polite" class="hidden items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-guacamole-b">
                         <span class="h-2 w-2 rounded-full bg-guacamole-b premium-skeleton"></span>
                         Actualizando selección...
                     </p>
@@ -284,7 +290,7 @@ const catalogSkeletonCards = Array.from({ length: 4 });
             </div>
         </section>
 
-    </main>
+    </div>
 </Layout>
 
 <script>
@@ -473,9 +479,11 @@ const catalogSkeletonCards = Array.from({ length: 4 });
                 categoryPills.forEach((p) => {
                     const btn = p as HTMLButtonElement;
                     btn.classList.remove('is-active');
+                    btn.setAttribute('aria-pressed', 'false');
                 });
 
                 button.classList.add('is-active');
+                button.setAttribute('aria-pressed', 'true');
 
                 runFilterWithFeedback();
             });
@@ -490,6 +498,7 @@ const catalogSkeletonCards = Array.from({ length: 4 });
             categoryPills.forEach((p) => {
                 const btn = p as HTMLButtonElement;
                 btn.classList.remove('is-active');
+                btn.setAttribute('aria-pressed', 'false');
             });
 
             // Set "Todos" as active
@@ -497,6 +506,7 @@ const catalogSkeletonCards = Array.from({ length: 4 });
             if (todosPill) {
                 const btn = todosPill as HTMLButtonElement;
                 btn.classList.add('is-active');
+                btn.setAttribute('aria-pressed', 'true');
             }
 
             runFilterWithFeedback();

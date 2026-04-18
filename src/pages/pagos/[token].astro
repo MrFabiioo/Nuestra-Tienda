@@ -105,7 +105,7 @@ const primaryImage = order.items[0]?.image;
 ---
 
 <Layout title={`Pago pedido ${order.id.slice(0, 8)}`} description="Revisa tu pedido y carga el comprobante de pago." image={primaryImage} noindex={true}>
-  <main class="min-h-screen px-4 py-8 md:px-8" data-payment-page>
+  <div class="min-h-screen px-4 py-8 md:px-8" data-payment-page>
     <div class="mx-auto max-w-6xl space-y-6">
         <BreadcrumbTrail
           items={paymentBreadcrumbs}
@@ -447,7 +447,7 @@ const primaryImage = order.items[0]?.image;
           </aside>
         </section>
     </div>
-  </main>
+  </div>
 
   <script>
       import { initPaymentProofPage } from '../../scripts/payment-proof-page';
