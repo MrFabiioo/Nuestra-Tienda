@@ -7,7 +7,7 @@ const LOCKED_DELIVERY_DATA = {
   method: 'wemi',
   address: 'CR 48 14 49',
   city: 'Medellin - Poblado',
-  notes: 'Grupo Emi Falk - Sala de Rdio',
+  notes: 'Grupo Emi Falk - Sala de Radio',
 };
 
 const VALIDATION_MESSAGES: Record<string, string> = {
