@@ -1,7 +1,6 @@
 
-import { useState, useEffect, useRef } from 'preact/hooks';
+import { useState, useEffect, useRef, useCallback } from 'preact/hooks';
 import { useStore } from '@nanostores/preact';
-import Cookies from 'js-cookie';
 import Cart from './svgs/Cart';
 import { cartItems, totalQuantity, totalPrice } from 'src/store/cart.store';
 import { CartCookiesClient } from '@utils/cart-cookies';
@@ -18,19 +17,29 @@ type InlineFeedback = {
   message: string;
 };
 
-type CartButtonProps = {
+export type CartButtonProps = {
   pendingOrderUrl?: string | null;
+  initialQuantity?: number;
 };
 
-export default function CartButton({ pendingOrderUrl = null }: CartButtonProps) {
+export default function CartButton({ pendingOrderUrl = null, initialQuantity = 0 }: CartButtonProps) {
   const $cartItems = useStore(cartItems);
   const $totalQty = useStore(totalQuantity);
   const $totalPriceValue = useStore(totalPrice);
   const [isOpen, setIsOpen] = useState(false);
   const [feedback, setFeedback] = useState<InlineFeedback | null>(null);
+  const [hasSyncedCart, setHasSyncedCart] = useState(initialQuantity === 0);
   const cartRef = useRef<HTMLDivElement>(null);
   const feedbackTimeoutRef = useRef<number | null>(null);
   const hasPendingOrder = Boolean(pendingOrderUrl);
+  const visibleQuantity = hasSyncedCart ? $totalQty : Math.max(initialQuantity, $totalQty);
+
+  const syncCartFromCookies = useCallback(() => {
+    const latestCart = CartCookiesClient.getCart();
+    cartItems.set(latestCart);
+    setHasSyncedCart(true);
+    return latestCart;
+  }, []);
 
   // Close cart on route change and page refresh
   useEffect(() => {
@@ -48,12 +57,6 @@ export default function CartButton({ pendingOrderUrl = null }: CartButtonProps) 
     return () => {
       document.removeEventListener('astro:page-load', handlePageLoad);
     };
-  }, []);
-
-  // Sync cart from cookies on mount
-  useEffect(() => {
-    const initialCart = CartCookiesClient.getCart();
-    cartItems.set(initialCart);
   }, []);
 
   useEffect(() => {
@@ -98,11 +101,13 @@ export default function CartButton({ pendingOrderUrl = null }: CartButtonProps) 
 
     const handleFeedback = (event: Event) => {
       const customEvent = event as CustomEvent<CartFeedbackDetail>;
+      syncCartFromCookies();
       setIsOpen(true);
       setFeedback(buildFeedback(customEvent.detail));
     };
 
     const handleOpen = () => {
+      syncCartFromCookies();
       setIsOpen(true);
     };
 
@@ -114,7 +119,7 @@ export default function CartButton({ pendingOrderUrl = null }: CartButtonProps) 
       window.removeEventListener(feedbackEventName, handleFeedback as EventListener);
       window.removeEventListener(openEventName, handleOpen);
     };
-  }, []);
+  }, [syncCartFromCookies]);
 
   useEffect(() => {
     if (!feedback) {
@@ -154,6 +159,10 @@ export default function CartButton({ pendingOrderUrl = null }: CartButtonProps) 
   }, [isOpen]);
 
   const toggleCart = () => {
+    if (!isOpen) {
+      syncCartFromCookies();
+    }
+
     setIsOpen(!isOpen);
   };
 
@@ -172,7 +181,7 @@ export default function CartButton({ pendingOrderUrl = null }: CartButtonProps) 
 
   const handleClearCart = () => {
     cartItems.set([]);
-    Cookies.remove('cart');
+    CartCookiesClient.clearCart();
     setFeedback({
       tone: 'neutral',
       title: 'Carrito reiniciado',
@@ -186,14 +195,21 @@ export default function CartButton({ pendingOrderUrl = null }: CartButtonProps) 
   const cartAriaLabel = hasPendingOrder
     ? 'Abrir carrito. Tienes un pago pendiente para retomar.'
     : 'Abrir carrito';
+  const cartHref = pendingOrderUrl ?? '/checkout';
 
   const grandTotal = $totalPriceValue;
+
+  const handleCartTrigger = (event: MouseEvent) => {
+    event.preventDefault();
+    toggleCart();
+  };
 
   return (
     <>
       {/* Trigger Button */}
-      <button
-        onClick={toggleCart}
+      <a
+        href={cartHref}
+        onClick={handleCartTrigger}
         aria-label={cartAriaLabel}
         aria-expanded={isOpen}
         title={hasPendingOrder ? 'Tienes un pago pendiente' : undefined}
@@ -212,15 +228,15 @@ export default function CartButton({ pendingOrderUrl = null }: CartButtonProps) 
             <span class="sr-only">Tienes un pago pendiente. Abre el carrito para retomar el pedido.</span>
           </>
         )}
-        {$cartItems.length > 0 && (
+        {visibleQuantity > 0 && (
           <span
             aria-hidden="true"
               class="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-guacamole-b px-1 text-xs font-black leading-none text-white sm:-right-2 sm:-top-2"
           >
-            {$totalQty}
+            {visibleQuantity}
           </span>
         )}
-      </button>
+      </a>
 
       {/* Mini-Cart Panel */}
       {isOpen && (
@@ -245,9 +261,9 @@ export default function CartButton({ pendingOrderUrl = null }: CartButtonProps) 
               <span class="opacity-90" style={{ color: 'var(--color-accent)' }}><Cart /></span>
               <div class="flex min-w-0 flex-wrap items-center gap-1.5 sm:gap-2.5">
                 <h2 class="truncate text-sm font-black uppercase leading-none tracking-wide sm:text-base">Tu carrito</h2>
-                {$cartItems.length > 0 && (
+                {visibleQuantity > 0 && (
                   <span class="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold sm:text-xs" style={{ border: '1px solid var(--color-border)', background: 'var(--color-surface-soft)', color: 'var(--color-accent)' }}>
-                    {$totalQty} {$totalQty === 1 ? 'producto' : 'productos'}
+                    {visibleQuantity} {visibleQuantity === 1 ? 'producto' : 'productos'}
                   </span>
                 )}
               </div>

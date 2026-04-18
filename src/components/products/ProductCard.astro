@@ -1,4 +1,6 @@
 ---
+import { resolveProductImageUrl } from '@utils/product-images';
+
 interface Props {
   id?: string;
   name: string;
@@ -19,6 +21,10 @@ const {
   slug = "#",
   isEnabled = true,
 } = Astro.props;
+
+const resolvedImage = resolveProductImageUrl(image, {
+  baseUrl: import.meta.env.PUBLIC_URL,
+});
 ---
 
 <article
@@ -28,10 +34,14 @@ const {
     <!-- Imagen -->
     <div class="product-card__media relative aspect-[4/3] overflow-hidden">
       <img
-        src={image}
+        src={resolvedImage}
         alt={name}
         class="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+        width="640"
+        height="480"
+        sizes="(min-width: 1280px) 18rem, (min-width: 640px) 50vw, 100vw"
         loading="lazy"
+        decoding="async"
       />
 
       {isEnabled ? (
@@ -111,7 +121,7 @@ const {
         data-product-id={id}
         data-product-name={name}
         data-product-price={price}
-        data-product-image={image}
+        data-product-image={resolvedImage}
         aria-live="polite"
       >
         Agregar
@@ -134,13 +144,15 @@ const {
   }
 
   function initAddToCartButtons() {
-    const buttons = document.querySelectorAll('.add-to-cart-btn');
+    const buttons = document.querySelectorAll<HTMLButtonElement>('.add-to-cart-zone .add-to-cart-btn[data-product-id]');
     
     buttons.forEach((button) => {
       if ((button as any).__cartInitialized) return;
       (button as any).__cartInitialized = true;
 
       button.addEventListener('click', (e) => {
+        if (!button.dataset.productId) return;
+
         e.preventDefault();
         e.stopPropagation();
         

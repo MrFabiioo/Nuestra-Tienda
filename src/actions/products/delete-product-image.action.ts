@@ -15,7 +15,8 @@ export const deleteProductImage= defineAction({
             await ensureImageMetaColumnsExist();
 
             const { rows } = await db.run(sql`SELECT id, image FROM ${ProductImage} WHERE id = ${imageId} LIMIT 1`);
-            const productImage = rows[0] as { id: string; image: string } | undefined;
+            const rawProductImage = rows[0] as unknown;
+            const productImage = rawProductImage as { id: string; image: string } | undefined;
 
             if (!productImage) {
                 throw new Error(`image with id ${imageId} not found`);    

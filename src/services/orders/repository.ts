@@ -5,6 +5,7 @@ import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { databaseAdapter } from '../data/database-adapter';
 import type { DatabaseSession } from '../data/transaction-runner';
 import { serializeDbDate } from '@utils/db-date';
+import { resolveProductImageUrl } from '@utils/product-images';
 import { mapAdminOrderSummary, type AdminOrderSummary } from './admin-order-summary.mapper';
 import { parseCartCookie } from './cart-cookie';
 import { ORDER_STATUS, PAYMENT_METHODS, PAYMENT_STATUS, roundMoney } from './constants';
@@ -90,10 +91,10 @@ export async function getCartOrderLinesFromContext(context: ActionAPIContext) {
       });
     }
 
-    const productImage = images.find((image) => image.productId === item.productId)?.image ?? 'no-image.png';
-    const image = productImage.startsWith('http') || productImage.startsWith('data:')
-      ? productImage
-      : `${import.meta.env.PUBLIC_URL}/images/products/${productImage}`;
+    const productImage = images.find((image) => image.productId === item.productId)?.image ?? null;
+    const image = resolveProductImageUrl(productImage, {
+      baseUrl: import.meta.env.PUBLIC_URL,
+    });
     const unitPrice = Number(product.price);
 
     return {
@@ -151,7 +152,9 @@ function mapPublicOrder(orderRow: typeof Order.$inferSelect, paymentRow: typeof 
       quantity: Number(item.quantity),
       unitPrice: Number(item.unitPrice),
       lineTotal: Number(item.lineTotal),
-      image: item.image ?? 'no-image.png',
+      image: resolveProductImageUrl(item.image ?? null, {
+        baseUrl: import.meta.env.PUBLIC_URL,
+      }),
     })),
     latestProof: latestProof
       ? {

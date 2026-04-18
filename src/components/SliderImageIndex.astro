@@ -1,9 +1,28 @@
 ---
+import { createBrandedPlaceholderImage } from '@utils/product-images';
 
 const images=[
-    "guacamoleIA.png",
-    "guacamole-caricatura.png",
-    "guacamoleIA.png",
+    {
+        src: createBrandedPlaceholderImage('Guacamole especial', {
+        accentColor: '#D88C2D',
+        subtitle: 'Placeholder temporal para slider legacy.',
+    }),
+        alt: 'Guacamole especial',
+    },
+    {
+        src: createBrandedPlaceholderImage('Guacamole tradicional', {
+        accentColor: '#7BA428',
+        subtitle: 'Placeholder temporal para slider legacy.',
+    }),
+        alt: 'Guacamole tradicional',
+    },
+    {
+        src: createBrandedPlaceholderImage('Guacamole artesanal', {
+        accentColor: '#5C8C2B',
+        subtitle: 'Placeholder temporal para slider legacy.',
+    }),
+        alt: 'Guacamole artesanal',
+    },
 ]
 
 const currentPath = Astro.url.pathname;
@@ -15,7 +34,18 @@ const currentPath = Astro.url.pathname;
         <div class="slider">
             {images.map((image,index) => (
                 
-                    <img src={image} alt="Slider Image" class="" id={`slide-${index+1}`}/>
+                    <img
+                        src={image.src}
+                        alt={image.alt}
+                        class=""
+                        id={`slide-${index+1}`}
+                        width="1600"
+                        height="900"
+                        loading={index === 0 ? 'eager' : 'lazy'}
+                        decoding={index === 0 ? 'sync' : 'async'}
+                        fetchpriority={index === 0 ? 'high' : 'auto'}
+                        sizes="100vw"
+                    />
                 
             ))}
         </div>

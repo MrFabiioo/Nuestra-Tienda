@@ -2,7 +2,6 @@
 import "../styles/global.css";
 import Navbar from "../components/Navbar.astro";
 import Footer from "../components/Footer.astro";
-import { ClientRouter } from "astro:transitions";
 import { BRAND_NAME, DEFAULT_OG_IMAGE_PATH, buildPageTitle, getSiteOrigin, isSensitiveSeoPath, toAbsoluteUrl } from "../utils/seo";
 
 interface Props {
@@ -27,7 +26,7 @@ const {
 
 const siteOrigin = getSiteOrigin(Astro.url);
 const canonicalUrl = toAbsoluteUrl(canonical, siteOrigin ?? Astro.url) ?? (siteOrigin ? new URL(Astro.url.pathname, siteOrigin) : undefined);
-const socialImageUrl = toAbsoluteUrl(image, siteOrigin ?? Astro.url);
+const socialImageUrl = image?.startsWith('data:') ? undefined : toAbsoluteUrl(image, siteOrigin ?? Astro.url);
 const pageTitle = buildPageTitle(title);
 const robotsContent = robots ?? (noindex || isSensitiveSeoPath(Astro.url.pathname) ? "noindex, nofollow" : "index, follow");
 ---
@@ -38,6 +37,9 @@ const robotsContent = robots ?? (noindex || isSensitiveSeoPath(Astro.url.pathnam
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="color-scheme" content="light dark" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<meta name="description" content={description} />
@@ -75,7 +77,21 @@ const robotsContent = robots ?? (noindex || isSensitiveSeoPath(Astro.url.pathnam
 			document.documentElement.dataset.theme = resolvedTheme;
 			document.documentElement.style.colorScheme = resolvedTheme;
 		</script>
-		<ClientRouter />
+		<script is:inline>
+			if (!window.__guacashopPageLoadDispatched) {
+				window.__guacashopPageLoadDispatched = true;
+
+				const dispatchPageLoad = () => {
+					document.dispatchEvent(new Event("astro:page-load"));
+				};
+
+				if (document.readyState === "loading") {
+					document.addEventListener("DOMContentLoaded", dispatchPageLoad, { once: true });
+				} else {
+					queueMicrotask(dispatchPageLoad);
+				}
+			}
+		</script>
 	</head>
 	<body>
 		<a class="skip-link" href="#main-content">Saltar al contenido principal</a>

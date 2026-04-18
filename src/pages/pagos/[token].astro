@@ -105,7 +105,7 @@ const primaryImage = order.items[0]?.image;
 ---
 
 <Layout title={`Pago pedido ${order.id.slice(0, 8)}`} description="Revisa tu pedido y carga el comprobante de pago." image={primaryImage} noindex={true}>
-  <main class="min-h-screen px-4 py-8 md:px-8">
+  <main class="min-h-screen px-4 py-8 md:px-8" data-payment-page>
     <div class="mx-auto max-w-6xl space-y-6">
         <BreadcrumbTrail
           items={paymentBreadcrumbs}
@@ -296,7 +296,7 @@ const primaryImage = order.items[0]?.image;
                     <a href={order.latestProof.assetUrl} target="_blank" rel="noreferrer" class="font-semibold text-guacamole-b hover:underline">Abrir archivo</a>
                   </div>
                   {proofIsImage ? (
-                    <img src={order.latestProof.assetUrl} alt="Comprobante de pago" class="max-h-[26rem] w-full rounded-2xl object-contain" />
+                    <img src={order.latestProof.assetUrl} alt="Comprobante de pago" class="max-h-[26rem] w-full rounded-2xl object-contain" loading="lazy" decoding="async" />
                   ) : (
                     <iframe src={order.latestProof.assetUrl} class="h-[26rem] w-full rounded-2xl border border-[var(--color-border)]" title="Comprobante PDF" />
                   )}
@@ -326,7 +326,7 @@ const primaryImage = order.items[0]?.image;
 
                   {/* Bancolombia banner */}
                   {paymentSettings.bancolombia && (
-                    <div id="banner-bancolombia" class="hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-6">
+                    <div id="banner-bancolombia" data-payment-banner="bancolombia" class="hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-6" aria-hidden="true">
                       <p class="mb-4 text-center text-sm font-semibold text-[var(--color-heading-sub)]">Datos para transferir por Bancolombia</p>
                       <dl class="space-y-2 text-center">
                         <div>
@@ -348,7 +348,7 @@ const primaryImage = order.items[0]?.image;
 
                   {/* Nequi banner */}
                   {paymentSettings.nequi && (
-                    <div id="banner-nequi" class="hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-6">
+                    <div id="banner-nequi" data-payment-banner="nequi" class="hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-6" aria-hidden="true">
                       <p class="mb-4 text-center text-sm font-semibold text-[var(--color-heading-sub)]">Datos para transferir por Nequi</p>
                       <dl class="space-y-2 text-center">
                         <div>
@@ -366,10 +366,10 @@ const primaryImage = order.items[0]?.image;
 
                   {/* QR banner — visible only when paymentQr exists */}
                   {paymentQr && (
-                    <div id="banner-qr" class="hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-6">
+                    <div id="banner-qr" data-payment-banner="qr" class="hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-6" aria-hidden="true">
                       <p class="mb-4 text-center text-sm font-semibold text-[var(--color-heading-sub)]">Escanea este código con tu app bancaria</p>
                       <div class="flex justify-center">
-                        <img src={paymentQr.url} alt="QR de pago" class="h-64 w-64 rounded-2xl object-contain shadow-lg" />
+                        <img src={paymentQr.url} alt="QR de pago" class="h-64 w-64 rounded-2xl object-contain shadow-lg" width="256" height="256" loading="lazy" decoding="async" sizes="256px" />
                       </div>
                       <p class="mt-4 text-center text-xs text-[var(--color-text-subtle)]">Usa el monto exacto del pedido · Conserva el comprobante</p>
                     </div>
@@ -419,7 +419,7 @@ const primaryImage = order.items[0]?.image;
               <div class="mt-5 space-y-3">
                 {order.items.map((item) => (
                   <div class="flex gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-3">
-                    <img src={item.image} alt={item.title} class="h-16 w-16 rounded-xl object-cover" />
+                    <img src={item.image} alt={item.title} class="h-16 w-16 rounded-xl object-cover" width="64" height="64" loading="lazy" decoding="async" sizes="64px" />
                     <div class="min-w-0 flex-1">
                       <p class="line-clamp-1 font-bold text-[var(--color-heading)]">{item.title}</p>
                       <p class="text-sm text-[var(--color-text-subtle)]">{item.size} · x{item.quantity}</p>
@@ -450,76 +450,12 @@ const primaryImage = order.items[0]?.image;
   </main>
 
   <script>
-      // @ts-nocheck
-      import { actions } from 'astro:actions';
+      import { initPaymentProofPage } from '../../scripts/payment-proof-page';
+      import { bindDocumentEventOnce } from '../../utils/bind-document-event-once';
 
-      document.addEventListener('astro:page-load', () => {
-        const formNode = document.getElementById('payment-proof-form');
-        const submitNode = document.getElementById('payment-proof-submit');
-        const feedbackNode = document.getElementById('payment-proof-feedback');
-        const selectNode = document.getElementById('paymentMethod');
-        const currentMethodEl = document.getElementById('current-payment-method');
-        const banners = {
-          bancolombia: document.getElementById('banner-bancolombia'),
-          nequi:       document.getElementById('banner-nequi'),
-          qr:          document.getElementById('banner-qr'),
-        };
-        const methodLabels = /** @type {Record<string, string>} */ ({
-          bancolombia: 'Bancolombia',
-          nequi: 'Nequi',
-          qr: 'QR',
-        });
+      const run = () => initPaymentProofPage(document);
 
-        const form = formNode instanceof HTMLFormElement ? formNode : null;
-        const submit = submitNode instanceof HTMLButtonElement ? submitNode : null;
-        const feedback = feedbackNode instanceof HTMLParagraphElement ? feedbackNode : null;
-        const select = selectNode instanceof HTMLSelectElement ? selectNode : null;
-
-        if (select) {
-          const syncBanners = () => {
-            const active = select.value;
-            for (const [key, el] of Object.entries(banners)) {
-              el?.classList.toggle('hidden', key !== active);
-            }
-            if (currentMethodEl) {
-              currentMethodEl.textContent = methodLabels[active] ?? active;
-            }
-          };
-          select.addEventListener('change', syncBanners);
-          syncBanners(); // estado inicial
-        }
-
-        if (!form || !submit || !feedback) return;
-
-        form.addEventListener('submit', async (event) => {
-          event.preventDefault();
-
-          const formData = new FormData(form);
-          const file = formData.get('proofFile');
-
-          if (!(file instanceof File) || file.size === 0) {
-            feedback.textContent = 'Elige un comprobante antes de enviarlo.';
-            feedback.className = 'min-h-[1.25rem] text-sm text-[var(--color-danger)]';
-            return;
-          }
-
-          submit.disabled = true;
-          submit.textContent = 'Subiendo comprobante...';
-          feedback.textContent = 'Estamos subiendo el archivo y moviendo el pedido a revisión.';
-          feedback.className = 'min-h-[1.25rem] text-sm text-[var(--color-text-muted)]';
-
-          const { error } = await actions.uploadPaymentProof(formData);
-
-          if (error) {
-            feedback.textContent = error.message;
-            feedback.className = 'min-h-[1.25rem] text-sm text-[var(--color-danger)]';
-            submit.disabled = false;
-            submit.textContent = 'Subir comprobante y pasar a revisión';
-            return;
-          }
-
-          window.location.href = `${window.location.pathname}?uploaded=1`;
-        });
-      });
+      run();
+      bindDocumentEventOnce('astro:page-load', 'payment-proof-page', run);
   </script>
 </Layout>

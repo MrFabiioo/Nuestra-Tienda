@@ -1,13 +1,43 @@
 ---
+import { resolveProductImageUrl } from '@utils/product-images';
+
 interface Props {
     src:string;
     alt:string;
-    className:string;
+    className?: string;
+    width?: number | `${number}`;
+    height?: number | `${number}`;
+    loading?: 'eager' | 'lazy';
+    decoding?: 'sync' | 'async' | 'auto';
+    sizes?: string;
+    fetchpriority?: 'high' | 'low' | 'auto';
 }
 
-const  {src,alt,className} = Astro.props;
+const  {
+    src,
+    alt,
+    className = '',
+    width = 64,
+    height = 64,
+    loading = 'lazy',
+    decoding = 'async',
+    sizes = '64px',
+    fetchpriority = 'auto',
+} = Astro.props;
 
-const currentImage = src.startsWith('http') ? src : `/${src}`;
+const currentImage = resolveProductImageUrl(src, {
+    baseUrl: import.meta.env.PUBLIC_URL,
+});
 ---
 
-<img src={currentImage} alt={alt}  class={className}>
+<img
+    src={currentImage}
+    alt={alt}
+    class={className}
+    width={width}
+    height={height}
+    loading={loading}
+    decoding={decoding}
+    sizes={sizes}
+    fetchpriority={fetchpriority}
+/>

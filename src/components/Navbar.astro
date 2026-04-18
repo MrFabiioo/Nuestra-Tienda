@@ -5,6 +5,26 @@ import { getPendingOrderFromCookies } from '../services/orders/pending-order';
 // Mostrar link Admin solo cuando hay sesión válida
 const user = Astro.locals.user;
 const pendingOrder = await getPendingOrderFromCookies(Astro.cookies);
+const currentPath = Astro.url.pathname;
+const pendingOrderUrl = pendingOrder ? `/pagos/${pendingOrder.token}` : null;
+
+const isActivePath = (href: string) => href === '/'
+	? currentPath === '/'
+	: currentPath === href || currentPath.startsWith(`${href}/`);
+
+let initialCartQuantity = 0;
+
+try {
+	const rawCartCookie = Astro.cookies.get('cart')?.value;
+	const parsedCart = JSON.parse(rawCartCookie ?? '[]');
+
+	if (Array.isArray(parsedCart)) {
+		initialCartQuantity = parsedCart.reduce((total, item) => total + (typeof item?.quantity === 'number' ? item.quantity : 0), 0);
+	}
+} catch {
+	initialCartQuantity = 0;
+}
+
 ---
 
 <header class="navbar">
@@ -30,8 +50,8 @@ const pendingOrder = await getPendingOrderFromCookies(Astro.cookies);
         <div class="navbar__right">
             <nav class="desktop-nav" aria-label="Navegación principal">
                 <ul class="desktop-nav__list">
-                    <li><a href="/" class="desktop-nav__link">Inicio</a></li>
-                    <li><a href="/tienda" class="desktop-nav__link">Tienda</a></li>
+                    <li><a href="/" class="desktop-nav__link" aria-current={isActivePath('/') ? 'page' : undefined}>Inicio</a></li>
+                    <li><a href="/tienda" class="desktop-nav__link" aria-current={isActivePath('/tienda') ? 'page' : undefined}>Tienda</a></li>
                     {user ? (
                         <>
                             <li>
@@ -74,18 +94,7 @@ const pendingOrder = await getPendingOrderFromCookies(Astro.cookies);
                 <span class="theme-toggle__label" data-theme-label>Modo claro</span>
             </button>
             <div class="cart-icon">
-                <CartButton client:only="preact" pendingOrderUrl={pendingOrder ? `/pagos/${pendingOrder.token}` : null}>
-                    <button
-                        slot="fallback"
-                        type="button"
-                        aria-hidden="true"
-                        tabindex="-1"
-                        class="cart-fallback"
-                    >
-                        <span class="cart-fallback__icon premium-skeleton"></span>
-                        <span class="cart-fallback__badge premium-skeleton"></span>
-                    </button>
-                </CartButton>
+                <CartButton client:idle pendingOrderUrl={pendingOrderUrl} initialQuantity={initialCartQuantity} />
             </div>
             <!-- Hamburguesa: solo visible en mobile -->
             <button
@@ -105,8 +114,8 @@ const pendingOrder = await getPendingOrderFromCookies(Astro.cookies);
     <!-- Menu desplegable (mobile) -->
     <nav class="mobile-menu" id="mobileMenu" aria-label="Menú mobile" aria-hidden="true">
         <ul class="mobile-menu__list">
-            <li><a href="/" class="mobile-menu__link">Inicio</a></li>
-            <li><a href="/tienda" class="mobile-menu__link">Tienda</a></li>
+            <li><a href="/" class="mobile-menu__link" aria-current={isActivePath('/') ? 'page' : undefined}>Inicio</a></li>
+            <li><a href="/tienda" class="mobile-menu__link" aria-current={isActivePath('/tienda') ? 'page' : undefined}>Tienda</a></li>
             {user ? (
                 <>
                     <li><a href="/admin/dashboard" class="mobile-menu__link mobile-menu__link--admin">Admin · Dashboard</a></li>
@@ -269,37 +278,6 @@ const pendingOrder = await getPendingOrderFromCookies(Astro.cookies);
         display: flex;
         align-items: center;
         position: relative;
-    }
-
-    .cart-fallback {
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 40px;
-        height: 40px;
-        border: 0;
-        border-radius: 999px;
-        background: transparent;
-        padding: 0;
-        pointer-events: none;
-    }
-
-    .cart-fallback__icon {
-        width: 28px;
-        height: 28px;
-        border-radius: 999px;
-        opacity: 0.9;
-    }
-
-    .cart-fallback__badge {
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 18px;
-        height: 18px;
-        border-radius: 999px;
-        border: 2px solid var(--color-surface);
     }
 
     /* Hamburguesa */
@@ -487,11 +465,6 @@ const pendingOrder = await getPendingOrderFromCookies(Astro.cookies);
             height: 32px;
         }
 
-        .cart-fallback {
-            width: 44px;
-            height: 44px;
-        }
-
         .theme-toggle {
             min-width: 40px;
             padding: 0.55rem;
@@ -547,6 +520,14 @@ const pendingOrder = await getPendingOrderFromCookies(Astro.cookies);
 
         syncThemeToggle(getResolvedTheme() as 'dark' | 'light');
 
+        if (themeToggle?.dataset.initialized === 'true') {
+            return;
+        }
+
+        if (themeToggle) {
+            themeToggle.dataset.initialized = 'true';
+        }
+
         function openMenu() {
             mobileMenu?.classList.add('mobile-menu--open');
             menuToggle?.classList.add('hamburger--open');
@@ -589,19 +570,6 @@ const pendingOrder = await getPendingOrderFromCookies(Astro.cookies);
             if (e.key === 'Escape' && mobileMenu?.classList.contains('mobile-menu--open')) {
                 closeMenu();
                 menuToggle?.focus();
-            }
-        });
-
-        // Marcar link activo
-        const currentPath = window.location.pathname;
-        document.querySelectorAll('.mobile-menu__link, .desktop-nav__link').forEach((link) => {
-            const anchor = link as HTMLAnchorElement;
-            const isActive = anchor.getAttribute('href') === currentPath ||
-                (currentPath !== '/' && anchor.getAttribute('href') !== '/' && currentPath.startsWith(anchor.getAttribute('href') ?? ''));
-            if (isActive) {
-                anchor.setAttribute('aria-current', 'page');
-            } else {
-                anchor.removeAttribute('aria-current');
             }
         });
     });

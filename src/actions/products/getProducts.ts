@@ -4,6 +4,7 @@ import { defineAction } from "astro:actions";
 import { Category, count, db, Product, ProductImage, sql } from "astro:db";
 import { z } from "astro:schema";
 import type {ProductWithImages} from '../../interfaces/products-with-images.interface'
+import { resolveProductImageList } from "@utils/product-images";
 import { ensureImageMetaColumnsExist, ensureIsEnabledColumnExists } from "@utils/product-db";
 
 export const getProductsByPage= defineAction({
@@ -49,7 +50,9 @@ export const getProductsByPage= defineAction({
             const products = rows.map(product =>{
                 return{
                     ...product,
-                    images: product.images ? product.images : 'no-image.png'
+                    images: resolveProductImageList(product.images as string | null, {
+                        baseUrl: import.meta.env.PUBLIC_URL,
+                    }).join(',')
                 }
             }) as unknown as ProductWithImages[]
 

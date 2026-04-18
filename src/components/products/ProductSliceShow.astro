@@ -130,6 +130,7 @@ const hasMultipleImages = fullImages.length > 1;
     justify-content: space-between;
     align-items: center;
     pointer-events: none;
+    z-index: 2;
   }
 
   .product-gallery__arrow {
@@ -222,9 +223,10 @@ const hasMultipleImages = fullImages.length > 1;
 
 <script>
   import { initProductGalleries } from '../../scripts/product-gallery';
+  import { bindDocumentEventOnce } from '../../utils/bind-document-event-once';
 
   const run = () => initProductGalleries(document);
 
   run();
-  document.addEventListener('astro:page-load', run);
+  bindDocumentEventOnce('astro:page-load', 'product-galleries', run);
 </script>

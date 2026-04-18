@@ -59,7 +59,7 @@ const { categories } = data;
                     <th>Acciones</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="categories-tbody">
                 {categories.length === 0 ? (
                     <tr>
                         <td colspan="4">
@@ -73,7 +73,7 @@ const { categories } = data;
                     </tr>
                 ) : (
                     categories.map((category) => (
-                        <tr>
+                        <tr data-category-row={category.id}>
                             <td>
                                 <p class="admin-table__primary">
                                     <a
@@ -131,10 +131,12 @@ const { categories } = data;
     import { actions } from "astro:actions";
 
     document.addEventListener("astro:page-load", () => {
+        const categoriesTbody = document.getElementById("categories-tbody") as HTMLTableSectionElement | null;
+
         const deleteButtons = document.querySelectorAll(".btn-delete-category");
 
         deleteButtons.forEach((btn) => {
-            btn.addEventListener("click", async (e) => {
+            btn.addEventListener("click", async () => {
                 const button = btn as HTMLButtonElement;
                 const id = button.getAttribute("data-id");
                 const name = button.getAttribute("data-name");
@@ -145,15 +147,17 @@ const { categories } = data;
                     return;
                 }
 
+                button.disabled = true;
+
                 const { error } = await actions.deleteCategory({ id });
 
                 if (error) {
                     alert(`Error al eliminar: ${error.message}`);
+                    button.disabled = false;
                     return;
                 }
 
-                // Reload the page to show updated list
-                window.location.reload();
+                categoriesTbody?.querySelector(`[data-category-row="${id}"]`)?.remove();
             });
         });
     });

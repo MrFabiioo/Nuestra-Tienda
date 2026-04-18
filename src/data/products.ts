@@ -1,3 +1,5 @@
+import { createBrandedPlaceholderImage } from '@utils/product-images';
+
 export interface Product {
     id: string;
     name: string;
@@ -8,6 +10,24 @@ export interface Product {
     category: string;
 }
 
+const salsaImage = createBrandedPlaceholderImage('Guacamole tradicional');
+const picanteImage = createBrandedPlaceholderImage('Guacamole picante', {
+    accentColor: '#D86A1F',
+    subtitle: 'Placeholder temporal para catálogo demo.',
+});
+const especialImage = createBrandedPlaceholderImage('Guacamole especial', {
+    accentColor: '#5C8C2B',
+    subtitle: 'Placeholder temporal para catálogo demo.',
+});
+const charcuteriaImage = createBrandedPlaceholderImage('Charcutería artesanal', {
+    accentColor: '#914B2D',
+    subtitle: 'Placeholder temporal para catálogo demo.',
+});
+const postreImage = createBrandedPlaceholderImage('Postres artesanales', {
+    accentColor: '#B46A8F',
+    subtitle: 'Placeholder temporal para catálogo demo.',
+});
+
 export const allProducts: Product[] = [
     // Salsas y Aderezos
     {
@@ -15,7 +35,7 @@ export const allProducts: Product[] = [
         name: "Guacamole Tradicional",
         price: 10000,
         description: "Ricoguacamole fresco y natural",
-        image: "/images/guacamole-caricatura.png",
+        image: salsaImage,
         slug: "/tienda",
         category: "Salsas y Aderezos"
     },
@@ -24,7 +44,7 @@ export const allProducts: Product[] = [
         name: "Guacamole Picante",
         price: 12000,
         description: "Con toque de chile habanero",
-        image: "/images/guacamole-caricatura-partida.png",
+        image: picanteImage,
         slug: "/tienda",
         category: "Salsas y Aderezos"
     },
@@ -33,7 +53,7 @@ export const allProducts: Product[] = [
         name: "Guacamole Especial",
         price: 15000,
         description: "Receta secreta de la casa",
-        image: "/images/guacamoleIA.png",
+        image: especialImage,
         slug: "/tienda",
         category: "Salsas y Aderezos"
     },
@@ -43,7 +63,7 @@ export const allProducts: Product[] = [
         name: "Chorizo Artesanal",
         price: 18000,
         description: "Chorizo de cerdo premium",
-        image: "/images/Chorizo-de-Cerdo.png",
+        image: charcuteriaImage,
         slug: "/tienda",
         category: "Charcutería"
     },
@@ -52,7 +72,7 @@ export const allProducts: Product[] = [
         name: "Chorizo Ahumado",
         price: 20000,
         description: "Con sabor ahumado tradicional",
-        image: "/images/Chorizo-de-Cerdo.png",
+        image: charcuteriaImage,
         slug: "/tienda",
         category: "Charcutería"
     },
@@ -61,7 +81,7 @@ export const allProducts: Product[] = [
         name: "Chorizo Picante",
         price: 19000,
         description: "Para los amantes del picante",
-        image: "/images/Chorizo-de-Cerdo.png",
+        image: charcuteriaImage,
         slug: "/tienda",
         category: "Charcutería"
     },
@@ -71,7 +91,7 @@ export const allProducts: Product[] = [
         name: "Galletas de Avena",
         price: 8000,
         description: "Crujientes y saludables",
-        image: "/images/galletas de avena.png",
+        image: postreImage,
         slug: "/tienda",
         category: "Postres"
     },
@@ -80,7 +100,7 @@ export const allProducts: Product[] = [
         name: "Galletas con Chispas",
         price: 9000,
         description: "Con chocolate belga",
-        image: "/images/galletas de avena.png",
+        image: postreImage,
         slug: "/tienda",
         category: "Postres"
     },
@@ -89,7 +109,7 @@ export const allProducts: Product[] = [
         name: "Galletas Integrales",
         price: 9500,
         description: "Sin azúcar agregada",
-        image: "/images/galletas de avena.png",
+        image: postreImage,
         slug: "/tienda",
         category: "Postres"
     }

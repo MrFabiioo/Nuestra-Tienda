@@ -1,4 +1,6 @@
 ---
+import { createBrandedPlaceholderImage, resolveProductImageUrl } from '@utils/product-images';
+
 interface FeaturedProduct {
   id:    string;
   title: string;
@@ -23,19 +25,28 @@ const hasFeaturedProducts = featuredProducts.length > 0;
 
 const FALLBACK_IMAGES: SlideItem[] = [
   {
-    src: "/images/guacamole-caricatura-partida.png",
+    src: createBrandedPlaceholderImage('Guacamole fresco', {
+      accentColor: '#7BA428',
+      subtitle: 'Selección visual mientras se completan los destacados.',
+    }),
     alt: "Guacamole fresco recien hecho",
     href: null,
     title: "Frescura artesanal",
   },
   {
-    src: "/images/guacamole-caricatura.png",
+    src: createBrandedPlaceholderImage('Sabor tradicional', {
+      accentColor: '#5C8C2B',
+      subtitle: 'La marca ya no depende de imágenes legacy en public/.',
+    }),
     alt: "Guacamole tradicional",
     href: null,
     title: "Sabor que invita",
   },
   {
-    src: "/images/guacamoleIA.png",
+    src: createBrandedPlaceholderImage('Momentos para compartir', {
+      accentColor: '#D88C2D',
+      subtitle: 'Placeholder temporal hasta definir el banner definitivo.',
+    }),
     alt: "Guacamole especial",
     href: null,
     title: "Momentos para compartir",
@@ -44,7 +55,9 @@ const FALLBACK_IMAGES: SlideItem[] = [
 
 const images: SlideItem[] = hasFeaturedProducts
   ? featuredProducts.map(p => ({
-      src:  p.image ?? '/images/no-image.png',
+      src: resolveProductImageUrl(p.image, {
+        baseUrl: import.meta.env.PUBLIC_URL,
+      }),
       alt:  p.title,
       href: `/products/${p.slug}`,
       title: p.title,
@@ -56,6 +69,9 @@ const sectionTitle = hasFeaturedProducts
   ? 'Los elegidos de la casa'
   : 'Una ventana a la identidad visual de la marca';
 const showControls = images.length > 1;
+const sliderImageWidth = 1600;
+const sliderImageHeight = 700;
+const sliderImageSizes = '(min-width: 1280px) 1200px, calc(100vw - 2rem)';
 ---
 
 <section class="slider-section" aria-label={hasFeaturedProducts ? 'Productos favoritos y destacados' : 'Galería visual de la marca'}>
@@ -71,14 +87,35 @@ const showControls = images.length > 1;
       <div class="slider-track" data-slider-track>
         {images.map((image, index) => (
           <div class="slide" data-index={index}>
-             {image.href
-               ? <a href={image.href} class="slide-link">
-                   <img src={image.src} alt={image.alt} />
-                 </a>
-               : <div class="slide-media">
-                   <img src={image.src} alt={image.alt} />
-                 </div>
-             }
+             {(() => {
+               const isPriorityImage = index === 0;
+
+               return image.href
+                 ? <a href={image.href} class="slide-link">
+                    <img
+                      src={image.src}
+                      alt={image.alt}
+                      width={sliderImageWidth}
+                      height={sliderImageHeight}
+                      loading={isPriorityImage ? 'eager' : 'lazy'}
+                      decoding={isPriorityImage ? 'sync' : 'async'}
+                      fetchpriority={isPriorityImage ? 'high' : 'auto'}
+                      sizes={sliderImageSizes}
+                    />
+                  </a>
+                 : <div class="slide-media">
+                    <img
+                      src={image.src}
+                      alt={image.alt}
+                      width={sliderImageWidth}
+                      height={sliderImageHeight}
+                      loading={isPriorityImage ? 'eager' : 'lazy'}
+                      decoding={isPriorityImage ? 'sync' : 'async'}
+                      fetchpriority={isPriorityImage ? 'high' : 'auto'}
+                      sizes={sliderImageSizes}
+                    />
+                  </div>;
+             })()}
           </div>
         ))}
       </div>
@@ -365,6 +402,8 @@ const showControls = images.length > 1;
 
     if (!sliderTrack || slideCount === 0) return;
 
+    const sliderTrackEl = sliderTrack;
+
     root.dataset.sliderInitialized = 'true';
 
     let currentIndex = 0;
@@ -379,7 +418,7 @@ const showControls = images.length > 1;
         currentIndex = index;
       }
 
-      sliderTrack.style.transform = `translateX(-${currentIndex * 100}%)`;
+      sliderTrackEl.style.transform = `translateX(-${currentIndex * 100}%)`;
 
       dots.forEach((dot, dotIndex) => {
         dot.classList.toggle('active', dotIndex === currentIndex);

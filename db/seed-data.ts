@@ -1,3 +1,5 @@
+import { createBrandedPlaceholderImage } from '../src/utils/product-images';
+
 interface SeedProduct {
   categoryId?: string;
   description: string;
@@ -10,12 +12,22 @@ interface SeedProduct {
 
 type ValidSizes = 'Pequeño' | 'Mediano' | 'Grande' | 'Extra-grande';
 
+const seedPrimaryImage = createBrandedPlaceholderImage('Guacamole tradicional');
+const seedSecondaryImage = createBrandedPlaceholderImage('Guacamole fresco', {
+  accentColor: '#5C8C2B',
+  subtitle: 'Seed temporal sin dependencia de assets locales.',
+});
+const seedSpecialImage = createBrandedPlaceholderImage('Guacamole especial', {
+  accentColor: '#D88C2D',
+  subtitle: 'Seed temporal sin dependencia de assets locales.',
+});
+
 export const seedProducts: SeedProduct[] = [
   {
     categoryId: 'cat-salsas',
     description:
       'Disfruta de un delicioso tazón de guacamole fresco, preparado con los mejores ingredientes. Perfecto para compartir en reuniones o disfrutar solo.',
-    images: ['guacamole-caricatura.png', 'guacamole-caricatura-partida.png'],
+    images: [seedPrimaryImage, seedSecondaryImage],
     price: 75,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'Rico',
@@ -25,7 +37,7 @@ export const seedProducts: SeedProduct[] = [
     categoryId: 'cat-salsas',
     description:
       "The Men's Quilted Shirt Jacket features a uniquely fit, quilted design for warmth and mobility in cold weather seasons. With an overall street-smart aesthetic, the jacket features subtle silicone injected Tesla logos below the back collar and on the right sleeve, as well as custom matte metal zipper pulls. Made from 87% nylon and 13% polyurethane.",
-    images: ['guacamoleIA.png', 'guacamole-caricatura.png'],
+    images: [seedSpecialImage, seedPrimaryImage],
     price: 200,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'men_quilted_shirt_jacket',
@@ -35,7 +47,7 @@ export const seedProducts: SeedProduct[] = [
     categoryId: 'cat-salsas',
     description:
       'Disfruta de un delicioso tazón de guacamole fresco, preparado con los mejores ingredientes. Perfecto para compartir en reuniones o disfrutar solo.',
-    images: ['guacamole-caricatura.png', 'guacamole-caricatura-partida.png'],
+    images: [seedPrimaryImage, seedSecondaryImage],
     price: 75,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'rico_guacamole',
@@ -45,7 +57,7 @@ export const seedProducts: SeedProduct[] = [
     categoryId: 'cat-salsas',
     description:
       "The Men's Quilted Shirt Jacket features a uniquely fit, quilted design for warmth and mobility in cold weather seasons. With an overall street-smart aesthetic, the jacket features subtle silicone injected Tesla logos below the back collar and on the right sleeve, as well as custom matte metal zipper pulls. Made from 87% nylon and 13% polyurethane.",
-    images: ['guacamoleIA.png', 'guacamole-caricatura.png'],
+    images: [seedSpecialImage, seedPrimaryImage],
     price: 200,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'rico_guacamole_consebolla',
@@ -55,7 +67,7 @@ export const seedProducts: SeedProduct[] = [
     categoryId: 'cat-salsas',
     description:
       'Disfruta de un delicioso tazón de guacamole fresco, preparado con los mejores ingredientes. Perfecto para compartir en reuniones o disfrutar solo.',
-    images: ['guacamole-caricatura.png', 'guacamole-caricatura-partida.png'],
+    images: [seedPrimaryImage, seedSecondaryImage],
     price: 75,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'rico_guacamole_con_ají',
@@ -65,7 +77,7 @@ export const seedProducts: SeedProduct[] = [
     categoryId: 'cat-salsas',
     description:
       "The Men's Quilted Shirt Jacket features a uniquely fit, quilted design for warmth and mobility in cold weather seasons. With an overall street-smart aesthetic, the jacket features subtle silicone injected Tesla logos below the back collar and on the right sleeve, as well as custom matte metal zipper pulls. Made from 87% nylon and 13% polyurethane.",
-    images: ['guacamoleIA.png', 'guacamole-caricatura.png'],
+    images: [seedSpecialImage, seedPrimaryImage],
     price: 200,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'rico_guacamole_con_ají_ajo',
@@ -75,7 +87,7 @@ export const seedProducts: SeedProduct[] = [
     categoryId: 'cat-salsas',
     description:
       'Disfruta de un delicioso tazón de guacamole fresco, preparado con los mejores ingredientes. Perfecto para compartir en reuniones o disfrutar solo.',
-    images: ['guacamole-caricatura.png', 'guacamole-caricatura-partida.png'],
+    images: [seedPrimaryImage, seedSecondaryImage],
     price: 75,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'rico_guacamole_con_ají_cilantro',
@@ -85,7 +97,7 @@ export const seedProducts: SeedProduct[] = [
     categoryId: 'cat-salsas',
     description:
       "The Men's Quilted Shirt Jacket features a uniquely fit, quilted design for warmth and mobility in cold weather seasons. With an overall street-smart aesthetic, the jacket features subtle silicone injected Tesla logos below the back collar and on the right sleeve, as well as custom matte metal zipper pulls. Made from 87% nylon and 13% polyurethane.",
-    images: ['guacamoleIA.png', 'guacamole-caricatura.png'],
+    images: [seedSpecialImage, seedPrimaryImage],
     price: 200,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'rico_guacamole_con_ají_tomate',
@@ -94,7 +106,7 @@ export const seedProducts: SeedProduct[] = [
   {
     description:
       "The Men's Quilted Shirt Jacket features a uniquely fit, quilted design for warmth and mobility in cold weather seasons. With an overall street-smart aesthetic, the jacket features subtle silicone injected Tesla logos below the back collar and on the right sleeve, as well as custom matte metal zipper pulls. Made from 87% nylon and 13% polyurethane.",
-    images: ['guacamoleIA.png', 'guacamole-caricatura.png'],
+    images: [seedSpecialImage, seedPrimaryImage],
     price: 200,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'men_quilted_shirt_jacket_2',
@@ -103,7 +115,7 @@ export const seedProducts: SeedProduct[] = [
   {
     description:
       'Disfruta de un delicioso tazón de guacamole fresco, preparado con los mejores ingredientes. Perfecto para compartir en reuniones o disfrutar solo.',
-    images: ['guacamole-caricatura.png', 'guacamole-caricatura-partida.png'],
+    images: [seedPrimaryImage, seedSecondaryImage],
     price: 75,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'rico_guacamole_2',
@@ -112,7 +124,7 @@ export const seedProducts: SeedProduct[] = [
     {
     description:
       "The Men's Quilted Shirt Jacket features a uniquely fit, quilted design for warmth and mobility in cold weather seasons. With an overall street-smart aesthetic, the jacket features subtle silicone injected Tesla logos below the back collar and on the right sleeve, as well as custom matte metal zipper pulls. Made from 87% nylon and 13% polyurethane.",
-    images: ['guacamoleIA.png', 'guacamole-caricatura.png'],
+    images: [seedSpecialImage, seedPrimaryImage],
     price: 200,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'rico_guacamole_consebolla_2',
@@ -121,7 +133,7 @@ export const seedProducts: SeedProduct[] = [
   {
     description:
       'Disfruta de un delicioso tazón de guacamole fresco, preparado con los mejores ingredientes. Perfecto para compartir en reuniones o disfrutar solo.',
-    images: ['guacamole-caricatura.png', 'guacamole-caricatura-partida.png'],
+    images: [seedPrimaryImage, seedSecondaryImage],
     price: 75,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'rico_guacamole_con_ají_2',
@@ -130,7 +142,7 @@ export const seedProducts: SeedProduct[] = [
     {
     description:
       "The Men's Quilted Shirt Jacket features a uniquely fit, quilted design for warmth and mobility in cold weather seasons. With an overall street-smart aesthetic, the jacket features subtle silicone injected Tesla logos below the back collar and on the right sleeve, as well as custom matte metal zipper pulls. Made from 87% nylon and 13% polyurethane.",
-    images: ['guacamoleIA.png', 'guacamole-caricatura.png'],
+    images: [seedSpecialImage, seedPrimaryImage],
     price: 200,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'rico_guacamole_con_ají_ajo_2',
@@ -139,7 +151,7 @@ export const seedProducts: SeedProduct[] = [
   {
     description:
       'Disfruta de un delicioso tazón de guacamole fresco, preparado con los mejores ingredientes. Perfecto para compartir en reuniones o disfrutar solo.',
-    images: ['guacamole-caricatura.png', 'guacamole-caricatura-partida.png'],
+    images: [seedPrimaryImage, seedSecondaryImage],
     price: 75,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'rico_guacamole_con_ají_cilantro_2',
@@ -148,7 +160,7 @@ export const seedProducts: SeedProduct[] = [
     {
     description:
       "The Men's Quilted Shirt Jacket features a uniquely fit, quilted design for warmth and mobility in cold weather seasons. With an overall street-smart aesthetic, the jacket features subtle silicone injected Tesla logos below the back collar and on the right sleeve, as well as custom matte metal zipper pulls. Made from 87% nylon and 13% polyurethane.",
-    images: ['guacamoleIA.png', 'guacamole-caricatura.png'],
+    images: [seedSpecialImage, seedPrimaryImage],
     price: 200,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'rico_guacamole_con_ají_tomate_2',
@@ -157,7 +169,7 @@ export const seedProducts: SeedProduct[] = [
   {
     description:
       'Disfruta de un delicioso tazón de guacamole fresco, preparado con los mejores ingredientes. Perfecto para compartir en reuniones o disfrutar solo.',
-    images: ['guacamole-caricatura.png', 'guacamole-caricatura-partida.png'],
+    images: [seedPrimaryImage, seedSecondaryImage],
     price: 75,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'rico_guacamole',
@@ -166,7 +178,7 @@ export const seedProducts: SeedProduct[] = [
     {
     description:
       "The Men's Quilted Shirt Jacket features a uniquely fit, quilted design for warmth and mobility in cold weather seasons. With an overall street-smart aesthetic, the jacket features subtle silicone injected Tesla logos below the back collar and on the right sleeve, as well as custom matte metal zipper pulls. Made from 87% nylon and 13% polyurethane.",
-    images: ['guacamoleIA.png', 'guacamole-caricatura.png'],
+    images: [seedSpecialImage, seedPrimaryImage],
     price: 200,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'rico_guacamole_consebolla',
@@ -175,7 +187,7 @@ export const seedProducts: SeedProduct[] = [
   {
     description:
       'Disfruta de un delicioso tazón de guacamole fresco, preparado con los mejores ingredientes. Perfecto para compartir en reuniones o disfrutar solo.',
-    images: ['guacamole-caricatura.png', 'guacamole-caricatura-partida.png'],
+    images: [seedPrimaryImage, seedSecondaryImage],
     price: 75,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'rico_guacamole_con_ají',
@@ -184,7 +196,7 @@ export const seedProducts: SeedProduct[] = [
     {
     description:
       "The Men's Quilted Shirt Jacket features a uniquely fit, quilted design for warmth and mobility in cold weather seasons. With an overall street-smart aesthetic, the jacket features subtle silicone injected Tesla logos below the back collar and on the right sleeve, as well as custom matte metal zipper pulls. Made from 87% nylon and 13% polyurethane.",
-    images: ['guacamoleIA.png', 'guacamole-caricatura.png'],
+    images: [seedSpecialImage, seedPrimaryImage],
     price: 200,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'rico_guacamole_con_ají_ajo',
@@ -193,7 +205,7 @@ export const seedProducts: SeedProduct[] = [
   {
     description:
       'Disfruta de un delicioso tazón de guacamole fresco, preparado con los mejores ingredientes. Perfecto para compartir en reuniones o disfrutar solo.',
-    images: ['guacamole-caricatura.png', 'guacamole-caricatura-partida.png'],
+    images: [seedPrimaryImage, seedSecondaryImage],
     price: 75,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'rico_guacamole_con_ají_cilantro',
@@ -202,7 +214,7 @@ export const seedProducts: SeedProduct[] = [
     {
     description:
       "The Men's Quilted Shirt Jacket features a uniquely fit, quilted design for warmth and mobility in cold weather seasons. With an overall street-smart aesthetic, the jacket features subtle silicone injected Tesla logos below the back collar and on the right sleeve, as well as custom matte metal zipper pulls. Made from 87% nylon and 13% polyurethane.",
-    images: ['guacamoleIA.png', 'guacamole-caricatura.png'],
+    images: [seedSpecialImage, seedPrimaryImage],
     price: 200,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'rico_guacamole_con_ají_tomate',
@@ -211,7 +223,7 @@ export const seedProducts: SeedProduct[] = [
   {
     description:
       'Disfruta de un delicioso tazón de guacamole fresco, preparado con los mejores ingredientes. Perfecto para compartir en reuniones o disfrutar solo.',
-    images: ['guacamole-caricatura.png', 'guacamole-caricatura-partida.png'],
+    images: [seedPrimaryImage, seedSecondaryImage],
     price: 75,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'tomate',
@@ -220,7 +232,7 @@ export const seedProducts: SeedProduct[] = [
     {
     description:
       "The Men's Quilted Shirt Jacket features a uniquely fit, quilted design for warmth and mobility in cold weather seasons. With an overall street-smart aesthetic, the jacket features subtle silicone injected Tesla logos below the back collar and on the right sleeve, as well as custom matte metal zipper pulls. Made from 87% nylon and 13% polyurethane.",
-    images: ['guacamoleIA.png', 'guacamole-caricatura.png'],
+    images: [seedSpecialImage, seedPrimaryImage],
     price: 200,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'pistacho',
@@ -229,7 +241,7 @@ export const seedProducts: SeedProduct[] = [
   {
     description:
       'Disfruta de un delicioso tazón de guacamole fresco, preparado con los mejores ingredientes. Perfecto para compartir en reuniones o disfrutar solo.',
-    images: ['guacamole-caricatura.png', 'guacamole-caricatura-partida.png'],
+    images: [seedPrimaryImage, seedSecondaryImage],
     price: 75,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'tarro',
@@ -238,7 +250,7 @@ export const seedProducts: SeedProduct[] = [
     {
     description:
       "The Men's Quilted Shirt Jacket features a uniquely fit, quilted design for warmth and mobility in cold weather seasons. With an overall street-smart aesthetic, the jacket features subtle silicone injected Tesla logos below the back collar and on the right sleeve, as well as custom matte metal zipper pulls. Made from 87% nylon and 13% polyurethane.",
-    images: ['guacamoleIA.png', 'guacamole-caricatura.png'],
+    images: [seedSpecialImage, seedPrimaryImage],
     price: 200,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'rrota',
@@ -247,7 +259,7 @@ export const seedProducts: SeedProduct[] = [
   {
     description:
       'Disfruta de un delicioso tazón de guacamole fresco, preparado con los mejores ingredientes. Perfecto para compartir en reuniones o disfrutar solo.',
-    images: ['guacamole-caricatura.png', 'guacamole-caricatura-partida.png'],
+    images: [seedPrimaryImage, seedSecondaryImage],
     price: 75,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'crespa',
@@ -256,7 +268,7 @@ export const seedProducts: SeedProduct[] = [
     {
     description:
       "The Men's Quilted Shirt Jacket features a uniquely fit, quilted design for warmth and mobility in cold weather seasons. With an overall street-smart aesthetic, the jacket features subtle silicone injected Tesla logos below the back collar and on the right sleeve, as well as custom matte metal zipper pulls. Made from 87% nylon and 13% polyurethane.",
-    images: ['guacamoleIA.png', 'guacamole-caricatura.png'],
+    images: [seedSpecialImage, seedPrimaryImage],
     price: 200,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'militar',
@@ -265,7 +277,7 @@ export const seedProducts: SeedProduct[] = [
   {
     description:
       'Disfruta de un delicioso tazón de guacamole fresco, preparado con los mejores ingredientes. Perfecto para compartir en reuniones o disfrutar solo.',
-    images: ['guacamole-caricatura.png', 'guacamole-caricatura-partida.png'],
+    images: [seedPrimaryImage, seedSecondaryImage],
     price: 75,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'envejcer',
@@ -274,7 +286,7 @@ export const seedProducts: SeedProduct[] = [
     {
     description:
       "The Men's Quilted Shirt Jacket features a uniquely fit, quilted design for warmth and mobility in cold weather seasons. With an overall street-smart aesthetic, the jacket features subtle silicone injected Tesla logos below the back collar and on the right sleeve, as well as custom matte metal zipper pulls. Made from 87% nylon and 13% polyurethane.",
-    images: ['guacamoleIA.png', 'guacamole-caricatura.png'],
+    images: [seedSpecialImage, seedPrimaryImage],
     price: 200,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'pomarola',
@@ -283,7 +295,7 @@ export const seedProducts: SeedProduct[] = [
   {
     description:
       'Disfruta de un delicioso tazón de guacamole fresco, preparado con los mejores ingredientes. Perfecto para compartir en reuniones o disfrutar solo.',
-    images: ['guacamole-caricatura.png', 'guacamole-caricatura-partida.png'],
+    images: [seedPrimaryImage, seedSecondaryImage],
     price: 75,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'mandarina',
@@ -292,7 +304,7 @@ export const seedProducts: SeedProduct[] = [
     {
     description:
       "The Men's Quilted Shirt Jacket features a uniquely fit, quilted design for warmth and mobility in cold weather seasons. With an overall street-smart aesthetic, the jacket features subtle silicone injected Tesla logos below the back collar and on the right sleeve, as well as custom matte metal zipper pulls. Made from 87% nylon and 13% polyurethane.",
-    images: ['guacamoleIA.png', 'guacamole-caricatura.png'],
+    images: [seedSpecialImage, seedPrimaryImage],
     price: 200,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'rosado',
@@ -301,7 +313,7 @@ export const seedProducts: SeedProduct[] = [
   {
     description:
       'Disfruta de un delicioso tazón de guacamole fresco, preparado con los mejores ingredientes. Perfecto para compartir en reuniones o disfrutar solo.',
-    images: ['guacamole-caricatura.png', 'guacamole-caricatura-partida.png'],
+    images: [seedPrimaryImage, seedSecondaryImage],
     price: 75,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'el_tipo',
@@ -310,7 +322,7 @@ export const seedProducts: SeedProduct[] = [
     {
     description:
       "The Men's Quilted Shirt Jacket features a uniquely fit, quilted design for warmth and mobility in cold weather seasons. With an overall street-smart aesthetic, the jacket features subtle silicone injected Tesla logos below the back collar and on the right sleeve, as well as custom matte metal zipper pulls. Made from 87% nylon and 13% polyurethane.",
-    images: ['guacamoleIA.png', 'guacamole-caricatura.png'],
+    images: [seedSpecialImage, seedPrimaryImage],
     price: 200,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'relacion',
@@ -319,7 +331,7 @@ export const seedProducts: SeedProduct[] = [
   {
     description:
       'Disfruta de un delicioso tazón de guacamole fresco, preparado con los mejores ingredientes. Perfecto para compartir en reuniones o disfrutar solo.',
-    images: ['guacamole-caricatura.png', 'guacamole-caricatura-partida.png'],
+    images: [seedPrimaryImage, seedSecondaryImage],
     price: 75,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'asjhguanda',
@@ -328,7 +340,7 @@ export const seedProducts: SeedProduct[] = [
     {
     description:
       "The Men's Quilted Shirt Jacket features a uniquely fit, quilted design for warmth and mobility in cold weather seasons. With an overall street-smart aesthetic, the jacket features subtle silicone injected Tesla logos below the back collar and on the right sleeve, as well as custom matte metal zipper pulls. Made from 87% nylon and 13% polyurethane.",
-    images: ['guacamoleIA.png', 'guacamole-caricatura.png'],
+    images: [seedSpecialImage, seedPrimaryImage],
     price: 200,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'revertraol',
@@ -337,7 +349,7 @@ export const seedProducts: SeedProduct[] = [
   {
     description:
       'Disfruta de un delicioso tazón de guacamole fresco, preparado con los mejores ingredientes. Perfecto para compartir en reuniones o disfrutar solo.',
-    images: ['guacamole-caricatura.png', 'guacamole-caricatura-partida.png'],
+    images: [seedPrimaryImage, seedSecondaryImage],
     price: 75,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'un_ocho',
@@ -346,7 +358,7 @@ export const seedProducts: SeedProduct[] = [
     {
     description:
       "The Men's Quilted Shirt Jacket features a uniquely fit, quilted design for warmth and mobility in cold weather seasons. With an overall street-smart aesthetic, the jacket features subtle silicone injected Tesla logos below the back collar and on the right sleeve, as well as custom matte metal zipper pulls. Made from 87% nylon and 13% polyurethane.",
-    images: ['guacamoleIA.png', 'guacamole-caricatura.png'],
+    images: [seedSpecialImage, seedPrimaryImage],
     price: 200,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'querida',
@@ -355,7 +367,7 @@ export const seedProducts: SeedProduct[] = [
   {
     description:
       'Disfruta de un delicioso tazón de guacamole fresco, preparado con los mejores ingredientes. Perfecto para compartir en reuniones o disfrutar solo.',
-    images: ['guacamole-caricatura.png', 'guacamole-caricatura-partida.png'],
+    images: [seedPrimaryImage, seedSecondaryImage],
     price: 75,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'moza',
@@ -364,7 +376,7 @@ export const seedProducts: SeedProduct[] = [
     {
     description:
       "The Men's Quilted Shirt Jacket features a uniquely fit, quilted design for warmth and mobility in cold weather seasons. With an overall street-smart aesthetic, the jacket features subtle silicone injected Tesla logos below the back collar and on the right sleeve, as well as custom matte metal zipper pulls. Made from 87% nylon and 13% polyurethane.",
-    images: ['guacamoleIA.png', 'guacamole-caricatura.png'],
+    images: [seedSpecialImage, seedPrimaryImage],
     price: 200,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'escolta',
@@ -373,7 +385,7 @@ export const seedProducts: SeedProduct[] = [
   {
     description:
       'Disfruta de un delicioso tazón de guacamole fresco, preparado con los mejores ingredientes. Perfecto para compartir en reuniones o disfrutar solo.',
-    images: ['guacamole-caricatura.png', 'guacamole-caricatura-partida.png'],
+    images: [seedPrimaryImage, seedSecondaryImage],
     price: 75,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'ridiculo',
@@ -382,7 +394,7 @@ export const seedProducts: SeedProduct[] = [
     {
     description:
       "The Men's Quilted Shirt Jacket features a uniquely fit, quilted design for warmth and mobility in cold weather seasons. With an overall street-smart aesthetic, the jacket features subtle silicone injected Tesla logos below the back collar and on the right sleeve, as well as custom matte metal zipper pulls. Made from 87% nylon and 13% polyurethane.",
-    images: ['guacamoleIA.png', 'guacamole-caricatura.png'],
+    images: [seedSpecialImage, seedPrimaryImage],
     price: 200,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'malestar',
@@ -391,7 +403,7 @@ export const seedProducts: SeedProduct[] = [
   {
     description:
       'Disfruta de un delicioso tazón de guacamole fresco, preparado con los mejores ingredientes. Perfecto para compartir en reuniones o disfrutar solo.',
-    images: ['guacamole-caricatura.png', 'guacamole-caricatura-partida.png'],
+    images: [seedPrimaryImage, seedSecondaryImage],
     price: 75,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'en_la_cultura',
@@ -400,7 +412,7 @@ export const seedProducts: SeedProduct[] = [
     {
     description:
       "The Men's Quilted Shirt Jacket features a uniquely fit, quilted design for warmth and mobility in cold weather seasons. With an overall street-smart aesthetic, the jacket features subtle silicone injected Tesla logos below the back collar and on the right sleeve, as well as custom matte metal zipper pulls. Made from 87% nylon and 13% polyurethane.",
-    images: ['guacamoleIA.png', 'guacamole-caricatura.png'],
+    images: [seedSpecialImage, seedPrimaryImage],
     price: 200,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'sigmung_freud',
@@ -409,7 +421,7 @@ export const seedProducts: SeedProduct[] = [
   {
     description:
       'Disfruta de un delicioso tazón de guacamole fresco, preparado con los mejores ingredientes. Perfecto para compartir en reuniones o disfrutar solo.',
-    images: ['guacamole-caricatura.png', 'guacamole-caricatura-partida.png'],
+    images: [seedPrimaryImage, seedSecondaryImage],
     price: 75,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'chili',
@@ -418,7 +430,7 @@ export const seedProducts: SeedProduct[] = [
     {
     description:
       "The Men's Quilted Shirt Jacket features a uniquely fit, quilted design for warmth and mobility in cold weather seasons. With an overall street-smart aesthetic, the jacket features subtle silicone injected Tesla logos below the back collar and on the right sleeve, as well as custom matte metal zipper pulls. Made from 87% nylon and 13% polyurethane.",
-    images: ['guacamoleIA.png', 'guacamole-caricatura.png'],
+    images: [seedSpecialImage, seedPrimaryImage],
     price: 200,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'chili_con_carne',
@@ -427,7 +439,7 @@ export const seedProducts: SeedProduct[] = [
   {
     description:
       'Disfruta de un delicioso tazón de guacamole fresco, preparado con los mejores ingredientes. Perfecto para compartir en reuniones o disfrutar solo.',
-    images: ['guacamole-caricatura.png', 'guacamole-caricatura-partida.png'],
+    images: [seedPrimaryImage, seedSecondaryImage],
     price: 75,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'mantequilla',
@@ -436,7 +448,7 @@ export const seedProducts: SeedProduct[] = [
     {
     description:
       "The Men's Quilted Shirt Jacket features a uniquely fit, quilted design for warmth and mobility in cold weather seasons. With an overall street-smart aesthetic, the jacket features subtle silicone injected Tesla logos below the back collar and on the right sleeve, as well as custom matte metal zipper pulls. Made from 87% nylon and 13% polyurethane.",
-    images: ['guacamoleIA.png', 'guacamole-caricatura.png'],
+    images: [seedSpecialImage, seedPrimaryImage],
     price: 200,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'resonancia',
@@ -445,7 +457,7 @@ export const seedProducts: SeedProduct[] = [
   {
     description:
       'Disfruta de un delicioso tazón de guacamole fresco, preparado con los mejores ingredientes. Perfecto para compartir en reuniones o disfrutar solo.',
-    images: ['guacamole-caricatura.png', 'guacamole-caricatura-partida.png'],
+    images: [seedPrimaryImage, seedSecondaryImage],
     price: 75,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'resultado',
@@ -454,7 +466,7 @@ export const seedProducts: SeedProduct[] = [
     {
     description:
       "The Men's Quilted Shirt Jacket features a uniquely fit, quilted design for warmth and mobility in cold weather seasons. With an overall street-smart aesthetic, the jacket features subtle silicone injected Tesla logos below the back collar and on the right sleeve, as well as custom matte metal zipper pulls. Made from 87% nylon and 13% polyurethane.",
-    images: ['guacamoleIA.png', 'guacamole-caricatura.png'],
+    images: [seedSpecialImage, seedPrimaryImage],
     price: 200,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'resolt',
@@ -463,7 +475,7 @@ export const seedProducts: SeedProduct[] = [
   {
     description:
       'Disfruta de un delicioso tazón de guacamole fresco, preparado con los mejores ingredientes. Perfecto para compartir en reuniones o disfrutar solo.',
-    images: ['guacamole-caricatura.png', 'guacamole-caricatura-partida.png'],
+    images: [seedPrimaryImage, seedSecondaryImage],
     price: 75,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'usain',
@@ -472,7 +484,7 @@ export const seedProducts: SeedProduct[] = [
     {
     description:
       "The Men's Quilted Shirt Jacket features a uniquely fit, quilted design for warmth and mobility in cold weather seasons. With an overall street-smart aesthetic, the jacket features subtle silicone injected Tesla logos below the back collar and on the right sleeve, as well as custom matte metal zipper pulls. Made from 87% nylon and 13% polyurethane.",
-    images: ['guacamoleIA.png', 'guacamole-caricatura.png'],
+    images: [seedSpecialImage, seedPrimaryImage],
     price: 200,
     sizes: ['Pequeño','Mediano','Grande','Extra-grande'],
     slug: 'super_sayayin',

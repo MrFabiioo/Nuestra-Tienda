@@ -1,6 +1,7 @@
 import { db, Category, Product, ProductImage } from 'astro:db';
 import { v4 as UUID } from 'uuid';
 import { seedProducts } from './seed-data';
+import { resolveProductImageUrl } from '../src/utils/product-images';
 
 // https://astro.build/db/seed
 export default async function seed() {
@@ -55,7 +56,7 @@ export default async function seed() {
     p.images.forEach((img) => {
       const image = {
         id: UUID(),
-        image: img,
+        image: resolveProductImageUrl(img),
         productId: product.id,
       };
 

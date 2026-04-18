@@ -1,6 +1,7 @@
 import { defineAction } from "astro:actions";
 import { db, Product, ProductImage, sql } from "astro:db";
 import { z } from "astro:schema";
+import { resolveProductImageUrl } from "@utils/product-images";
 import { ensureFeaturedColumnExists, ensureImageMetaColumnsExist } from "@utils/product-db";
 
 export const getFeaturedProducts = defineAction({
@@ -26,7 +27,9 @@ export const getFeaturedProducts = defineAction({
                 id:    r.id    as string,
                 title: r.title as string,
                 slug:  r.slug  as string,
-                image: r.image as string | null,
+                image: resolveProductImageUrl(r.image as string | null, {
+                    baseUrl: import.meta.env.PUBLIC_URL,
+                }),
             })),
         };
     },

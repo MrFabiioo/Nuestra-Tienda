@@ -781,36 +781,51 @@ const analyticsRequest = isFiltered
 
 <script>
   import { actions } from 'astro:actions';
-  import {
-    destroyAdminAnalyticsDashboard,
-    renderAdminAnalyticsDashboard,
-    renderAdminAnalyticsDashboardError,
-    renderAdminAnalyticsDashboardLoading,
-  } from '../../scripts/admin/admin-analytics-dashboard';
 
   const analyticsRequestElement = document.getElementById('analytics-request');
   const analyticsRequest = analyticsRequestElement?.textContent
     ? JSON.parse(analyticsRequestElement.textContent)
     : {};
+  const analyticsRoot = document.getElementById('analytics-dashboard-root');
+
+  let dashboardModulePromise: Promise<typeof import('../../scripts/admin/admin-analytics-dashboard')> | null = null;
+
+  function loadDashboardModule() {
+    if (!dashboardModulePromise) {
+      dashboardModulePromise = import('../../scripts/admin/admin-analytics-dashboard');
+    }
+
+    return dashboardModulePromise;
+  }
 
   async function loadAnalyticsDashboard() {
-    renderAdminAnalyticsDashboardLoading();
+    analyticsRoot?.setAttribute('aria-busy', 'true');
 
-    const { data, error } = await actions.getAnalytics(analyticsRequest);
+    const [{ data, error }, dashboardModule] = await Promise.all([
+      actions.getAnalytics(analyticsRequest),
+      loadDashboardModule(),
+    ]);
 
     if (error || !data) {
-      renderAdminAnalyticsDashboardError(error?.message ?? 'La action autenticada devolvió un error inesperado.');
+      dashboardModule.renderAdminAnalyticsDashboardError(error?.message ?? 'La action autenticada devolvió un error inesperado.');
       document.getElementById('analytics-retry-button')?.addEventListener('click', () => {
+        dashboardModule.renderAdminAnalyticsDashboardLoading();
         void loadAnalyticsDashboard();
       }, { once: true });
+      analyticsRoot?.setAttribute('aria-busy', 'false');
       return;
     }
 
-    renderAdminAnalyticsDashboard(data);
+    dashboardModule.renderAdminAnalyticsDashboard(data);
+    analyticsRoot?.setAttribute('aria-busy', 'false');
   }
 
   document.addEventListener('astro:before-swap', () => {
-    destroyAdminAnalyticsDashboard();
+    if (!dashboardModulePromise) return;
+
+    void dashboardModulePromise.then(({ destroyAdminAnalyticsDashboard }) => {
+      destroyAdminAnalyticsDashboard();
+    });
   });
 
   document.addEventListener('astro:page-load', () => {

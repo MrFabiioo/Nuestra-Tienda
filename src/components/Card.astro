@@ -1,5 +1,6 @@
 ---
 import type { ProductWithImages } from '../interfaces/products-with-images.interface';
+import { resolveProductImageList } from '@utils/product-images';
 
 interface Props {
     product: ProductWithImages;
@@ -8,7 +9,9 @@ interface Props {
 const product = Astro.props;
 // Support both flat structure and legacy nested structure
 const displayProduct = product.product ?? product;
-const currentImage = displayProduct.images.split(',');
+const currentImage = resolveProductImageList(displayProduct.images, {
+    baseUrl: import.meta.env.PUBLIC_URL,
+});
 const isEnabled = displayProduct.isEnabled === null || displayProduct.isEnabled === undefined ? true : Boolean(displayProduct.isEnabled);
 ---
 
@@ -20,7 +23,11 @@ const isEnabled = displayProduct.isEnabled === null || displayProduct.isEnabled 
                 src={currentImage[0]}
                 alt={displayProduct.title}
                 class="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+                width="640"
+                height="480"
                 loading="lazy"
+                decoding="async"
+                sizes="(min-width: 1280px) 18rem, (min-width: 640px) 50vw, 100vw"
             />
             
             {isEnabled ? (

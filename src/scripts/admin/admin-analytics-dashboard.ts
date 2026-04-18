@@ -1,4 +1,4 @@
-import { Chart, registerables } from 'chart.js';
+import type { Chart as ChartInstance } from 'chart.js';
 
 type AnalyticsSummary = {
   totalOrders: number;
@@ -108,15 +108,28 @@ const TEMPORAL_WARNINGS = [
 
 const activeChartIds = new Set<string>();
 
-let chartJsRegistered = false;
+type ChartModule = typeof import('chart.js');
 
-function ensureChartJsRegistered() {
-  if (chartJsRegistered) {
-    return;
+let chartJsRegistered = false;
+let chartModulePromise: Promise<ChartModule> | null = null;
+let chartModuleCache: ChartModule | null = null;
+
+async function ensureChartJsRegistered() {
+  if (!chartModulePromise) {
+    chartModulePromise = import('chart.js').then((module) => {
+      chartModuleCache = module;
+      return module;
+    });
   }
 
-  Chart.register(...registerables);
-  chartJsRegistered = true;
+  const module = chartModuleCache ?? await chartModulePromise;
+
+  if (!chartJsRegistered) {
+    module.Chart.register(...module.registerables);
+    chartJsRegistered = true;
+  }
+
+  return module;
 }
 
 function buildPalette(isDark: boolean) {
@@ -140,7 +153,17 @@ function buildPalette(isDark: boolean) {
   };
 }
 
+function getChartConstructor() {
+  return chartModuleCache?.Chart ?? null;
+}
+
 function applyChartDefaults(palette: AnalyticsPalette) {
+  const Chart = getChartConstructor();
+
+  if (!Chart) {
+    return;
+  }
+
   Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
   Chart.defaults.font.size = 12;
   Chart.defaults.color = palette.text;
@@ -709,6 +732,13 @@ function writeAnalyticsData(root: Document, data: AdminAnalyticsDashboardData) {
 }
 
 function destroyChart(root: Document, id: string) {
+  const Chart = getChartConstructor();
+
+  if (!Chart) {
+    activeChartIds.delete(id);
+    return;
+  }
+
   const canvas = getCanvas(root, id);
   const chart = canvas ? Chart.getChart(canvas) : Chart.getChart(id);
 
@@ -719,15 +749,16 @@ function destroyChart(root: Document, id: string) {
   activeChartIds.delete(id);
 }
 
-function rememberChart(id: string, chart: Chart) {
+function rememberChart(id: string, chart: ChartInstance) {
   activeChartIds.add(id);
   return chart;
 }
 
 function createHorizontalBarChart(root: Document, palette: AnalyticsPalette, options: HorizontalBarChartOptions) {
+  const Chart = getChartConstructor();
   const ctx = getCtx(root, options.id);
 
-  if (!ctx || options.values.length === 0) {
+  if (!Chart || !ctx || options.values.length === 0) {
     return null;
   }
 
@@ -773,8 +804,8 @@ function createHorizontalBarChart(root: Document, palette: AnalyticsPalette, opt
         tooltip: {
           ...tooltip,
           callbacks: {
-            title: (items) => options.labels[items[0]?.dataIndex ?? 0] ?? '',
-            label: (context) => options.tooltipLabel(
+            title: (items: any) => options.labels[items[0]?.dataIndex ?? 0] ?? '',
+            label: (context: any) => options.tooltipLabel(
               Number(context.parsed.x ?? 0),
               options.labels[context.dataIndex] ?? '',
               context.dataIndex,
@@ -786,7 +817,7 @@ function createHorizontalBarChart(root: Document, palette: AnalyticsPalette, opt
         x: {
           ...baseScale,
           ticks: options.valueFormatter
-            ? { ...baseScale.ticks, callback: (value) => options.valueFormatter?.(Number(value)) }
+            ? { ...baseScale.ticks, callback: (value: any) => options.valueFormatter?.(Number(value)) }
             : { ...baseScale.ticks, stepSize: 1 },
         },
         y: { ...baseScale },
@@ -796,9 +827,10 @@ function createHorizontalBarChart(root: Document, palette: AnalyticsPalette, opt
 }
 
 function createVerticalBarChart(root: Document, palette: AnalyticsPalette, options: VerticalBarChartOptions) {
+  const Chart = getChartConstructor();
   const ctx = getCtx(root, options.id);
 
-  if (!ctx || options.values.length === 0) {
+  if (!Chart || !ctx || options.values.length === 0) {
     return null;
   }
 
@@ -844,7 +876,7 @@ function createVerticalBarChart(root: Document, palette: AnalyticsPalette, optio
         tooltip: {
           ...tooltip,
           callbacks: {
-            label: (context) => ` ${Number(context.parsed.y ?? 0)} pedido${Number(context.parsed.y ?? 0) === 1 ? '' : 's'}`,
+            label: (context: any) => ` ${Number(context.parsed.y ?? 0)} pedido${Number(context.parsed.y ?? 0) === 1 ? '' : 's'}`,
           },
         },
       },
@@ -857,9 +889,10 @@ function createVerticalBarChart(root: Document, palette: AnalyticsPalette, optio
 }
 
 function createTrendChart(root: Document, data: AdminAnalyticsDashboardData, palette: AnalyticsPalette) {
+  const Chart = getChartConstructor();
   const trendCtx = getCtx(root, 'chart-trend');
 
-  if (!trendCtx || data.byDay.length === 0) {
+  if (!Chart || !trendCtx || data.byDay.length === 0) {
     return null;
   }
 
@@ -930,7 +963,7 @@ function createTrendChart(root: Document, data: AdminAnalyticsDashboardData, pal
         tooltip: {
           ...tooltip,
           callbacks: {
-            label: (context) => context.datasetIndex === 0
+            label: (context: any) => context.datasetIndex === 0
               ? ` Monto bruto: ${currency(Number(context.parsed.y ?? 0))}`
               : ` Pedidos: ${Number(context.parsed.y ?? 0)}`,
           },
@@ -941,7 +974,7 @@ function createTrendChart(root: Document, data: AdminAnalyticsDashboardData, pal
         yRevenue: {
           ...baseScale,
           position: 'left',
-          ticks: { ...baseScale.ticks, callback: (value) => currency(Number(value)) },
+          ticks: { ...baseScale.ticks, callback: (value: any) => currency(Number(value)) },
         },
         yOrders: {
           ...baseScale,
@@ -993,95 +1026,104 @@ export function initAdminAnalyticsDashboard(root: Document = document, initialDa
     return () => destroyAdminAnalyticsDashboard(root);
   }
 
-  ensureChartJsRegistered();
+  let disposed = false;
 
-  const palette = buildPalette(root.documentElement.dataset.theme === 'dark');
-  applyChartDefaults(palette);
-  destroyAdminAnalyticsDashboard(root);
+  void ensureChartJsRegistered().then(() => {
+    if (disposed) {
+      return;
+    }
 
-  createTrendChart(root, data, palette);
+    const palette = buildPalette(root.documentElement.dataset.theme === 'dark');
+    applyChartDefaults(palette);
+    destroyAdminAnalyticsDashboard(root);
 
-  createHorizontalBarChart(root, palette, {
-    id: 'chart-status',
-    labels: data.byStatus.map((item) => labelStatus(item.label)),
-    values: data.byStatus.map((item) => item.count),
-    datasetLabel: 'Pedidos',
-    primary: palette.accentStrong,
-    soft: palette.accentSoft,
-    tooltipLabel: (value, label) => ` ${label}: ${value} pedido${value === 1 ? '' : 's'}`,
+    createTrendChart(root, data, palette);
+
+    createHorizontalBarChart(root, palette, {
+      id: 'chart-status',
+      labels: data.byStatus.map((item) => labelStatus(item.label)),
+      values: data.byStatus.map((item) => item.count),
+      datasetLabel: 'Pedidos',
+      primary: palette.accentStrong,
+      soft: palette.accentSoft,
+      tooltipLabel: (value, label) => ` ${label}: ${value} pedido${value === 1 ? '' : 's'}`,
+    });
+
+    createHorizontalBarChart(root, palette, {
+      id: 'chart-top-qty',
+      labels: data.topByQty.map((item) => item.title),
+      values: data.topByQty.map((item) => item.qty),
+      datasetLabel: 'Unidades demandadas',
+      primary: palette.blue,
+      soft: palette.blueSoft,
+      tooltipLabel: (value, label) => ` ${label}: ${value} unidad${value === 1 ? '' : 'es'}`,
+    });
+
+    createHorizontalBarChart(root, palette, {
+      id: 'chart-top-rev',
+      labels: data.topByRevenue.map((item) => item.title),
+      values: data.topByRevenue.map((item) => item.revenue),
+      datasetLabel: 'Monto bruto',
+      primary: palette.teal,
+      soft: palette.tealSoft,
+      tooltipLabel: (value, label) => ` ${label}: ${currency(value)}`,
+      valueFormatter: (value) => currency(value),
+    });
+
+    createHorizontalBarChart(root, palette, {
+      id: 'chart-top-profit',
+      labels: data.topByEstimatedProfit.map((item) => item.title),
+      values: data.topByEstimatedProfit.map((item) => item.estimatedProfit),
+      datasetLabel: 'Ganancia estimada',
+      primary: palette.teal,
+      soft: palette.tealSoft,
+      tooltipLabel: (value, _label, index) => {
+        const item = data.topByEstimatedProfit[index];
+
+        if (!item) {
+          return ` Ganancia estimada: ${currency(value)}`;
+        }
+
+        return [
+          ` Ingreso aprobado: ${currency(item.estimatedRevenue)}`,
+          ` Costo estimado: ${currency(item.estimatedCost)}`,
+          ` Ganancia estimada: ${currency(item.estimatedProfit)}`,
+        ];
+      },
+      valueFormatter: (value) => currency(value),
+    });
+
+    createHorizontalBarChart(root, palette, {
+      id: 'chart-payment',
+      labels: data.byPaymentMethod.map((item) => item.label),
+      values: data.byPaymentMethod.map((item) => item.count),
+      datasetLabel: 'Pedidos',
+      primary: palette.blue,
+      soft: palette.blueSoft,
+      tooltipLabel: (value, label) => ` ${label}: ${value} pedido${value === 1 ? '' : 's'}`,
+    });
+
+    createVerticalBarChart(root, palette, {
+      id: 'chart-dow',
+      labels: data.byDayOfWeek.map((item) => item.dayName.slice(0, 3)),
+      values: data.byDayOfWeek.map((item) => item.count),
+      datasetLabel: 'Pedidos',
+      primary: palette.warning,
+      soft: palette.warningSoft,
+    });
+
+    createVerticalBarChart(root, palette, {
+      id: 'chart-hour',
+      labels: data.byHour.map((item) => `${item.hour.toString().padStart(2, '0')}h`),
+      values: data.byHour.map((item) => item.count),
+      datasetLabel: 'Pedidos',
+      primary: palette.red,
+      soft: palette.redSoft,
+    });
   });
 
-  createHorizontalBarChart(root, palette, {
-    id: 'chart-top-qty',
-    labels: data.topByQty.map((item) => item.title),
-    values: data.topByQty.map((item) => item.qty),
-    datasetLabel: 'Unidades demandadas',
-    primary: palette.blue,
-    soft: palette.blueSoft,
-    tooltipLabel: (value, label) => ` ${label}: ${value} unidad${value === 1 ? '' : 'es'}`,
-  });
-
-  createHorizontalBarChart(root, palette, {
-    id: 'chart-top-rev',
-    labels: data.topByRevenue.map((item) => item.title),
-    values: data.topByRevenue.map((item) => item.revenue),
-    datasetLabel: 'Monto bruto',
-    primary: palette.teal,
-    soft: palette.tealSoft,
-    tooltipLabel: (value, label) => ` ${label}: ${currency(value)}`,
-    valueFormatter: (value) => currency(value),
-  });
-
-  createHorizontalBarChart(root, palette, {
-    id: 'chart-top-profit',
-    labels: data.topByEstimatedProfit.map((item) => item.title),
-    values: data.topByEstimatedProfit.map((item) => item.estimatedProfit),
-    datasetLabel: 'Ganancia estimada',
-    primary: palette.teal,
-    soft: palette.tealSoft,
-    tooltipLabel: (value, _label, index) => {
-      const item = data.topByEstimatedProfit[index];
-
-      if (!item) {
-        return ` Ganancia estimada: ${currency(value)}`;
-      }
-
-      return [
-        ` Ingreso aprobado: ${currency(item.estimatedRevenue)}`,
-        ` Costo estimado: ${currency(item.estimatedCost)}`,
-        ` Ganancia estimada: ${currency(item.estimatedProfit)}`,
-      ];
-    },
-    valueFormatter: (value) => currency(value),
-  });
-
-  createHorizontalBarChart(root, palette, {
-    id: 'chart-payment',
-    labels: data.byPaymentMethod.map((item) => item.label),
-    values: data.byPaymentMethod.map((item) => item.count),
-    datasetLabel: 'Pedidos',
-    primary: palette.blue,
-    soft: palette.blueSoft,
-    tooltipLabel: (value, label) => ` ${label}: ${value} pedido${value === 1 ? '' : 's'}`,
-  });
-
-  createVerticalBarChart(root, palette, {
-    id: 'chart-dow',
-    labels: data.byDayOfWeek.map((item) => item.dayName.slice(0, 3)),
-    values: data.byDayOfWeek.map((item) => item.count),
-    datasetLabel: 'Pedidos',
-    primary: palette.warning,
-    soft: palette.warningSoft,
-  });
-
-  createVerticalBarChart(root, palette, {
-    id: 'chart-hour',
-    labels: data.byHour.map((item) => `${item.hour.toString().padStart(2, '0')}h`),
-    values: data.byHour.map((item) => item.count),
-    datasetLabel: 'Pedidos',
-    primary: palette.red,
-    soft: palette.redSoft,
-  });
-
-  return () => destroyAdminAnalyticsDashboard(root);
+  return () => {
+    disposed = true;
+    destroyAdminAnalyticsDashboard(root);
+  };
 }

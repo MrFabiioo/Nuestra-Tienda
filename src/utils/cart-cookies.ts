@@ -6,6 +6,10 @@ export class CartCookiesClient {
     return JSON.parse(Cookies.get('cart') ?? '[]');
   }
 
+  static clearCart() {
+    Cookies.remove('cart');
+  }
+
   static addItem(cartItem: CartItem): CartItem[] {
     const cart = CartCookiesClient.getCart();
 

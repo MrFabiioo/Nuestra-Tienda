@@ -289,7 +289,7 @@ const catalogSkeletonCards = Array.from({ length: 4 });
 
 <script>
     // Client-side search and filter functionality
-    // Use astro:page-load for ViewTransitions/ClientRouter compatibility
+    // Use astro:page-load so the filter logic works both on first load and on future page lifecycle hooks
     document.addEventListener('astro:page-load', () => {
         const searchInput = document.getElementById('search-input') as HTMLInputElement;
         const productCards = document.querySelectorAll('.product-card-wrapper');

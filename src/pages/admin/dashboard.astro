@@ -154,7 +154,7 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
 
                             <tbody>
                                 {products.map((p) => (
-                                    <tr>
+                                    <tr data-product-row={p.id}>
                                         <td class="products-td--img">
                                             <div class="admin-table-thumbnail">
                                                 <ProductImage
@@ -282,37 +282,39 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
                 <div class="premium-panel rounded-2xl p-5">
                     <p class="text-xs font-bold uppercase tracking-[0.18em] text-[var(--color-heading-sub)]">Estado actual</p>
 
-                    {currentQr ? (
-                        <div class="mt-4 space-y-4">
-                            <img
-                                src={currentQr.url}
-                                alt="QR de pago actual"
-                                class="mx-auto max-h-64 w-auto rounded-xl border border-[var(--color-border)] object-contain"
-                            />
-                            <p class="text-center text-xs text-[var(--color-text-subtle)]">
-                                Subido: {new Date(currentQr.uploadedAt).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' })}
-                            </p>
-                            <button
-                                id="btn-delete-qr"
-                                type="button"
-                                class="premium-action-secondary w-full justify-center text-[var(--color-danger)]"
-                                style="border-color: var(--color-danger-border);"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                    <div id="qr-current-state">
+                        {currentQr ? (
+                            <div class="mt-4 space-y-4">
+                                <img
+                                    src={currentQr.url}
+                                    alt="QR de pago actual"
+                                    class="mx-auto max-h-64 w-auto rounded-xl border border-[var(--color-border)] object-contain"
+                                />
+                                <p class="text-center text-xs text-[var(--color-text-subtle)]">
+                                    Subido: {new Date(currentQr.uploadedAt).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                </p>
+                                <button
+                                    id="btn-delete-qr"
+                                    type="button"
+                                    class="premium-action-secondary w-full justify-center text-[var(--color-danger)]"
+                                    style="border-color: var(--color-danger-border);"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                    </svg>
+                                    Eliminar QR
+                                </button>
+                            </div>
+                        ) : (
+                            <div class="mt-4 flex flex-col items-center gap-3 rounded-xl border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface-soft)] px-4 py-10 text-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-10 w-10 text-[var(--color-border-strong)]" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75z" />
                                 </svg>
-                                Eliminar QR
-                            </button>
-                        </div>
-                    ) : (
-                        <div class="mt-4 flex flex-col items-center gap-3 rounded-xl border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface-soft)] px-4 py-10 text-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-10 w-10 text-[var(--color-border-strong)]" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75z" />
-                            </svg>
-                            <p class="text-sm text-[var(--color-text-subtle)]">Sin QR configurado. Los clientes no podrán usar esta opción de pago.</p>
-                        </div>
-                    )}
+                                <p class="text-sm text-[var(--color-text-subtle)]">Sin QR configurado. Los clientes no podrán usar esta opción de pago.</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 <!-- Upload nuevo QR -->
@@ -370,7 +372,9 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
                             <p class="text-xs font-bold uppercase tracking-[0.18em] text-[var(--color-heading-sub)]">Bancolombia</p>
                             <h3 class="mt-2 text-xl font-black text-[var(--color-heading)]">Datos de cuenta</h3>
                         </div>
-                        <span class:list={[
+                        <span
+                            id="payment-status-bancolombia"
+                            class:list={[
                             'rounded-full border px-3 py-1 text-xs font-semibold',
                             currentBancolombia
                                 ? 'border-guacamole-b/40 bg-guacamole-b/10 text-guacamole-b'
@@ -380,32 +384,34 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
                         </span>
                     </div>
 
-                    {currentBancolombia ? (
-                        <dl class="mt-4 space-y-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 text-sm">
-                            <div>
-                                <dt class="text-[var(--color-text-subtle)]">Tipo de cuenta</dt>
-                                <dd class="font-semibold text-[var(--color-heading-sub)]">{currentBancolombia.accountType}</dd>
-                            </div>
-                            <div>
-                                <dt class="text-[var(--color-text-subtle)]">Número</dt>
-                                <dd class="font-semibold text-[var(--color-heading-sub)]">{currentBancolombia.accountNumber}</dd>
-                            </div>
-                            <div>
-                                <dt class="text-[var(--color-text-subtle)]">Titular</dt>
-                                <dd class="font-semibold text-[var(--color-heading-sub)]">{currentBancolombia.holderName}</dd>
-                            </div>
-                            {currentBancolombia.note && (
+                    <div id="payment-summary-bancolombia">
+                        {currentBancolombia ? (
+                            <dl class="mt-4 space-y-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 text-sm">
                                 <div>
-                                    <dt class="text-[var(--color-text-subtle)]">Nota</dt>
-                                    <dd class="font-semibold text-[var(--color-heading-sub)]">{currentBancolombia.note}</dd>
+                                    <dt class="text-[var(--color-text-subtle)]">Tipo de cuenta</dt>
+                                    <dd class="font-semibold text-[var(--color-heading-sub)]">{currentBancolombia.accountType}</dd>
                                 </div>
-                            )}
-                        </dl>
-                    ) : (
-                        <div class="mt-4 rounded-2xl border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface-soft)] px-4 py-6 text-sm text-[var(--color-text-subtle)]">
-                            No hay datos cargados para Bancolombia. Si lo dejas así, el cliente no verá este método en <code>/pagos/[token]</code>.
-                        </div>
-                    )}
+                                <div>
+                                    <dt class="text-[var(--color-text-subtle)]">Número</dt>
+                                    <dd class="font-semibold text-[var(--color-heading-sub)]">{currentBancolombia.accountNumber}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-[var(--color-text-subtle)]">Titular</dt>
+                                    <dd class="font-semibold text-[var(--color-heading-sub)]">{currentBancolombia.holderName}</dd>
+                                </div>
+                                {currentBancolombia.note && (
+                                    <div>
+                                        <dt class="text-[var(--color-text-subtle)]">Nota</dt>
+                                        <dd class="font-semibold text-[var(--color-heading-sub)]">{currentBancolombia.note}</dd>
+                                    </div>
+                                )}
+                            </dl>
+                        ) : (
+                            <div class="mt-4 rounded-2xl border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface-soft)] px-4 py-6 text-sm text-[var(--color-text-subtle)]">
+                                No hay datos cargados para Bancolombia. Si lo dejas así, el cliente no verá este método en <code>/pagos/[token]</code>.
+                            </div>
+                        )}
+                    </div>
 
                     <form class="payment-config-form mt-5 space-y-4" data-method="bancolombia">
                         <div>
@@ -445,7 +451,9 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
                             <p class="text-xs font-bold uppercase tracking-[0.18em] text-[var(--color-heading-sub)]">Nequi</p>
                             <h3 class="mt-2 text-xl font-black text-[var(--color-heading)]">Pago por celular</h3>
                         </div>
-                        <span class:list={[
+                        <span
+                            id="payment-status-nequi"
+                            class:list={[
                             'rounded-full border px-3 py-1 text-xs font-semibold',
                             currentNequi
                                 ? 'border-guacamole-b/40 bg-guacamole-b/10 text-guacamole-b'
@@ -455,28 +463,30 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
                         </span>
                     </div>
 
-                    {currentNequi ? (
-                        <dl class="mt-4 space-y-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 text-sm">
-                            <div>
-                                <dt class="text-[var(--color-text-subtle)]">Celular</dt>
-                                <dd class="font-semibold text-[var(--color-heading-sub)]">{currentNequi.phoneNumber}</dd>
-                            </div>
-                            <div>
-                                <dt class="text-[var(--color-text-subtle)]">Titular</dt>
-                                <dd class="font-semibold text-[var(--color-heading-sub)]">{currentNequi.holderName}</dd>
-                            </div>
-                            {currentNequi.note && (
+                    <div id="payment-summary-nequi">
+                        {currentNequi ? (
+                            <dl class="mt-4 space-y-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 text-sm">
                                 <div>
-                                    <dt class="text-[var(--color-text-subtle)]">Nota</dt>
-                                    <dd class="font-semibold text-[var(--color-heading-sub)]">{currentNequi.note}</dd>
+                                    <dt class="text-[var(--color-text-subtle)]">Celular</dt>
+                                    <dd class="font-semibold text-[var(--color-heading-sub)]">{currentNequi.phoneNumber}</dd>
                                 </div>
-                            )}
-                        </dl>
-                    ) : (
-                        <div class="mt-4 rounded-2xl border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface-soft)] px-4 py-6 text-sm text-[var(--color-text-subtle)]">
-                            No hay datos cargados para Nequi. Si lo dejas así, el cliente no verá este método en <code>/pagos/[token]</code>.
-                        </div>
-                    )}
+                                <div>
+                                    <dt class="text-[var(--color-text-subtle)]">Titular</dt>
+                                    <dd class="font-semibold text-[var(--color-heading-sub)]">{currentNequi.holderName}</dd>
+                                </div>
+                                {currentNequi.note && (
+                                    <div>
+                                        <dt class="text-[var(--color-text-subtle)]">Nota</dt>
+                                        <dd class="font-semibold text-[var(--color-heading-sub)]">{currentNequi.note}</dd>
+                                    </div>
+                                )}
+                            </dl>
+                        ) : (
+                            <div class="mt-4 rounded-2xl border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface-soft)] px-4 py-6 text-sm text-[var(--color-text-subtle)]">
+                                No hay datos cargados para Nequi. Si lo dejas así, el cliente no verá este método en <code>/pagos/[token]</code>.
+                            </div>
+                        )}
+                    </div>
 
                     <form class="payment-config-form mt-5 space-y-4" data-method="nequi">
                         <div>
@@ -641,6 +651,162 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
     };
 
     document.addEventListener("astro:page-load", () => {
+        const enabledIcon = `
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>`;
+        const disabledIcon = `
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+            </svg>`;
+        const featuredIcon = (featured: boolean) => `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${featured ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.8" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+            </svg>`;
+        const qrCurrentState = document.getElementById('qr-current-state') as HTMLDivElement | null;
+
+        const escapeHtml = (value: string) => value
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
+
+        const formatUploadedAt = (value: string) => new Date(value).toLocaleDateString('es-CO', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+        });
+
+        const setEnabledButtonState = (button: HTMLButtonElement, isEnabled: boolean) => {
+            const title = button.closest('tr')?.querySelector('.products-name-link')?.textContent?.trim() ?? 'producto';
+            button.dataset.enabled = String(isEnabled);
+            button.classList.toggle('btn-enabled--disabled', !isEnabled);
+            button.setAttribute('aria-label', isEnabled ? `Deshabilitar ${title}` : `Habilitar ${title}`);
+            button.setAttribute('title', isEnabled ? 'Deshabilitar producto' : 'Habilitar producto');
+            button.innerHTML = isEnabled ? enabledIcon : disabledIcon;
+        };
+
+        const setFeaturedButtonState = (button: HTMLButtonElement, featured: boolean) => {
+            const title = button.closest('tr')?.querySelector('.products-name-link')?.textContent?.trim() ?? 'producto';
+            button.dataset.featured = String(featured);
+            button.classList.toggle('btn-featured--active', featured);
+            button.setAttribute('aria-label', featured ? `Quitar ${title} del banner` : `Destacar ${title} en banner`);
+            button.setAttribute('title', featured ? 'Quitar del banner' : 'Destacar en banner');
+            button.innerHTML = featuredIcon(featured);
+        };
+
+        const renderQrState = (qr?: { url: string; uploadedAt: string } | null) => {
+            if (!qrCurrentState) return;
+
+            if (!qr) {
+                qrCurrentState.innerHTML = `
+                    <div class="mt-4 flex flex-col items-center gap-3 rounded-xl border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface-soft)] px-4 py-10 text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-10 w-10 text-[var(--color-border-strong)]" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75z" />
+                        </svg>
+                        <p class="text-sm text-[var(--color-text-subtle)]">Sin QR configurado. Los clientes no podrán usar esta opción de pago.</p>
+                    </div>`;
+                return;
+            }
+
+            qrCurrentState.innerHTML = `
+                <div class="mt-4 space-y-4">
+                    <img src="${escapeHtml(qr.url)}" alt="QR de pago actual" class="mx-auto max-h-64 w-auto rounded-xl border border-[var(--color-border)] object-contain" />
+                    <p class="text-center text-xs text-[var(--color-text-subtle)]">Subido: ${escapeHtml(formatUploadedAt(qr.uploadedAt))}</p>
+                    <button id="btn-delete-qr" type="button" class="premium-action-secondary w-full justify-center text-[var(--color-danger)]" style="border-color: var(--color-danger-border);">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                        </svg>
+                        Eliminar QR
+                    </button>
+                </div>`;
+
+            bindDeleteQrButton();
+        };
+
+        const renderPaymentSummary = (method: 'bancolombia' | 'nequi', config?: Record<string, string> | null) => {
+            if (!config) {
+                return method === 'bancolombia'
+                    ? `<div class="mt-4 rounded-2xl border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface-soft)] px-4 py-6 text-sm text-[var(--color-text-subtle)]">No hay datos cargados para Bancolombia. Si lo dejas así, el cliente no verá este método en <code>/pagos/[token]</code>.</div>`
+                    : `<div class="mt-4 rounded-2xl border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface-soft)] px-4 py-6 text-sm text-[var(--color-text-subtle)]">No hay datos cargados para Nequi. Si lo dejas así, el cliente no verá este método en <code>/pagos/[token]</code>.</div>`;
+            }
+
+            const commonItems = method === 'bancolombia'
+                ? `
+                    <div>
+                        <dt class="text-[var(--color-text-subtle)]">Tipo de cuenta</dt>
+                        <dd class="font-semibold text-[var(--color-heading-sub)]">${escapeHtml(config.accountType ?? '')}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-[var(--color-text-subtle)]">Número</dt>
+                        <dd class="font-semibold text-[var(--color-heading-sub)]">${escapeHtml(config.accountNumber ?? '')}</dd>
+                    </div>`
+                : `
+                    <div>
+                        <dt class="text-[var(--color-text-subtle)]">Celular</dt>
+                        <dd class="font-semibold text-[var(--color-heading-sub)]">${escapeHtml(config.phoneNumber ?? '')}</dd>
+                    </div>`;
+
+            return `
+                <dl class="mt-4 space-y-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 text-sm">
+                    ${commonItems}
+                    <div>
+                        <dt class="text-[var(--color-text-subtle)]">Titular</dt>
+                        <dd class="font-semibold text-[var(--color-heading-sub)]">${escapeHtml(config.holderName ?? '')}</dd>
+                    </div>
+                    ${config.note ? `
+                        <div>
+                            <dt class="text-[var(--color-text-subtle)]">Nota</dt>
+                            <dd class="font-semibold text-[var(--color-heading-sub)]">${escapeHtml(config.note)}</dd>
+                        </div>` : ''}
+                </dl>`;
+        };
+
+        const updatePaymentMethodUi = (method: 'bancolombia' | 'nequi', config?: Record<string, string> | null) => {
+            const summary = document.getElementById(`payment-summary-${method}`);
+            const status = document.getElementById(`payment-status-${method}`);
+            const deleteButton = document.querySelector(`.payment-config-delete[data-method="${method}"]`) as HTMLButtonElement | null;
+
+            summary && (summary.innerHTML = renderPaymentSummary(method, config));
+
+            if (status) {
+                status.textContent = config ? 'Activo' : 'Sin configurar';
+                status.classList.toggle('border-guacamole-b/40', Boolean(config));
+                status.classList.toggle('bg-guacamole-b/10', Boolean(config));
+                status.classList.toggle('text-guacamole-b', Boolean(config));
+                status.classList.toggle('border-[var(--color-border)]', !config);
+                status.classList.toggle('text-[var(--color-text-subtle)]', !config);
+            }
+
+            if (deleteButton) {
+                deleteButton.disabled = !config;
+            }
+        };
+
+        function bindDeleteQrButton() {
+            const deleteQrBtn = document.getElementById('btn-delete-qr') as HTMLButtonElement | null;
+            if (!deleteQrBtn || deleteQrBtn.dataset.bound === 'true') return;
+
+            deleteQrBtn.dataset.bound = 'true';
+            deleteQrBtn.addEventListener('click', async () => {
+                if (!confirm('¿Eliminar el QR de pago? Los clientes no podrán usar esa opción hasta que subas uno nuevo.')) return;
+                deleteQrBtn.disabled = true;
+
+                const { error } = await actions.deletePaymentQr();
+
+                if (error) {
+                    alert(`Error: ${error.message}`);
+                    deleteQrBtn.disabled = false;
+                    return;
+                }
+
+                renderQrState(null);
+            });
+        }
+
         // ── Toggle enabled ────────────────────────────────────────────
         document.querySelectorAll(".btn-toggle-enabled").forEach((btn) => {
             btn.addEventListener("click", async () => {
@@ -659,7 +825,8 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
                     return;
                 }
 
-                window.location.reload();
+                setEnabledButtonState(button, !currentEnabled);
+                button.disabled = false;
             });
         });
 
@@ -681,7 +848,8 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
                     return;
                 }
 
-                window.location.reload();
+                setFeaturedButtonState(button, !currentFeatured);
+                button.disabled = false;
             });
         });
 
@@ -698,7 +866,7 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
             qrFeedback.textContent = 'Subiendo imagen…';
             qrFeedback.className = 'min-h-[1.25rem] text-sm text-[var(--color-text-muted)]';
 
-            const { error } = await actions.uploadPaymentQr(new FormData(qrForm));
+            const { data, error } = await actions.uploadPaymentQr(new FormData(qrForm));
 
             if (error) {
                 qrFeedback.textContent = error.message;
@@ -707,26 +875,15 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
                 return;
             }
 
-            window.location.reload();
+            renderQrState(data?.qr ?? null);
+            qrFeedback.textContent = 'QR actualizado. Ya quedó reflejado en la vista actual.';
+            qrFeedback.className = 'min-h-[1.25rem] text-sm text-guacamole-b';
+            qrForm.reset();
+            qrSubmit.disabled = false;
         });
 
         // ── QR delete ──────────────────────────────────────────────────
-        const deleteQrBtn = document.getElementById('btn-delete-qr') as HTMLButtonElement | null;
-
-        deleteQrBtn?.addEventListener('click', async () => {
-            if (!confirm('¿Eliminar el QR de pago? Los clientes no podrán usar esa opción hasta que subas uno nuevo.')) return;
-            deleteQrBtn.disabled = true;
-
-            const { error } = await actions.deletePaymentQr();
-
-            if (error) {
-                alert(`Error: ${error.message}`);
-                deleteQrBtn.disabled = false;
-                return;
-            }
-
-            window.location.reload();
-        });
+        bindDeleteQrButton();
 
         document.querySelectorAll('.payment-config-form').forEach((node) => {
             const form = node as HTMLFormElement;
@@ -763,7 +920,7 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
                         },
                     };
 
-                const { error } = await adminActions.savePaymentMethodConfig(payload);
+                const { data, error } = await adminActions.savePaymentMethodConfig(payload);
 
                 if (error) {
                     feedback.textContent = error.message;
@@ -772,7 +929,10 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
                     return;
                 }
 
-                window.location.reload();
+                updatePaymentMethodUi(method, data?.config ?? null);
+                feedback.textContent = `${method === 'bancolombia' ? 'Bancolombia' : 'Nequi'} actualizado sin recargar la página.`;
+                feedback.className = 'payment-config-feedback min-h-[1.25rem] text-sm text-guacamole-b';
+                submit.disabled = false;
             });
         });
 
@@ -781,6 +941,8 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
 
             button.addEventListener('click', async () => {
                 const method = button.dataset.method as 'bancolombia' | 'nequi' | undefined;
+                const form = button.closest('form');
+                const feedback = form?.querySelector('.payment-config-feedback') as HTMLParagraphElement | null;
                 if (!method) return;
 
                 if (!confirm(`¿Eliminar ${method}? Va a desaparecer del flujo público de pagos hasta volver a configurarlo.`)) {
@@ -788,16 +950,29 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
                 }
 
                 button.disabled = true;
+                if (feedback) {
+                    feedback.textContent = 'Eliminando configuración...';
+                    feedback.className = 'payment-config-feedback min-h-[1.25rem] text-sm text-[var(--color-text-muted)]';
+                }
 
                 const { error } = await adminActions.deletePaymentMethodConfig(method);
 
                 if (error) {
-                    alert(`Error: ${error.message}`);
+                    if (feedback) {
+                        feedback.textContent = error.message;
+                        feedback.className = 'payment-config-feedback min-h-[1.25rem] text-sm text-[var(--color-danger)]';
+                    } else {
+                        alert(`Error: ${error.message}`);
+                    }
                     button.disabled = false;
                     return;
                 }
 
-                window.location.reload();
+                updatePaymentMethodUi(method, null);
+                if (feedback) {
+                    feedback.textContent = `${method === 'bancolombia' ? 'Bancolombia' : 'Nequi'} eliminado sin recargar.`;
+                    feedback.className = 'payment-config-feedback min-h-[1.25rem] text-sm text-guacamole-b';
+                }
             });
         });
 
@@ -825,7 +1000,7 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
                     return;
                 }
 
-                window.location.reload();
+                document.querySelector(`[data-product-row="${id}"]`)?.remove();
             });
         });
     });

@@ -1,6 +1,7 @@
 import { defineAction } from "astro:actions";
 import { Category, db, Product, ProductImage, sql } from "astro:db";
 import { z } from "astro:schema";
+import { resolveProductImageUrl } from "@utils/product-images";
 import { ensureImageMetaColumnsExist, ensureIsEnabledColumnExists } from "@utils/product-db";
 
 interface ProductByCategory {
@@ -82,7 +83,9 @@ export const getProductsByCategory = defineAction({
                         price: Number(p.price),
                         sizes: String(p.sizes),
                         slug: String(p.slug),
-                        image: p.image ? String(p.image) : '/images/no-image.png',
+                        image: resolveProductImageUrl(String(p.image ?? ''), {
+                            baseUrl: import.meta.env.PUBLIC_URL,
+                        }),
                         isEnabled: p.isEnabled === null || p.isEnabled === undefined ? true : Boolean(p.isEnabled),
                     }))
                 });
@@ -101,7 +104,9 @@ export const getProductsByCategory = defineAction({
                     price: Number(p.price),
                     sizes: String(p.sizes),
                     slug: String(p.slug),
-                    image: p.image ? String(p.image) : '/images/no-image.png',
+                    image: resolveProductImageUrl(String(p.image ?? ''), {
+                        baseUrl: import.meta.env.PUBLIC_URL,
+                    }),
                     isEnabled: p.isEnabled === null || p.isEnabled === undefined ? true : Boolean(p.isEnabled),
                 }))
             });

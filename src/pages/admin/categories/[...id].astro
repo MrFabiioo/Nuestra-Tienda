@@ -122,7 +122,6 @@ if (!isNew && id) {
 
 <script>
     import { actions } from "astro:actions";
-    import { navigate } from "astro:transitions/client";
 
     document.addEventListener("astro:page-load", () => {
         const form = document.getElementById("category-form") as HTMLFormElement;
@@ -162,7 +161,7 @@ if (!isNew && id) {
                 return;
             }
 
-            navigate("/admin/categories");
+            window.location.assign("/admin/categories");
         });
     });
 </script>

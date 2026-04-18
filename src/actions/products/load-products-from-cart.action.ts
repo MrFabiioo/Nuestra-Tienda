@@ -4,6 +4,7 @@ import type { CartItem } from "@interfaces/cart-item";
 import { defineAction } from "astro:actions";
 import { db, inArray, Product, ProductImage, sql } from "astro:db";
 import { ensureImageMetaColumnsExist } from "@utils/product-db";
+import { resolveProductImageUrl } from "@utils/product-images";
 
 export const loadProductsFromCart= defineAction({
         accept:'json',
@@ -44,9 +45,9 @@ export const loadProductsFromCart= defineAction({
                     quantity: item.quantity,
                     price: product.price,
                     slug: product.slug,
-                    image: image
-                        ? (image.startsWith('http') ? image : `${import.meta.env.PUBLIC_URL}/images/products/${image}`)
-                        : `${import.meta.env.PUBLIC_URL}/images/no-image.png`
+                    image: resolveProductImageUrl(image, {
+                        baseUrl: import.meta.env.PUBLIC_URL,
+                    })
                 };
             });
         }

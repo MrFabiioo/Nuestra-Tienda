@@ -396,7 +396,7 @@ const initialRecipe: ProductRecipe = (product as any).recipe ?? {
               <p class="admin-shell__eyebrow text-[0.68rem]">Preview</p>
               <span class="admin-table-badge admin-table-badge--accent">{images.length} {images.length === 1 ? 'imagen' : 'imágenes'}</span>
             </div>
-            <div class="relative" style="height: 360px;">
+            <div class="relative h-[360px] overflow-hidden">
               <ProductSliceShow images={images.map(i=>i.image)} />
             </div>
           </div>
@@ -1816,7 +1816,13 @@ document.addEventListener('astro:page-load', () => {
   });
 
   // ── Drag & Drop ───────────────────────────────────────────────────────
+  const isFileDrag = (e: DragEvent) => Array.from(e.dataTransfer?.types ?? []).includes('Files');
+
   const preventDefaults = (e: DragEvent) => {
+    if (!isFileDrag(e)) {
+      return;
+    }
+
     e.preventDefault();
     e.stopPropagation();
   };

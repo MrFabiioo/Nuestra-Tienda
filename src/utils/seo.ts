@@ -1,5 +1,5 @@
 export const BRAND_NAME = 'Guacamole Shop';
-export const DEFAULT_OG_IMAGE_PATH = '/images/guacamole-caricatura.png';
+export const DEFAULT_OG_IMAGE_PATH: string | undefined = undefined;
 
 const LEGACY_BRAND_TOKENS = [BRAND_NAME, 'Nuestra Tienda'];
 

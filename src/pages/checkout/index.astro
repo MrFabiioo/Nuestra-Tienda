@@ -39,7 +39,7 @@ const checkoutBreadcrumbs = [
 ---
 
 <Layout title="Checkout" description="Revisa tu pedido y deja listo el paso al pago" noindex={true}>
-  <main class="theme-checkout-page min-h-screen bg-guacamole-fondo/10 py-8 px-4 md:px-8">
+  <main class="theme-checkout-page min-h-screen bg-guacamole-fondo/10 py-8 px-4 md:px-8" data-checkout-page>
     <div class="max-w-6xl mx-auto mb-6">
       <BreadcrumbTrail
         items={checkoutBreadcrumbs}
@@ -163,7 +163,12 @@ const checkoutBreadcrumbs = [
                       <img
                         src={product.image}
                         alt={product.title}
-                         class="h-20 w-20 rounded-xl border-2 border-guacamole-b/20 object-cover shadow-sm md:h-24 md:w-24"
+                        class="h-20 w-20 rounded-xl border-2 border-guacamole-b/20 object-cover shadow-sm md:h-24 md:w-24"
+                        width="96"
+                        height="96"
+                        loading="lazy"
+                        decoding="async"
+                        sizes="96px"
                       />
                     </div>
 
@@ -196,11 +201,12 @@ const checkoutBreadcrumbs = [
                       </div>
 
                       <!-- Remove Button -->
-                       <button
-                         data-id={product.productId}
-                         data-size={product.sizes}
-                         class="btn-delete mt-3 inline-flex items-center gap-1 rounded-full border border-guacamole-b/15 bg-guacamole-fondo/10 px-3 py-1.5 text-sm font-semibold text-guacamole-a transition-colors hover:border-guacamole-b/25 hover:bg-guacamole-fondo/15 hover:text-guacamole-b disabled:cursor-wait disabled:border-guacamole-b/10 disabled:bg-guacamole-fondo/10 disabled:text-guacamole-b/40"
-                        >
+                        <button
+                          type="button"
+                          data-id={product.productId}
+                          data-size={product.sizes}
+                          class="btn-delete mt-3 inline-flex items-center gap-1 rounded-full border border-guacamole-b/15 bg-guacamole-fondo/10 px-3 py-1.5 text-sm font-semibold text-guacamole-a transition-colors hover:border-guacamole-b/25 hover:bg-guacamole-fondo/15 hover:text-guacamole-b disabled:cursor-wait disabled:border-guacamole-b/10 disabled:bg-guacamole-fondo/10 disabled:text-guacamole-b/40"
+                         >
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
@@ -647,253 +653,11 @@ const checkoutBreadcrumbs = [
 </style>
 
 <script>
-import { CartCookiesClient } from "@utils/cart-cookies";
-import { actions } from "astro:actions";
-import { navigate } from "astro:transitions/client";
+import { initCheckoutPage } from '../../scripts/checkout-page';
+import { bindDocumentEventOnce } from '../../utils/bind-document-event-once';
 
-document.addEventListener('astro:page-load',()=>{
-  const form = document.getElementById('customer-form') as HTMLFormElement | null;
-  const checkoutFeedback = document.getElementById('checkout-feedback') as HTMLParagraphElement | null;
-  const feedbackBox = document.getElementById('form-feedback') as HTMLDivElement | null;
-  const lockedDeliveryData = {
-    method: 'wemi',
-    address: 'CR 48 14 49',
-    city: 'Medellin - Poblado',
-    notes: 'Grupo Emi Falk - Sala de Rdio'
-  };
+const run = () => initCheckoutPage(document);
 
-  const validationMessages: Record<string, string> = {
-    fullName: 'Compártenos tu nombre completo para identificar el pedido.',
-    phone: 'Necesitamos un teléfono válido para coordinar cualquier detalle.',
-    email: 'Ingresá un correo válido para enviarte la confirmación.',
-    address: 'La dirección de entrega en la WEMI debe quedar cargada.',
-    city: 'La ciudad del punto de entrega en la WEMI debe quedar cargada.',
-    deliveryMethod: 'La entrega se realiza únicamente en la WEMI.'
-  };
-
-  const applyLockedDeliveryData = () => {
-    if (!form) return;
-
-    const addressField = form.elements.namedItem('address') as HTMLInputElement | null;
-    const cityField = form.elements.namedItem('city') as HTMLInputElement | null;
-    const notesField = form.elements.namedItem('notes') as HTMLTextAreaElement | null;
-    const deliveryMethods = form.elements.namedItem('deliveryMethod') as RadioNodeList | null;
-
-    if (addressField) addressField.value = lockedDeliveryData.address;
-    if (cityField) cityField.value = lockedDeliveryData.city;
-    if (notesField) notesField.value = lockedDeliveryData.notes;
-
-    if (deliveryMethods) {
-      for (let i = 0; i < deliveryMethods.length; i++) {
-        const radio = deliveryMethods[i] as HTMLInputElement;
-        radio.checked = radio.value === lockedDeliveryData.method;
-      }
-    }
-  };
-
-  const setCheckoutFeedback = (message: string, tone: 'default' | 'error' | 'success' = 'default') => {
-    if (!checkoutFeedback) return;
-
-    checkoutFeedback.textContent = message;
-    checkoutFeedback.classList.remove('text-gray-500', 'text-red-500', 'text-guacamole-b');
-
-    if (tone === 'error') {
-      checkoutFeedback.classList.add('text-red-500');
-      return;
-    }
-
-    if (tone === 'success') {
-      checkoutFeedback.classList.add('text-guacamole-b');
-      return;
-    }
-
-    checkoutFeedback.classList.add('text-gray-500');
-  };
-
-  const showFormFeedback = (message: string) => {
-    if (!feedbackBox) return;
-
-    feedbackBox.textContent = message;
-    feedbackBox.classList.remove('hidden');
-  };
-
-  const hideFormFeedback = () => {
-    if (!feedbackBox) return;
-
-    feedbackBox.textContent = '';
-    feedbackBox.classList.add('hidden');
-  };
-
-  const setFieldError = (field: HTMLElement, message: string) => {
-    const wrapper = field.closest('[data-field-wrapper]');
-    const errorEl = wrapper?.querySelector<HTMLElement>('[data-field-error]');
-
-    field.setAttribute('aria-invalid', 'true');
-
-    if (errorEl) {
-      errorEl.textContent = message;
-      errorEl.classList.remove('hidden');
-    }
-  };
-
-  const clearFieldError = (field: HTMLElement) => {
-    const wrapper = field.closest('[data-field-wrapper]');
-    const errorEl = wrapper?.querySelector<HTMLElement>('[data-field-error]');
-
-    field.removeAttribute('aria-invalid');
-
-    if (errorEl) {
-      errorEl.textContent = '';
-      errorEl.classList.add('hidden');
-    }
-  };
-
-  const getFieldMessage = (field: HTMLInputElement | HTMLTextAreaElement) => {
-    if (field.validity.valueMissing) {
-      return validationMessages[field.name] ?? 'Este campo es obligatorio.';
-    }
-
-    if (field.validity.typeMismatch && field.name === 'email') {
-      return 'Ese correo no parece válido. Revísalo antes de continuar.';
-    }
-
-    return '';
-  };
-
-  const validateForm = () => {
-    if (!form) return true;
-
-    hideFormFeedback();
-
-    const invalidFields: HTMLElement[] = [];
-    const methodRadios = Array.from(form.querySelectorAll<HTMLInputElement>('input[name="deliveryMethod"]'));
-    const hasDeliveryMethod = methodRadios.some((radio) => radio.checked);
-
-    if (!hasDeliveryMethod && methodRadios.length > 0) {
-      methodRadios.forEach((radio) => setFieldError(radio, validationMessages.deliveryMethod));
-      invalidFields.push(methodRadios[0]);
-    } else {
-      methodRadios.forEach((radio) => clearFieldError(radio));
-    }
-
-    form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input, textarea').forEach((field) => {
-      if (field.type === 'radio') return;
-
-      const message = getFieldMessage(field);
-      if (message) {
-        setFieldError(field, message);
-        invalidFields.push(field);
-        return;
-      }
-
-      clearFieldError(field);
-    });
-
-    if (invalidFields.length > 0) {
-      showFormFeedback('Hay algunos datos por ajustar antes de pasar al pago. Revisa los campos marcados y continuamos.');
-      invalidFields[0].focus();
-      return false;
-    }
-
-    return true;
-  };
-
-  if (form) {
-    applyLockedDeliveryData();
-
-    form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input, textarea').forEach((field) => {
-      if (field.type === 'radio') {
-        field.addEventListener('change', () => {
-          Array.from(form.querySelectorAll<HTMLInputElement>('input[name="deliveryMethod"]')).forEach((radio) => clearFieldError(radio));
-          hideFormFeedback();
-        });
-        return;
-      }
-
-      field.addEventListener('input', () => {
-        if (field.checkValidity()) {
-          clearFieldError(field);
-        }
-      });
-
-      field.addEventListener('blur', () => {
-        const message = getFieldMessage(field);
-        if (message) {
-          setFieldError(field, message);
-        } else {
-          clearFieldError(field);
-        }
-      });
-    });
-  }
-
-  // Handle delete buttons
-  const deleteButtons = document.querySelectorAll('.btn-delete');
-  deleteButtons.forEach(button => {
-    button.addEventListener('click',(event)=>{
-      const target = event.currentTarget as HTMLButtonElement;
-      if (target.disabled) return;
-
-      target.disabled = true;
-      target.setAttribute('aria-busy', 'true');
-      target.textContent = 'Quitando...';
-      setCheckoutFeedback('Actualizando tu pedido...', 'success');
-
-      const productId = target.dataset.id ?? "";
-      const size= target.dataset.size ?? "";
-      CartCookiesClient.removeItem(productId, size)
-      
-      navigate('/checkout')
-    })
-  })
-
-  // Handle proceed to payment button with real order creation
-  const proceedButton = document.getElementById('proceed-to-payment');
-  const proceedButtonLabel = document.getElementById('proceed-to-payment-label');
-  if (proceedButton) {
-    const setProceedPending = (isPending: boolean, label: string) => {
-      proceedButton.classList.toggle('pointer-events-none', isPending);
-      proceedButton.classList.toggle('opacity-80', isPending);
-      proceedButton.setAttribute('aria-disabled', String(isPending));
-      proceedButton.setAttribute('aria-busy', String(isPending));
-
-      if (proceedButtonLabel) {
-        proceedButtonLabel.innerHTML = isPending
-          ? '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12a8 8 0 018-8m0 0a8 8 0 018 8m-8-8v8" /></svg>' + label
-          : '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>' + label;
-      }
-    };
-
-    proceedButton.addEventListener('click', async (e) => {
-      e.preventDefault();
-      if (!form) return;
-
-       if (proceedButton.getAttribute('aria-disabled') === 'true') return;
-      
-      // Check form validity
-      if (!validateForm()) {
-        setCheckoutFeedback('Faltan algunos datos antes de pasar al pago.', 'error');
-        return;
-      }
-
-      setProceedPending(true, 'Creando pedido...');
-      setCheckoutFeedback('Estamos guardando tu pedido para que el pago quede trazable.', 'success');
-
-      const formData = new FormData(form);
-
-      const { data, error } = await actions.createOrder(formData);
-
-      if (error || !data) {
-        console.error(error);
-        showFormFeedback(error?.message ?? 'No pudimos crear tu pedido. Revisa los datos e inténtalo de nuevo.');
-        setCheckoutFeedback('Hubo un problema al guardar el pedido. No continuaremos hasta dejarlo bien registrado.', 'error');
-        setProceedPending(false, 'Continuar a medios de pago');
-        return;
-      }
-
-      setCheckoutFeedback('Pedido creado. Te llevamos a la referencia pública de pago.', 'success');
-      window.location.href = data.redirectUrl;
-    });
-  }
-});
+run();
+bindDocumentEventOnce('astro:page-load', 'checkout-page', run);
 </script>
