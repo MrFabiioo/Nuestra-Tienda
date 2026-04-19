@@ -9,6 +9,7 @@ import { buildEstimatedProfitabilityRanking } from './estimated-profitability';
 import { databaseAdapter } from '../data/database-adapter';
 import type { DatabaseSession } from '../data/transaction-runner';
 import { formatPaymentMethod } from '../orders/constants';
+import { serializeDbDate } from '@utils/db-date';
 
 const DAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 const BUSINESS_DAY_OF_WEEK_SQL = sql.raw(buildBusinessDayOfWeekExpression('createdAt'));
@@ -21,10 +22,13 @@ export interface DateRange {
 }
 
 type AnalyticsWindow = {
-  fromMs: number;
-  toMs: number;
+  fromDbValue: string;
+  toDbValue: string;
   last30BusinessDayWindow: ReturnType<typeof getLast30BusinessDayWindow>;
 };
+
+const ANALYTICS_MIN_DB_DATE = '0000-01-01T00:00:00.000Z';
+const ANALYTICS_MAX_DB_DATE = '9999-12-31T23:59:59.999Z';
 
 type AnalyticsSummary = {
   totalOrders: number;
@@ -76,12 +80,12 @@ function generateRangeDates(from: Date, to: Date): string[] {
   return dates;
 }
 
-function resolveAnalyticsWindow(range?: DateRange): AnalyticsWindow {
+export function resolveAnalyticsWindow(range?: DateRange): AnalyticsWindow {
   const analyticsReferenceDate = new Date();
 
   return {
-    fromMs: range?.from.getTime() ?? 0,
-    toMs: range?.to.getTime() ?? 9_999_999_999_999,
+    fromDbValue: range ? serializeDbDate(range.from) : ANALYTICS_MIN_DB_DATE,
+    toDbValue: range ? serializeDbDate(range.to) : ANALYTICS_MAX_DB_DATE,
     last30BusinessDayWindow: getLast30BusinessDayWindow(analyticsReferenceDate),
   };
 }
@@ -107,7 +111,7 @@ function toDistribution(rows: unknown[], transformLabel?: (label: string) => str
 }
 
 export async function getAnalyticsSummary(range?: DateRange): Promise<AnalyticsSummary> {
-  const { fromMs, toMs } = resolveAnalyticsWindow(range);
+  const { fromDbValue, toDbValue } = resolveAnalyticsWindow(range);
 
   const [summaryResult, itemsSoldResult] = await Promise.all([
     databaseAdapter.run(sql`
@@ -120,13 +124,13 @@ export async function getAnalyticsSummary(range?: DateRange): Promise<AnalyticsS
         COALESCE(SUM(CASE WHEN status IN ('pending_payment', 'under_review') THEN 1 ELSE 0 END), 0) as pendingOrders,
         COALESCE(SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END), 0) as rejectedOrders
       FROM ${Order}
-      WHERE createdAt >= ${fromMs} AND createdAt < ${toMs}
+      WHERE createdAt >= ${fromDbValue} AND createdAt < ${toDbValue}
     `),
     databaseAdapter.run(sql`
       SELECT COALESCE(SUM(oi.quantity), 0) as totalItemsSold
       FROM ${OrderItem} oi
       INNER JOIN ${Order} o ON o.id = oi.orderId
-      WHERE o.createdAt >= ${fromMs} AND o.createdAt < ${toMs}
+      WHERE o.createdAt >= ${fromDbValue} AND o.createdAt < ${toDbValue}
     `),
   ]);
 
@@ -146,7 +150,7 @@ export async function getAnalyticsSummary(range?: DateRange): Promise<AnalyticsS
 }
 
 export async function getAnalyticsDatasets(range?: DateRange, adapter: DatabaseSession = databaseAdapter): Promise<AnalyticsDatasets> {
-  const { fromMs, toMs, last30BusinessDayWindow } = resolveAnalyticsWindow(range);
+  const { fromDbValue, toDbValue, last30BusinessDayWindow } = resolveAnalyticsWindow(range);
 
   const [
     topByQtyResult,
@@ -167,7 +171,7 @@ export async function getAnalyticsDatasets(range?: DateRange, adapter: DatabaseS
         ROUND(SUM(oi.lineTotal), 2) as revenue
       FROM ${OrderItem} oi
       INNER JOIN ${Order} o ON o.id = oi.orderId
-      WHERE o.createdAt >= ${fromMs} AND o.createdAt < ${toMs}
+      WHERE o.createdAt >= ${fromDbValue} AND o.createdAt < ${toDbValue}
       GROUP BY oi.productId, oi.title
       ORDER BY qty DESC
       LIMIT 10
@@ -180,7 +184,7 @@ export async function getAnalyticsDatasets(range?: DateRange, adapter: DatabaseS
         SUM(oi.quantity) as qty
       FROM ${OrderItem} oi
       INNER JOIN ${Order} o ON o.id = oi.orderId
-      WHERE o.createdAt >= ${fromMs} AND o.createdAt < ${toMs}
+      WHERE o.createdAt >= ${fromDbValue} AND o.createdAt < ${toDbValue}
       GROUP BY oi.productId, oi.title
       ORDER BY revenue DESC
       LIMIT 10
@@ -195,7 +199,7 @@ export async function getAnalyticsDatasets(range?: DateRange, adapter: DatabaseS
       FROM ${OrderItem} oi
       INNER JOIN ${Order} o ON o.id = oi.orderId
       LEFT JOIN ${Product} p ON p.id = oi.productId
-      WHERE o.status = 'approved' AND o.createdAt >= ${fromMs} AND o.createdAt < ${toMs}
+      WHERE o.status = 'approved' AND o.createdAt >= ${fromDbValue} AND o.createdAt < ${toDbValue}
       GROUP BY oi.productId, oi.title, p.recipe
     `),
     adapter.run(sql`
@@ -211,7 +215,7 @@ export async function getAnalyticsDatasets(range?: DateRange, adapter: DatabaseS
         COUNT(*) as count,
         ROUND(COALESCE(SUM(total), 0), 2) as revenue
       FROM ${Order}
-      WHERE createdAt >= ${fromMs} AND createdAt < ${toMs}
+      WHERE createdAt >= ${fromDbValue} AND createdAt < ${toDbValue}
       GROUP BY day
       ORDER BY day
     `),
@@ -220,7 +224,7 @@ export async function getAnalyticsDatasets(range?: DateRange, adapter: DatabaseS
         ${BUSINESS_HOUR_SQL} as hour,
         COUNT(*) as count
       FROM ${Order}
-      WHERE createdAt >= ${fromMs} AND createdAt < ${toMs}
+      WHERE createdAt >= ${fromDbValue} AND createdAt < ${toDbValue}
       GROUP BY hour
       ORDER BY hour
     `),
@@ -231,7 +235,7 @@ export async function getAnalyticsDatasets(range?: DateRange, adapter: DatabaseS
             COUNT(*) as orders,
             ROUND(COALESCE(SUM(total), 0), 2) as revenue
           FROM ${Order}
-          WHERE createdAt >= ${fromMs} AND createdAt < ${toMs}
+          WHERE createdAt >= ${fromDbValue} AND createdAt < ${toDbValue}
           GROUP BY orderDate
           ORDER BY orderDate
         `)
@@ -248,7 +252,7 @@ export async function getAnalyticsDatasets(range?: DateRange, adapter: DatabaseS
     adapter.run(sql`
       SELECT status, COUNT(*) as count
       FROM ${Order}
-      WHERE createdAt >= ${fromMs} AND createdAt < ${toMs}
+      WHERE createdAt >= ${fromDbValue} AND createdAt < ${toDbValue}
       GROUP BY status
       ORDER BY count DESC
     `),
@@ -256,7 +260,7 @@ export async function getAnalyticsDatasets(range?: DateRange, adapter: DatabaseS
       SELECT pay.method as label, COUNT(*) as count
       FROM ${Payment} pay
       INNER JOIN ${Order} o ON o.id = pay.orderId
-      WHERE o.createdAt >= ${fromMs} AND o.createdAt < ${toMs}
+      WHERE o.createdAt >= ${fromDbValue} AND o.createdAt < ${toDbValue}
       GROUP BY pay.method
       ORDER BY count DESC
     `),
