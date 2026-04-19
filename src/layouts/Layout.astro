@@ -77,21 +77,6 @@ const robotsContent = robots ?? (noindex || isSensitiveSeoPath(Astro.url.pathnam
 			document.documentElement.dataset.theme = resolvedTheme;
 			document.documentElement.style.colorScheme = resolvedTheme;
 		</script>
-		<script is:inline>
-			if (!window.__guacashopPageLoadDispatched) {
-				window.__guacashopPageLoadDispatched = true;
-
-				const dispatchPageLoad = () => {
-					document.dispatchEvent(new Event("astro:page-load"));
-				};
-
-				if (document.readyState === "loading") {
-					document.addEventListener("DOMContentLoaded", dispatchPageLoad, { once: true });
-				} else {
-					queueMicrotask(dispatchPageLoad);
-				}
-			}
-		</script>
 	</head>
 	<body>
 		<a class="skip-link" href="#main-content">Saltar al contenido principal</a>
