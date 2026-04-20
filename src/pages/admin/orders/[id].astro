@@ -92,9 +92,6 @@ const statusChipClass =
           Eliminar pedido
         </button>
         <p id="order-delete-feedback" class="mt-3 min-h-[1.25rem] max-w-sm text-sm text-[var(--color-text-muted)]" aria-live="polite">
-          {canDeleteOrder
-            ? 'Acción irreversible: borra pedido, ítems, pago, comprobantes y logs relacionados.'
-            : 'Tu usuario está autenticado, pero no figura en la lista sensible para eliminar pedidos. Configurá ADMIN_ALLOWED_EMAILS u ORDER_NOTIFICATIONS_ADMIN_EMAIL.'}
         </p>
       </div>
     </div>
