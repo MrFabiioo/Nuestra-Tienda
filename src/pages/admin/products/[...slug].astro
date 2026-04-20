@@ -418,7 +418,7 @@ const initialRecipe: ProductRecipe = (product as any).recipe ?? {
           <div class="premium-panel overflow-hidden">
             <div class="flex items-center gap-3 border-b px-6 py-4" style="border-color: var(--color-border);">
               <p class="admin-shell__eyebrow text-[0.68rem]">Preview</p>
-              <span class="admin-table-badge admin-table-badge--accent">{images.length} {images.length === 1 ? 'imagen' : 'imágenes'}</span>
+              <span class="admin-table-badge admin-table-badge--accent" data-images-count>{images.length} {images.length === 1 ? 'imagen' : 'imágenes'}</span>
             </div>
             <div class="relative h-[360px] overflow-hidden">
               <ProductSliceShow images={images.map(i=>i.image)} />
@@ -434,7 +434,7 @@ const initialRecipe: ProductRecipe = (product as any).recipe ?? {
               <h3 class="admin-table-title mt-1 text-lg font-bold">Imágenes del producto</h3>
             </div>
             <div class="flex items-center gap-3">
-              <span class="admin-table-badge admin-table-badge--accent">
+              <span class="admin-table-badge admin-table-badge--accent" data-images-count>
                 {images.length} {images.length === 1 ? 'imagen' : 'imágenes'}
               </span>
               {images.length > 0 && (
@@ -454,6 +454,8 @@ const initialRecipe: ProductRecipe = (product as any).recipe ?? {
               Usá ↑↓ para reordenar el slider. La imagen marcada con ★ se muestra en la tarjeta del catálogo.
             </p>
           )}
+
+          <p id="images-feedback" class="px-5 pt-3 text-sm min-h-[1.5rem]" style="color: var(--color-text-subtle);"></p>
 
           <div class="admin-table-scroll">
             <table class="admin-table min-w-[640px]">
@@ -1350,6 +1352,7 @@ const initialRecipe: ProductRecipe = (product as any).recipe ?? {
 ></script>
 
 <script>
+import { createAdminFeedbackUi } from '../../../scripts/admin/admin-feedback';
 import { actions } from 'astro:actions';
 import { navigate } from 'astro:transitions/client';
 
@@ -1766,6 +1769,8 @@ document.addEventListener('astro:page-load', () => {
   const featuredStatusCopy = document.getElementById('featured-status-copy') as HTMLParagraphElement | null;
   const enabledStatusCopy = document.getElementById('enabled-status-copy') as HTMLParagraphElement | null;
   const enabledStatusHelp = document.getElementById('enabled-status-help') as HTMLParagraphElement | null;
+  const imagesFeedback = document.getElementById('images-feedback') as HTMLParagraphElement | null;
+  const adminFeedback = createAdminFeedbackUi();
 
   if (!form) return;
 
@@ -1909,6 +1914,60 @@ document.addEventListener('astro:page-load', () => {
     }
   };
 
+  const setImagesFeedback = (message: string, tone: 'muted' | 'success' | 'danger' = 'muted') => {
+    if (!imagesFeedback) return;
+
+    const toneMap = {
+      muted: 'var(--color-text-subtle)',
+      success: 'var(--color-accent)',
+      danger: 'var(--color-danger)',
+    } as const;
+
+    imagesFeedback.textContent = message;
+    imagesFeedback.style.color = toneMap[tone];
+  };
+
+  const renderImagesEmptyState = () => {
+    if (!tbody) return;
+
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5">
+          <div class="flex flex-col items-center justify-center px-4 py-10 text-center">
+            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full" style="background: var(--color-surface-soft); color: var(--color-accent);">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-6 w-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+              </svg>
+            </div>
+            <p class="admin-table-title text-base font-semibold">No hay imágenes cargadas todavía</p>
+            <p class="admin-table-copy mt-2 max-w-md text-sm leading-relaxed">
+              Carga archivos desde el panel superior y la galería aparecerá aquí automáticamente.
+            </p>
+          </div>
+        </td>
+      </tr>`;
+  };
+
+  const updateImagesUiState = () => {
+    const imageRows = tbody ? Array.from(tbody.querySelectorAll('.image-row')) : [];
+    const count = imageRows.length;
+
+    document.querySelectorAll<HTMLElement>('[data-images-count]').forEach((node) => {
+      node.textContent = `${count} ${count === 1 ? 'imagen' : 'imágenes'}`;
+    });
+
+    if (btnSaveImagesMeta) {
+      btnSaveImagesMeta.hidden = count === 0;
+    }
+
+    if (count === 0) {
+      renderImagesEmptyState();
+      return;
+    }
+
+    refreshOrderButtons();
+  };
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -1942,16 +2001,46 @@ document.addEventListener('astro:page-load', () => {
       const id = button.getAttribute('data-id');
       if (!id) return;
 
-      button.disabled = true;
+      const confirmed = await adminFeedback.confirm({
+        title: 'Eliminar imagen del producto',
+        message: 'Se quitará del producto inmediatamente. Si era la imagen principal, revisá el orden visual antes de guardar.',
+        confirmLabel: 'Sí, eliminar',
+        cancelLabel: 'Cancelar',
+        tone: 'danger',
+      });
 
-      const { error } = await actions.deleteProductImage(id);
-      if (error) {
-        alert(error.message);
-        button.disabled = false;
+      if (!confirmed) {
         return;
       }
 
-      document.querySelector(`#${id}`)?.remove();
+      const originalLabel = button.textContent ?? 'Eliminar';
+
+      button.disabled = true;
+      button.textContent = 'Eliminando...';
+      setImagesFeedback('Eliminando imagen...', 'muted');
+
+      const { error } = await actions.deleteProductImage(id);
+      if (error) {
+        void adminFeedback.alert({
+          title: 'No pudimos eliminar la imagen',
+          message: error.message,
+          confirmLabel: 'Entendido',
+          tone: 'danger',
+        });
+        button.disabled = false;
+        button.textContent = originalLabel;
+        setImagesFeedback(error.message, 'danger');
+        return;
+      }
+
+      button.closest('.image-row')?.remove();
+      updateImagesUiState();
+      setImagesFeedback('Imagen eliminada sin recargar.', 'success');
+      adminFeedback.notify({
+        title: 'Imagen eliminada',
+        message: 'La galería quedó actualizada en esta vista.',
+        tone: 'success',
+      });
     });
   });
 
