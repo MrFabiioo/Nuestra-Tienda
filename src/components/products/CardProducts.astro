@@ -231,9 +231,6 @@ const sliderId = `slider-${title.replace(/\s+/g, '-').toLowerCase()}`;
 <script>
     import { bindDocumentEventOnce } from '../../utils/bind-document-event-once';
 
-    bindDocumentEventOnce("astro:page-load", 'card-products-carousels', initCarousels);
-    bindDocumentEventOnce("astro:beforematch", 'card-products-carousels', initCarousels);
-
     function initCarousels() {
         const viewports = document.querySelectorAll('.carousel-viewport');
         
@@ -288,4 +285,7 @@ const sliderId = `slider-${title.replace(/\s+/g, '-').toLowerCase()}`;
             nextBtn?.addEventListener('click', () => scrollToIndex(getCurrentIndex() + getStep()));
         });
     }
+
+    initCarousels();
+    bindDocumentEventOnce("astro:page-load", 'card-products-carousels', initCarousels);
 </script>
