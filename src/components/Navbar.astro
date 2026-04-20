@@ -4,7 +4,7 @@ import { getPendingOrderFromCookies } from '../services/orders/pending-order';
 
 // Mostrar link Admin solo cuando hay sesión válida
 const user = Astro.locals.user;
-const pendingOrder = await getPendingOrderFromCookies(Astro.cookies);
+const pendingOrder = Astro.isPrerendered ? null : await getPendingOrderFromCookies(Astro.cookies);
 const currentPath = Astro.url.pathname;
 const pendingOrderUrl = pendingOrder ? `/pagos/${pendingOrder.token}` : null;
 
@@ -14,15 +14,17 @@ const isActivePath = (href: string) => href === '/'
 
 let initialCartQuantity = 0;
 
-try {
-	const rawCartCookie = Astro.cookies.get('cart')?.value;
-	const parsedCart = JSON.parse(rawCartCookie ?? '[]');
+if (!Astro.isPrerendered) {
+	try {
+		const rawCartCookie = Astro.cookies.get('cart')?.value;
+		const parsedCart = JSON.parse(rawCartCookie ?? '[]');
 
-	if (Array.isArray(parsedCart)) {
-		initialCartQuantity = parsedCart.reduce((total, item) => total + (typeof item?.quantity === 'number' ? item.quantity : 0), 0);
+		if (Array.isArray(parsedCart)) {
+			initialCartQuantity = parsedCart.reduce((total, item) => total + (typeof item?.quantity === 'number' ? item.quantity : 0), 0);
+		}
+	} catch {
+		initialCartQuantity = 0;
 	}
-} catch {
-	initialCartQuantity = 0;
 }
 
 ---
