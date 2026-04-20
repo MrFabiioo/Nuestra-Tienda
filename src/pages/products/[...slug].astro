@@ -20,11 +20,14 @@ const { data: catalogData, error: catalogError } = await Astro.callAction(action
 const {product, images} = data;
 
 type RelatedProductCard = {
+    id?: string;
     name: string;
     price: number;
     description: string;
     image: string;
+    sizes?: string;
     slug: string;
+    isEnabled?: boolean;
 };
 
 const isEnabled = 'isEnabled' in product ? (product as any).isEnabled !== false : true;
@@ -56,11 +59,14 @@ const relatedProducts: RelatedProductCard[] = catalogError || !catalogData?.prod
         })
         .slice(0, 4)
         .map((candidate) => ({
+            id: candidate.id,
             name: candidate.title,
             price: candidate.price,
             description: candidate.description,
             image: candidate.image,
+            sizes: candidate.sizes,
             slug: `/products/${candidate.slug}`,
+            isEnabled: candidate.isEnabled,
         }));
 
 const primaryImage = images[0]?.image;

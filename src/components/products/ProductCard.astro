@@ -30,6 +30,7 @@ const resolvedImage = resolveProductImageUrl(image, {
 });
 const availableSizes = parseProductSizes(sizes);
 const quickAddSize = availableSizes.length === 1 ? availableSizes[0] : null;
+const needsSizeSelection = availableSizes.length > 1;
 ---
 
 <article
@@ -113,36 +114,72 @@ const quickAddSize = availableSizes.length === 1 ? availableSizes[0] : null;
   )}
 
   {id && isEnabled && quickAddSize && (
-    <div class="product-card__cart-zone add-to-cart-zone flex flex-col gap-3 border-t border-neutral-100 bg-neutral-50/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+    <div class="product-card__cart-zone product-card__cart-zone--quick add-to-cart-zone border-t px-4 py-3 sm:px-5">
       <!-- Selector de cantidad -->
-      <div class="qty-control flex items-center gap-1">
-        <button class="qty-btn qty-decrease flex h-11 w-11 items-center justify-center rounded-full border text-base font-bold transition-all hover:border-guacamole-b hover:bg-guacamole-b hover:text-white disabled:cursor-not-allowed disabled:opacity-40" data-action="decrease" aria-label="Disminuir cantidad">−</button>
-        <span class="qty-value min-w-[20px] text-center text-sm font-semibold">1</span>
-        <button class="qty-btn qty-increase flex h-11 w-11 items-center justify-center rounded-full border text-base font-bold transition-all hover:border-guacamole-b hover:bg-guacamole-b hover:text-white disabled:cursor-not-allowed disabled:opacity-40" data-action="increase" aria-label="Aumentar cantidad">+</button>
-      </div>
+      <div class="product-card__cart-actions">
+        <div class="qty-control product-card__qty-control" aria-label="Selector de cantidad">
+          <button class="qty-btn product-card__qty-btn qty-decrease" data-action="decrease" aria-label="Disminuir cantidad">−</button>
+          <span class="qty-value product-card__qty-value" aria-live="polite">1</span>
+          <button class="qty-btn product-card__qty-btn qty-increase" data-action="increase" aria-label="Aumentar cantidad">+</button>
+        </div>
 
-      <button 
-        class="add-to-cart-btn flex min-h-11 w-full flex-1 items-center justify-center rounded-full bg-guacamole-b px-3 py-2 text-sm font-bold uppercase tracking-wide text-white transition-all duration-200 hover:bg-guacamole-a hover:shadow-md hover:shadow-guacamole-a/25 active:scale-[0.97] disabled:cursor-wait disabled:opacity-80 disabled:hover:bg-guacamole-b disabled:hover:shadow-none sm:w-auto"
+        <button 
+          class="add-to-cart-btn product-card__cart-button"
         data-product-id={id}
         data-product-name={name}
         data-product-price={price}
         data-product-image={resolvedImage}
         data-product-size={quickAddSize}
         aria-live="polite"
-      >
-        Agregar
-      </button>
+        >
+          Agregar
+        </button>
+      </div>
     </div>
   )}
 
-  {id && isEnabled && !quickAddSize && (
-    <div class="product-card__cart-zone flex items-center justify-center border-t border-neutral-100 bg-neutral-50/60 px-4 py-3 sm:px-5">
-      <a
-        href={slug}
-        class="flex min-h-11 w-full items-center justify-center rounded-full border border-guacamole-b/20 px-3 py-2 text-sm font-bold uppercase tracking-wide text-guacamole-a transition-all duration-200 hover:border-guacamole-b hover:bg-guacamole-b hover:text-white hover:shadow-md hover:shadow-guacamole-a/20"
-      >
-        Elegir tamaño
-      </a>
+  {id && isEnabled && needsSizeSelection && (
+    <div class="product-card__cart-zone product-card__cart-zone--select add-to-cart-zone border-t px-4 py-3 sm:px-5" data-requires-size="true">
+      <div class="product-card__size-picker">
+        <label class="product-card__size-label" for={`product-card-size-${id}`}>
+          Elegí tamaño
+        </label>
+
+        <div class="product-card__size-select-wrap">
+          <select
+            id={`product-card-size-${id}`}
+            class="product-card__size-select"
+            data-size-selector
+            aria-label={`Elegí tamaño para ${name}`}
+          >
+            <option value="">Seleccionar</option>
+            {availableSizes.map((sizeOption) => (
+              <option value={sizeOption}>{sizeOption}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div class="product-card__cart-actions">
+        <div class="qty-control product-card__qty-control" aria-label="Selector de cantidad">
+          <button class="qty-btn product-card__qty-btn qty-decrease" data-action="decrease" aria-label="Disminuir cantidad">−</button>
+          <span class="qty-value product-card__qty-value" aria-live="polite">1</span>
+          <button class="qty-btn product-card__qty-btn qty-increase" data-action="increase" aria-label="Aumentar cantidad">+</button>
+        </div>
+
+        <button
+          class="add-to-cart-btn product-card__cart-button"
+          data-product-id={id}
+          data-product-name={name}
+          data-product-price={price}
+          data-product-image={resolvedImage}
+          aria-live="polite"
+          disabled
+          aria-disabled="true"
+        >
+          Elegí tamaño
+        </button>
+      </div>
     </div>
   )}
 </article>
@@ -151,13 +188,16 @@ const quickAddSize = availableSizes.length === 1 ? availableSizes[0] : null;
   import { cartItems } from "../../store/cart.store";
   import { CartCookiesClient } from "@utils/cart-cookies";
   import { emitCartFeedback, emitCartOpen } from "@utils/cart-feedback";
+  import { bindDocumentEventOnce } from '../../utils/bind-document-event-once';
 
-  document.addEventListener('astro:page-load', initProductCards);
-  document.addEventListener('astro:beforematch', initProductCards);
+  initProductCards();
+  bindDocumentEventOnce('astro:page-load', 'product-cards', initProductCards);
+  bindDocumentEventOnce('astro:beforematch', 'product-cards-beforematch', initProductCards);
 
   function initProductCards() {
     initAddToCartButtons();
     initQuantitySelectors();
+    initSizeSelectors();
   }
 
   function initAddToCartButtons() {
@@ -286,6 +326,42 @@ const quickAddSize = availableSizes.length === 1 ? availableSizes[0] : null;
       });
     });
   }
+
+  function initSizeSelectors() {
+    const zones = document.querySelectorAll<HTMLElement>('.add-to-cart-zone[data-requires-size="true"]');
+
+    zones.forEach((zone) => {
+      if ((zone as any).__sizeInitialized) return;
+      (zone as any).__sizeInitialized = true;
+
+      const sizeSelector = zone.querySelector<HTMLSelectElement>('[data-size-selector]');
+      const addButton = zone.querySelector<HTMLButtonElement>('.add-to-cart-btn[data-product-id]');
+
+      if (!sizeSelector || !addButton) return;
+
+      const syncSelectedSize = () => {
+        const selectedSize = sizeSelector.value.trim();
+
+        if (!selectedSize) {
+          delete addButton.dataset.productSize;
+          addButton.disabled = true;
+          addButton.setAttribute('aria-disabled', 'true');
+          addButton.textContent = 'Elegí tamaño';
+          addButton.setAttribute('aria-label', `Elegí tamaño para ${addButton.dataset.productName ?? 'producto'}`);
+          return;
+        }
+
+        addButton.dataset.productSize = selectedSize;
+        addButton.disabled = false;
+        addButton.setAttribute('aria-disabled', 'false');
+        addButton.textContent = 'Agregar';
+        addButton.setAttribute('aria-label', `Agregar ${selectedSize} de ${addButton.dataset.productName ?? 'producto'} al carrito`);
+      };
+
+      sizeSelector.addEventListener('change', syncSelectedSize);
+      syncSelectedSize();
+    });
+  }
 </script>
 
 <style>
@@ -345,16 +421,221 @@ const quickAddSize = availableSizes.length === 1 ? availableSizes[0] : null;
 
   .product-card__cart-zone {
     border-top-color: var(--color-border);
-    background: color-mix(in srgb, var(--color-surface-soft) 58%, var(--color-surface) 42%);
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--color-surface-soft) 62%, var(--color-surface) 38%) 0%, color-mix(in srgb, var(--color-surface-elevated) 94%, transparent) 100%);
+  }
+
+  .product-card__cart-zone--quick {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .product-card__cart-zone--select {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .product-card__cart-actions {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .product-card__qty-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    width: fit-content;
+    padding: 0.25rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-surface-elevated) 94%, transparent);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
   }
 
   .qty-btn {
+    border: 1px solid var(--color-border);
     background: color-mix(in srgb, var(--color-surface-elevated) 96%, transparent);
-    border-color: var(--color-border);
     color: var(--color-text-muted);
+  }
+
+  .product-card__qty-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.35rem;
+    height: 2.35rem;
+    border-width: 1px;
+    border-radius: 999px;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1;
+    transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
+  }
+
+  .product-card__qty-btn:hover:not(:disabled) {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 92%, var(--color-accent-strong) 8%);
+    color: var(--color-text-on-accent);
+    box-shadow: 0 10px 20px color-mix(in srgb, var(--color-accent) 18%, transparent);
+    transform: translateY(-1px);
+  }
+
+  .product-card__qty-btn:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+
+  .product-card__qty-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.42;
+    box-shadow: none;
+  }
+
+  .product-card__qty-btn:focus-visible,
+  .product-card__cart-button:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--color-accent) 82%, white 18%);
+    outline-offset: 2px;
   }
 
   .qty-value {
     color: var(--color-text);
+  }
+
+  .product-card__qty-value {
+    min-width: 1.9rem;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .product-card__size-label {
+    color: var(--color-text-subtle);
+  }
+
+  .product-card__size-picker {
+    display: grid;
+    gap: 0.35rem;
+    min-width: 0;
+    padding: 0.75rem 0.875rem;
+    border-radius: 1rem;
+    border: 1px solid var(--color-border);
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--color-surface-elevated) 94%, transparent) 0%, color-mix(in srgb, var(--color-surface-soft) 56%, var(--color-surface) 44%) 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  }
+
+  .product-card__size-select-wrap {
+    position: relative;
+    min-width: 0;
+  }
+
+  .product-card__size-select-wrap::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 0.95rem;
+    width: 0.55rem;
+    height: 0.55rem;
+    border-right: 2px solid var(--color-text-muted);
+    border-bottom: 2px solid var(--color-text-muted);
+    transform: translateY(-65%) rotate(45deg);
+    pointer-events: none;
+  }
+
+  .product-card__size-select {
+    width: 100%;
+    min-height: 2.35rem;
+    appearance: none;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+    color: var(--color-text);
+    padding: 0.5rem 2.35rem 0.5rem 0.85rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    line-height: 1;
+    transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+  }
+
+  .product-card__size-select:hover {
+    border-color: color-mix(in srgb, var(--color-accent) 65%, var(--color-border));
+  }
+
+  .product-card__size-select:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--color-accent) 82%, white 18%);
+    outline-offset: 2px;
+    border-color: var(--color-accent);
+    box-shadow: 0 10px 22px color-mix(in srgb, var(--color-accent) 24%, transparent);
+  }
+
+  .product-card__cart-button {
+    display: inline-flex;
+    width: 100%;
+    min-height: 2.85rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-strong) 100%);
+    color: var(--color-text-on-accent);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    box-shadow: 0 12px 24px color-mix(in srgb, var(--color-accent) 22%, transparent);
+    transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease, background-position 180ms ease;
+  }
+
+  .product-card__cart-button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 16px 28px color-mix(in srgb, var(--color-accent-strong) 28%, transparent);
+    filter: saturate(1.05);
+  }
+
+  .product-card__cart-button:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 10px 18px color-mix(in srgb, var(--color-accent) 18%, transparent);
+  }
+
+  .product-card__cart-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.72;
+    box-shadow: none;
+  }
+
+  .product-card__cart-button:disabled:hover {
+    transform: none;
+    filter: none;
+    box-shadow: none;
+  }
+
+  @media (max-width: 420px) {
+    .product-card__cart-actions {
+      grid-template-columns: 1fr;
+    }
+
+    .product-card__qty-control {
+      justify-self: center;
+    }
+  }
+
+  @media (min-width: 640px) {
+    .product-card__cart-zone--quick {
+      display: flex;
+      align-items: center;
+    }
+
+    .product-card__cart-zone--select {
+      gap: 0.625rem;
+    }
+
+    .product-card__size-picker {
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      gap: 0.75rem;
+    }
   }
 </style>

@@ -17,11 +17,14 @@ const { data, error } = await Astro.callAction(actions.getProductsByCategory, {}
 let productsByCategory: Array<{
     categoryName: string;
     products: Array<{
+        id?: string;
         name: string;
         price: number;
         description: string;
         image: string;
+        sizes?: string;
         slug: string;
+        isEnabled?: boolean;
     }>;
 }> = [];
 
@@ -37,6 +40,7 @@ if (error) {
             price: product.price,
             description: product.description,
             image: product.image,
+            sizes: product.sizes,
             slug: `/products/${product.slug}`,
             isEnabled: product.isEnabled,
         }))
