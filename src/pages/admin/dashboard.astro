@@ -131,6 +131,7 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
                 </div>
             ) : (
                 <div class="admin-table-shell">
+                    <div id="products-feedback" class="mb-4 hidden rounded-2xl border px-4 py-3 text-sm" aria-live="polite"></div>
                     <div class="admin-table-scroll">
                         <table class="admin-table products-table">
                             <colgroup>
@@ -643,6 +644,7 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
 
 <script>
     // @ts-nocheck
+    import { createAdminFeedbackUi } from '../../scripts/admin/admin-feedback';
     import { actions } from "astro:actions";
 
     const adminActions = actions as typeof actions & {
@@ -650,7 +652,24 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
         deletePaymentMethodConfig: (...args: any[]) => Promise<any>;
     };
 
-    document.addEventListener("astro:page-load", () => {
+    {
+        const adminFeedback = createAdminFeedbackUi();
+        const productsFeedback = document.getElementById('products-feedback') as HTMLDivElement | null;
+
+        const setProductsFeedback = (message: string, tone: 'muted' | 'success' | 'danger' = 'muted') => {
+            if (!productsFeedback) return;
+
+            const toneClassMap = {
+                muted: 'border-[var(--color-border)] bg-[var(--color-surface-soft)] text-[var(--color-text-muted)]',
+                success: 'border-[var(--color-border-strong)] bg-[var(--color-surface-soft)] text-[var(--color-accent-strong)]',
+                danger: 'border-[var(--color-danger-border)] bg-[var(--color-danger-surface)] text-[var(--color-danger-text)]',
+            } as const;
+
+            productsFeedback.hidden = false;
+            productsFeedback.textContent = message;
+            productsFeedback.className = `mb-4 rounded-2xl border px-4 py-3 text-sm ${toneClassMap[tone]}`;
+        };
+
         const enabledIcon = `
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
@@ -986,22 +1005,43 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
 
                 if (!id) return;
 
-                if (!confirm(`¿Estás seguro de que deseas eliminar el producto "${title}"? Esta acción también eliminará sus imágenes.`)) {
+                const confirmed = await adminFeedback.confirm({
+                    title: `Eliminar ${title ?? 'producto'}`,
+                    message: 'Esta acción borra el producto y sus imágenes. Si ya tiene pedidos asociados, el sistema lo bloqueará para proteger el historial.',
+                    confirmLabel: 'Sí, eliminar',
+                    cancelLabel: 'Cancelar',
+                    tone: 'danger',
+                });
+
+                if (!confirmed) {
                     return;
                 }
 
                 button.disabled = true;
+                setProductsFeedback(`Eliminando ${title ?? 'producto'}...`, 'muted');
 
                 const { error } = await actions.deleteProduct({ id });
 
                 if (error) {
-                    alert(`Error al eliminar: ${error.message}`);
+                    setProductsFeedback(error.message, 'danger');
+                    void adminFeedback.alert({
+                        title: 'No pudimos eliminar el producto',
+                        message: error.message,
+                        confirmLabel: 'Entendido',
+                        tone: 'danger',
+                    });
                     button.disabled = false;
                     return;
                 }
 
                 document.querySelector(`[data-product-row="${id}"]`)?.remove();
+                setProductsFeedback(`Producto ${title ?? ''} eliminado sin recargar.`.trim(), 'success');
+                adminFeedback.notify({
+                    title: 'Producto eliminado',
+                    message: 'La tabla quedó actualizada en esta misma vista.',
+                    tone: 'success',
+                });
             });
         });
-    });
+    }
 </script>

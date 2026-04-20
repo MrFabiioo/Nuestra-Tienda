@@ -4,6 +4,7 @@ import { actions } from 'astro:actions';
 import { Formatter } from '@utils/formatter';
 import { getOrderById } from '../../../services/orders/repository';
 import { formatOrderStatus, formatPaymentStatus, ORDER_STATUS } from '../../../services/orders/constants';
+import { canManageSensitiveAdminActions } from '../../../firebase/guards';
 
 export const prerender = false;
 
@@ -35,6 +36,7 @@ const statusLabel = formatOrderStatus(orderDetail.order.status);
 const canReview = orderDetail.order.status === ORDER_STATUS.underReview;
 const proofIsImage = orderDetail.latestProof?.mimeType?.startsWith('image/');
 const reviewMessage = Astro.url.searchParams.get('review');
+const canDeleteOrder = canManageSensitiveAdminActions(Astro.locals.user?.email);
 
 const statusChipClass =
   orderDetail.order.status === ORDER_STATUS.approved
@@ -80,12 +82,20 @@ const statusChipClass =
           data-order-id={id}
           class="premium-action-destructive gap-2"
           type="button"
+          disabled={!canDeleteOrder}
+          aria-disabled={!canDeleteOrder ? 'true' : undefined}
+          title={!canDeleteOrder ? 'Tu usuario no está habilitado para eliminar pedidos.' : 'Eliminar pedido'}
         >
           <svg class="h-4 w-4 flex-shrink-0" viewBox="0 0 20 20" fill="none" aria-hidden="true">
             <path d="M4 6h12M8 6V4h4v2M7 6v9a1 1 0 001 1h4a1 1 0 001-1V6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           Eliminar pedido
         </button>
+        <p id="order-delete-feedback" class="mt-3 min-h-[1.25rem] max-w-sm text-sm text-[var(--color-text-muted)]" aria-live="polite">
+          {canDeleteOrder
+            ? 'Acción irreversible: borra pedido, ítems, pago, comprobantes y logs relacionados.'
+            : 'Tu usuario está autenticado, pero no figura en la lista sensible para eliminar pedidos. Configurá ADMIN_ALLOWED_EMAILS u ORDER_NOTIFICATIONS_ADMIN_EMAIL.'}
+        </p>
       </div>
     </div>
 
@@ -348,34 +358,71 @@ const statusChipClass =
 </style>
 
 <script>
+  import { createAdminFeedbackUi } from '../../../scripts/admin/admin-feedback';
   import { actions } from 'astro:actions';
 
-  document.addEventListener('astro:page-load', () => {
+  {
+    const adminFeedback = createAdminFeedbackUi();
     // ── Eliminar pedido ───────────────────────────────────────────────
     const deleteBtn = document.getElementById('delete-order-btn') as HTMLButtonElement | null;
+    const deleteFeedback = document.getElementById('order-delete-feedback') as HTMLParagraphElement | null;
+
+    const setDeleteFeedback = (message: string, tone: 'muted' | 'success' | 'danger' = 'muted') => {
+      if (!deleteFeedback) return;
+
+      const toneClassMap = {
+        muted: 'min-h-[1.25rem] max-w-sm text-sm text-[var(--color-text-muted)]',
+        success: 'min-h-[1.25rem] max-w-sm text-sm text-[var(--color-accent-strong)]',
+        danger: 'min-h-[1.25rem] max-w-sm text-sm text-[var(--color-danger)]',
+      } as const;
+
+      deleteFeedback.textContent = message;
+      deleteFeedback.className = `mt-3 ${toneClassMap[tone]}`;
+    };
 
     if (deleteBtn) {
       deleteBtn.addEventListener('click', async () => {
+        if (deleteBtn.disabled) {
+          return;
+        }
+
         const orderId = deleteBtn.dataset.orderId ?? '';
 
-        const confirmed = window.confirm(
-          `¿Eliminás el pedido ${orderId.slice(0, 8)}?\n\nEsta acción es irreversible: se borran el pedido, los ítems, el pago, los comprobantes y los logs de notificaciones.`
-        );
+        const confirmed = await adminFeedback.confirm({
+          title: `Eliminar pedido ${orderId.slice(0, 8)}`,
+          message: 'Esta acción es irreversible: se borran el pedido, los ítems, el pago, los comprobantes y los logs de notificaciones.',
+          confirmLabel: 'Sí, eliminar pedido',
+          cancelLabel: 'Cancelar',
+          tone: 'danger',
+        });
 
         if (!confirmed) return;
 
         deleteBtn.disabled = true;
         deleteBtn.textContent = 'Eliminando...';
+        setDeleteFeedback('Eliminando pedido y limpiando comprobantes remotos...', 'muted');
 
         const { error } = await actions.deleteOrder({ id: orderId });
 
         if (error) {
-          alert(`No se pudo eliminar el pedido: ${error.message}`);
+          setDeleteFeedback(error.message, 'danger');
+          void adminFeedback.alert({
+            title: 'No pudimos eliminar el pedido',
+            message: error.message,
+            confirmLabel: 'Entendido',
+            tone: 'danger',
+          });
           deleteBtn.disabled = false;
           deleteBtn.innerHTML = `<svg class="h-4 w-4 flex-shrink-0" viewBox="0 0 20 20" fill="none"><path d="M4 6h12M8 6V4h4v2M7 6v9a1 1 0 001 1h4a1 1 0 001-1V6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Eliminar pedido`;
           return;
         }
 
+        adminFeedback.notify({
+          title: 'Pedido eliminado',
+          message: 'Redirigiendo al listado de pedidos...',
+          tone: 'success',
+          durationMs: 2000,
+        });
         window.location.href = '/admin/orders';
       });
     }
@@ -385,41 +432,41 @@ const statusChipClass =
     const feedback = document.getElementById('review-feedback') as HTMLParagraphElement | null;
     const decisionInput = document.getElementById('review-decision') as HTMLInputElement | null;
 
-    if (!form || !feedback || !decisionInput) return;
+    if (form && feedback && decisionInput) {
+      let currentDecision: 'approved' | 'rejected' = 'approved';
 
-    let currentDecision: 'approved' | 'rejected' = 'approved';
-
-    form.querySelectorAll<HTMLButtonElement>('button[type="submit"]').forEach((button) => {
-      button.addEventListener('click', () => {
-        currentDecision = (button.dataset.decision as 'approved' | 'rejected') ?? 'approved';
-        decisionInput.value = currentDecision;
+      form.querySelectorAll<HTMLButtonElement>('button[type="submit"]').forEach((button) => {
+        button.addEventListener('click', () => {
+          currentDecision = (button.dataset.decision as 'approved' | 'rejected') ?? 'approved';
+          decisionInput.value = currentDecision;
+        });
       });
-    });
 
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
 
-      const formData = new FormData(form);
-      formData.set('decision', currentDecision);
+        const formData = new FormData(form);
+        formData.set('decision', currentDecision);
 
-      if (currentDecision === 'rejected' && !(formData.get('rejectionReason')?.toString().trim())) {
-        feedback.textContent = 'Si vas a rechazar, deja un motivo claro para el cliente.';
-        feedback.className = 'min-h-[1.25rem] text-sm text-[var(--color-danger)]';
-        return;
-      }
+        if (currentDecision === 'rejected' && !(formData.get('rejectionReason')?.toString().trim())) {
+          feedback.textContent = 'Si vas a rechazar, deja un motivo claro para el cliente.';
+          feedback.className = 'min-h-[1.25rem] text-sm text-[var(--color-danger)]';
+          return;
+        }
 
-      feedback.textContent = 'Guardando decisión y enviando notificaciones...';
-      feedback.className = 'min-h-[1.25rem] text-sm text-[var(--color-text-muted)]';
+        feedback.textContent = 'Guardando decisión y enviando notificaciones...';
+        feedback.className = 'min-h-[1.25rem] text-sm text-[var(--color-text-muted)]';
 
-      const { error } = await actions.reviewPayment(formData);
+        const { error } = await actions.reviewPayment(formData);
 
-      if (error) {
-        feedback.textContent = error.message;
-        feedback.className = 'min-h-[1.25rem] text-sm text-[var(--color-danger)]';
-        return;
-      }
+        if (error) {
+          feedback.textContent = error.message;
+          feedback.className = 'min-h-[1.25rem] text-sm text-[var(--color-danger)]';
+          return;
+        }
 
-      window.location.href = `${window.location.pathname}?review=${currentDecision}`;
-    });
-  });
+        window.location.href = `${window.location.pathname}?review=${currentDecision}`;
+      });
+    }
+  }
 </script>
