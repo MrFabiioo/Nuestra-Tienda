@@ -4,7 +4,7 @@ import { CartCookiesClient } from '@utils/cart-cookies';
 type Tone = 'default' | 'error' | 'success';
 
 const LOCKED_DELIVERY_DATA = {
-  method: 'wemi',
+  method: 'Trabajo',
   address: 'CR 48 14 49',
   city: 'Medellin - Poblado',
   notes: 'Grupo Emi Falk - Sala de Radio',
@@ -14,9 +14,9 @@ const VALIDATION_MESSAGES: Record<string, string> = {
   fullName: 'Compártenos tu nombre completo para identificar el pedido.',
   phone: 'Necesitamos un teléfono válido para coordinar cualquier detalle.',
   email: 'Ingresá un correo válido para enviarte la confirmación.',
-  address: 'La dirección de entrega en la WEMI debe quedar cargada.',
-  city: 'La ciudad del punto de entrega en la WEMI debe quedar cargada.',
-  deliveryMethod: 'La entrega se realiza únicamente en la WEMI.',
+  address: 'La dirección de entrega en el trabajo debe quedar cargada.',
+  city: 'La ciudad del punto de entrega en el trabajo debe quedar cargada.',
+  deliveryMethod: 'La entrega se realiza únicamente en el trabajo.',
 };
 
 function setCheckoutFeedback(node: HTMLParagraphElement | null, message: string, tone: Tone = 'default') {
