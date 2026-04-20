@@ -1,9 +1,9 @@
 
 import { defineAction } from "astro:actions";
-import { db, eq, Product, ProductImage } from "astro:db";
+import { db, eq, OrderItem, Product, ProductImage } from "astro:db";
 import { ImageUpload } from "@utils/image-upload";
 import { z } from "astro:schema";
-import { requireAuth } from "../../firebase/guards";
+import { requireAuth, requireProductDeletable } from "../../firebase/guards";
 
 export const deleteProduct = defineAction({
     accept: 'json',
@@ -12,6 +12,15 @@ export const deleteProduct = defineAction({
     }),
     handler: async ({ id }, context) => {
         requireAuth(context);
+
+        const orderItems = await db
+            .select()
+            .from(OrderItem)
+            .where(eq(OrderItem.productId, id))
+            .limit(1);
+
+        requireProductDeletable(orderItems.length);
+
         // 1. Fetch all images associated with the product
         const images = await db
             .select()

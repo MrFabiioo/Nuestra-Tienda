@@ -78,3 +78,12 @@ export function requireSensitiveAdminAccess(context: ActionAPIContext, capabilit
 
   return user;
 }
+
+export function requireProductDeletable(orderItemCount: number) {
+  if (orderItemCount > 0) {
+    throw new ActionError({
+      code: 'FORBIDDEN',
+      message: 'No se puede eliminar este producto porque ya tiene pedidos asociados. Deshabilitalo desde el panel para ocultarlo sin romper el historial.',
+    });
+  }
+}
