@@ -820,27 +820,17 @@ const analyticsRequest = isFiltered
     analyticsRoot?.setAttribute('aria-busy', 'false');
   }
 
-  document.addEventListener('astro:before-swap', () => {
-    if (!dashboardModulePromise) return;
-
-    void dashboardModulePromise.then(({ destroyAdminAnalyticsDashboard }) => {
-      destroyAdminAnalyticsDashboard();
-    });
-  });
-
-  document.addEventListener('astro:page-load', () => {
-    void loadAnalyticsDashboard();
-  });
+  void loadAnalyticsDashboard();
 </script>
 
 <script>
-  document.addEventListener('astro:page-load', () => {
+  {
     const fromInput  = document.getElementById('export-from') as HTMLInputElement | null;
     const toInput    = document.getElementById('export-to')   as HTMLInputElement | null;
     const exportBtn  = document.getElementById('export-btn')  as HTMLButtonElement | null;
     const presetBtns = document.querySelectorAll<HTMLButtonElement>('[data-preset]');
 
-    if (!fromInput || !toInput) return;
+    if (fromInput && toInput) {
 
     // ── Highlight active preset based on current URL params ───────────
     const urlFrom = new URLSearchParams(window.location.search).get('from');
@@ -936,5 +926,6 @@ const analyticsRequest = isFiltered
       const label = `${from}_${to}`;
       window.location.href = `/admin/analytics-export?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&label=${encodeURIComponent(label)}`;
     });
-  });
+    }
+  }
 </script>
