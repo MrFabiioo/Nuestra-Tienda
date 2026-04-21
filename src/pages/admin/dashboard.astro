@@ -6,6 +6,7 @@ import Pagination from "@components/shared/Pagination.astro";
 import { Formatter } from "@utils/formatter";
 import ProductImage from "@components/products/ProductImage.astro";
 import { getPaymentSettings } from "../../actions/settings/get-payment-settings.action";
+import { canManageSensitiveAdminActions } from "../../firebase/guards";
 
 export const prerender = false;
 
@@ -32,15 +33,7 @@ const { data: paymentSettingsData } = await Astro.callAction(getPaymentSettings,
 const currentBancolombia = paymentSettingsData?.bancolombia ?? null;
 const currentNequi = paymentSettingsData?.nequi ?? null;
 
-const sensitiveAdminAllowlist = new Set(
-    [import.meta.env.ADMIN_ALLOWED_EMAILS, import.meta.env.ORDER_NOTIFICATIONS_ADMIN_EMAIL]
-        .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
-        .flatMap((value) => value.split(','))
-        .map((value) => value.trim().toLowerCase())
-        .filter(Boolean)
-);
-
-const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.trim().toLowerCase());
+const canManageSensitiveSettings = canManageSensitiveAdminActions(adminUser.email);
 ---
 
 <Layout title={`Dashboard`}>
@@ -274,7 +267,7 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
 
             {!canManageSensitiveSettings && (
                 <div class="mt-6 rounded-2xl border border-amber-400/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-900 dark:text-amber-100">
-                    Tu sesión está autenticada, pero no hace parte de la lista autorizada para acciones sensibles. Puedes ver la configuración actual, pero los cambios del servidor requieren que tu correo esté en <code>ADMIN_ALLOWED_EMAILS</code> o <code>ORDER_NOTIFICATIONS_ADMIN_EMAIL</code>.
+                    Tu sesión está autenticada, pero no hace parte de la lista autorizada para acciones sensibles. Puedes ver la configuración actual, pero los cambios del servidor requieren que tu correo esté en <code>ADMIN_ALLOWED_EMAILS</code>.
                 </div>
             )}
 
@@ -294,12 +287,14 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
                                 <p class="text-center text-xs text-[var(--color-text-subtle)]">
                                     Subido: {new Date(currentQr.uploadedAt).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' })}
                                 </p>
-                                <button
-                                    id="btn-delete-qr"
-                                    type="button"
-                                    class="premium-action-secondary w-full justify-center text-[var(--color-danger)]"
-                                    style="border-color: var(--color-danger-border);"
-                                >
+                                 <button
+                                     id="btn-delete-qr"
+                                     type="button"
+                                     class="premium-action-secondary w-full justify-center text-[var(--color-danger)]"
+                                     style="border-color: var(--color-danger-border);"
+                                     disabled={!canManageSensitiveSettings}
+                                     title={!canManageSensitiveSettings ? 'Solo usuarios en ADMIN_ALLOWED_EMAILS pueden eliminar el QR.' : 'Eliminar QR'}
+                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                                     </svg>
@@ -333,10 +328,11 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
                                 accept="image/jpeg,image/png,image/webp"
                                 class="premium-field file:mr-4 file:rounded-full file:border-0 file:bg-guacamole-b file:px-4 file:py-2 file:font-semibold file:text-white"
                                 required
+                                disabled={!canManageSensitiveSettings}
                             />
                         </div>
                         <p id="qr-feedback" class="min-h-[1.25rem] text-sm text-[var(--color-text-muted)]" aria-live="polite"></p>
-                        <button id="qr-submit" type="submit" class="premium-action-primary w-full justify-center">
+                        <button id="qr-submit" type="submit" class="premium-action-primary w-full justify-center" disabled={!canManageSensitiveSettings}>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                             </svg>
@@ -362,7 +358,7 @@ const canManageSensitiveSettings = sensitiveAdminAllowlist.has(adminUser.email.t
 
             {!canManageSensitiveSettings && (
                 <div class="mt-6 rounded-2xl border border-amber-400/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-900 dark:text-amber-100">
-                    Tu sesión está autenticada, pero no hace parte de la lista autorizada para acciones sensibles. Puedes ver Bancolombia y Nequi, pero para editarlos tu correo debe estar en <code>ADMIN_ALLOWED_EMAILS</code> o <code>ORDER_NOTIFICATIONS_ADMIN_EMAIL</code>.
+                    Tu sesión está autenticada, pero no hace parte de la lista autorizada para acciones sensibles. Puedes ver Bancolombia y Nequi, pero para editarlos tu correo debe estar en <code>ADMIN_ALLOWED_EMAILS</code>.
                 </div>
             )}
 
