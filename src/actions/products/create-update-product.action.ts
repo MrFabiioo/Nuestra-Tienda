@@ -1,13 +1,14 @@
 
 
 import { ImageUpload } from "@utils/image-upload";
+import { runInTransaction } from "../../services/data/transaction-runner";
 import { isMissingRecipeColumnError } from "@utils/product-db";
 import { serializeProductSizes } from "@utils/product-sizes";
 import { ActionError, defineAction } from "astro:actions";
-import { db, Product, ProductImage, sql } from "astro:db";
+import { Product, ProductImage, sql } from "astro:db";
 import { z } from "astro:schema";
 import { v4 as UUID } from "uuid";
-import { requireAuth } from "../../firebase/guards";
+import { requireAdminAccess } from "../../firebase/guards";
 
 const MAX_FILE_SIZE = 5_000_000; // 5MB
 const ACEPTED_IMAGE_TYPES = [
@@ -58,7 +59,7 @@ export const createUpdateProduct = defineAction({
         ).optional(),
     }),
     handler: async (form, context) => {
-        requireAuth(context);
+        requireAdminAccess(context, 'gestionar productos');
 
         const { id = UUID(), imageFiles, recipe: recipeRaw, ...rest } = form;
         rest.slug = rest.slug.toLowerCase().replace(/ /g, '-').trim();
@@ -90,47 +91,56 @@ export const createUpdateProduct = defineAction({
             recipe: recipeJson,
         };
 
-        const secureUrls: string[] = [];
+        const uploadedAssets: Awaited<ReturnType<typeof ImageUpload.uploadDetailed>>[] = [];
         if (form.imageFiles && form.imageFiles.length > 0 && form.imageFiles[0].size > 0) {
-            const urls = await Promise.all(
-                form.imageFiles.map((file) => ImageUpload.upload(file)),
-            );
-            secureUrls.push(...urls);
+            try {
+                for (const file of form.imageFiles) {
+                    const asset = await ImageUpload.uploadDetailed(file);
+                    uploadedAssets.push(asset);
+                }
+            } catch (error) {
+                await Promise.all(
+                    uploadedAssets.map((asset) => ImageUpload.deleteAsset(asset.publicId, 'image')),
+                );
+                throw error;
+            }
         }
 
         const persistProduct = async (includeRecipe: boolean) => {
-            if (!form.id) {
-                if (includeRecipe) {
-                    await db.run(sql`
-                        insert into ${Product} (id, title, description, price, sizes, slug, categoryId, recipe)
-                        values (${id}, ${rest.title}, ${rest.description}, ${rest.price}, ${rest.sizes}, ${rest.slug}, ${rest.categoryId ?? null}, ${recipeJson})
+            await runInTransaction(async (session) => {
+                if (!form.id) {
+                    if (includeRecipe) {
+                        await session.run(sql`
+                            insert into ${Product} (id, title, description, price, sizes, slug, categoryId, recipe)
+                            values (${id}, ${rest.title}, ${rest.description}, ${rest.price}, ${rest.sizes}, ${rest.slug}, ${rest.categoryId ?? null}, ${recipeJson})
+                        `);
+                    } else {
+                        await session.run(sql`
+                            insert into ${Product} (id, title, description, price, sizes, slug, categoryId)
+                            values (${id}, ${rest.title}, ${rest.description}, ${rest.price}, ${rest.sizes}, ${rest.slug}, ${rest.categoryId ?? null})
+                        `);
+                    }
+                } else if (includeRecipe) {
+                    await session.run(sql`
+                        update ${Product}
+                        set title = ${rest.title}, description = ${rest.description}, price = ${rest.price}, sizes = ${rest.sizes}, slug = ${rest.slug}, categoryId = ${rest.categoryId ?? null}, recipe = ${recipeJson}
+                        where id = ${id}
                     `);
                 } else {
-                    await db.run(sql`
-                        insert into ${Product} (id, title, description, price, sizes, slug, categoryId)
-                        values (${id}, ${rest.title}, ${rest.description}, ${rest.price}, ${rest.sizes}, ${rest.slug}, ${rest.categoryId ?? null})
+                    await session.run(sql`
+                        update ${Product}
+                        set title = ${rest.title}, description = ${rest.description}, price = ${rest.price}, sizes = ${rest.sizes}, slug = ${rest.slug}, categoryId = ${rest.categoryId ?? null}
+                        where id = ${id}
                     `);
                 }
-            } else if (includeRecipe) {
-                await db.run(sql`
-                    update ${Product}
-                    set title = ${rest.title}, description = ${rest.description}, price = ${rest.price}, sizes = ${rest.sizes}, slug = ${rest.slug}, categoryId = ${rest.categoryId ?? null}, recipe = ${recipeJson}
-                    where id = ${id}
-                `);
-            } else {
-                await db.run(sql`
-                    update ${Product}
-                    set title = ${rest.title}, description = ${rest.description}, price = ${rest.price}, sizes = ${rest.sizes}, slug = ${rest.slug}, categoryId = ${rest.categoryId ?? null}
-                    where id = ${id}
-                `);
-            }
 
-            for (const imageUrl of secureUrls) {
-                await db.run(sql`
-                    insert into ${ProductImage} (id, image, productId)
-                    values (${UUID()}, ${imageUrl}, ${product.id})
-                `);
-            }
+                for (const asset of uploadedAssets) {
+                    await session.run(sql`
+                        insert into ${ProductImage} (id, image, productId)
+                        values (${UUID()}, ${asset.secureUrl}, ${product.id})
+                    `);
+                }
+            });
         };
 
         let recipeWasPersisted = true;
@@ -138,12 +148,27 @@ export const createUpdateProduct = defineAction({
         try {
             await persistProduct(true);
         } catch (error) {
-            if (!isMissingRecipeColumnError(error)) {
-                throw error;
+            if (isMissingRecipeColumnError(error)) {
+                recipeWasPersisted = false;
+                try {
+                    await persistProduct(false);
+                } catch (persistFallbackError) {
+                    await Promise.all(
+                        uploadedAssets.map((asset) => ImageUpload.deleteAsset(asset.publicId, 'image')),
+                    );
+                    throw persistFallbackError;
+                }
+
+                return {
+                    ...product,
+                    recipe: null,
+                };
             }
 
-            recipeWasPersisted = false;
-            await persistProduct(false);
+            await Promise.all(
+                uploadedAssets.map((asset) => ImageUpload.deleteAsset(asset.publicId, 'image')),
+            );
+            throw error;
         }
 
         return {

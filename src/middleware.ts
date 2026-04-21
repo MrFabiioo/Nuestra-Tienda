@@ -26,6 +26,7 @@
 import { defineMiddleware } from 'astro:middleware';
 import { verifyFirebaseIdToken } from './firebase/auth';
 import { SESSION_COOKIE_NAME } from './firebase/config';
+import { canAccessAdmin } from './firebase/guards';
 import { isSensitiveSeoPath } from './utils/seo';
 
 const ADMIN_LOGIN_PATH = '/admin/login';
@@ -43,7 +44,6 @@ const PROTECTED_ADMIN_ACTIONS = new Set([
   'updateProductImagesMeta',
   'toggleFeatured',
   'toggleEnabled',
-  'getCategories',
   'createUpdateCategory',
   'deleteCategory',
   'getOrders',
@@ -160,6 +160,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   // ── Autenticado ───────────────────────────────────────────────────────────────
   context.locals.user = user;
+
+  if ((isAdminPageRequest || isProtectedAdminAction) && !canAccessAdmin(user.email)) {
+    return applySensitiveSeoHeaders(new Response('No tenés permisos para acceder al panel admin.', { status: 403 }));
+  }
 
   const response = await next();
 

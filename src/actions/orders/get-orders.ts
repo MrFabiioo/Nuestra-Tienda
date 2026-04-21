@@ -1,6 +1,6 @@
 import { ActionError, defineAction } from 'astro:actions';
 import { z } from 'astro:schema';
-import { requireAuth } from '../../firebase/guards';
+import { requireAdminAccess } from '../../firebase/guards';
 import { getOrderById, listAdminOrders } from '../../services/orders/repository';
 
 export const getOrders = defineAction({
@@ -10,7 +10,7 @@ export const getOrders = defineAction({
     orderId: z.string().optional(),
   }).optional(),
   handler: async (input, context) => {
-    requireAuth(context);
+    requireAdminAccess(context, 'ver pedidos');
 
     if (input?.orderId) {
       const detail = await getOrderById(input.orderId);

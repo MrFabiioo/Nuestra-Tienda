@@ -3,7 +3,7 @@ import { defineAction } from "astro:actions";
 import { db, eq, OrderItem, Product, ProductImage } from "astro:db";
 import { ImageUpload } from "@utils/image-upload";
 import { z } from "astro:schema";
-import { requireAuth, requireProductDeletable } from "../../firebase/guards";
+import { requireAdminAccess, requireProductDeletable } from "../../firebase/guards";
 
 export const deleteProduct = defineAction({
     accept: 'json',
@@ -11,7 +11,7 @@ export const deleteProduct = defineAction({
         id: z.string(),
     }),
     handler: async ({ id }, context) => {
-        requireAuth(context);
+        requireAdminAccess(context, 'eliminar productos');
 
         const orderItems = await db
             .select()

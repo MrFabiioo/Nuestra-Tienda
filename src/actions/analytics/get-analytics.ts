@@ -1,6 +1,6 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'astro:schema';
-import { requireAuth } from '../../firebase/guards';
+import { requireAdminAccess } from '../../firebase/guards';
 import { resolveAnalyticsRange } from '../../services/analytics/analytics-range';
 import { getAnalyticsData } from '../../services/analytics/repository';
 
@@ -11,7 +11,7 @@ export const getAnalytics = defineAction({
     to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   }).optional(),
   handler: async (input, context) => {
-    requireAuth(context);
+    requireAdminAccess(context, 'ver analytics');
 
     const range = resolveAnalyticsRange(input);
 

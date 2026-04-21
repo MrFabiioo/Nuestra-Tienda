@@ -2,13 +2,14 @@ import { defineAction } from "astro:actions";
 import { db, Product, ProductImage, sql } from "astro:db";
 import { z } from "astro:schema";
 import { resolveProductImageUrl } from "@utils/product-images";
-import { ensureFeaturedColumnExists, ensureImageMetaColumnsExist } from "@utils/product-db";
+import { ensureFeaturedColumnExists, ensureImageMetaColumnsExist, ensureIsEnabledColumnExists } from "@utils/product-db";
 
 export const getFeaturedProducts = defineAction({
     accept: 'json',
     input: z.object({}).optional(),
     handler: async () => {
         await ensureFeaturedColumnExists();
+        await ensureIsEnabledColumnExists();
         await ensureImageMetaColumnsExist();
 
         const query = sql`
@@ -19,6 +20,7 @@ export const getFeaturedProducts = defineAction({
                 ) AS image
             FROM ${Product} p
             WHERE p.featured = 1
+              AND COALESCE(p.isEnabled, 1) = 1
             ORDER BY p.title ASC
         `;
         const { rows } = await db.run(query);

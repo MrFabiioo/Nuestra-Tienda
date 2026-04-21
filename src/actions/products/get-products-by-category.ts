@@ -45,6 +45,7 @@ export const getProductsByCategory = defineAction({
                     (SELECT image FROM ${ProductImage} WHERE productId = a.id ORDER BY COALESCE(sortOrder, 9999), rowid LIMIT 1)
                 ) as image
             FROM ${Product} a
+            WHERE COALESCE(a.isEnabled, 1) = 1
             ORDER BY a.categoryId, COALESCE(a.isEnabled, 1) DESC, a.title;
         `;
         

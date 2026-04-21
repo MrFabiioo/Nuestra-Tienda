@@ -5,6 +5,8 @@ interface ImportMetaEnv {
   readonly ASTRO_DB_APP_TOKEN?: string;
   readonly ASTRO_DB_REMOTE_URL?: string;
   readonly ORDER_NOTIFICATIONS_ADMIN_EMAIL?: string;
+  readonly ORDER_NOTIFICATIONS_ADMIN_WHATSAPP?: string;
+  readonly ORDER_NOTIFICATIONS_WHATSAPP_ENABLED?: 'true' | 'false';
 }
 
 interface ImportMeta {

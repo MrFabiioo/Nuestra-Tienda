@@ -4,7 +4,7 @@ import { defineAction } from "astro:actions";
 import { db, eq, Category } from "astro:db";
 import { z } from "astro:schema";
 import { v4 as UUID } from "uuid";
-import { requireAuth } from "../../firebase/guards";
+import { requireAdminAccess } from "../../firebase/guards";
 
 export const createUpdateCategory = defineAction({
     accept:'form',
@@ -14,7 +14,7 @@ export const createUpdateCategory = defineAction({
         slug: z.string().min(1, "El slug es requerido"),
     }),
     handler:async(form, context)=>{
-        requireAuth(context);
+        requireAdminAccess(context, 'gestionar categorías');
         const { id = UUID(), name, slug } = form;
         
         // Normalize slug: lowercase, replace spaces with hyphens, trim

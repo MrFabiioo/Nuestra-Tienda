@@ -1,11 +1,12 @@
 
 
 import { defineAction } from "astro:actions";
-import { Category, count, db, Product, ProductImage, sql } from "astro:db";
+import { Category, db, Product, ProductImage, sql } from "astro:db";
 import { z } from "astro:schema";
 import type {ProductWithImages} from '../../interfaces/products-with-images.interface'
 import { resolveProductImageList } from "@utils/product-images";
 import { ensureImageMetaColumnsExist, ensureIsEnabledColumnExists } from "@utils/product-db";
+import { hasAdminAccess } from "../../firebase/guards";
 
 export const getProductsByPage= defineAction({
         accept:'json',
@@ -13,12 +14,17 @@ export const getProductsByPage= defineAction({
             page:z.number().optional().default(1),
             limit:z.number().optional().default(6),
         }),
-        handler:async({page,limit})=>{
+        handler:async({page,limit}, context)=>{
             page = page <= 0 ? 1 : page;
             await ensureIsEnabledColumnExists();
             await ensureImageMetaColumnsExist();
-            const [totalRecords] = await db.select({count: count()}).from(Product);
-            const totalPages  = Math.ceil(totalRecords.count/limit);
+            const includeDisabledProducts = hasAdminAccess(context);
+            const { rows: totalRows } = await db.run(includeDisabledProducts
+                ? sql`SELECT COUNT(*) as count FROM ${Product}`
+                : sql`SELECT COUNT(*) as count FROM ${Product} WHERE COALESCE(isEnabled, 1) = 1`
+            );
+            const totalRecords = Number((totalRows[0] as { count?: number | string } | undefined)?.count ?? 0);
+            const totalPages  = Math.ceil(totalRecords/limit);
             if (page > totalPages) {
                 return{
                     products: [] as ProductWithImages[],
@@ -39,6 +45,7 @@ export const getProductsByPage= defineAction({
                 (select name from ${Category} where id = a.categoryId) as categoryName,
                 (select slug from ${Category} where id = a.categoryId) as categorySlug
                 from ${Product} a
+                ${includeDisabledProducts ? sql`` : sql`WHERE COALESCE(a.isEnabled, 1) = 1`}
                 ORDER BY COALESCE(a.isEnabled, 1) DESC, a.title
                 LIMIT ${limit} OFFSET ${(page-1)*limit};
 

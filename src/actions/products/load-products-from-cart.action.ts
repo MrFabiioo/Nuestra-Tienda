@@ -1,39 +1,109 @@
-
-
-import type { CartItem } from "@interfaces/cart-item";
 import { defineAction } from "astro:actions";
 import { db, inArray, Product, ProductImage, sql } from "astro:db";
-import { ensureImageMetaColumnsExist } from "@utils/product-db";
+import { ensureImageMetaColumnsExist, ensureIsEnabledColumnExists } from "@utils/product-db";
 import { resolveProductImageUrl } from "@utils/product-images";
+import { parseCartCookie } from "../../services/orders/cart-cookie";
+
+type RemovedCartItem = {
+    productId: string;
+    title: string;
+    size: string;
+    reason: 'missing' | 'disabled';
+};
 
 export const loadProductsFromCart= defineAction({
         accept:'json',
         handler:async(_,{cookies})=>{
-            const cart = JSON.parse(cookies.get('cart')?.value ?? '[]') as CartItem[];
-            if(cart.length ===0) return [];
+            const cart = parseCartCookie(cookies.get('cart')?.value);
+            if(cart.length ===0) {
+                return {
+                    products: [],
+                    removedItems: [] as RemovedCartItem[],
+                };
+            }
 
             await ensureImageMetaColumnsExist();
+            await ensureIsEnabledColumnExists();
 
-            const productIds = cart.map((item)=>item.productId);
+            const productIds = [...new Set(cart.map((item)=>item.productId))];
 
             const products = await db.select().from(Product).where(inArray(Product.id, productIds));
+            const productMap = new Map(products.map((product) => [product.id, product]));
+            const availableProductIds = new Set(
+                products
+                    .filter((product) => product.isEnabled === null || product.isEnabled === undefined || Boolean(product.isEnabled))
+                    .map((product) => product.id),
+            );
+
+            const removedItems = cart.flatMap<RemovedCartItem>((item) => {
+                const product = productMap.get(item.productId);
+
+                if (!product) {
+                    return [{
+                        productId: item.productId,
+                        title: item.name?.trim() || 'Producto no disponible',
+                        size: item.size,
+                        reason: 'missing' as const,
+                    }];
+                }
+
+                if (availableProductIds.has(item.productId)) {
+                    return [];
+                }
+
+                return [{
+                    productId: item.productId,
+                    title: product.title,
+                    size: item.size,
+                    reason: 'disabled' as const,
+                }];
+            });
+
+            const sanitizedCart = cart.filter((item) => availableProductIds.has(item.productId));
+
+            if (removedItems.length > 0) {
+                if (sanitizedCart.length === 0) {
+                    cookies.delete('cart', { path: '/' });
+                } else {
+                    cookies.set('cart', JSON.stringify(sanitizedCart), { path: '/' });
+                }
+            }
+
+            if (sanitizedCart.length === 0) {
+                return {
+                    products: [],
+                    removedItems,
+                };
+            }
 
             const imageMap = new Map<string, string>();
-            await Promise.all(products.map(async (product) => {
-                const { rows } = await db.run(sql`
-                    SELECT COALESCE(
-                        (SELECT image FROM ${ProductImage} WHERE productId = ${product.id} AND isCard = 1 LIMIT 1),
-                        (SELECT image FROM ${ProductImage} WHERE productId = ${product.id} ORDER BY COALESCE(sortOrder, 9999), rowid LIMIT 1)
-                    ) as image
-                `);
-                const image = (rows[0] as any)?.image as string | null;
-                if (image) imageMap.set(product.id, image);
-            }));
+            const imageRows = await Promise.all(
+                [...new Set(sanitizedCart.map((item) => item.productId))].map(async (productId) => {
+                    const { rows } = await db.run(sql`
+                        SELECT image
+                        FROM ${ProductImage}
+                        WHERE productId = ${productId}
+                        ORDER BY COALESCE(isCard, 0) DESC, COALESCE(sortOrder, 9999), rowid
+                        LIMIT 1
+                    `);
 
-            return cart.map(item =>{
-                const product = products.find(p => p.id === item.productId);
+                    return {
+                        productId,
+                        image: (rows[0] as { image?: string | null } | undefined)?.image ?? null,
+                    };
+                }),
+            );
+
+            for (const imageRow of imageRows) {
+                if (!imageRow.image) continue;
+                imageMap.set(imageRow.productId, imageRow.image);
+            }
+
+            return {
+                products: sanitizedCart.map(item =>{
+                const product = productMap.get(item.productId);
                 if (!product) {
-                    throw new Error(`ERROR: el producto con id: ${item.productId} no fue encontrado !!!`);
+                    return null;
                 }
 
                 const image = imageMap.get(item.productId) ?? null;
@@ -49,6 +119,8 @@ export const loadProductsFromCart= defineAction({
                         baseUrl: import.meta.env.PUBLIC_URL,
                     })
                 };
-            });
+            }).filter((item): item is NonNullable<typeof item> => item !== null),
+                removedItems,
+            };
         }
     })

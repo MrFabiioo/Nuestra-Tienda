@@ -7,6 +7,7 @@ import { defineAction } from "astro:actions";
 import { Category, db, eq, Product, ProductImage, sql } from "astro:db";
 import { z } from "astro:schema";
 import type { ProductRecipe } from "@interfaces/recipe.interface";
+import { hasAdminAccess } from "../../firebase/guards";
 
 type ProductBySlugRow = {
     id: string;
@@ -41,7 +42,7 @@ function parseRecipe(raw: string | null | undefined): ProductRecipe {
     }
 }
 
-async function findProductBySlug(slug: string) {
+async function findProductBySlug(slug: string, includeDisabled: boolean) {
     await ensureFeaturedColumnExists();
     await ensureIsEnabledColumnExists();
     await ensureImageMetaColumnsExist();
@@ -51,6 +52,7 @@ async function findProductBySlug(slug: string) {
             SELECT id, title, description, price, sizes, slug, categoryId, recipe, featured, isEnabled
             FROM ${Product}
             WHERE slug = ${slug}
+            ${includeDisabled ? sql`` : sql`AND COALESCE(isEnabled, 1) = 1`}
             LIMIT 1
         `);
         const productRow = rows[0] as Record<string, unknown> | undefined;
@@ -75,6 +77,7 @@ async function findProductBySlug(slug: string) {
             SELECT id, title, description, price, sizes, slug, categoryId, featured, isEnabled
             FROM ${Product}
             WHERE slug = ${slug}
+            ${includeDisabled ? sql`` : sql`AND COALESCE(isEnabled, 1) = 1`}
             LIMIT 1
         `);
         const productRow = rows[0] as Record<string, unknown> | undefined;
@@ -96,7 +99,7 @@ async function findProductBySlug(slug: string) {
 export const getProductBySlug = defineAction({
         accept: 'json',
         input: z.string(),
-        handler: async (slug) => {
+        handler: async (slug, context) => {
             if (slug === 'new-product') {
                 return {
                     product: { ...newProduct, recipe: emptyRecipe() },
@@ -104,7 +107,7 @@ export const getProductBySlug = defineAction({
                 };
             }
 
-            const productRow = await findProductBySlug(slug);
+            const productRow = await findProductBySlug(slug, hasAdminAccess(context));
             if (!productRow) {
                 throw new Error(`Producto de nombre ${slug} no encontrado`);
             }

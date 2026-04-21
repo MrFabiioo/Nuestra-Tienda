@@ -18,6 +18,10 @@ type NotificationDraft = {
   provider: string;
 };
 
+function isWhatsAppNotificationsEnabled() {
+  return import.meta.env.ORDER_NOTIFICATIONS_WHATSAPP_ENABLED === 'true';
+}
+
 function adminRecipients() {
   return {
     email: import.meta.env.ORDER_NOTIFICATIONS_ADMIN_EMAIL as string | undefined,
@@ -33,6 +37,15 @@ function formatCOP(amount: number): string {
     currency: 'COP',
     maximumFractionDigits: 0,
   }).format(amount);
+}
+
+function escapeHtml(value: string | number | null | undefined): string {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
 }
 
 // ─── WhatsApp builders ─────────────────────────────────────────────────────────
@@ -117,12 +130,12 @@ function itemsAsEmailHtml(order: PublicOrder): string {
   return order.items.map((item) => `
     <tr>
       <td style="padding:12px 0;border-bottom:1px solid #f0f0f0;vertical-align:top;width:72px;">
-        <img src="${item.image}" alt="${item.title}" width="64" height="64"
+        <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" width="64" height="64"
           style="border-radius:8px;object-fit:cover;display:block;background:#f5f5f5;" />
       </td>
       <td style="padding:12px 0 12px 16px;border-bottom:1px solid #f0f0f0;vertical-align:top;">
-        <div style="font-weight:600;color:#1a1a1a;font-size:15px;">${item.title}</div>
-        <div style="font-size:13px;color:#777;margin-top:3px;">Talla: ${item.size} &nbsp;·&nbsp; Cantidad: ${item.quantity}</div>
+        <div style="font-weight:600;color:#1a1a1a;font-size:15px;">${escapeHtml(item.title)}</div>
+        <div style="font-size:13px;color:#777;margin-top:3px;">Talla: ${escapeHtml(item.size)} &nbsp;·&nbsp; Cantidad: ${escapeHtml(item.quantity)}</div>
         <div style="font-size:13px;color:#999;margin-top:2px;">${formatCOP(item.unitPrice)} c/u</div>
       </td>
       <td style="padding:12px 0;border-bottom:1px solid #f0f0f0;vertical-align:top;text-align:right;white-space:nowrap;font-weight:700;color:#1a1a1a;font-size:15px;">
@@ -138,8 +151,8 @@ function customerInfoHtml(order: PublicOrder): string {
       <tr>
         <td style="padding:14px 16px;">
           <div style="font-size:12px;color:#5a8a72;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Cliente</div>
-          <div style="font-size:15px;font-weight:700;color:#1a1a1a;">${order.customerName}</div>
-          <div style="font-size:13px;color:#555;margin-top:3px;">${order.customerPhone} &nbsp;·&nbsp; ${order.customerEmail}</div>
+          <div style="font-size:15px;font-weight:700;color:#1a1a1a;">${escapeHtml(order.customerName)}</div>
+          <div style="font-size:13px;color:#555;margin-top:3px;">${escapeHtml(order.customerPhone)} &nbsp;·&nbsp; ${escapeHtml(order.customerEmail)}</div>
         </td>
       </tr>
     </table>
@@ -170,7 +183,7 @@ function wrapEmailHtml(opts: {
           <tr>
             <td style="padding:28px 24px;text-align:center;">
               <div style="font-size:24px;font-weight:800;color:#fff;letter-spacing:.5px;">🥑 Nuestra Tienda</div>
-              <div style="margin-top:6px;font-size:13px;color:rgba(255,255,255,.7);">${ref}</div>
+              <div style="margin-top:6px;font-size:13px;color:rgba(255,255,255,.7);">${escapeHtml(ref)}</div>
             </td>
           </tr>
         </table>
@@ -178,8 +191,8 @@ function wrapEmailHtml(opts: {
         <table style="width:100%;background:#fff;border-collapse:collapse;">
           <tr>
             <td style="padding:28px 24px;">
-              <h2 style="margin:0 0 8px;font-size:20px;color:#1a1a1a;">${title}</h2>
-              <p style="margin:0 0 24px;color:#555;font-size:15px;line-height:1.6;">${intro}</p>
+              <h2 style="margin:0 0 8px;font-size:20px;color:#1a1a1a;">${escapeHtml(title)}</h2>
+              <p style="margin:0 0 24px;color:#555;font-size:15px;line-height:1.6;">${escapeHtml(intro)}</p>
               ${showCustomerInfo ? customerInfoHtml(order) : ''}
               <table style="width:100%;border-collapse:collapse;">
                 ${itemsAsEmailHtml(order)}
@@ -220,6 +233,7 @@ function buildDrafts(event: NotificationEvent, order: PublicOrder): Notification
   const admin = adminRecipients();
   const ref = `Pedido ${order.id.slice(0, 8).toUpperCase()}`;
   const items = itemsAsPlainText(order);
+  const whatsappEnabled = isWhatsAppNotificationsEnabled();
 
   const titles: Record<NotificationEvent, { customer: string; admin: string }> = {
     payment_proof_uploaded: {
@@ -269,13 +283,13 @@ function buildDrafts(event: NotificationEvent, order: PublicOrder): Notification
       }),
     },
     // ── Customer WhatsApp ──
-    {
+    ...(whatsappEnabled ? [{
       channel: NOTIFICATION_CHANNEL.whatsapp,
       template: event,
       recipient: order.customerPhone,
       provider: 'whatsapp-cloud',
       text: buildCustomerWhatsApp(event, order, ref),
-    },
+    }] as NotificationDraft[] : []),
     // ── Admin email ──
     ...(admin.email ? [{
       channel: NOTIFICATION_CHANNEL.email,
@@ -293,7 +307,7 @@ function buildDrafts(event: NotificationEvent, order: PublicOrder): Notification
       }),
     }] as NotificationDraft[] : []),
     // ── Admin WhatsApp ──
-    ...(admin.whatsapp ? [{
+    ...(whatsappEnabled && admin.whatsapp ? [{
       channel: NOTIFICATION_CHANNEL.whatsapp,
       template: event,
       recipient: admin.whatsapp,
@@ -351,7 +365,7 @@ export async function dispatchOrderNotifications(event: NotificationEvent, order
       ? await sendEmail({
           to: draft.recipient,
           subject: draft.subject ?? 'Actualización de pedido',
-          html: draft.html ?? `<p>${draft.text}</p>`,
+          html: draft.html ?? `<p>${escapeHtml(draft.text)}</p>`,
           text: draft.text,
         })
       : await sendWhatsApp({

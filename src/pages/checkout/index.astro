@@ -9,14 +9,16 @@ export const prerender = false
 
 const pendingOrder = await getPendingOrderFromCookies(Astro.cookies);
 
-const {data:products,error}= await Astro.callAction(actions.loadProductsFromCart,{});
+const {data:checkoutCart,error}= await Astro.callAction(actions.loadProductsFromCart,{});
 
 
 
-if (error || !products) {
+if (error || !checkoutCart) {
    console.error(error)
    return Astro.redirect('/');
 }
+
+const { products, removedItems } = checkoutCart;
 
 const total = products.reduce(
   (acc, product) => acc + product.price * product.quantity,
@@ -24,6 +26,9 @@ const total = products.reduce(
 );
 
 const isEmpty = products.length === 0;
+const hasRemovedItems = removedItems.length > 0;
+const removedItemsPreview = removedItems.slice(0, 3);
+const hasMoreRemovedItems = removedItems.length > removedItemsPreview.length;
 const lockedDeliveryData = {
   method: 'Trabajo',
   address: 'CR 48 14 49',
@@ -41,14 +46,40 @@ const checkoutBreadcrumbs = [
 <Layout title="Checkout" description="Revisa tu pedido y deja listo el paso al pago" noindex={true}>
   <div class="theme-checkout-page min-h-screen bg-guacamole-fondo/10 py-8 px-4 md:px-8" data-checkout-page>
     <div class="max-w-6xl mx-auto mb-6">
-      <BreadcrumbTrail
-        items={checkoutBreadcrumbs}
-        eyebrow="Paso 1 de 2"
-        summary={isEmpty
-          ? 'Tu checkout está listo para recibir productos. Vuelve a la tienda para armar tu pedido y luego completa tus datos aquí.'
+        <BreadcrumbTrail
+          items={checkoutBreadcrumbs}
+          eyebrow="Paso 1 de 2"
+          summary={isEmpty
+          ? hasRemovedItems
+            ? 'Detectamos productos que ya no estaban disponibles y limpiamos tu carrito para que puedas retomarlo sin trabas.'
+            : 'Tu checkout está listo para recibir productos. Vuelve a la tienda para armar tu pedido y luego completa tus datos aquí.'
           : 'Estás revisando tu pedido antes de pagar. Si necesitas ajustar productos, puedes volver a la tienda o entrar al detalle desde esta misma pantalla.'}
-      />
+        />
     </div>
+
+    {hasRemovedItems && (
+      <div class="mx-auto mb-6 max-w-6xl rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 text-amber-900 shadow-sm">
+        <p class="text-xs font-black uppercase tracking-[0.18em] text-amber-700">Carrito actualizado antes de pagar</p>
+        <p class="mt-1 text-sm font-semibold">
+          Quitamos {removedItems.length} {removedItems.length === 1 ? 'producto' : 'productos'} que ya no {removedItems.length === 1 ? 'estaba' : 'estaban'} disponible{removedItems.length === 1 ? '' : 's'} para que revises el pedido antes de continuar.
+        </p>
+        <div class="mt-3 flex flex-wrap gap-2 text-xs font-medium">
+          {removedItemsPreview.map((item) => (
+            <span class="rounded-full border border-amber-300 bg-white px-3 py-1">
+              {item.title} · {item.size}
+            </span>
+          ))}
+          {hasMoreRemovedItems && (
+            <span class="rounded-full border border-amber-300 bg-white px-3 py-1">
+              +{removedItems.length - removedItemsPreview.length} más
+            </span>
+          )}
+        </div>
+        <p class="mt-3 text-sm text-amber-800">
+          El carrito ya quedó limpio. Puedes ajustar tu selección y seguir al pago cuando quieras.
+        </p>
+      </div>
+    )}
     
     {isEmpty ? (
       <!-- Empty Cart State -->
@@ -75,7 +106,9 @@ const checkoutBreadcrumbs = [
           </h1>
           
           <p class="mb-8 text-lg text-gray-600">
-            Agrega productos desde la tienda para revisar tu compra y avanzar al pago cuando quieras.
+            {hasRemovedItems
+              ? 'Los productos que tenías ya no estaban disponibles y por eso limpiamos el carrito. Vuelve a la tienda para armar tu pedido de nuevo sin sorpresas.'
+              : 'Agrega productos desde la tienda para revisar tu compra y avanzar al pago cuando quieras.'}
           </p>
           
           <a 

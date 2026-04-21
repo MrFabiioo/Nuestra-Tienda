@@ -57,7 +57,7 @@ export function requireAuth(context: ActionAPIContext) {
   return user;
 }
 
-export function canManageSensitiveAdminActions(email: string | undefined) {
+export function canAccessAdmin(email: string | undefined) {
   if (!email) return false;
 
   const allowlist = getSensitiveAdminEmailAllowlist();
@@ -66,10 +66,14 @@ export function canManageSensitiveAdminActions(email: string | undefined) {
   return allowlist.has(normalizeEmail(email));
 }
 
-export function requireSensitiveAdminAccess(context: ActionAPIContext, capability = 'realizar esta acción sensible') {
+export function hasAdminAccess(context: ActionAPIContext) {
+  return canAccessAdmin(context.locals.user?.email);
+}
+
+export function requireAdminAccess(context: ActionAPIContext, capability = 'acceder al panel admin') {
   const user = requireAuth(context);
 
-  if (!canManageSensitiveAdminActions(user.email)) {
+  if (!canAccessAdmin(user.email)) {
     throw new ActionError({
       code: 'FORBIDDEN',
       message: `Tu usuario no tiene permisos para ${capability}. Configurá ADMIN_ALLOWED_EMAILS (o ORDER_NOTIFICATIONS_ADMIN_EMAIL como fallback) con los correos habilitados.`,
@@ -77,6 +81,14 @@ export function requireSensitiveAdminAccess(context: ActionAPIContext, capabilit
   }
 
   return user;
+}
+
+export function canManageSensitiveAdminActions(email: string | undefined) {
+  return canAccessAdmin(email);
+}
+
+export function requireSensitiveAdminAccess(context: ActionAPIContext, capability = 'realizar esta acción sensible') {
+  return requireAdminAccess(context, capability);
 }
 
 export function requireProductDeletable(orderItemCount: number) {

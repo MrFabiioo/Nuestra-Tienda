@@ -4,14 +4,14 @@ import { ImageUpload } from "@utils/image-upload";
 import { defineAction } from "astro:actions";
 import { db, eq, ProductImage, sql } from "astro:db";
 import { z } from "astro:schema";
-import { requireAuth } from "../../firebase/guards";
+import { requireAdminAccess } from "../../firebase/guards";
 import { ensureImageMetaColumnsExist } from "@utils/product-db";
 
 export const deleteProductImage= defineAction({
         accept:'json',
         input:z.string(),
         handler:async(imageId, context)=>{
-            requireAuth(context);
+            requireAdminAccess(context, 'gestionar imágenes de productos');
             await ensureImageMetaColumnsExist();
 
             const { rows } = await db.run(sql`SELECT id, image FROM ${ProductImage} WHERE id = ${imageId} LIMIT 1`);

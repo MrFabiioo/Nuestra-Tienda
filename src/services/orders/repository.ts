@@ -10,6 +10,7 @@ import { mapAdminOrderSummary, type AdminOrderSummary } from './admin-order-summ
 import { parseCartCookie } from './cart-cookie';
 import { orderRequiresClientAction, ORDER_STATUS, PAYMENT_METHODS, PAYMENT_STATUS, roundMoney } from './constants';
 import { buildPaymentProofCleanupTarget, type PaymentProofCleanupTarget } from './payment-proof-compensation';
+import { ensureIsEnabledColumnExists } from '@utils/product-db';
 
 export type CartOrderLine = {
   productId: string;
@@ -77,11 +78,31 @@ export async function getCartOrderLinesFromContext(context: ActionAPIContext) {
     });
   }
 
+  await ensureIsEnabledColumnExists();
+
   const productIds = [...new Set(cart.map((item) => item.productId))];
-  const products = await getProductsByIds(databaseAdapter, productIds);
+  const products = (await getProductsByIds(databaseAdapter, productIds)).filter(
+    (product) => product.isEnabled === null || product.isEnabled === undefined || Boolean(product.isEnabled),
+  );
+  const availableProductIds = new Set(products.map((product) => product.id));
+  const sanitizedCart = cart.filter((item) => availableProductIds.has(item.productId));
+
+  if (sanitizedCart.length !== cart.length) {
+    if (sanitizedCart.length === 0) {
+      context.cookies.delete('cart', { path: '/' });
+    } else {
+      context.cookies.set('cart', JSON.stringify(sanitizedCart), { path: '/' });
+    }
+
+    throw new ActionError({
+      code: 'BAD_REQUEST',
+      message: 'Algunos productos de tu carrito ya no están disponibles. Actualizamos el carrito para que lo revises antes de continuar.',
+    });
+  }
+
   const images = await getProductImagesByProductIds(databaseAdapter, productIds);
 
-  return cart.map((item) => {
+  return sanitizedCart.map((item) => {
     const product = products.find((candidate) => candidate.id === item.productId);
 
     if (!product) {

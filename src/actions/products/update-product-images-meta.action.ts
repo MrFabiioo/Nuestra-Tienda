@@ -1,7 +1,7 @@
 import { defineAction } from "astro:actions";
 import { db, ProductImage, sql } from "astro:db";
 import { z } from "astro:schema";
-import { requireAuth } from "../../firebase/guards";
+import { requireAdminAccess } from "../../firebase/guards";
 import { ensureImageMetaColumnsExist } from "@utils/product-db";
 
 export const updateProductImagesMeta = defineAction({
@@ -14,7 +14,7 @@ export const updateProductImagesMeta = defineAction({
     })),
   }),
   handler: async (input, context) => {
-    requireAuth(context);
+    requireAdminAccess(context, 'gestionar imágenes de productos');
     await ensureImageMetaColumnsExist();
 
     for (const img of input.images) {
