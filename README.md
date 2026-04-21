@@ -165,7 +165,9 @@ Usalo solo cuando realmente quieras probar contra la DB remota configurada.
 | `npm run build` | Build remoto (`astro build --remote`). |
 | `npm run build:local` | Build local. |
 | `npm run build:remote` | Build remoto explícito. |
-| `npm run preview` | Preview del build. |
+| `npm run preview` | Preview del build SSR escuchando en host externo. |
+| `npm start` | Levanta el servidor SSR compilado (`dist/server/entry.mjs`). |
+| `npm run check` | Corre validaciones livianas de Astro/TypeScript. |
 | `npm run astro` | Ejecuta CLI de Astro. |
 
 > Nota: el repo tiene varios `*.test.ts`, pero hoy **no** hay un script `test` oficial cableado en `package.json`.
@@ -214,19 +216,19 @@ El admin vive bajo `/admin/*`.
 
 **Railway** es una opción lógica para este proyecto porque resuelve bien un runtime Node + variables de entorno + conexión a servicios externos.
 
-### Pero ojo con esto
+### Estado actual
 
-El proyecto tiene muchas rutas con `export const prerender = false`, o sea que usa SSR/on-demand rendering. Según la documentación actual de Astro v5, **cualquier proyecto con páginas server-rendered necesita un adapter para deploy de producción**. Hoy este repo **no trae un adapter de Astro instalado/configurado**.
+El repo ya quedó preparado para SSR sobre Railway con `@astrojs/node` en modo `standalone` y `output: 'server'`. Eso genera el entrypoint productivo en `dist/server/entry.mjs`, compatible con un `npm start` simple.
 
-En otras palabras: para desplegarlo prolijo en Railway primero hay que definir el adapter de runtime (por ejemplo, Node), y recién después cerrar el pipeline de deploy.
+Además, `server.host = true` deja al runtime escuchando correctamente para plataformas tipo Railway sin inventar una integración propietaria.
 
 ### Checklist breve para dejarlo deployable
 
-1. Agregar y configurar un adapter SSR de Astro compatible con Railway.
-2. Cargar variables de entorno del entorno objetivo.
-3. Usar base remota con `ASTRO_DB_REMOTE_URL` y `ASTRO_DB_APP_TOKEN`.
+1. Configurar en Railway las variables del entorno objetivo (`PUBLIC_URL`, `ASTRO_DB_REMOTE_URL`, `ASTRO_DB_APP_TOKEN`, Firebase y las que correspondan a notificaciones).
+2. Usar `npm run build` como build command y `npm start` como start command.
+3. Apuntar la base remota a staging, no a producción, para el primer smoke test.
 4. Validar login admin, checkout, `/pagos/[token]` y `/admin/analytics` en staging.
-5. Evitar usar una DB remota productiva para smoke tests de `dev:remote`.
+5. Recién después promover la misma configuración a producción si todo da bien.
 
 ## Estructura principal del proyecto
 
