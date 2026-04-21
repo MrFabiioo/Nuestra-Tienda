@@ -37,6 +37,18 @@ export default function CartButton({ pendingOrderUrl = null, initialQuantity = 0
   const hasPendingOrder = Boolean(pendingOrderUrl);
   const visibleQuantity = hasSyncedCart ? $totalQty : Math.max(initialQuantity, $totalQty);
 
+  const shouldAutoOpenCart = useCallback((feedbackType: CartFeedbackDetail['type']) => {
+    if (feedbackType !== 'add') {
+      return true;
+    }
+
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return true;
+    }
+
+    return window.matchMedia('(min-width: 640px)').matches;
+  }, []);
+
   const syncCartFromCookies = useCallback(() => {
     const latestCart = CartCookiesClient.getCart();
     cartItems.set(latestCart);
@@ -105,7 +117,7 @@ export default function CartButton({ pendingOrderUrl = null, initialQuantity = 0
     const handleFeedback = (event: Event) => {
       const customEvent = event as CustomEvent<CartFeedbackDetail>;
       syncCartFromCookies();
-      setIsOpen(true);
+      setIsOpen(shouldAutoOpenCart(customEvent.detail.type));
       setFeedback(buildFeedback(customEvent.detail));
     };
 
@@ -122,7 +134,7 @@ export default function CartButton({ pendingOrderUrl = null, initialQuantity = 0
       window.removeEventListener(feedbackEventName, handleFeedback as EventListener);
       window.removeEventListener(openEventName, handleOpen);
     };
-  }, [syncCartFromCookies]);
+  }, [shouldAutoOpenCart, syncCartFromCookies]);
 
   useEffect(() => {
     if (!feedback) {
@@ -442,13 +454,13 @@ export default function CartButton({ pendingOrderUrl = null, initialQuantity = 0
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-guacamole-b shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                   </svg>
-                  <span class="font-semibold leading-snug">Envío gratis en pedidos mayores a $50</span>
+                  <span class="font-semibold leading-snug">Todos los pedidos tienen envío gratis </span>
                 </div>
                 <div class="theme-text-muted flex items-start gap-2 text-xs">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-guacamole-b shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span class="font-semibold leading-snug">Garantía de devolución de 30 días</span>
+                  <span class="font-semibold leading-snug">Calidad grantizada</span>
                 </div>
               </div>
 
