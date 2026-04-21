@@ -837,6 +837,7 @@ function createVerticalBarChart(root: Document, palette: AnalyticsPalette, optio
   destroyChart(root, options.id);
 
   const maxValue = Math.max(...options.values, 1);
+  const shouldLimitTicks = options.labels.length > 8;
   const baseScale = {
     grid: { color: palette.grid, drawBorder: false },
     ticks: { color: palette.text },
@@ -881,7 +882,17 @@ function createVerticalBarChart(root: Document, palette: AnalyticsPalette, optio
         },
       },
       scales: {
-        x: { ...baseScale, ticks: { ...baseScale.ticks, maxRotation: 0, font: { size: 10 } } },
+        x: {
+          ...baseScale,
+          ticks: {
+            ...baseScale.ticks,
+            autoSkip: shouldLimitTicks,
+            maxTicksLimit: shouldLimitTicks ? 8 : options.labels.length,
+            minRotation: 0,
+            maxRotation: 45,
+            font: { size: 10 },
+          },
+        },
         y: { ...baseScale, ticks: { ...baseScale.ticks, stepSize: 1 } },
       },
     },
