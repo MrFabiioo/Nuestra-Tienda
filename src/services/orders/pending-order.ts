@@ -1,5 +1,5 @@
 import type { AstroCookies } from 'astro';
-import { ORDER_STATUS } from './constants';
+import { orderRequiresClientAction } from './constants';
 import { getPublicOrderByToken } from './repository';
 import type { PublicOrder } from './repository';
 
@@ -29,10 +29,6 @@ export function clearPendingOrderPointerForToken(cookies: AstroCookies, token: s
   if (readPendingOrderPointer(cookies) !== token) return;
 
   clearPendingOrderPointer(cookies);
-}
-
-export function orderRequiresClientAction(status: string) {
-  return status === ORDER_STATUS.pendingPayment || status === ORDER_STATUS.rejected;
 }
 
 export function reconcilePendingOrderPointer(cookies: AstroCookies, order: Pick<PublicOrder, 'status' | 'token'> | null) {

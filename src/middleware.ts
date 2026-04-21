@@ -48,6 +48,7 @@ const PROTECTED_ADMIN_ACTIONS = new Set([
   'deleteCategory',
   'getOrders',
   'reviewPayment',
+  'regeneratePaymentLink',
   'deleteOrder',
   'getAnalytics',
   'uploadPaymentQr',

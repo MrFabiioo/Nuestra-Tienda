@@ -3,7 +3,7 @@ import Layout from '@layouts/Layout.astro';
 import { actions } from 'astro:actions';
 import { Formatter } from '@utils/formatter';
 import { getOrderById } from '../../../services/orders/repository';
-import { formatOrderStatus, formatPaymentStatus, ORDER_STATUS } from '../../../services/orders/constants';
+import { formatOrderStatus, formatPaymentStatus, orderRequiresClientAction, ORDER_STATUS } from '../../../services/orders/constants';
 import { canManageSensitiveAdminActions } from '../../../firebase/guards';
 
 export const prerender = false;
@@ -34,6 +34,7 @@ function labelPaymentMethod(method: string) {
 
 const statusLabel = formatOrderStatus(orderDetail.order.status);
 const canReview = orderDetail.order.status === ORDER_STATUS.underReview;
+const canRegeneratePaymentLink = orderRequiresClientAction(orderDetail.order.status);
 const proofIsImage = orderDetail.latestProof?.mimeType?.startsWith('image/');
 const reviewMessage = Astro.url.searchParams.get('review');
 const canDeleteOrder = canManageSensitiveAdminActions(Astro.locals.user?.email);
@@ -269,6 +270,64 @@ const statusChipClass =
           )}
         </article>
 
+        <article class="premium-panel rounded-3xl p-6 md:p-8">
+          <div class="flex items-center gap-3 border-b border-[var(--color-border)] pb-5">
+            <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--color-surface-soft)]">
+              <svg class="h-5 w-5 text-guacamole-b" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M4 10a6 6 0 0110.24-4.24M16 10a6 6 0 01-10.24 4.24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M13 3.5h1.5V5M7 15H5.5v-1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-lg font-bold text-[var(--color-heading)]">Link público de pago</h2>
+              <p class="mt-0.5 text-xs text-[var(--color-text-subtle)]">Genera un nuevo <code>/pagos/&#123;token&#125;</code> sin exponer el hash almacenado.</p>
+            </div>
+          </div>
+
+          <div class="mt-5 space-y-4">
+            <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 text-sm text-[var(--color-text-muted)]">
+              {canRegeneratePaymentLink ? (
+                <>
+                  <p>Este pedido todavía requiere acción del cliente. Si el link anterior se perdió, puedes invalidarlo y emitir uno nuevo.</p>
+                  <p class="mt-2 text-xs text-[var(--color-text-subtle)]">El token original no se puede recuperar: al regenerar, solo queda válido el nuevo link.</p>
+                </>
+              ) : (
+                <p>Este pedido está en estado <strong class="text-[var(--color-heading-sub)]">{statusLabel}</strong>. No conviene regenerar el link porque ya no espera una acción nueva del cliente.</p>
+              )}
+            </div>
+
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <button
+                id="regenerate-payment-link-btn"
+                type="button"
+                data-order-id={id}
+                class="premium-action-secondary justify-center"
+                disabled={!canDeleteOrder || !canRegeneratePaymentLink}
+                aria-disabled={!canDeleteOrder || !canRegeneratePaymentLink ? 'true' : undefined}
+                title={!canDeleteOrder ? 'Tu usuario no está habilitado para regenerar links.' : !canRegeneratePaymentLink ? 'El estado actual no admite regenerar el link.' : 'Regenerar link de pago'}
+              >
+                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <path d="M4 10a6 6 0 0110.24-4.24M16 10a6 6 0 01-10.24 4.24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  <path d="M13 3.5h1.5V5M7 15H5.5v-1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Regenerar link
+              </button>
+              <p id="regenerate-payment-link-feedback" class="min-h-[1.25rem] text-sm text-[var(--color-text-muted)]" aria-live="polite"></p>
+            </div>
+
+            <div id="regenerated-payment-link-panel" class="hidden rounded-2xl border border-guacamole-b/30 bg-guacamole-b/5 p-4">
+              <label for="regenerated-payment-link-input" class="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-guacamole-b">Nuevo link</label>
+              <div class="flex flex-col gap-3 sm:flex-row">
+                <input id="regenerated-payment-link-input" type="text" readonly class="premium-field flex-1" value="" />
+                <button id="copy-regenerated-payment-link-btn" type="button" class="premium-action-primary justify-center">
+                  Copiar
+                </button>
+              </div>
+              <p class="mt-2 text-xs text-[var(--color-text-subtle)]">Compártelo ahora: el link anterior queda inválido.</p>
+            </div>
+          </div>
+        </article>
+
         <!-- Financial summary -->
         <article class="premium-panel rounded-3xl p-6 md:p-8">
           <div class="flex items-center gap-3 border-b border-[var(--color-border)] pb-5">
@@ -421,6 +480,88 @@ const statusChipClass =
           durationMs: 2000,
         });
         window.location.href = '/admin/orders';
+      });
+    }
+
+    // ── Regenerar link público ───────────────────────────────────────
+    const regenerateBtn = document.getElementById('regenerate-payment-link-btn') as HTMLButtonElement | null;
+    const regenerateFeedback = document.getElementById('regenerate-payment-link-feedback') as HTMLParagraphElement | null;
+    const regeneratePanel = document.getElementById('regenerated-payment-link-panel') as HTMLDivElement | null;
+    const regenerateInput = document.getElementById('regenerated-payment-link-input') as HTMLInputElement | null;
+    const copyRegeneratedBtn = document.getElementById('copy-regenerated-payment-link-btn') as HTMLButtonElement | null;
+
+    if (regenerateBtn && regenerateFeedback && regeneratePanel && regenerateInput) {
+      const defaultRegenerateLabel = regenerateBtn.innerHTML;
+
+      const setRegenerateFeedback = (message: string, tone: 'muted' | 'success' | 'danger' = 'muted') => {
+        const toneClassMap = {
+          muted: 'min-h-[1.25rem] text-sm text-[var(--color-text-muted)]',
+          success: 'min-h-[1.25rem] text-sm text-[var(--color-accent-strong)]',
+          danger: 'min-h-[1.25rem] text-sm text-[var(--color-danger)]',
+        } as const;
+
+        regenerateFeedback.textContent = message;
+        regenerateFeedback.className = toneClassMap[tone];
+      };
+
+      regenerateBtn.addEventListener('click', async () => {
+        if (regenerateBtn.disabled) {
+          return;
+        }
+
+        const orderId = regenerateBtn.dataset.orderId ?? '';
+
+        const confirmed = await adminFeedback.confirm({
+          title: `Regenerar link del pedido ${orderId.slice(0, 8)}`,
+          message: 'Se invalida el link público anterior y solo quedará funcionando el nuevo. Asegúrate de compartirlo con el cliente.',
+          confirmLabel: 'Sí, regenerar',
+          cancelLabel: 'Cancelar',
+          tone: 'warning',
+        });
+
+        if (!confirmed) return;
+
+        regenerateBtn.disabled = true;
+        regenerateBtn.textContent = 'Regenerando...';
+        regeneratePanel.classList.add('hidden');
+        regenerateInput.value = '';
+        setRegenerateFeedback('Generando nuevo link público...', 'muted');
+
+        const { data, error } = await actions.regeneratePaymentLink({ orderId });
+
+        if (error || !data) {
+          setRegenerateFeedback(error?.message ?? 'No pudimos regenerar el link.', 'danger');
+          regenerateBtn.disabled = false;
+          regenerateBtn.innerHTML = defaultRegenerateLabel;
+          return;
+        }
+
+        const absoluteUrl = new URL(data.redirectUrl, window.location.origin).toString();
+        regenerateInput.value = absoluteUrl;
+        regeneratePanel.classList.remove('hidden');
+        setRegenerateFeedback('Listo. El link anterior quedó inválido y ya puedes copiar el nuevo.', 'success');
+        regenerateBtn.disabled = false;
+        regenerateBtn.innerHTML = defaultRegenerateLabel;
+
+        adminFeedback.notify({
+          title: 'Link regenerado',
+          message: 'Copia el nuevo enlace y compártelo con el cliente.',
+          tone: 'success',
+          durationMs: 2800,
+        });
+      });
+
+      copyRegeneratedBtn?.addEventListener('click', async () => {
+        if (!regenerateInput.value) return;
+
+        try {
+          await navigator.clipboard.writeText(regenerateInput.value);
+          setRegenerateFeedback('Link copiado al portapapeles.', 'success');
+        } catch {
+          regenerateInput.focus();
+          regenerateInput.select();
+          setRegenerateFeedback('No pudimos copiar automáticamente. Selecciónalo y cópialo manualmente.', 'danger');
+        }
       });
     }
 

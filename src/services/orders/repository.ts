@@ -8,7 +8,7 @@ import { serializeDbDate } from '@utils/db-date';
 import { resolveProductImageUrl } from '@utils/product-images';
 import { mapAdminOrderSummary, type AdminOrderSummary } from './admin-order-summary.mapper';
 import { parseCartCookie } from './cart-cookie';
-import { ORDER_STATUS, PAYMENT_METHODS, PAYMENT_STATUS, roundMoney } from './constants';
+import { orderRequiresClientAction, ORDER_STATUS, PAYMENT_METHODS, PAYMENT_STATUS, roundMoney } from './constants';
 import { buildPaymentProofCleanupTarget, type PaymentProofCleanupTarget } from './payment-proof-compensation';
 
 export type CartOrderLine = {
@@ -325,6 +325,18 @@ async function updateOrderStatus(adapter: DatabaseSession, input: {
   `);
 }
 
+async function updateOrderPublicTokenHash(adapter: DatabaseSession, input: {
+  orderId: string;
+  publicTokenHash: string;
+  nowSql: string;
+}) {
+  await adapter.run(sql`
+    update ${Order}
+    set publicTokenHash = ${input.publicTokenHash}, updatedAt = ${input.nowSql}
+    where id = ${input.orderId}
+  `);
+}
+
 async function reviewPaymentRecord(adapter: DatabaseSession, input: {
   paymentId: string;
   status: string;
@@ -544,6 +556,42 @@ export async function reviewOrderPayment(input: {
   return {
     status: orderStatus,
     reviewedAt,
+  };
+}
+
+export async function regenerateOrderPaymentLink(orderId: string) {
+  const now = new Date();
+  const nowSql = serializeDbDate(now);
+  const publicToken = generatePublicToken();
+  const publicTokenHash = hashPublicToken(publicToken);
+
+  await databaseAdapter.transaction.run(async (session) => {
+    const orderRow = await getOrderRowById(session, orderId);
+
+    if (!orderRow) {
+      throw new ActionError({
+        code: 'NOT_FOUND',
+        message: 'No encontramos el pedido para regenerar el link.',
+      });
+    }
+
+    if (!orderRequiresClientAction(orderRow.status)) {
+      throw new ActionError({
+        code: 'CONFLICT',
+        message: 'Este pedido ya no admite regenerar un link público de pago.',
+      });
+    }
+
+    await updateOrderPublicTokenHash(session, {
+      orderId,
+      publicTokenHash,
+      nowSql,
+    });
+  });
+
+  return {
+    publicToken,
+    regeneratedAt: now,
   };
 }
 

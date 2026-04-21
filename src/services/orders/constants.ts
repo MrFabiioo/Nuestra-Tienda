@@ -49,6 +49,10 @@ export type OrderStatus = typeof ORDER_STATUS[keyof typeof ORDER_STATUS];
 export type PaymentStatus = typeof PAYMENT_STATUS[keyof typeof PAYMENT_STATUS];
 export type PaymentMethod = typeof PAYMENT_METHODS[keyof typeof PAYMENT_METHODS];
 
+export function orderRequiresClientAction(status: string) {
+  return status === ORDER_STATUS.pendingPayment || status === ORDER_STATUS.rejected;
+}
+
 export function roundMoney(value: number) {
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
