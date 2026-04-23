@@ -13,6 +13,19 @@ export default defineConfig({
   server: {
     host: true,
   },
+  security: {
+    checkOrigin: true,
+    allowedDomains: [
+      {
+        protocol: 'https',
+        hostname: 'nuestra-tienda-production.up.railway.app',
+      },
+      {
+        protocol: 'https',
+        hostname: 'nuestratienda.site',
+      },
+    ],
+  },
   vite: {
     optimizeDeps: {
       include: [
