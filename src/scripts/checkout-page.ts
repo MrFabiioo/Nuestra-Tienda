@@ -150,6 +150,22 @@ function validateForm(form: HTMLFormElement, feedbackBox: HTMLDivElement | null)
   return true;
 }
 
+const SCROLL_KEY = 'checkout-scroll-y';
+
+function saveScrollAndReload() {
+  sessionStorage.setItem(SCROLL_KEY, String(window.scrollY));
+  window.location.assign('/checkout');
+}
+
+function restoreScroll() {
+  const saved = sessionStorage.getItem(SCROLL_KEY);
+  if (!saved) return;
+  sessionStorage.removeItem(SCROLL_KEY);
+  requestAnimationFrame(() => {
+    window.scrollTo({ top: parseInt(saved, 10), behavior: 'instant' });
+  });
+}
+
 export function initCheckoutPage(rootNode: ParentNode = document) {
   const pageRoot = rootNode.querySelector<HTMLElement>('[data-checkout-page]');
   const form = pageRoot?.querySelector<HTMLFormElement>('#customer-form') ?? null;
@@ -159,6 +175,8 @@ export function initCheckoutPage(rootNode: ParentNode = document) {
   }
 
   pageRoot.dataset.checkoutReady = 'true';
+
+  restoreScroll();
 
   const checkoutFeedback = pageRoot.querySelector<HTMLParagraphElement>('#checkout-feedback');
   const feedbackBox = pageRoot.querySelector<HTMLDivElement>('#form-feedback');
@@ -211,6 +229,19 @@ export function initCheckoutPage(rootNode: ParentNode = document) {
   });
 
   pageRoot.addEventListener('click', (event) => {
+    const qtyButton = (event.target as HTMLElement | null)?.closest<HTMLButtonElement>('.btn-qty-change');
+    if (qtyButton && !qtyButton.disabled) {
+      const productId = qtyButton.dataset.id ?? '';
+      const size = qtyButton.dataset.size ?? '';
+      const delta = qtyButton.dataset.action === 'increment' ? 1 : -1;
+
+      qtyButton.disabled = true;
+      setCheckoutFeedback(checkoutFeedback, 'Actualizando tu pedido...', 'success');
+      CartCookiesClient.updateQuantity(productId, size, delta);
+      saveScrollAndReload();
+      return;
+    }
+
     const deleteButton = (event.target as HTMLElement | null)?.closest<HTMLButtonElement>('.btn-delete');
     if (!deleteButton || deleteButton.disabled) {
       return;
@@ -224,7 +255,7 @@ export function initCheckoutPage(rootNode: ParentNode = document) {
     const productId = deleteButton.dataset.id ?? '';
     const size = deleteButton.dataset.size ?? '';
     CartCookiesClient.removeItem(productId, size);
-    window.location.assign('/checkout');
+    saveScrollAndReload();
   });
 
   if (!proceedButton) {

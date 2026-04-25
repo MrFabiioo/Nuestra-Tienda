@@ -219,7 +219,25 @@ const checkoutBreadcrumbs = [
                             <span class="rounded-full border border-guacamole-fondo/30 bg-guacamole-fondo/20 px-3 py-1 font-semibold text-[var(--color-heading-sub)]">
                               {product.sizes}
                             </span>
-                            <span>Cantidad: <strong>{product.quantity}</strong></span>
+                            <div class="flex items-center gap-1" aria-label="Cantidad">
+                              <button
+                                type="button"
+                                data-id={product.productId}
+                                data-size={product.sizes}
+                                data-action="decrement"
+                                class="btn-qty-change flex h-7 w-7 items-center justify-center rounded-full border border-guacamole-b/20 bg-guacamole-fondo/10 text-base font-bold text-guacamole-a transition-colors hover:border-guacamole-b/40 hover:bg-guacamole-fondo/20 disabled:cursor-wait disabled:opacity-40"
+                                aria-label="Disminuir cantidad"
+                              >−</button>
+                              <span class="w-7 text-center text-sm font-bold text-[var(--color-heading-sub)]">{product.quantity}</span>
+                              <button
+                                type="button"
+                                data-id={product.productId}
+                                data-size={product.sizes}
+                                data-action="increment"
+                                class="btn-qty-change flex h-7 w-7 items-center justify-center rounded-full border border-guacamole-b/20 bg-guacamole-fondo/10 text-base font-bold text-guacamole-a transition-colors hover:border-guacamole-b/40 hover:bg-guacamole-fondo/20 disabled:cursor-wait disabled:opacity-40"
+                                aria-label="Aumentar cantidad"
+                              >+</button>
+                            </div>
                           </div>
                         </div>
 

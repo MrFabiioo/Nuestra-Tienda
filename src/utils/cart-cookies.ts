@@ -40,4 +40,21 @@ export class CartCookiesClient {
 
     return updatedCart;
   }
+
+  static updateQuantity(productId: string, size: string, delta: number): CartItem[] {
+    const cart = CartCookiesClient.getCart();
+    const item = cart.find((i) => i.productId === productId && i.size === size);
+
+    if (!item) return cart;
+
+    item.quantity = Math.max(0, item.quantity + delta);
+
+    const updatedCart = item.quantity === 0
+      ? cart.filter((i) => !(i.productId === productId && i.size === size))
+      : cart;
+
+    Cookies.set('cart', JSON.stringify(updatedCart));
+
+    return updatedCart;
+  }
 }
